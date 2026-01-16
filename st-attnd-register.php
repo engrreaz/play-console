@@ -1,6 +1,8 @@
 <?php
 session_start();
 include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+include_once 'datam/datam-stprofile.php';
+
 
 // --- ১. ফিল্টার হ্যান্ডলিং (Secure & Default logic) ---
 $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
