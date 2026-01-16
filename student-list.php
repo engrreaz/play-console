@@ -42,7 +42,7 @@ $page_title = "Class Students";
 
     /* Expandable Student List Item */
     .st-card {
-        background: #FFFFFF; border-radius: 12px; padding: 8px 12px; margin: 0 8px 6px;
+        background: #FFFFFF; border-radius: 8px; padding: 8px 12px; margin: 0 8px 6px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #eee; transition: all 0.2s ease;
     }
     .st-card.inactive { opacity: 0.5; filter: grayscale(1); }
