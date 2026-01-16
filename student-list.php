@@ -1,7 +1,7 @@
 <?php
 session_start();
 include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
-
+include_once 'datam/datam-stprofile.php';
 // --- ১. সেটিংস এবং পারমিশন হ্যান্ডলিং ---
 $sy_param = '%' . $sy  . '%';
 $month = date('m');
@@ -105,15 +105,15 @@ $page_title = "Class Students";
 
                 // বকেয়া তথ্য একবারে ফেচ করা (Optimization)
                 $dues_map = [];
-                // $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
-                // $stmt_d->bind_param("sssss", $sy_param, $sccode, $cls, $sec, $month);
-                // $stmt_d->execute();
-                // $res_d = $stmt_d->get_result();
-                // while($rd = $res_d->fetch_assoc()) $dues_map[$rd['stid']] = $rd['td'];
-                // $stmt_d->close();
+                $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
+                $stmt_d->bind_param("sssss", $sy_param, $sccode, $cls, $sec, $month);
+                $stmt_d->execute();
+                $res_d = $stmt_d->get_result();
+                while($rd = $res_d->fetch_assoc()) $dues_map[$rd['stid']] = $rd['td'];
+                $stmt_d->close();
 
                 // স্টুডেন্ট লিস্ট
-                echo $sy_param . '/' . $sccode . '/' . $cls . '/' . $sec . '/';
+                // echo $sy_param . '/' . $sccode . '/' . $cls . '/' . $sec . '/';
                 $stmt_s = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
                 $stmt_s->bind_param("ssss", $sy_param, $sccode, $cls, $sec);
                 $stmt_s->execute();
@@ -121,7 +121,6 @@ $page_title = "Class Students";
 
                 while ($row = $res_s->fetch_assoc()):
                     $stid = $row["stid"];
-                    echo $stid;
                     $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
                     if($st_idx === false) continue;
 
@@ -174,7 +173,7 @@ $page_title = "Class Students";
                                 <div class="action-lbl">Profile</div>
                             </button>
                             <?php endif; ?>
-                            ddddxxxx
+                            
                         </div>
                     </div>
                 <?php endwhile; $stmt_s->close(); ?>
