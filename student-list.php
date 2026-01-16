@@ -134,7 +134,7 @@ if (isset($settings_map['Profile Entry']) && strpos($settings_map['Profile Entry
 
                         // ১. বকেয়া হিসেবের অপ্টিমাইজড কোয়েরি
                         $dues_data = [];
-                        $stmt_dues = $conn->prepare("SELECT stid, SUM(dues) as total_dues FROM stfinance WHERE sessionyear = ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
+                        $stmt_dues = $conn->prepare("SELECT stid, SUM(dues) as total_dues FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
                         $stmt_dues->bind_param("sssss", $sy, $sccode, $classname, $sectionname, $month);
                         $stmt_dues->execute();
                         $res_dues = $stmt_dues->get_result();
