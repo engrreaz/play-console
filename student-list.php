@@ -1,7 +1,8 @@
 <?php
 session_start();
-include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+include_once 'inc.php'; 
 include_once 'datam/datam-stprofile.php';
+
 // --- ১. সেটিংস এবং পারমিশন হ্যান্ডলিং ---
 $sy_param = '%' . $sy  . '%';
 $month = date('m');
@@ -24,43 +25,51 @@ $page_title = "Class Students";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Tab Styling (M3 Chips/Segmented Control) */
-    .m3-tab-container { overflow-x: auto; white-space: nowrap; padding: 10px 16px; border-bottom: 1px solid #E7E0EC; }
+    /* Condensed M3 Tab Container */
+    .m3-tab-container { overflow-x: auto; white-space: nowrap; padding: 6px 12px; border-bottom: 1px solid #E7E0EC; background: #fff; }
     .nav-pills .nav-link {
-        border-radius: 100px; border: 1px solid #79747E; color: #49454F;
-        padding: 6px 16px; font-size: 0.85rem; font-weight: 600; margin-right: 8px; background: transparent;
+        border-radius: 8px; border: 1px solid #79747E; color: #49454F;
+        padding: 4px 12px; font-size: 0.75rem; font-weight: 600; margin-right: 6px; background: transparent;
     }
     .nav-pills .nav-link.active { background-color: #EADDFF !important; color: #21005D !important; border-color: #6750A4; }
 
-    /* Summary Dashboard Card */
-    .summary-card { background: #F3EDF7; border-radius: 28px; padding: 20px; margin: 16px; display: flex; justify-content: space-around; text-align: center; }
-    .stat-val { font-size: 1.5rem; font-weight: 800; color: #6750A4; line-height: 1; }
-    .stat-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #49454F; margin-top: 5px; }
+    /* Compact Summary Card */
+    .summary-card { background: #F3EDF7; border-radius: 12px; padding: 12px; margin: 8px 12px; display: flex; justify-content: space-around; text-align: center; }
+    .stat-val { font-size: 1.2rem; font-weight: 800; color: #6750A4; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #49454F; }
 
-    /* Student List Card */
+    /* Expandable Student List Item */
     .st-card {
-        background: #FFFFFF; border-radius: 24px; padding: 16px; margin: 0 16px 12px;
-        display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s;
+        background: #FFFFFF; border-radius: 12px; padding: 8px 12px; margin: 0 8px 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #eee; transition: all 0.2s ease;
     }
-    .st-card:active { transform: scale(0.98); background: #F7F2FA; }
-    .st-card.inactive { opacity: 0.6; filter: grayscale(0.8); }
+    .st-card.inactive { opacity: 0.5; filter: grayscale(1); }
+    
+    .st-avatar { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: #eee; }
 
-    .st-avatar { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: #eee; border: 1px solid #E7E0EC; }
+    .due-pill { font-size: 0.7rem; font-weight: 800; color: #B3261E; background: #FFEBEE; padding: 2px 8px; border-radius: 6px; }
 
-    /* Action Buttons Bar */
-    .action-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-    .action-item { background: #F7F2FA; border-radius: 12px; padding: 8px; border: none; text-align: center; text-decoration: none !important; }
-    .action-item:active { background: #EADDFF; }
-    .action-item i { font-size: 1.2rem; color: #6750A4; display: block; }
-    .action-lbl { font-size: 0.6rem; font-weight: 700; color: #49454F; margin-top: 4px; text-transform: uppercase; }
-    .text-danger-m3 { color: #B3261E !important; }
+    /* Hidden Action Bar */
+    .action-bar { 
+        display: none; /* Default hidden */
+        grid-template-columns: repeat(4, 1fr); gap: 6px; 
+        margin-top: 10px; padding-top: 10px; border-top: 1px dashed #E7E0EC;
+    }
+    .st-card.expanded .action-bar { display: grid; }
+    .st-card.expanded { border-color: #6750A4; background-color: #F7F2FA; }
+
+    .action-item { background: #fff; border-radius: 8px; padding: 6px; border: 1px solid #E7E0EC; text-align: center; text-decoration: none !important; }
+    .action-item i { font-size: 1.1rem; color: #6750A4; display: block; }
+    .action-lbl { font-size: 0.55rem; font-weight: 700; color: #49454F; margin-top: 2px; text-transform: uppercase; }
+
+    .scroll-hide::-webkit-scrollbar { display: none; }
 </style>
 
-<header class="m3-app-bar shadow-sm">
+<header class="m3-app-bar shadow-sm" style="height: 56px; border-radius: 0 0 12px 12px;">
     <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <h1 class="page-title" style="font-size: 1.1rem;"><?php echo $page_title; ?></h1>
     <div class="action-icons"><i class="bi bi-search"></i></div>
 </header>
 
@@ -86,24 +95,16 @@ $page_title = "Class Students";
         <div class="tab-pane fade <?php echo ($h == 0) ? 'show active' : ''; ?>" id="tab-<?php echo $h; ?>">
             
             <div class="summary-card shadow-sm">
-                <div>
-                    <span class="stat-val" id="cnt-<?php echo $h; ?>">--</span>
-                    <span class="stat-lbl">Active Students</span>
-                </div>
+                <div><span class="stat-val" id="cnt-<?php echo $h; ?>">0</span> <span class="stat-lbl">Students</span></div>
                 <?php if ($collection_permission): ?>
                 <div class="vr opacity-10"></div>
-                <div>
-                    <span class="stat-val text-danger-m3" id="cntamt-<?php echo $h; ?>">--</span>
-                    <span class="stat-lbl">Total Dues</span>
-                </div>
+                <div><span class="stat-val text-danger" id="cntamt-<?php echo $h; ?>">0</span> <span class="stat-lbl">Dues</span></div>
                 <?php endif; ?>
             </div>
 
-            <div class="list-container">
+            <div class="list-container px-1">
                 <?php
                 $cnt = 0; $cntamt = 0;
-
-                // বকেয়া তথ্য একবারে ফেচ করা (Optimization)
                 $dues_map = [];
                 $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
                 $stmt_d->bind_param("sssss", $sy_param, $sccode, $cls, $sec, $month);
@@ -112,8 +113,6 @@ $page_title = "Class Students";
                 while($rd = $res_d->fetch_assoc()) $dues_map[$rd['stid']] = $rd['td'];
                 $stmt_d->close();
 
-                // স্টুডেন্ট লিস্ট
-                // echo $sy_param . '/' . $sccode . '/' . $cls . '/' . $sec . '/';
                 $stmt_s = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
                 $stmt_s->bind_param("ssss", $sy_param, $sccode, $cls, $sec);
                 $stmt_s->execute();
@@ -123,56 +122,42 @@ $page_title = "Class Students";
                     $stid = $row["stid"];
                     $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
                     if($st_idx === false) continue;
-
                     $p = $datam_st_profile[$st_idx];
                     $due = $dues_map[$stid] ?? 0;
                     $is_active = ($row["status"] == '1');
-                    
                     if($is_active) { $cnt++; $cntamt += $due; }
                 ?>
-                    <div class="st-card shadow-sm <?php echo $is_active ? '' : 'inactive'; ?>">
+                    <div class="st-card shadow-sm <?php echo $is_active ? '' : 'inactive'; ?>" onclick="this.classList.toggle('expanded')">
                         <div class="d-flex align-items-center">
                             <img src="https://eimbox.com/students/<?php echo $stid; ?>.jpg" class="st-avatar shadow-sm" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
-                            <div class="ms-3 overflow-hidden">
-                                <div class="fw-bold text-dark text-truncate small"><?php echo $p["stnameeng"]; ?></div>
-                                <div class="text-muted" style="font-size: 0.65rem;"><?php echo $p["stnameben"]; ?></div>
-                                <div class="d-flex gap-2 mt-1">
-                                    <span class="badge rounded-pill bg-primary-subtle text-primary px-3">Roll: <?php echo $row["rollno"]; ?></span>
-                                    <span class="badge rounded-pill bg-light text-muted px-2">ID: <?php echo $stid; ?></span>
+                            <div class="ms-3 flex-grow-1 overflow-hidden">
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><?php echo $p["stnameeng"]; ?></div>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="fw-bold text-primary" style="font-size: 0.75rem;">Roll: <?php echo $row["rollno"]; ?></span>
+                                    <span class="text-muted" style="font-size: 0.65rem;">ID: <?php echo $stid; ?></span>
+                                    <?php if($due > 0): ?>
+                                        <span class="due-pill ms-auto">৳<?php echo number_format($due); ?></span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
+                            <i class="bi bi-chevron-expand text-muted ms-2 opacity-50"></i>
                         </div>
 
                         <div class="action-bar">
-                            <button class="action-item" onclick="st_attnd('<?php echo $stid; ?>')">
-                                <i class="bi bi-fingerprint"></i>
-                                <div class="action-lbl">Attend</div>
-                            </button>
-                            
+                            <div class="action-item" onclick="event.stopPropagation(); st_attnd('<?php echo $stid; ?>')">
+                                <i class="bi bi-fingerprint"></i><div class="action-lbl">Attend</div>
+                            </div>
                             <?php if ($collection_permission): ?>
-                            <button class="action-item" onclick="st_pay('<?php echo $stid; ?>')">
-                                <i class="bi bi-coin <?php echo ($due > 0) ? 'text-danger' : ''; ?>"></i>
-                                <div class="action-lbl <?php echo ($due > 0) ? 'text-danger' : ''; ?>">৳<?php echo number_format($due); ?></div>
-                            </button>
+                            <div class="action-item" onclick="event.stopPropagation(); st_pay('<?php echo $stid; ?>')">
+                                <i class="bi bi-coin"></i><div class="action-lbl">Payment</div>
+                            </div>
                             <?php endif; ?>
-
-                            <button class="action-item" onclick="st_res('<?php echo $stid; ?>')">
-                                <i class="bi bi-file-earmark-ruled"></i>
-                                <div class="action-lbl">Result</div>
-                            </button>
-
-                            <?php if ($profile_entry_permission): ?>
-                            <button class="action-item" onclick="st_prof('<?php echo $stid; ?>')">
-                                <i class="bi bi-pencil-square"></i>
-                                <div class="action-lbl">Edit</div>
-                            </button>
-                            <?php else: ?>
-                            <button class="action-item" onclick="st_prof('<?php echo $stid; ?>')">
-                                <i class="bi bi-person-bounding-box"></i>
-                                <div class="action-lbl">Profile</div>
-                            </button>
-                            <?php endif; ?>
-                            
+                            <div class="action-item" onclick="event.stopPropagation(); st_res('<?php echo $stid; ?>')">
+                                <i class="bi bi-file-earmark-ruled"></i><div class="action-lbl">Result</div>
+                            </div>
+                            <div class="action-item" onclick="event.stopPropagation(); st_prof('<?php echo $stid; ?>')">
+                                <i class="bi bi-person-bounding-box"></i><div class="action-lbl">Profile</div>
+                            </div>
                         </div>
                     </div>
                 <?php endwhile; $stmt_s->close(); ?>
@@ -186,16 +171,12 @@ $page_title = "Class Students";
         </script>
         <?php endfor; ?>
     </div>
-
-    <?php else: ?>
-        <div class="text-center py-5 opacity-25">
-            <i class="bi bi-person-x display-1"></i>
-            <p class="fw-bold mt-2">No assigned classes found.</p>
-        </div>
     <?php endif; ?>
 </main>
 
-<div style="height: 60px;"></div> <script>
+<div style="height: 65px;"></div>
+
+<script>
     function st_attnd(id) { window.location.href = "stguarattnd.php?stid=" + id; }
     function st_pay(id) { window.location.href = "stfinancedetails.php?id=" + id; }
     function st_res(id) { window.location.href = "stguarresult.php?stid=" + id; }
