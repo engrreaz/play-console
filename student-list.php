@@ -141,7 +141,7 @@ if (isset($settings_map['Profile Entry']) && strpos($settings_map['Profile Entry
                         while($rd = $res_dues->fetch_assoc()) { $dues_data[$rd['stid']] = $rd['total_dues']; }
 
                         // ২. স্টুডেন্ট লিস্ট কোয়েরি
-                        $stmt_st = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear = ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
+                        $stmt_st = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
                         $stmt_st->bind_param("ssss", $sy, $sccode, $classname, $sectionname);
                         $stmt_st->execute();
                         $res_st = $stmt_st->get_result();
