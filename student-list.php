@@ -2,6 +2,7 @@
 session_start();
 include_once 'inc.php'; // এটি inc.inc.php এবং header.php লোড করবে
 
+$sy = '%' . $sy  . '%';
 // --- Permission and Settings Fetching ---
 if (isset($_GET['cls']) && isset($_GET['sec'])) {
     $classname = $_GET['cls'];
