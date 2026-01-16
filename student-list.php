@@ -98,8 +98,8 @@ $page_title = "Class Students";
                 </div>
                 <?php endif; ?>
             </div>
-fffffffffff
-            <div class="list-container">
+
+            <div class="list-container">ffffff
                 <?php
                 $cnt = 0; $cntamt = 0;
 
