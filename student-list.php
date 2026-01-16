@@ -125,8 +125,7 @@ $page_title = "Class Students";
                     if($st_idx === false) continue;
 
                     $p = $datam_st_profile[$st_idx];
-                    // $due = $dues_map[$stid] ?? 0;
-                    $due = 0;
+                    $due = $dues_map[$stid] ?? 0;
                     $is_active = ($row["status"] == '1');
                     
                     if($is_active) { $cnt++; $cntamt += $due; }
