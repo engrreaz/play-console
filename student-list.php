@@ -98,7 +98,7 @@ $page_title = "Class Students";
                 </div>
                 <?php endif; ?>
             </div>
-
+fffffffffff
             <div class="list-container">
                 <?php
                 $cnt = 0; $cntamt = 0;
@@ -113,6 +113,7 @@ $page_title = "Class Students";
                 // $stmt_d->close();
 
                 // স্টুডেন্ট লিস্ট
+                echo $sy_param . '/' . $sccode . '/' . $cls . '/' . $sec . '/';
                 $stmt_s = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
                 $stmt_s->bind_param("ssss", $sy_param, $sccode, $cls, $sec);
                 $stmt_s->execute();
