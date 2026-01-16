@@ -105,12 +105,12 @@ $page_title = "Class Students";
 
                 // বকেয়া তথ্য একবারে ফেচ করা (Optimization)
                 $dues_map = [];
-                $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
-                $stmt_d->bind_param("sssss", $sy_param, $sccode, $cls, $sec, $month);
-                $stmt_d->execute();
-                $res_d = $stmt_d->get_result();
-                while($rd = $res_d->fetch_assoc()) $dues_map[$rd['stid']] = $rd['td'];
-                $stmt_d->close();
+                // $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
+                // $stmt_d->bind_param("sssss", $sy_param, $sccode, $cls, $sec, $month);
+                // $stmt_d->execute();
+                // $res_d = $stmt_d->get_result();
+                // while($rd = $res_d->fetch_assoc()) $dues_map[$rd['stid']] = $rd['td'];
+                // $stmt_d->close();
 
                 // স্টুডেন্ট লিস্ট
                 $stmt_s = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
@@ -124,7 +124,8 @@ $page_title = "Class Students";
                     if($st_idx === false) continue;
 
                     $p = $datam_st_profile[$st_idx];
-                    $due = $dues_map[$stid] ?? 0;
+                    // $due = $dues_map[$stid] ?? 0;
+                    $due = 0;
                     $is_active = ($row["status"] == '1');
                     
                     if($is_active) { $cnt++; $cntamt += $due; }
