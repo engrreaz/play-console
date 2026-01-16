@@ -99,7 +99,7 @@ $page_title = "Class Students";
                 <?php endif; ?>
             </div>
 
-            <div class="list-container">ffffff
+            <div class="list-container">
                 <?php
                 $cnt = 0; $cntamt = 0;
 
@@ -121,6 +121,7 @@ $page_title = "Class Students";
 
                 while ($row = $res_s->fetch_assoc()):
                     $stid = $row["stid"];
+                    echo $stid;
                     $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
                     if($st_idx === false) continue;
 
@@ -173,6 +174,7 @@ $page_title = "Class Students";
                                 <div class="action-lbl">Profile</div>
                             </button>
                             <?php endif; ?>
+                            ddddxxxx
                         </div>
                     </div>
                 <?php endwhile; $stmt_s->close(); ?>
