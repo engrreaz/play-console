@@ -27,7 +27,8 @@ $stmt_hol->close();
 
 // সংশ্লিষ্ট ক্লাসের স্টুডেন্ট লিস্ট
 $students = [];
-$stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear = ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
+$sy = '%' . $sy . '%';
+$stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
 $stmt_st->bind_param("ssss", $sy, $sccode, $classname, $sectionname);
 $stmt_st->execute();
 $res_st = $stmt_st->get_result();
@@ -36,7 +37,7 @@ $stmt_st->close();
 
 // হাজিরা ডেটা ফেচ করা (একবার কুয়েরি করে মেমরিতে রাখা - O(1) Lookup)
 $attendance_map = [];
-$sql_att = "SELECT stid, adate, yn, bunk FROM stattnd WHERE sccode = ? AND sessionyear = ? AND classname = ? AND sectionname = ? AND adate BETWEEN ? AND ?";
+$sql_att = "SELECT stid, adate, yn, bunk FROM stattnd WHERE sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ? AND adate BETWEEN ? AND ?";
 $stmt_att = $conn->prepare($sql_att);
 $stmt_att->bind_param("ssssss", $sccode, $sy, $classname, $sectionname, $date_start, $date_end);
 $stmt_att->execute();
