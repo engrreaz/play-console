@@ -1,0 +1,31 @@
+<?php
+// PHOTO
+$photo_path = $BASE_PATH_URL . 'students/' . $stid . ".jpg";
+if (!file_exists($photo_path)) {
+    $photo_path = "https://eimbox.com/teacher/no-img.jpg";
+} else {
+    $photo_path = $BASE_PATH_URL_FILE . 'students/' . $stid . ".jpg";
+}
+
+
+// JS Cancel Event if Possible
+event.stopPropagation();
+scname = encodeURIComponent(document.getElementById("scname").value);
+
+
+// FIREBASE NOTIFICATION
+$token = 'fSsuRE9vTd-cgNR7QI749H:APA91bH7mdd15HFgTnqBTWzD3L1S3j8QV8EnlWn6gcJjFOyKZbmyBPA4A_UZKN-BFkMiAmcpdPR5TwASl3X4Czre4kTXnrYQT9CxYz4RWcF0UI5HmaD7HZ8';
+$firebase_datam = array(
+    'token' => $token,
+    'title' => 'Check title',
+    'body' => 'Shorir',
+    'image' => 'Chhobi',
+    'data1' => 'Prothom Data',
+    'data2' => 'Ditio Line',
+    'data3' => 'Shes Line.'
+);
+include 'firebase.php';
+
+$qq = "INSERT INTO subsetup (sccode, classname, sectionname, subject,fullmarks, subj, obj, pra, ca, camanual, pass_algorithm, cnt, reverse) SELECT '$sccode', classname, '$secf', subject,fullmarks, subj, obj, pra, 0, camanual, pass_algorithm, cnt, reverse from subjectsettinglist where id = '$idr';";
+
+// 

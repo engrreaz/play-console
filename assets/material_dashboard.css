@@ -1,0 +1,107 @@
+/* File: assets/material_dashboard.css */
+/* For a Material Design-inspired aesthetic */
+
+/* Import Roboto font, standard for Material Design */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f5f7; /* A slightly different off-white */
+}
+
+/* Material Card Styling */
+.card {
+    border: none;
+    border-radius: 8px; /* Softer radius */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* Standard Material shadow */
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+}
+
+.card:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.card .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #343a40;
+}
+
+.card .card-body {
+    padding: 1rem; /* Consistent padding */
+}
+
+/* Material List Group Styling */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+.list-group-item:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Progress Bar */
+.progress {
+    border-radius: 4px;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 20px; /* Pill-shaped buttons */
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+}
+
+/* Alert styling */
+.alert {
+     border-radius: 8px;
+     border-left-width: 5px;
+}
+
+/* App Bar & Nav Drawer consistency */
+.app-bar {
+    background-color: var(--primary-color, #4285F4);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.app-bar .app-bar-title {
+    color: #fff;
+}
+.app-bar .btn {
+    color: #fff;
+}
+
+.nav-drawer {
+     box-shadow: 4px 0 16px rgba(0,0,0,0.15);
+}
+
+.nav-drawer .nav-link {
+    font-weight: 500;
+    color: #495057;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+.nav-drawer .nav-link:hover {
+    background-color: #e9ecef;
+    border-left-color: var(--primary-color, #4285F4);
+}
+.nav-drawer .nav-link .bi {
+    color: #6c757d;
+}

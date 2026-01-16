@@ -1,0 +1,7 @@
+:root {
+    --darker:rgb(38, 87, 24);
+  --dark: rgb(28, 158, 93);
+  --normal: rgb(92, 207, 127);
+  --light: rgb(182, 238, 189);
+  --lighter: rgb(227, 241, 230);
+}

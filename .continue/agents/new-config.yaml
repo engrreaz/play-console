@@ -1,0 +1,9 @@
+name: Example Config
+version: 1.0.0
+schema: v1
+models:
+  - name: my gpt-5
+    provider: openai
+    model: gpt-5
+    apiKey: YOUR_OPENAI_API_KEY_HERE
+

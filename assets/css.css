@@ -1,0 +1,224 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+* {
+  font-family: Roboto, "Gothic A1", "Noto Sans Bengali", sans-serif;
+  /* font-family : "Great Vibes"; */
+  /* font-family : "JetBrain Mono"; */
+  font-size: 1.0em;
+}
+
+html {
+  font-size: 1.0em;
+}
+
+body {
+  background: var(--light);
+  margin-top: -1px;
+}
+
+
+
+.gt {
+  margin-top: 1px;
+}
+
+.gb {
+  margin-bottom: 1px;
+}
+
+.gg {
+  border: 1px solid lightgray;
+  margin: 0;
+  border-radius: 0;
+}
+
+.card, .card-body {
+  border-radius: 0;
+  margin: 0;
+}
+
+.logoo {
+  font-size: 32;
+  color: white;
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+
+.card {
+  border: 0;
+  border-radius: 0;
+}
+
+.nored {
+  border: 0;
+  border-radius: 0;
+}
+
+.card-header {
+  padding: 10px;
+}
+
+
+
+.nmbr {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.nmbr small {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.prog {
+  width: 80px;
+  text-align: center;
+}
+
+
+/*input[type=text], input[type=tel] , input[type=number] , .input-group-text{*/
+/*    background: transparent;*/
+/*    border-radius: 0;*/
+/*    border:0;*/
+/*    border-bottom : 1px solid lightgray;*/
+/*}*/
+/*input[type=text]:focus, input[type=tel]:focus, input[type=number]:focus {*/
+/*    border-color:transparent;*/
+/*    background: transparent;*/
+/*    border-radius: 0;*/
+/*    border:0;*/
+/*    font-weight: 600;*/
+/*    color: var(--dark);*/
+/*     border-bottom : 1px solid var(--dark);;*/
+/*    box-shadow: 0px 0px 0px rgba(56, 169, 240, 0.75) !important;*/
+
+/*}*/
+
+
+
+.sele, .form-control .input[type=text]:disable {
+  width: 100%;
+  background: var(--light);
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid lightgray;
+}
+
+.sele {
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0;
+  border: 0;
+  font-weight: 600;
+  color: black;
+  border-bottom: 1px solid var(--dark);
+}
+
+.sele:focus {
+  border-color: transparent;
+  background: transparent;
+  border-radius: 0;
+  border: 0;
+  font-weight: 600;
+  color: var(--dark);
+  border-bottom: 1px solid var(--dark);
+  box-shadow: 0px 0px 0px rgba(56, 169, 240, 0.75) !important;
+
+}
+
+.pad60 {
+  margin-left: 60px;
+}
+
+input[type="checkbox"] {
+  -webkit-transform: scale(1.5);
+  transform: scale(1.5);
+  margin: 0px;
+}
+
+input[type=checkbox]:checked {
+  background-color: var(--dark) !important;
+  color: #ffffff !important;
+  border: 0px solid dark(--dark) !important;
+}
+
+/*.btn {*/
+/*    border-radius: 0;*/
+/*}*/
+
+
+
+
+@property --p {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.pie {
+  --p: 20;
+  --b: 5px;
+  --c: darkred;
+  --w: 50px;
+
+  width: var(--w);
+  aspect-ratio: 1;
+  position: relative;
+  display: inline-grid;
+  margin: 5px;
+  place-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: sans-serif;
+  background: var(--lighter);
+  border-radius: 50%;
+}
+
+.pie:before,
+.pie:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+
+}
+
+.pie:before {
+  inset: 0;
+  background:
+    radial-gradient(farthest-side, var(--c) 98%, #0000) top/var(--b) var(--b) no-repeat,
+    conic-gradient(var(--c) calc(var(--p)*1%), #0000 0);
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(99% - var(--b)), #000 calc(100% - var(--b)));
+  mask: radial-gradient(farthest-side, #0000 calc(99% - var(--b)), #000 calc(100% - var(--b)));
+}
+
+.pie:after {
+  inset: calc(50% - var(--b)/2);
+  background: var(--c);
+  transform: rotate(calc(var(--p)*3.6deg)) translateY(calc(50% - var(--w)/2));
+}
+
+.animate {
+  animation: p 1s .5s both;
+}
+
+.no-round:before {
+  background-size: 0 0, auto;
+}
+
+.no-round:after {
+  content: none;
+}
+
+@keyframes p {
+  from {
+    --p: 0
+  }
+}
+
+
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+}

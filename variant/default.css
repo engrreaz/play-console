@@ -1,0 +1,7 @@
+:root {
+  --darker: indigo;
+  --dark: darkviolet;
+  --normal: rgb(154, 54, 163);
+  --light: rgb(207, 165, 207);
+  --lighter: rgb(230, 230, 241);
+}
