@@ -1,27 +1,26 @@
 <?php
-include 'inc.php';
+include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-$id = $userid;
-$current_time = $cur; // inc.php থেকে প্রাপ্ত
-$today = $td;         // inc.php থেকে প্রাপ্ত
+$current_time = $cur; 
+$today = $td;
 
-// ইন এবং আউট টাইম সেট করা
+// ইন এবং আউট টাইম সেটিংস
 $reqin = ($in_time_user != '00:00:00') ? $in_time_user : $in_time;
 $reqout = ($out_time_user != '00:00:00') ? $out_time_user : $out_time;
 
 $inout = 'in';
-$status_label = '';
+$stst = '';
 
-// ১. চেক করা হচ্ছে আজকের হাজিরা আগে দেওয়া হয়েছে কি না
+// ১. হাজিরা প্রসেসিং লজিক (Prepared Statements)
 $stmt = $conn->prepare("SELECT id FROM teacherattnd WHERE user = ? AND adate = ? AND sccode = ? LIMIT 1");
 $stmt->bind_param("sss", $usr, $today, $sccode);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    // এটি "Attendance Out" সেশন
+    // --- Attendance Out সেশন ---
     $row = $result->fetch_assoc();
-    $id2 = $row["id"];
+    $db_id = $row["id"];
     $full_reqout = $today . ' ' . $reqout;
     $diff_seconds = strtotime($current_time) - strtotime($full_reqout);
     
@@ -29,14 +28,12 @@ if ($result->num_rows > 0) {
     $abs_diff = abs($diff_seconds);
     $balout = sprintf('%02d:%02d:%02d', ($abs_diff/3600), ($abs_diff/60%60), ($abs_diff%60));
 
-    // আপডেট কুয়েরি (Prepared Statement)
     $upd = $conn->prepare("UPDATE teacherattnd SET realout=?, balout=?, statusout=?, detectout='GPS', disout=? WHERE id=?");
-    $upd->bind_param("sssdi", $current_time, $balout, $stst, $distance, $id2);
+    $upd->bind_param("sssdi", $current_time, $balout, $stst, $distance, $db_id);
     $upd->execute();
-    
     $inout = 'out';
 } else {
-    // এটি নতুন "Attendance In" সেশন
+    // --- Attendance In সেশন ---
     $full_reqin = $today . ' ' . $reqin;
     $diff_seconds = strtotime($current_time) - strtotime($full_reqin);
     
@@ -44,12 +41,12 @@ if ($result->num_rows > 0) {
     $abs_diff = abs($diff_seconds);
     $balin = sprintf('%02d:%02d:%02d', ($abs_diff/3600), ($abs_diff/60%60), ($abs_diff%60));
 
-    // ইনসার্ট কুয়েরি (Prepared Statement)
+    // ইনসার্ট কুয়েরি থেকে sessionyear সরিয়ে ফেলা হয়েছে
     $ins = $conn->prepare("INSERT INTO teacherattnd (user, tid, adate, reqin, reqout, realin, balin, statusin, detectin, disin, sccode, entryby, entrytime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'GPS', ?, ?, ?, ?)");
     $ins->bind_param("ssssssssdsss", $usr, $userid, $today, $full_reqin, $reqout, $current_time, $balin, $stst, $distance, $sccode, $usr, $current_time);
     $ins->execute();
 
-    // টোডো লিস্টে আউট এন্ট্রি যোগ করা (যদি প্রয়োজন হয়)
+    // টোডো লিস্টে আউট এন্ট্রি যোগ করা
     if ($tattndout == 1) {
         $todo = $conn->prepare("INSERT INTO todolist (sccode, date, user, todotype, descrip1, status, creationtime, response, responsetxt) VALUES (?, ?, ?, 'Attendance', 'Attendance Out', 0, ?, 'geoattnd', 'Submit')");
         $todo->bind_param("ssss", $sccode, $today, $usr, $current_time);
@@ -58,117 +55,93 @@ if ($result->num_rows > 0) {
     $inout = 'in';
 }
 
-// টোডো লিস্ট স্ট্যাটাস আপডেট
-$upd_todo = $conn->prepare("UPDATE todolist SET status=1, responsetime=? WHERE id = ?");
-$upd_todo->bind_param("si", $current_time, $id);
-$upd_todo->execute();
+// টোডো লিস্ট স্ট্যাটাস আপডেট (যদি থাকে)
+if(isset($todo_id)) {
+    $upd_todo = $conn->prepare("UPDATE todolist SET status=1, responsetime=? WHERE id = ?");
+    $upd_todo->bind_param("si", $current_time, $todo_id);
+    $upd_todo->execute();
+}
 
 // ২. ইউআই প্যারামিটার নির্ধারণ
-$bgclr = '#B3261E'; // M3 Error Color (Crimson)
-$msg = 'Area mismatch';
-$icon = 'shield-fill-x';
+$bgclr = '#B3261E'; // Default Error
+$msg = 'Location Mismatch';
+$icon = 'shield-lock-fill';
 
 if ($distance == 0) {
     $msg = 'Location not detected';
-    $icon = 'shield-slash-fill';
+    $icon = 'geo-alt-fill';
 } else if ($distance > 0 && $distance <= $dista_differ) {
     if ($inout == 'in') {
-        if ($stst == 'Fast') {
-            $bgclr = '#146C32'; // M3 Success Green
-            $msg = '<b>Checked In</b><br>Good morning! Arrived early.';
-        } else {
-            $bgclr = '#E46C0A'; // M3 Warning Orange
-            $msg = '<b>Checked In</b><br>You are a bit late today.';
-        }
+        $bgclr = ($stst == 'Fast') ? '#146C32' : '#E46C0A';
+        $msg = ($stst == 'Fast') ? '<b>Checked In</b><br>Good morning! Arrived early.' : '<b>Checked In</b><br>You are a bit late today.';
     } else {
-        if ($stst == 'Fast') {
-            $bgclr = '#E46C0A';
-            $msg = '<b>Checked Out</b><br>Leaving early? Have a safe trip.';
-        } else {
-            $bgclr = '#146C32';
-            $msg = '<b>Checked Out</b><br>Duty completed. Well done!';
-        }
+        $bgclr = ($stst == 'Fast') ? '#E46C0A' : '#146C32';
+        $msg = ($stst == 'Fast') ? '<b>Checked Out</b><br>Leaving early? Have a safe trip.' : '<b>Checked Out</b><br>Duty completed. Well done!';
     }
-    $icon = 'shield-fill-check';
-} else {
-    $msg = 'You are out of the designated area';
+    $icon = 'check-circle-fill';
 }
 ?>
 
 <style>
-    :root {
-        --m3-surface: #FEF7FF;
-    }
-    body { margin: 0; font-family: 'Roboto', sans-serif; overflow: hidden; }
-    .m3-container {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        transition: background 0.5s ease;
+    body { margin: 0; background-color: <?php echo $bgclr; ?>; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; overflow: hidden; }
+    
+    .result-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(15px);
+        border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
+        padding: 40px 24px;
+        margin: 20px;
         text-align: center;
-        padding: 20px;
+        width: 85%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
-    .m3-icon-wrapper {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 30px;
-        border-radius: 32px; /* M3 extra rounded */
-        margin-bottom: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    .icon-circle {
+        width: 90px; height: 90px;
+        background: white; color: <?php echo $bgclr; ?>;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 24px; font-size: 48px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
-    .status-msg { font-size: 1.5rem; line-height: 1.4; margin-bottom: 40px; }
-    .m3-btn {
-        background: #1C1B1F; /* On Surface */
-        color: white;
-        border: none;
-        padding: 12px 32px;
-        border-radius: 100px; /* Pill button */
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        cursor: pointer;
+
+    .status-msg { font-size: 1.1rem; line-height: 1.5; margin-bottom: 32px; font-weight: 400; letter-spacing: 0.3px; }
+    
+    .btn-m3 {
+        background: white; color: <?php echo $bgclr; ?>;
+        border: none; padding: 12px 48px;
+        border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
+        font-weight: 800; font-size: 0.9rem;
+        letter-spacing: 1px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: 0.2s;
     }
-    .gps-tag {
-        position: absolute;
-        top: 20px;
-        font-size: 0.8rem;
-        opacity: 0.8;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
+    .btn-m3:active { transform: scale(0.96); opacity: 0.9; }
 </style>
 
-<main>
-    <div class="m3-container" style="background: <?php echo $bgclr; ?>;">
-        <div class="gps-tag">
-            <i class="bi bi-geo-alt-fill"></i>
-            GPS VERIFIED ATTENDANCE
-        </div>
-
-        <div class="m3-icon-wrapper">
-            <i class="bi bi-<?php echo $icon; ?>" style="font-size: 80px;"></i>
+<main class="text-center w-100">
+    <div class="result-card shadow-lg">
+        <div class="icon-circle">
+            <i class="bi bi-<?php echo $icon; ?>"></i>
         </div>
 
         <div class="status-msg">
             <?php echo $msg; ?>
         </div>
 
-        <button class="m3-btn" onclick="backs();">
+        <button class="btn-m3" onclick="finish();">
             DONE
         </button>
+    </div>
+    
+    <div class="mt-4 small opacity-50 fw-bold" style="letter-spacing: 1px;">
+        <?php echo date('h:i A'); ?> <i class="bi bi-dot"></i> ID: <?php echo $userid; ?>
     </div>
 </main>
 
 <script>
-    function backs() {
-        // অ্যান্ড্রয়েড নেটিভ অ্যাপ হলে ব্যাক করবে, নয়তো সামারি পেজে যাবে
-        if(window.history.length > 1) {
-            window.location.href = 'my-attnd-summery.php';
-        } else {
-            window.location.href = 'index.php';
-        }
+    function finish() {
+        // সেশন ইয়ার ছাড়া সামারি পেজে নেভিগেট করা
+        window.location.href = 'my-attnd-summery.php';
     }
 </script>
+
+<?php include 'footer.php'; ?>
