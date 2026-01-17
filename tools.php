@@ -1,33 +1,37 @@
 <?php
 include_once 'inc.php'; // DB সংযোগ এবং প্রাথমিক ডাটা লোড করে
 
-// টিচারের অ্যাসাইন করা ক্লাসের ডাটা হ্যান্ডলিং
-$cteacher_data = $cteacher_data ?? [];
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
+
+$page_title = "Management Tools";
 
 /**
- * মডিউল ক্যাটাগরি এবং আইটেম নির্ধারণ
- * এখানে আপনি খুব সহজে নতুন মডিউল যোগ বা পরিবর্তন করতে পারবেন।
+ * ২. মডিউল কনফিগারেশন
  */
 $academic_tools = [
     [
         'title' => 'Marks Entry',
-        'desc' => 'Entry, edit, and manage exam marks',
+        'desc' => 'Manage exam marks & results',
         'icon' => 'bi-pencil-square',
-        'color' => '#0061A4', // M3 Primary
+        'color' => '#6750A4', // M3 Primary
         'url' => 'markentryselect.php'
     ],
     [
         'title' => 'Class Test',
-        'desc' => 'Manage student class tests and assessments',
+        'desc' => 'Assessments & class tests',
         'icon' => 'bi-journal-check',
         'color' => '#7D5260', // M3 Tertiary
         'url' => 'class_test.php'
     ],
     [
         'title' => 'Co-Curricular',
-        'desc' => 'Manage student extra-curricular activities',
+        'desc' => 'Extra-curricular activities',
         'icon' => 'bi-trophy',
-        'color' => '#196D35', // M3 Success
+        'color' => '#146C32', // M3 Success
         'url' => 'co_curricular_entry.php'
     ]
 ];
@@ -35,159 +39,129 @@ $academic_tools = [
 $admin_tools = [
     [
         'title' => 'Leave Applications',
-        'desc' => 'Review and respond to staff leave requests',
+        'desc' => 'Respond to staff leave requests',
         'icon' => 'bi-file-earmark-person',
-        'color' => '#BA1A1A', // M3 Error
+        'color' => '#B3261E', // M3 Error
         'url' => 'leave-application-response.php'
     ],
     [
         'title' => 'Notice Manager',
-        'desc' => 'Manage institute notifications',
+        'desc' => 'Broadcast institute notifications',
         'icon' => 'bi-megaphone',
         'color' => '#6750A4',
-        'url' => 'noticemanager.php',
-        'hidden' => true // প্রয়োজন অনুযায়ী হাইড রাখা যাবে
+        'url' => 'noticemanager.php'
     ]
 ];
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
-    .category-label {
-        font-size: 0.85rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #6750A4;
-        margin: 20px 0 10px 16px;
-        letter-spacing: 1px;
-    }
-
-    /* M3 List Item Style */
-    .tool-item {
-        background: #FFFFFF;
-        border-radius: 20px;
-        padding: 16px;
-        margin: 0 12px 10px 12px;
-        display: flex;
-        align-items: center;
-        text-decoration: none !important;
-        color: inherit;
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .tool-item:active {
-        background-color: #EADDFF; /* Tonal Container on click */
-        transform: scale(0.98);
-    }
-
-    /* Tonal Icon Container */
-    .icon-container {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 16px;
-        flex-shrink: 0;
-    }
-
-    .icon-container i { font-size: 1.5rem; }
-
-    .tool-title { font-weight: 700; color: #1C1B1F; margin-bottom: 2px; font-size: 1rem; }
-    .tool-desc { font-size: 0.75rem; color: #49454F; line-height: 1.2; }
-
-    /* Top App Bar Customization */
+    /* Full-Width M3 App Bar (8px Bottom Radius) */
     .m3-app-bar {
-        background: white;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        width: 100%; height: 56px; background: #fff; display: flex; align-items: center; 
+        padding: 0 16px; position: sticky; top: 0; z-index: 1050; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Compact Category Labels */
+    .m3-cat-label {
+        font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+        color: #6750A4; margin: 20px 0 8px 16px; letter-spacing: 0.8px;
+    }
+
+    /* Condensed Tool Card (8px Radius) */
+    .tool-card {
+        background: #fff; border-radius: 8px; padding: 12px;
+        margin: 0 12px 6px; border: 1px solid #f0f0f0;
+        display: flex; align-items: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        transition: transform 0.15s ease, background 0.15s;
+        text-decoration: none !important; color: inherit;
+    }
+    .tool-card:active { transform: scale(0.98); background-color: #F3EDF7; }
+
+    /* Tonal Icon Box (8px Radius) */
+    .icon-box {
+        width: 44px; height: 44px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 14px; flex-shrink: 0; font-size: 1.3rem;
+    }
+
+    .tool-info { flex-grow: 1; overflow: hidden; }
+    .tool-name { font-weight: 700; color: #1C1B1F; font-size: 0.9rem; margin-bottom: 0; }
+    .tool-meta { font-size: 0.7rem; color: #49454F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .session-indicator {
+        font-size: 0.65rem; background: #EADDFF; color: #21005D;
+        padding: 2px 8px; border-radius: 4px; font-weight: 800;
     }
 </style>
 
-<main class="pb-5">
-    <div class="m3-app-bar mb-4">
-        <div class="d-flex align-items-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px;">
-                <i class="bi bi-grid-fill fs-5"></i>
-            </div>
-            <div>
-                <h4 class="fw-bold mb-0">Modules</h4>
-                <small class="text-muted">Tools & Management</small>
-            </div>
-        </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="session-indicator"><?php echo $current_session; ?></span>
     </div>
+</header>
 
-    <div class="container-fluid px-2">
-        
-        <div class="category-label">Attendance & Records</div>
-        
-        <?php if (!empty($cteacher_data)): ?>
-            <?php foreach ($cteacher_data as $class): ?>
-                <a href="stattnd.php?cls=<?php echo urlencode($class['cteachercls']); ?>&sec=<?php echo urlencode($class['cteachersec']); ?>" class="tool-item shadow-sm">
-                    <div class="icon-container" style="background-color: #E3F2FD; color: #1976D2;">
-                        <i class="bi bi-fingerprint"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="tool-title">Student Attendance</div>
-                        <div class="tool-desc">Mark attendance for <b><?php echo $class['cteachercls'] . " | " . $class['cteachersec']; ?></b></div>
-                    </div>
-                    <i class="bi bi-chevron-right text-muted opacity-50"></i>
-                </a>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <a href="stattnd.php" class="tool-item shadow-sm">
-                <div class="icon-container" style="background-color: #E3F2FD; color: #1976D2;">
+<main class="pb-5 mt-2">
+    <div class="m3-cat-label">Class Management</div>
+    <?php if (!empty($cteacher_data)): ?>
+        <?php foreach ($cteacher_data as $class): ?>
+            <a href="stattnd.php?cls=<?php echo urlencode($class['cteachercls']); ?>&sec=<?php echo urlencode($class['cteachersec']); ?>&year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
+                <div class="icon-box shadow-sm" style="background-color: #E3F2FD; color: #1976D2;">
                     <i class="bi bi-fingerprint"></i>
                 </div>
-                <div class="flex-grow-1">
-                    <div class="tool-title">Attendance</div>
-                    <div class="tool-desc">General student attendance management</div>
+                <div class="tool-info">
+                    <div class="tool-name">Roll Call</div>
+                    <div class="tool-meta">Attendance for <b><?php echo $class['cteachercls'] . " (" . $class['cteachersec'] . ")"; ?></b></div>
                 </div>
-                <i class="bi bi-chevron-right text-muted opacity-50"></i>
-            </a>
-        <?php endif; ?>
-
-        <div class="category-label">Academic Tools</div>
-        <?php foreach ($academic_tools as $item): ?>
-            <a href="<?php echo $item['url']; ?>" class="tool-item shadow-sm">
-                <div class="icon-container" style="background-color: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
-                    <i class="bi <?php echo $item['icon']; ?>"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <div class="tool-title"><?php echo $item['title']; ?></div>
-                    <div class="tool-desc"><?php echo $item['desc']; ?></div>
-                </div>
-                <i class="bi bi-chevron-right text-muted opacity-50"></i>
+                <i class="bi bi-chevron-right text-muted opacity-25"></i>
             </a>
         <?php endforeach; ?>
+    <?php else: ?>
+        <a href="stattnd.php?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
+            <div class="icon-box shadow-sm" style="background-color: #F3EDF7; color: #6750A4;">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="tool-info">
+                <div class="tool-name">Attendance</div>
+                <div class="tool-meta">Daily student presence tracking</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+    <?php endif; ?>
 
-        <div class="category-label">Administration</div>
-        <?php foreach ($admin_tools as $item): ?>
-            <?php if (!isset($item['hidden']) || !$item['hidden']): ?>
-                <a href="<?php echo $item['url']; ?>" class="tool-item shadow-sm">
-                    <div class="icon-container" style="background-color: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
-                        <i class="bi <?php echo $item['icon']; ?>"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="tool-title"><?php echo $item['title']; ?></div>
-                        <div class="tool-desc"><?php echo $item['desc']; ?></div>
-                    </div>
-                    <i class="bi bi-chevron-right text-muted opacity-50"></i>
-                </a>
-            <?php endif; ?>
-        <?php endforeach; ?>
+    <div class="m3-cat-label">Academic Excellence</div>
+    <?php foreach ($academic_tools as $item): ?>
+        <a href="<?php echo $item['url']; ?>?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
+            <div class="icon-box shadow-sm" style="background: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
+                <i class="bi <?php echo $item['icon']; ?>"></i>
+            </div>
+            <div class="tool-info">
+                <div class="tool-name"><?php echo $item['title']; ?></div>
+                <div class="tool-meta"><?php echo $item['desc']; ?></div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+    <?php endforeach; ?>
 
-    </div>
+    <div class="m3-cat-label">Administration</div>
+    <?php foreach ($admin_tools as $item): ?>
+        <a href="<?php echo $item['url']; ?>?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
+            <div class="icon-box shadow-sm" style="background: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
+                <i class="bi <?php echo $item['icon']; ?>"></i>
+            </div>
+            <div class="tool-info">
+                <div class="tool-name"><?php echo $item['title']; ?></div>
+                <div class="tool-meta"><?php echo $item['desc']; ?></div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+    <?php endforeach; ?>
 </main>
 
-<div style="height: 70px;"></div>
-
-<?php include_once 'footer.php'; ?>
+<div style="height: 75px;"></div> <?php include_once 'footer.php'; ?>

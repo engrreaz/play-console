@@ -34,6 +34,10 @@ if ($result0xrtyv->num_rows > 0) {
 $sccode = $eiin;
 
 
+$sessionyear = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] ?? $_COOKIE['query-session'] ?? $sy;
+$sessionyear_param = '%' . $sessionyear . '%';
+// echo $sy_param;'
+
 //************************************************************************************************************************************************************
 
 if (isset($_GET["email"])) {
@@ -256,17 +260,7 @@ if ($sccode > 100) {
     }
 
 
-    if ($userlevel == 'Administrator' || $userlevel == 'Head Teacher') {
-        if ($scname == '' || $scadd1 == '' || $scadd2 = '' || $ps == '' || $dist == '' || $contact == '' || $logo == '') {
-            header("Location: settingsinstituteinfo.php");
-        } else if ($pack == 0) {
-            header("Location: accountbuypack.php");
-        }
-    }
 
-    if ($userlevel == 'Guest') {
-        $pxx = "We noticed that,<br>You're in under review by you Head Teacher / any Administrator.<br> Contact with your authority. <br><br> <b>OR</b><br>You may change your EIIN information.";
-    }
 }
 
 // $dista_differ = $tattndradius;
@@ -353,29 +347,4 @@ include 'header.php';
 
     <div id="mbox2"></div>
     
-    
-    <script>
-
-
-            // $(document).ready(function () {
-            //     if(document.readyState === 'ready' || document.readyState === 'complete'){
-                    
-            //     }
-              
-            // });
-            
-//             window.onload(function(){
-
-
-
-// });
-            
-    //   document.getElementById("mbox").style.display = 'none';      
-        </script>
-
-        <?php
-
-        include 'bill.php';
-
-
-        include 'footer.php';
+ 

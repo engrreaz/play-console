@@ -1,299 +1,126 @@
+<?php
+include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $sy;
+
+$page_title = "Welcome Visitor";
+?>
+
 <style>
-    .card {
-        box-shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03);
-        border-width: 0;
-        transition: all .2s;
+    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
+
+    /* Full-Width Top App Bar (8px Bottom Radius) */
+    .m3-app-bar {
+        width: 100%; height: 56px; background: #fff; display: flex; align-items: center; 
+        padding: 0 16px; position: sticky; top: 0; z-index: 1050; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Hero Clock Section (8px Radius) */
+    .hero-clock-card {
+        background: #F3EDF7; border-radius: 8px; padding: 20px;
+        margin: 12px; border: 1px solid #EADDFF;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center;
+    }
+    .hero-time { font-size: 1.8rem; font-weight: 800; color: #6750A4; display: block; line-height: 1.2; }
+    .hero-date { font-size: 0.8rem; font-weight: 700; color: #49454F; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Modern Progress Bar */
+    .m3-progress-container { background: #E7E0EC; height: 8px; border-radius: 4px; margin-top: 15px; overflow: hidden; }
+    .m3-progress-fill { background: #6750A4; height: 100%; width: 37%; transition: width 0.5s ease; }
+
+    /* Action List Card (8px Radius) */
+    .m3-nav-card {
+        background: #fff; border-radius: 8px; padding: 14px 16px;
+        margin: 0 12px 10px; border: 1px solid #f0f0f0;
+        display: flex; align-items: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        transition: transform 0.15s ease, background 0.15s;
+        text-decoration: none !important; color: inherit;
+    }
+    .m3-nav-card:active { transform: scale(0.98); background-color: #F7F2FA; }
+
+    .nav-icon {
+        width: 40px; height: 40px; border-radius: 8px;
+        background: #F3EDF7; color: #6750A4;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 14px; font-size: 1.2rem;
     }
 
-    .card {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        word-wrap: break-word;
-        background-color: var(--lighter);
-        background-clip: border-box;
-        border: 1px solid rgba(26, 54, 126, 0.125);
-        border-radius: .25rem;
-    }
-
-    .card-body {
-        flex: 1 1 auto;
-        padding: 1rem 1.25rem;
-    }
-
-    .vertical-timeline {
-        width: 100%;
-        position: relative;
-        padding: .5rem 0 0;
-    }
-
-    .vertical-timeline::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 10px;
-        height: 100%;
-        width: 2px;
-        background: lightgray;
-        border-radius: .25rem;
-    }
-
-    .vertical-timeline-element {
-        position: relative;
-        margin: 0 0 1rem;
-    }
-
-    .vertical-timeline--animate .vertical-timeline-element-icon.bounce-in {
-        visibility: visible;
-        animation: cd-bounce-1 .8s;
-    }
-
-    .vertical-timeline-element-icon {
-        position: absolute;
-        top: 0;
-        left: 1px;
-    }
-
-    .vertical-timeline-element-icon .badge-dot-xl {}
-
-    .badge-dot-xl {
-        width: 18px;
-        height: 18px;
-        position: relative;
-    }
-
-    .badge:empty {
-        display: none;
-    }
-
-
-    .badge-dot-xl::before {
-        content: '';
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        margin: -5px 0 0 -5px;
-        background: #f00;
-    }
-
-
-
-
-    .vertical-timeline-element-content {
-        position: relative;
-        margin-left: 25px;
-        font-size: .8rem;
-    }
-
-    .vertical-timeline-element-content .timeline-title {
-        font-size: .8rem;
-        text-transform: uppercase;
-        margin: 0 0;
-        padding: 2px 0 0;
-        font-weight: bold;
-    }
-
-    .vertical-timeline-element-content .vertical-timeline-element-date {
-        display: block;
-        position: absolute;
-        left: -90px;
-        top: 0;
-        padding-right: 10px;
-        text-align: right;
-        color: #adb5bd;
-        font-size: .7619rem;
-        white-space: nowrap;
-    }
-
-    .vertical-timeline-element-content:after {
-        content: "";
-        display: table;
-        clear: both;
-    }
-
-    .wd {
-        width: 45px;
-    }
-
-    .nmbr {
-        font-size: 30px;
-        font-weight: bold;
-    }
-
-    .nmbr small {
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-
-
-    .time {
-        font-size: 24px;
-        font-weight: bold;
-    }
-
-    .date {
-        font-weight: 500;
-        color: var(--darker);
-    }
-
-    .lable {}
-
-    .progress-box {
-        background: var(--light);
-    }
-
-    .progress-val {
-        width: 69%;
-        height: 10px;
-        background: var(--darker);
-    }
-
-    .right {
-        float: right;
-    }
-
-    .attnd {
-        font-size: 24px;
-        font-weight: 500;
-        color: var(--darker);
-        margin: 0;
-        position: relative;
-    }
-
-    a,
-    a:hover,
-    a:link,
-    a:visited {
-        text-decoration: none;
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--dark);
-    }
-
-    .lnk-text {
-        display: inline-block;
-        padding: 7px 7px;
-        font-size: 15px;
-        font-weight: 700;
-        text-transform: uppercase;
+    .nav-label { font-weight: 700; color: #1D1B20; font-size: 0.95rem; }
+    
+    .debug-chip {
+        display: inline-block; background: #eee; color: #666;
+        font-size: 0.65rem; font-weight: 700; padding: 2px 10px;
+        border-radius: 4px; margin: 10px 16px;
     }
 </style>
 
-
-<div class="clearfix"></div>
-
-<div class="main-card mb-1 mt-1 card">
-
-    <div class="card-body">
-        <div class="time" id="time"></div>
-        <div class="date" id="day"><?php echo date('l, d, F, Y'); ?></div>
-        <small style="color:red;"> Weekend</small>
-        <div class="lable">3rd Period<span id="rest"></span></div>
-        <div class="progress-box">
-            <div class="progress-val" id="bar"></div>
-        </div>
-
-
+<header class="m3-app-bar shadow-sm">
+    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+        <i class="bi bi-person-badge-fill"></i>
     </div>
-</div>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <a href="sout.php" class="btn btn-sm btn-outline-danger border-0 fw-bold" style="border-radius: 8px;">OUT</a>
+</header>
 
-<?php echo $userlevel . ' / ' . $usr . '//' . $sccode; ?>
-
-
-
-<div class="main-card mb-1 card">
-    </i><a href="about.php?sccode=<?php echo $sccode; ?>">
-        <div class="card-body">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                class="bi bi-mortarboard-fill" viewBox="0 0 16 16">
-                <path
-                    d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917l-7.5-3.5Z" />
-                <path
-                    d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Z" />
-            </svg>
-            <div class="lnk-text" style="">About Us</div>
+<main class="pb-5 mt-2">
+    <div class="hero-clock-card shadow-sm">
+        <span class="hero-time" id="m3-time">00:00:00</span>
+        <span class="hero-date" id="m3-date"><?php echo date('l, d F'); ?></span>
+        
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="small fw-bold text-muted text-uppercase">Institute Progress</span>
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;">Active</span>
         </div>
+        <div class="m3-progress-container">
+            <div class="m3-progress-fill" id="m3-bar"></div>
+        </div>
+    </div>
+
+    <div class="debug-chip shadow-sm">
+        <?php echo strtoupper($userlevel); ?> <i class="bi bi-dot"></i> <?php echo $usr; ?> <i class="bi bi-dot"></i> <?php echo $sccode; ?>
+    </div>
+
+    <div class="px-3 mb-2 mt-2 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Quick Information</div>
+
+    <a href="about.php?sccode=<?php echo $sccode; ?>" class="m3-nav-card shadow-sm">
+        <div class="nav-icon"><i class="bi bi-mortarboard-fill"></i></div>
+        <div class="flex-grow-1">
+            <div class="nav-label">About Institute</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-
-</div>
-
-<a href="sout.php">OUT</a>
-
-<div class="main-card mb-1 card">
-    </i><a href="contact.php?sccode=<?php echo $sccode; ?>">
-        <div class="card-body">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
-                class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
-            </svg>
-            <div class="lnk-text" style="">Address</div>
+    <a href="contact.php?sccode=<?php echo $sccode; ?>" class="m3-nav-card shadow-sm">
+        <div class="nav-icon" style="background: #E3F2FD; color: #1976D2;"><i class="bi bi-geo-alt-fill"></i></div>
+        <div class="flex-grow-1">
+            <div class="nav-label">Office Address</div>
         </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
-</div>
 
+</main>
 
+<div style="height: 60px;"></div> <script>
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+        const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        const dateStr = now.toLocaleDateString('en-US', dateOptions);
+        
+        document.getElementById('m3-time').innerHTML = timeStr;
+        document.getElementById('m3-date').innerHTML = dateStr;
 
-
-<script>
-
-
-
-    // Update the count down every 1 second
-    var x = setInterval(function () {
-
-
-
-        // If the count down is finished, write some text
-        if (distance < 0) {
-            clearInterval(x);
-            document.getElementById("demo").innerHTML = "EXPIRED";
-        }
-    }, 1000);
-</script>
-
-
-<script>
-    function time() {
-        var date = new Date();
-        var time = date.toLocaleTimeString();
-        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        var day = date.toLocaleDateString('en-US', options);
-        document.getElementById('time').innerHTML = time;
-        document.getElementById('day').innerHTML = day;
-
-
-        var countDownDate = new Date("Oct 21, 2023 03:00:00").getTime();
-        var now = new Date().getTime();
-        var distance = countDownDate - now;
-
-        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        var rest = hours * 3600 + minutes * 60 + seconds * 1;
-
-        // Display the result in the element with id="demo"
-        if (hours < 10) { hours = '0' + hours; }
-        if (minutes < 10) { minutes = '0' + minutes; }
-        if (seconds < 10) { seconds = '0' + seconds; }
-        //document.getElementById("rest").innerHTML = hours + ":" + minutes + ":" + seconds;
-
-        var length = 5 * 60;
-        var perc = 100 * rest / length;
-        document.getElementById('bar').style.width = "37%";//perc +'%';
-
-
-
+        // প্রগ্রেস বার সিমুলেশন
+        // (আপনি চাইলে এখানে নির্দিষ্ট টাইমের উপর ভিত্তি করে লজিক যোগ করতে পারেন)
+        document.getElementById('m3-bar').style.width = "42%";
     }
-    setInterval(function () {
-        time();
-    }, 1000);
-</script>
 
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
 
 <?php include 'footer.php'; ?>

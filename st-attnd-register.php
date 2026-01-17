@@ -3,45 +3,49 @@ session_start();
 include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 include_once 'datam/datam-stprofile.php';
 
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
 
-// --- ১. ফিল্টার হ্যান্ডলিং (Secure & Default logic) ---
-$year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$month = isset($_GET['month']) ? str_pad(intval($_GET['month']), 2, '0', STR_PAD_LEFT) : date('m');
+// ২. ফিল্টার হ্যান্ডলিং
+$year_filter = isset($_GET['y_f']) ? intval($_GET['y_f']) : date('Y');
+$month_filter = isset($_GET['m_f']) ? str_pad(intval($_GET['m_f']), 2, '0', STR_PAD_LEFT) : date('m');
+
 $classname = $_GET['cls'] ?? ($cteacher_data[0]['cteachercls'] ?? '');
 $sectionname = $_GET['sec'] ?? ($cteacher_data[0]['cteachersec'] ?? '');
 
-$date_start = "$year-$month-01";
+$date_start = "$year_filter-$month_filter-01";
 $days_in_month = date('t', strtotime($date_start));
-$date_end = "$year-$month-$days_in_month";
+$date_end = "$year_filter-$month_filter-$days_in_month";
 $today_date = date('Y-m-d');
+$page_title = "Monthly Register";
 
-// --- ২. ডাটা ফেচিং (Optimized for Register View) ---
+// ৩. ডাটা ফেচিং (Optimized)
 
-// ছুটির দিন (Weekends) ফেচ করা
+// উইকেন্ড সেটিংস
 $holidays_str = '';
 $stmt_hol = $conn->prepare("SELECT settings_value FROM settings WHERE sccode = ? AND setting_title = 'Weekends'");
 $stmt_hol->bind_param("s", $sccode);
 $stmt_hol->execute();
-if ($row = $stmt_hol->get_result()->fetch_assoc()) {
-    $holidays_str = $row['settings_value'];
-}
+if ($row = $stmt_hol->get_result()->fetch_assoc()) { $holidays_str = $row['settings_value']; }
 $stmt_hol->close();
 
-// সংশ্লিষ্ট ক্লাসের স্টুডেন্ট লিস্ট
+// স্টুডেন্ট লিস্ট
 $students = [];
-$sy = '%' . $sy . '%';
 $stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
-$stmt_st->bind_param("ssss", $sy, $sccode, $classname, $sectionname);
+$stmt_st->bind_param("ssss", $sy_param, $sccode, $classname, $sectionname);
 $stmt_st->execute();
 $res_st = $stmt_st->get_result();
 while($row = $res_st->fetch_assoc()) $students[] = $row;
 $stmt_st->close();
 
-// হাজিরা ডেটা ফেচ করা (একবার কুয়েরি করে মেমরিতে রাখা - O(1) Lookup)
+// অ্যাটেনডেন্স ম্যাপ (Lookup Table)
 $attendance_map = [];
 $sql_att = "SELECT stid, adate, yn, bunk FROM stattnd WHERE sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ? AND adate BETWEEN ? AND ?";
 $stmt_att = $conn->prepare($sql_att);
-$stmt_att->bind_param("ssssss", $sccode, $sy, $classname, $sectionname, $date_start, $date_end);
+$stmt_att->bind_param("ssssss", $sccode, $sy_param, $classname, $sectionname, $date_start, $date_end);
 $stmt_att->execute();
 $res_att = $stmt_att->get_result();
 while ($row = $res_att->fetch_assoc()) {
@@ -50,165 +54,204 @@ while ($row = $res_att->fetch_assoc()) {
 $stmt_att->close();
 ?>
 
+<?php
+// ... (আপনার আগের সব PHP লজিক অপরিবর্তিত থাকবে) ...
+
+// আপনার কাঙ্ক্ষিত লিঙ্কটি জেনারেট করা
+$roll_call_url = "stattnd.php?cls=" . urlencode($classname) . "&sec=" . urlencode($sectionname) . "&year=" . $current_session;
+?>
+
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    /* ... (আগের সব CSS অপরিবর্তিত থাকবে) ... */
 
-    /* App Bar Style */
-    .m3-app-bar {
-        background-color: #FFFFFF;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1050;
+    /* M3 Floating Action Button (FAB) */
+    .fab-roll-call {
+        position: fixed;
+        bottom: 85px; /* বটম নেভ এর উপরে */
+        right: 20px;
+        background-color: #6750A4; /* M3 Primary */
+        color: #FFFFFF;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px; /* M3 FAB standard radius */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+        text-decoration: none !important;
+        z-index: 1100;
+        transition: transform 0.2s, background-color 0.2s;
     }
+    .fab-roll-call:active { transform: scale(0.9); background-color: #4F378B; }
+    .fab-roll-call i { font-size: 1.5rem; }
 
-    /* Filter Card */
-    .m3-card { background: #fff; border-radius: 24px; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 16px; margin-bottom: 16px; }
-    .form-select { border-radius: 12px; border: 1px solid #79747E; padding: 10px; font-size: 0.9rem; }
-
-    /* Attendance Register Table Layout */
-    .register-container {
-        background: #fff;
-        border-radius: 28px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+    /* Header Action Button (8px radius) */
+    .btn-roll-call-sm {
+        background-color: #EADDFF;
+        color: #21005D;
+        border: none;
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 8px !important;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
-
-    .table-responsive { max-height: 65vh; overflow: auto; }
-    .table { margin-bottom: 0; font-size: 0.85rem; }
-    .table th, .table td { vertical-align: middle; text-align: center; border-color: #E7E0EC; }
-
-    /* Sticky Header & Columns */
-    .sticky-header { position: sticky; top: 0; background: #F3EDF7 !important; z-index: 10; font-weight: 700; color: #6750A4; }
-    .sticky-col-roll { position: sticky; left: 0; background: #fff !important; z-index: 5; border-right: 2px solid #E7E0EC !important; width: 50px; }
-    .sticky-col-name { position: sticky; left: 50px; background: #fff !important; z-index: 5; border-right: 2px solid #E7E0EC !important; width: 140px; text-align: left !important; }
-
-    /* Attendance Indicators (Badges) */
-    .att-indicator { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-    .bg-p { background-color: #4CAF50; } /* Present */
-    .bg-a { background-color: #F44336; } /* Absent */
-    .bg-b { background-color: #FFB300; } /* Bunk */
-    .bg-h { background-color: #9E9E9E; } /* Holiday */
-    .bg-n { background-color: #424242; } /* Not Taken */
-    .bg-f { background-color: #F3EDF7; } /* Future */
-
-    /* Legend Bar */
-    .m3-legend {
-        background: #F3EDF7; padding: 12px; border-radius: 16px;
-        display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.75rem; font-weight: 600;
-    }
-    .legend-item { display: flex; align-items: center; gap: 4px; }
 </style>
 
-<main class="container-fluid px-3 pt-3">
-    <div class="m3-app-bar mb-3">
-        <div class="d-flex align-items-center">
-            <a href="reporthome.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-            <div>
-                <h5 class="fw-bold mb-0">Monthly Register</h5>
-                <small class="text-muted"><?php echo date('F Y', strtotime($date_start)); ?></small>
-            </div>
-        </div>
-    </div>
 
-    <div class="m3-card shadow-sm">
-        <form method="GET" class="row g-2 align-items-end">
-            <div class="col-6">
-                <label class="small fw-bold ms-2 mb-1">Class</label>
-                <select name="cls" class="form-select" onchange="this.form.submit()">
+<style>
+    body { background-color: #FEF7FF; font-size: 0.85rem; margin: 0; padding: 0; }
+
+    /* Full Width Top Bar */
+    .m3-app-bar {
+        width: 100%; position: sticky; top: 0; z-index: 1060;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Condensed Filter Card */
+    .filter-card {
+        background: #fff; border-radius: 8px; padding: 12px; margin: 8px;
+        border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .form-select-sm { border-radius: 6px; border: 1px solid #79747E; font-size: 0.75rem; font-weight: 600; }
+
+    /* Attendance Register Container */
+    .register-wrapper {
+        background: #fff; border-radius: 8px; margin: 0 8px 12px;
+        border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .table-container { max-height: 60vh; overflow: auto; position: relative; }
+    
+    .table-m3 { margin-bottom: 0; width: 100%; border-collapse: separate; border-spacing: 0; }
+    .table-m3 th, .table-m3 td { 
+        padding: 6px 2px; text-align: center; border-bottom: 1px solid #F3EDF7; 
+        border-right: 1px solid #F3EDF7; font-size: 0.7rem;
+    }
+
+    /* Sticky Logic */
+    .stk-head { position: sticky; top: 0; background: #F3EDF7 !important; z-index: 20; font-weight: 800; color: #6750A4; }
+    .stk-roll { position: sticky; left: 0; background: #fff !important; z-index: 10; font-weight: 800; border-right: 2px solid #EADDFF !important; min-width: 35px; }
+    .stk-name { position: sticky; left: 35px; background: #fff !important; z-index: 10; border-right: 2px solid #EADDFF !important; min-width: 100px; text-align: left !important; padding-left: 6px !important; }
+    .stk-head.stk-roll, .stk-head.stk-name { z-index: 30; }
+
+    /* Attendance Dots */
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-p { background: #4CAF50; } /* Present */
+    .dot-a { background: #B3261E; } /* Absent */
+    .dot-b { background: #FF9800; } /* Bunk */
+    .dot-h { background: #E7E0EC; } /* Holiday */
+    .dot-n { background: #49454F; opacity: 0.3; } /* Not Taken */
+    .dot-f { background: transparent; border: 1px solid #eee; } /* Future */
+
+    /* Legend Bar */
+    .legend-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; background: #F3EDF7; border-radius: 0 0 8px 8px; }
+    .lg-item { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; font-weight: 700; color: #49454F; }
+</style>
+
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    
+    <a href="<?php echo $roll_call_url; ?>" class="btn-roll-call-sm shadow-sm me-2">
+        <i class="bi bi-pencil-square"></i> ROLL CALL
+    </a>
+    
+    <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.6rem;"><?php echo $current_session; ?></span>
+</header>
+
+<main class="pb-5 mt-1">
+    <a href="<?php echo $roll_call_url; ?>" class="fab-roll-call shadow-lg" title="Start Roll Call">
+        <i class="bi bi-fingerprint"></i>
+    </a>
+</main>
+
+<main class="pb-5 mt-1">
+    <div class="filter-card shadow-sm">
+        <form method="GET" class="row gx-2 gy-2 align-items-center">
+            <div class="col-4">
+                <select name="cls" class="form-select form-select-sm" onchange="this.form.submit()">
                     <?php foreach ($cteacher_data as $c): ?>
                         <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-6">
-                <label class="small fw-bold ms-2 mb-1">Section</label>
-                <select name="sec" class="form-select" onchange="this.form.submit()">
+            <div class="col-3">
+                <select name="sec" class="form-select form-select-sm" onchange="this.form.submit()">
                     <?php foreach ($cteacher_data as $c): ?>
                         <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-5">
-                <select name="month" class="form-select">
-                    <?php for ($m = 1; $m <= 12; $m++): ?>
-                        <option value="<?php echo $m; ?>" <?php echo ($m == intval($month)) ? 'selected' : ''; ?>><?php echo date('M', mktime(0, 0, 0, $m, 10)); ?></option>
-                    <?php endfor; ?>
-                </select>
-            </div>
-            <div class="col-4">
-                <select name="year" class="form-select">
-                    <?php for ($y = date('Y'); $y >= date('Y') - 2; $y--): ?>
-                        <option value="<?php echo $y; ?>" <?php echo ($y == $year) ? 'selected' : ''; ?>><?php echo $y; ?></option>
-                    <?php endfor; ?>
-                </select>
-            </div>
             <div class="col-3">
-                <button type="submit" class="btn btn-primary w-100 rounded-pill"><i class="bi bi-search"></i></button>
+                <select name="m_f" class="form-select form-select-sm">
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
+                        <option value="<?php echo $m; ?>" <?php echo ($m == intval($month_filter)) ? 'selected' : ''; ?>><?php echo date('M', mktime(0, 0, 0, $m, 10)); ?></option>
+                    <?php endfor; ?>
+                </select>
             </div>
+            <div class="col-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm" style="border-radius: 6px;"><i class="bi bi-search"></i></button>
+            </div>
+            <input type="hidden" name="year" value="<?php echo $current_session; ?>">
         </form>
     </div>
 
-    <div class="register-container">
-        <div class="table-responsive">
-            <table class="table table-bordered table-sm">
+    <div class="register-wrapper shadow-sm">
+        <div class="table-container">
+            <table class="table-m3">
                 <thead>
-                    <tr class="sticky-header">
-                        <th class="sticky-col-roll">Roll</th>
-                        <th class="sticky-col-name">Student Name</th>
+                    <tr>
+                        <th class="stk-head stk-roll">#</th>
+                        <th class="stk-head stk-name">Name</th>
                         <?php for ($d = 1; $d <= $days_in_month; $d++): ?>
-                            <th style="min-width: 35px;"><?php echo $d; ?></th>
+                            <th class="stk-head" style="min-width: 28px;"><?php echo $d; ?></th>
                         <?php endfor; ?>
-                        <th style="min-width: 60px;">Rate</th>
+                        <th class="stk-head" style="min-width: 40px; border-right: 0;">%</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($students)): ?>
-                        <tr><td colspan="<?php echo $days_in_month + 3; ?>" class="p-5 text-muted">No students found.</td></tr>
+                        <tr><td colspan="<?php echo $days_in_month + 3; ?>" class="p-5 text-muted">No records.</td></tr>
                     <?php else: ?>
                         <?php foreach ($students as $st): 
                             $stid = $st['stid'];
-                            // প্রোফাইল থেকে নাম খুঁজে বের করা
                             $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
                             $st_name = ($st_idx !== false) ? $datam_st_profile[$st_idx]['stnameeng'] : 'ID: '.$stid;
-                            
-                            $open_days = 0; $present_days = 0;
+                            $open = 0; $present = 0;
                         ?>
                             <tr>
-                                <td class="sticky-col-roll fw-bold"><?php echo $st['rollno']; ?></td>
-                                <td class="sticky-col-name text-truncate small"><?php echo $st_name; ?></td>
+                                <td class="stk-roll fw-bold"><?php echo $st['rollno']; ?></td>
+                                <td class="stk-name text-truncate"><?php echo $st_name; ?></td>
                                 <?php 
                                 for ($d = 1; $d <= $days_in_month; $d++): 
-                                    $c_date = "$year-$month-" . str_pad($d, 2, '0', STR_PAD_LEFT);
-                                    $day_n = date('l', strtotime($c_date));
-                                    $indicator = 'bg-f'; // Future
+                                    $c_date = "$year_filter-$month_filter-" . str_pad($d, 2, '0', STR_PAD_LEFT);
+                                    $day_name = date('l', strtotime($c_date));
+                                    $dot_class = 'dot-f'; // Future
                                     
                                     if (strtotime($c_date) <= strtotime($today_date)) {
-                                        if (str_contains($holidays_str, $day_n)) {
-                                            $indicator = 'bg-h'; // Holiday
+                                        if (str_contains($holidays_str, $day_name)) {
+                                            $dot_class = 'dot-h';
                                         } else {
-                                            $open_days++;
+                                            $open++;
                                             if (isset($attendance_map[$stid][$c_date])) {
                                                 $att = $attendance_map[$stid][$c_date];
                                                 if ($att['yn'] == '1') {
-                                                    $present_days++;
-                                                    $indicator = ($att['bunk'] == '1') ? 'bg-b' : 'bg-p';
-                                                } else {
-                                                    $indicator = 'bg-a';
-                                                }
-                                            } else {
-                                                $indicator = 'bg-n'; // Not Taken
-                                            }
+                                                    $present++;
+                                                    $dot_class = ($att['bunk'] == '1') ? 'dot-b' : 'dot-p';
+                                                } else { $dot_class = 'dot-a'; }
+                                            } else { $dot_class = 'dot-n'; }
                                         }
                                     }
                                 ?>
-                                    <td><span class="att-indicator <?php echo $indicator; ?>"></span></td>
+                                    <td><span class="dot <?php echo $dot_class; ?>"></span></td>
                                 <?php endfor; ?>
-                                <td class="fw-bold text-primary">
-                                    <?php echo ($open_days > 0) ? round(($present_days / $open_days) * 100) . '%' : '--'; ?>
+                                <td class="fw-bold text-primary" style="border-right: 0;">
+                                    <?php echo ($open > 0) ? round(($present / $open) * 100) : '0'; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -217,16 +260,14 @@ $stmt_att->close();
             </table>
         </div>
         
-        <div class="m3-legend">
-            <div class="legend-item"><span class="att-indicator bg-p"></span> Present</div>
-            <div class="legend-item"><span class="att-indicator bg-a"></span> Absent</div>
-            <div class="legend-item"><span class="att-indicator bg-b"></span> Bunk</div>
-            <div class="legend-item"><span class="att-indicator bg-h"></span> Weekend</div>
-            <div class="legend-item"><span class="att-indicator bg-n"></span> Missing</div>
+        <div class="legend-row">
+            <div class="lg-item"><span class="dot dot-p"></span> Present</div>
+            <div class="lg-item"><span class="dot dot-a"></span> Absent</div>
+            <div class="lg-item"><span class="dot dot-b"></span> Bunk</div>
+            <div class="lg-item"><span class="dot dot-h"></span> Holiday</div>
+            <div class="lg-item"><span class="dot dot-n"></span> Missing</div>
         </div>
     </div>
 </main>
 
-<div style="height: 60px;"></div>
-
-<?php include 'footer.php'; ?>
+<div style="height: 65px;"></div> <?php include 'footer.php'; ?>

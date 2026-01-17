@@ -1,15 +1,22 @@
 <?php
 include 'inc.php'; // এটি header.php এবং DB কানেকশন লোড করবে
 
-$stid = $_GET['stid'] ?? 0;
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
 
-// ১. স্টুডেন্ট এবং সেশন ইনফো ফেচ করা (Prepared Statement)
+$stid = $_GET['stid'] ?? 0;
+$page_title = "Attendance Report";
+
+// ২. স্টুডেন্ট এবং সেশন ইনফো ফেচ করা (Prepared Statement)
 $std_data = [];
 $stmt = $conn->prepare("SELECT s.*, si.classname, si.sectionname, si.rollno 
                         FROM students s 
                         JOIN sessioninfo si ON s.stid = si.stid 
-                        WHERE s.stid = ? AND si.sessionyear = ? LIMIT 1");
-$stmt->bind_param("ss", $stid, $sy);
+                        WHERE s.stid = ? AND si.sessionyear LIKE ? LIMIT 1");
+$stmt->bind_param("ss", $stid, $sy_param);
 $stmt->execute();
 $res = $stmt->get_result();
 if($row = $res->fetch_assoc()) {
@@ -23,12 +30,11 @@ $sec = $std_data['sectionname'] ?? '';
 $roll = $std_data['rollno'] ?? '';
 $stdid = $std_data['stid'] ?? $stid;
 
-// ২. উপস্থিতির ডাটা এবং সামারি ফেচ করা
+// ৩. উপস্থিতির ডাটা এবং সামারি ফেচ করা
 $att_data_list = [];
 $present_count = $absent_count = $late_count = 0;
 
-$stmt_att = $conn->prepare("SELECT adate, yn, statusin FROM stattnd WHERE stid = ? AND sessionyear LIKE ? ORDER BY adate DESC");
-$sy_param = "%$sy%";
+$stmt_att = $conn->prepare("SELECT adate, yn FROM stattnd WHERE stid = ? AND sessionyear LIKE ? ORDER BY adate DESC");
 $stmt_att->bind_param("ss", $stid, $sy_param);
 $stmt_att->execute();
 $res_att = $stmt_att->get_result();
@@ -48,125 +54,116 @@ $photo_path = "https://eimbox.com/students/" . $stdid . ".jpg";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Profile Hero Section */
-    .profile-hero {
-        background: linear-gradient(135deg, #6750A4, #9581CD);
-        border-radius: 0 0 32px 32px;
-        padding: 30px 20px 40px;
-        color: white;
+    /* Profile Hero Section (Large Photo Focus) */
+    .profile-header {
+        background: #fff;
+        padding: 30px 20px;
         text-align: center;
-        margin-bottom: 20px;
-    }
-    .avatar-frame {
-        width: 80px; height: 80px;
-        border-radius: 50%;
-        border: 3px solid white;
-        margin: 0 auto 12px;
-        overflow: hidden;
-    }
-    .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* Stats Dashboard */
-    .stats-card {
-        background: #F3EDF7;
-        border-radius: 28px;
-        padding: 20px;
-        margin: 0 16px 24px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .stat-box { text-align: center; padding: 10px; border-radius: 16px; background: #fff; }
-    .stat-val { font-size: 1.3rem; font-weight: 800; color: #1C1B1F; line-height: 1; }
-    .stat-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-top: 4px; opacity: 0.7; }
-
-    /* Attendance List Rows */
-    .att-row {
-        background: white;
-        border-radius: 20px;
-        padding: 14px 16px;
-        margin: 0 16px 10px;
-        display: flex;
-        align-items: center;
-        border: none;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        border-radius: 0 0 8px 8px; /* আপনার নির্দেশিত ৮ পিক্সেল */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 12px;
     }
     
-    .status-chip {
-        width: 48px; height: 48px;
-        border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        margin-right: 15px; font-size: 1.2rem;
+    .large-avatar-frame {
+        width: 130px; height: 130px; /* ছবি বড় করা হয়েছে */
+        border-radius: 12px; /* M3 style rounded square */
+        border: 4px solid #F3EDF7;
+        margin: 0 auto 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
     }
-    .bg-present { background-color: #E8F5E9; color: #2E7D32; }
-    .bg-absent { background-color: #FFEBEE; color: #D32F2F; }
-    .bg-late { background-color: #FFF3E0; color: #E65100; }
+    .large-avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
 
-    .date-main { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; }
-    .date-sub { font-size: 0.75rem; color: #49454F; }
+    .st-name { font-size: 1.2rem; font-weight: 800; color: #1C1B1F; margin-bottom: 4px; }
+    .st-meta { font-size: 0.75rem; font-weight: 700; color: #6750A4; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Stats Dashboard (8px Radius) */
+    .stats-row { display: flex; gap: 8px; padding: 0 12px; margin-bottom: 20px; }
+    .stat-chip {
+        flex: 1; background: #fff; border-radius: 8px; padding: 12px 8px;
+        text-align: center; border: 1px solid #f0f0f0; box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .stat-val { font-size: 1.2rem; font-weight: 800; display: block; line-height: 1; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; margin-top: 4px; color: #49454F; }
+
+    /* History List (8px Radius) */
+    .history-card {
+        background: #fff; border-radius: 8px; padding: 12px;
+        margin: 0 12px 8px; display: flex; align-items: center;
+        border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    
+    .status-icon {
+        width: 42px; height: 42px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 12px; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .c-present { background: #E8F5E9; color: #2E7D32; }
+    .c-absent { background: #FFEBEE; color: #D32F2F; }
+    .c-late { background: #FFF3E0; color: #E65100; }
+
+    .hist-date { font-weight: 700; color: #1C1B1F; font-size: 0.85rem; }
+    .hist-desc { font-size: 0.7rem; color: #79747E; font-weight: 500; }
 </style>
 
-<main class="pb-5">
-    <div class="profile-hero shadow">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="index.php" class="text-white"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h6 class="fw-bold mb-0">Attendance Report</h6>
-            <div style="width: 24px;"></div>
-        </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;">Session: <?php echo $current_session; ?></span>
+    </div>
+</header>
 
-        <div class="avatar-frame shadow-sm">
+<main class="pb-5">
+    <div class="profile-header shadow-sm">
+        <div class="large-avatar-frame">
             <img src="<?php echo $photo_path; ?>" onerror="this.src='https://eimbox.com/students/noimg.jpg';">
         </div>
-        
-        <h5 class="fw-bold mb-1"><?php echo $stnameeng; ?></h5>
-        <div class="d-flex justify-content-center gap-2 mt-2">
-            <span class="badge rounded-pill bg-white text-primary px-3">Class: <?php echo $cls; ?></span>
-            <span class="badge rounded-pill bg-white text-primary px-3">Roll: <?php echo $roll; ?></span>
+        <div class="st-name"><?php echo $stnameeng; ?></div>
+        <div class="st-meta">
+            Class <?php echo $cls; ?> <i class="bi bi-dot"></i> Section <?php echo $sec; ?> <i class="bi bi-dot"></i> Roll <?php echo $roll; ?>
         </div>
     </div>
 
-    <div class="stats-card">
-        <div class="row g-2">
-            <div class="col-4">
-                <div class="stat-box shadow-sm" style="color: #2E7D32;">
-                    <div class="stat-val"><?php echo $present_count; ?></div>
-                    <div class="stat-label">Present</div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="stat-box shadow-sm" style="color: #D32F2F;">
-                    <div class="stat-val"><?php echo $absent_count; ?></div>
-                    <div class="stat-label">Absent</div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="stat-box shadow-sm" style="color: #E65100;">
-                    <div class="stat-val"><?php echo $late_count; ?></div>
-                    <div class="stat-label">Late</div>
-                </div>
-            </div>
+    <div class="stats-row">
+        <div class="stat-chip">
+            <span class="stat-val text-success"><?php echo $present_count; ?></span>
+            <span class="stat-lbl">Present</span>
+        </div>
+        <div class="stat-chip">
+            <span class="stat-val text-danger"><?php echo $absent_count; ?></span>
+            <span class="stat-lbl">Absent</span>
+        </div>
+        <div class="stat-chip">
+            <span class="stat-val text-warning"><?php echo $late_count; ?></span>
+            <span class="stat-lbl">Late</span>
         </div>
     </div>
 
-    <h6 class="ms-4 mb-3 text-secondary fw-bold small text-uppercase tracking-wider">Attendance History</h6>
+    <div class="px-3 mb-2 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-muted small text-uppercase" style="letter-spacing: 1px;">Attendance Log</span>
+        <i class="bi bi-filter-right fs-5 text-primary"></i>
+    </div>
 
     <div class="px-1">
         <?php if(!empty($att_data_list)): ?>
             <?php foreach($att_data_list as $att): 
-                $is_present = ($att['yn'] == 1);
-                $is_late = ($att['statusin'] == 'Late');
+                $is_p = ($att['yn'] == 1);
+                $is_l = ($att['statusin'] == 'Late');
                 
-                $row_class = $is_present ? ($is_late ? 'bg-late' : 'bg-present') : 'bg-absent';
-                $row_icon = $is_present ? ($is_late ? 'bi-clock-history' : 'bi-check2-circle') : 'bi-x-circle';
-                $status_text = $is_present ? ($is_late ? 'Present (Late Entry)' : 'Present') : 'Absent';
+                $cls_tag = $is_p ? ($is_l ? 'c-late' : 'c-present') : 'c-absent';
+                $icon_tag = $is_p ? ($is_l ? 'bi-clock-history' : 'bi-check-circle-fill') : 'bi-x-circle-fill';
+                $status_txt = $is_p ? ($is_l ? 'Present (Late Entry)' : 'Present') : 'Absent from Institute';
             ?>
-                <div class="att-row shadow-sm">
-                    <div class="status-chip <?php echo $row_class; ?>">
-                        <i class="bi <?php echo $row_icon; ?>"></i>
+                <div class="history-card shadow-sm">
+                    <div class="status-icon <?php echo $cls_tag; ?>">
+                        <i class="bi <?php echo $icon_tag; ?>"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <div class="date-main"><?php echo date('d F, Y', strtotime($att['adate'])); ?></div>
-                        <div class="date-sub"><?php echo date('l', strtotime($att['adate'])); ?> <i class="bi bi-dot"></i> <?php echo $status_text; ?></div>
+                        <div class="hist-date"><?php echo date('d M, Y', strtotime($att['adate'])); ?></div>
+                        <div class="hist-desc"><?php echo date('l', strtotime($att['adate'])); ?> <i class="bi bi-dot"></i> <?php echo $status_txt; ?></div>
                     </div>
                     <i class="bi bi-chevron-right text-muted opacity-25"></i>
                 </div>
@@ -174,12 +171,10 @@ $photo_path = "https://eimbox.com/students/" . $stdid . ".jpg";
         <?php else: ?>
             <div class="text-center py-5 opacity-25">
                 <i class="bi bi-calendar-x display-1"></i>
-                <p class="mt-2 fw-bold">No attendance records found.</p>
+                <p class="mt-2 fw-bold">Records unavailable.</p>
             </div>
         <?php endif; ?>
     </div>
 </main>
 
-<div style="height: 60px;"></div>
-
-<?php include 'footer.php'; ?>
+<div style="height: 65px;"></div> <?php include 'footer.php'; ?>

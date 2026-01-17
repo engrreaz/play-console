@@ -1,196 +1,161 @@
 <?php
-include 'inc.php'; // header.php এবং কানেকশন লোড করবে
+include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. ফিল্টার হ্যান্ডলিং (Security & Default values)
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
+
+// ২. ফিল্টার হ্যান্ডলিং (Class & Section)
 $classname = $_GET['cls'] ?? ($cteacher_data[0]['cteachercls'] ?? '');
 $sectionname = $_GET['sec'] ?? ($cteacher_data[0]['cteachersec'] ?? '');
 
-// ২. পিরিয়ড ডিটেইলস ফেচ করা (Prepared Statement)
-$class_schedule = [];
-$stmt_sc = $conn->prepare("SELECT period, timestart, timeend FROM classschedule WHERE sccode = ? AND sessionyear LIKE ? ORDER BY period ASC");
-$sy_param = "%$sy%";
-$stmt_sc->bind_param("ss", $sccode, $sy_param);
-$stmt_sc->execute();
-$res_sc = $stmt_sc->get_result();
-while ($row = $res_sc->fetch_assoc()) {
-    $class_schedule[$row['period']] = $row;
-}
-$stmt_sc->close();
+$page_title = "Class Routine";
 
-// ৩. পূর্ণ রুটিন ফেচ করা (Weekly Data)
+// ৩. রুটিন ডাটা ফেচিং (Prepared Statement - Secure)
 $routine_data = [];
-$stmt_rt = $conn->prepare("SELECT period, wday, subcode, tid FROM clsroutine WHERE sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_rt->bind_param("ssss", $sccode, $sy_param, $classname, $sectionname);
-$stmt_rt->execute();
-$res_rt = $stmt_rt->get_result();
-while ($row = $res_rt->fetch_assoc()) {
-    $routine_data[$row['wday']][$row['period']] = $row;
+$days_order = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+$sql = "SELECT * FROM classschedule 
+        WHERE sccode = ? AND sessionyear LIKE ? 
+        ORDER BY period, timestart ASC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $sccode, $sy_param);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $routine_data[$row['dayname']][] = $row;
 }
-$stmt_rt->close();
-
-// সাবজেক্ট এবং টিচার ডাটা লোড (Assuming these arrays are available from inc.php)
-include_once 'datam/datam-subject-list.php'; 
-include_once 'datam/datam-teacher.php';
-
-$week_days = [
-    1 => 'Sat', 2 => 'Sun', 3 => 'Mon', 4 => 'Tue', 5 => 'Wed', 6 => 'Thu', 7 => 'Fri'
-];
-$today_num = date('N') == 6 ? 1 : date('N') + 2; // Saturday=1 adjust for PHP date format
-if($today_num > 7) $today_num -= 7;
+$stmt->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface */
-    
-    /* Day Tabs Styling */
-    .day-tabs-container {
-        position: sticky;
-        top: 0;
-        z-index: 1020;
-        background: #fff;
-        padding: 10px 0;
-        border-bottom: 1px solid #E7E0EC;
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
+
+    /* Full Width M3 App Bar */
+    .m3-app-bar {
+        width: 100%; position: sticky; top: 0; z-index: 1050;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .nav-pills-m3 {
-        display: flex;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 0 15px;
-        gap: 8px;
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Filter Card (Condensed) */
+    .filter-card {
+        background: #fff; border-radius: 8px; padding: 12px; margin: 10px 12px;
+        border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
-    .nav-pills-m3::-webkit-scrollbar { display: none; }
-    
-    .nav-pills-m3 .nav-link {
-        border-radius: 12px;
-        padding: 8px 20px;
-        background: #F3EDF7;
-        color: #49454F;
-        font-weight: 600;
-        border: none;
+    .form-select-sm { border-radius: 6px; border: 1px solid #79747E; font-size: 0.8rem; font-weight: 600; height: 38px; }
+
+    /* Day Card (M3 Medium) */
+    .day-card {
+        background: #fff; border-radius: 8px; margin: 0 12px 12px;
+        border: 1px solid #f0f0f0; overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .nav-pills-m3 .nav-link.active {
-        background-color: #6750A4 !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .day-header {
+        background: #F3EDF7; padding: 10px 16px; 
+        font-weight: 800; color: #6750A4; font-size: 0.85rem;
+        display: flex; justify-content: space-between; align-items: center;
     }
 
-    /* Period Card Styling */
-    .period-card {
-        border: none;
-        border-radius: 20px;
-        background: #fff;
-        margin-bottom: 12px;
-        transition: 0.2s;
-        display: flex;
-        align-items: center;
-        padding: 16px;
+    /* Period Row Item */
+    .period-item {
+        display: flex; align-items: center; padding: 12px 16px;
+        border-bottom: 1px solid #F7F2FA; position: relative;
     }
-    .time-slot {
-        min-width: 85px;
-        border-right: 2px solid #E7E0EC;
-        margin-right: 15px;
-        padding-right: 10px;
+    .period-item:last-child { border-bottom: none; }
+    
+    .time-box {
+        width: 75px; flex-shrink: 0; text-align: center;
+        border-right: 2px solid #EADDFF; margin-right: 15px;
     }
-    .time-slot .start { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; }
-    .time-slot .end { font-size: 0.75rem; color: #79747E; }
-    
-    .subject-info .sub-name { font-weight: 700; color: #21005D; font-size: 1.05rem; margin-bottom: 2px; }
-    .subject-info .teacher-name { font-size: 0.85rem; color: #49454F; display: flex; align-items: center; }
-    
+    .time-start { font-weight: 800; color: #1C1B1F; font-size: 0.8rem; display: block; }
+    .time-end { font-size: 0.65rem; color: #79747E; font-weight: 600; }
+
+    .sub-info { flex-grow: 1; overflow: hidden; }
+    .sub-name { font-weight: 700; color: #1D1B20; font-size: 0.9rem; margin-bottom: 2px; display: block; }
+    .teacher-name { font-size: 0.75rem; color: #49454F; font-weight: 500; }
+
     .period-badge {
-        background: #EADDFF;
-        color: #21005D;
-        border-radius: 8px;
-        padding: 4px 8px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-        display: inline-block;
+        font-size: 0.6rem; background: #EADDFF; color: #21005D;
+        padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-left: 8px;
     }
 </style>
 
-<main class="pb-5">
-    <div class="p-3 bg-white d-flex align-items-center">
-        <a href="reporthome.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-        <div>
-            <h5 class="fw-bold mb-0">Class Routine</h5>
-            <small class="text-muted"><?php echo htmlspecialchars($classname . " - " . $sectionname); ?></small>
-        </div>
-    </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;"><?php echo $current_session; ?></span>
+</header>
 
-    <div class="day-tabs-container shadow-sm">
-        <ul class="nav nav-pills-m3" id="routineTab" role="tablist">
-            <?php foreach ($week_days as $num => $name): ?>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo ($num == $today_num) ? 'active' : ''; ?>" 
-                            id="day-tab-<?php echo $num; ?>" 
-                            data-bs-toggle="pill" 
-                            data-bs-target="#day-<?php echo $num; ?>" 
-                            type="button">
-                        <?php echo $name; ?>
-                    </button>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-
-    <div class="tab-content container mt-3" id="routineTabContent">
-        <?php foreach ($week_days as $wday_num => $day_name): ?>
-            <div class="tab-pane fade <?php echo ($wday_num == $today_num) ? 'show active' : ''; ?>" 
-                 id="day-<?php echo $wday_num; ?>" role="tabpanel">
-                
-                <?php 
-                $periods_found = false;
-                if (isset($routine_data[$wday_num])):
-                    foreach ($class_schedule as $p_num => $p_info):
-                        if (isset($routine_data[$wday_num][$p_num])):
-                            $periods_found = true;
-                            $entry = $routine_data[$wday_num][$p_num];
-                            
-                            // Subject Lookup
-                            $s_idx = array_search($entry['subcode'], array_column($datam_subject_list, 'subcode'));
-                            $sub_name = ($s_idx !== false) ? $datam_subject_list[$s_idx]['subject'] : 'Unknown';
-                            
-                            // Teacher Lookup
-                            $t_idx = array_search($entry['tid'], array_column($datam_teacher_list, 'tid'));
-                            $t_name = ($t_idx !== false) ? $datam_teacher_list[$t_idx]['tname'] : 'N/A';
-                ?>
-                    <div class="period-card shadow-sm">
-                        <div class="time-slot text-center">
-                            <div class="start"><?php echo date('h:i', strtotime($p_info['timestart'])); ?></div>
-                            <div class="end"><?php echo date('h:i A', strtotime($p_info['timeend'])); ?></div>
-                        </div>
-                        <div class="subject-info flex-grow-1">
-                            <span class="period-badge">PERIOD <?php echo $p_num; ?></span>
-                            <div class="sub-name"><?php echo htmlspecialchars($sub_name); ?></div>
-                            <div class="teacher-name">
-                                <i class="bi bi-person-video3 me-2 text-primary"></i>
-                                <?php echo htmlspecialchars($t_name); ?>
-                            </div>
-                        </div>
-                        <div class="ms-auto">
-                            <i class="bi bi-chevron-right text-muted opacity-50"></i>
-                        </div>
-                    </div>
-
-                <?php 
-                        endif;
-                    endforeach; 
-                endif;
-
-                if (!$periods_found): ?>
-                    <div class="text-center py-5">
-                        <div class="rounded-circle bg-light d-inline-flex p-4 mb-3">
-                            <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                        </div>
-                        <h6 class="text-muted">No classes scheduled for <?php echo $day_name; ?></h6>
-                    </div>
-                <?php endif; ?>
+<main class="pb-5 mt-2">
+    <div class="filter-card">
+        <form method="GET" class="row gx-2 align-items-center">
+            <div class="col-5">
+                <select name="cls" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <?php foreach ($cteacher_data as $c): ?>
+                        <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-        <?php endforeach; ?>
+            <div class="col-4">
+                <select name="sec" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <?php foreach ($cteacher_data as $c): ?>
+                        <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold shadow-sm" style="border-radius: 6px; height: 38px;">VIEW</button>
+            </div>
+            <input type="hidden" name="year" value="<?php echo $current_session; ?>">
+        </form>
+    </div>
+
+    <div class="routine-container">
+        <?php if (empty($routine_data)): ?>
+            <div class="text-center py-5 opacity-25">
+                <i class="bi bi-calendar-x display-1"></i>
+                <p class="fw-bold mt-2">No routine found for <?php echo $classname; ?>.</p>
+            </div>
+        <?php else: ?>
+            <?php foreach ($days_order as $day): 
+                if (!isset($routine_data[$day])) continue;
+            ?>
+                <div class="day-card shadow-sm">
+                    <div class="day-header">
+                        <span><i class="bi bi-calendar-check me-2"></i><?php echo strtoupper($day); ?></span>
+                        <span class="small opacity-50"><?php echo count($routine_data[$day]); ?> Classes</span>
+                    </div>
+                    
+                    <div class="periods-list">
+                        <?php foreach ($routine_data[$day] as $p): 
+                            $time_s = date('h:i A', strtotime($p['timestart']));
+                            $time_e = date('h:i A', strtotime($p['timeend']));
+                        ?>
+                            <div class="period-item">
+                                <div class="time-box">
+                                    <span class="time-start"><?php echo $time_s; ?></span>
+                                    <span class="time-end"><?php echo $time_e; ?></span>
+                                </div>
+                                <div class="sub-info">
+                                    <span class="sub-name text-truncate">
+                                        <?php echo $p['subject']; ?>
+                                        <span class="period-badge">P-<?php echo $p['period']; ?></span>
+                                    </span>
+                                    <span class="teacher-name"><i class="bi bi-person me-1"></i><?php echo $p['teachername'] ?: 'Not Assigned'; ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </main>
 
-<div style="height: 70px;"></div>
-
-<?php include 'footer.php'; ?>
+<div style="height: 75px;"></div> <?php include 'footer.php'; ?>

@@ -1,236 +1,161 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// --- ১. ফিল্টার হ্যান্ডলিং (Secure) ---
-$report_date = $_GET['report_date'] ?? date('Y-m-d');
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
+
+// ২. ফিল্টার হ্যান্ডলিং (Class & Section)
 $classname = $_GET['cls'] ?? ($cteacher_data[0]['cteachercls'] ?? '');
 $sectionname = $_GET['sec'] ?? ($cteacher_data[0]['cteachersec'] ?? '');
 
-// --- ২. ডাটা ফেচিং (Prepared Statement - Secure) ---
-$absent_list = [];
-$absent_count = 0;
-$bunk_count = 0;
+$page_title = "Class Routine";
 
-$sql = "SELECT si.stid, si.rollno, sa.yn AS present_status, sa.bunk
-        FROM sessioninfo si
-        LEFT JOIN stattnd sa ON si.stid = sa.stid AND sa.adate = ? AND sa.sccode = ?
-        WHERE si.sessionyear = ?
-          AND si.sccode = ?
-          AND si.classname = ?
-          AND si.sectionname = ?
-          AND si.status = '1'
-          AND (sa.yn = '0' OR sa.bunk = '1' OR sa.stid IS NULL)
-        ORDER BY si.rollno";
-        
+// ৩. রুটিন ডাটা ফেচিং (Prepared Statement - Secure)
+$routine_data = [];
+$days_order = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+$sql = "SELECT * FROM classschedule 
+        WHERE sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ? 
+        ORDER BY FIELD(dayname, 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), timestart ASC";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ssssss", $report_date, $sccode, $sy, $sccode, $classname, $sectionname);
+$stmt->bind_param("ssss", $sccode, $sy_param, $classname, $sectionname);
 $stmt->execute();
 $result = $stmt->get_result();
 
 while ($row = $result->fetch_assoc()) {
-    $absent_list[] = $row;
-    if ($row['bunk'] == '1') {
-        $bunk_count++;
-    } else {
-        $absent_count++;
-    }
+    $routine_data[$row['dayname']][] = $row;
 }
 $stmt->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Top App Bar */
+    /* Full Width M3 App Bar */
     .m3-app-bar {
-        background-color: #FFFFFF;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1020;
+        width: 100%; position: sticky; top: 0; z-index: 1050;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
-    /* Hero Summary Card */
-    .hero-stats {
-        background: #F3EDF7;
-        border-radius: 28px;
-        padding: 24px;
-        margin: 16px;
-        display: flex;
-        justify-content: space-around;
-        text-align: center;
-    }
-    .stat-val { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-    .stat-lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-top: 5px; opacity: 0.8; }
-
-    /* Filter Form Styling */
+    /* Filter Card (Condensed) */
     .filter-card {
-        background: white;
-        border-radius: 24px;
-        padding: 20px;
-        margin: 0 16px 24px;
-        border: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background: #fff; border-radius: 8px; padding: 12px; margin: 10px 12px;
+        border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
-    .form-floating > .form-control, .form-floating > .form-select {
-        border-radius: 12px;
-        border: 1px solid #79747E;
+    .form-select-sm { border-radius: 6px; border: 1px solid #79747E; font-size: 0.8rem; font-weight: 600; height: 38px; }
+
+    /* Day Card (M3 Medium) */
+    .day-card {
+        background: #fff; border-radius: 8px; margin: 0 12px 12px;
+        border: 1px solid #f0f0f0; overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .day-header {
+        background: #F3EDF7; padding: 10px 16px; 
+        font-weight: 800; color: #6750A4; font-size: 0.85rem;
+        display: flex; justify-content: space-between; align-items: center;
     }
 
-    /* M3 List Item (Student Card) */
-    .student-card {
-        background: white;
-        border-radius: 20px;
-        padding: 12px 16px;
-        margin: 0 16px 10px;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        border: none;
+    /* Period Row Item */
+    .period-item {
+        display: flex; align-items: center; padding: 12px 16px;
+        border-bottom: 1px solid #F7F2FA; position: relative;
     }
-    .student-pic {
-        width: 52px; height: 52px;
-        border-radius: 12px;
-        object-fit: cover;
-        margin-right: 15px;
-        border: 1px solid #E7E0EC;
+    .period-item:last-child { border-bottom: none; }
+    
+    .time-box {
+        width: 75px; flex-shrink: 0; text-align: center;
+        border-right: 2px solid #EADDFF; margin-right: 15px;
     }
+    .time-start { font-weight: 800; color: #1C1B1F; font-size: 0.8rem; display: block; }
+    .time-end { font-size: 0.65rem; color: #79747E; font-weight: 600; }
 
-    /* Status Badges (Chips) */
-    .chip {
-        font-size: 0.7rem;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 8px;
-        text-transform: uppercase;
-    }
-    .chip-absent { background: #FFEBEE; color: #B3261E; }
-    .chip-bunk { background: #FFF3E0; color: #E65100; }
+    .sub-info { flex-grow: 1; overflow: hidden; }
+    .sub-name { font-weight: 700; color: #1D1B20; font-size: 0.9rem; margin-bottom: 2px; display: block; }
+    .teacher-name { font-size: 0.75rem; color: #49454F; font-weight: 500; }
 
-    /* Action Buttons */
-    .btn-action {
-        width: 40px; height: 40px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        text-decoration: none;
-        transition: 0.2s;
+    .period-badge {
+        font-size: 0.6rem; background: #EADDFF; color: #21005D;
+        padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-left: 8px;
     }
-    .btn-call { background: #E8F5E9; color: #2E7D32; }
-    .btn-sms { background: #E3F2FD; color: #1976D2; }
-    .btn-action:active { transform: scale(0.9); opacity: 0.8; }
 </style>
 
-<main class="pb-5">
-    <div class="m3-app-bar mb-3">
-        <div class="d-flex align-items-center">
-            <a href="reporthome.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-            <div>
-                <h5 class="fw-bold mb-0">Absent & Bunk List</h5>
-                <small class="text-muted"><?php echo date('d M, Y', strtotime($report_date)); ?></small>
-            </div>
-        </div>
-    </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;"><?php echo $current_session; ?></span>
+</header>
 
-    <div class="hero-stats shadow-sm">
-        <div style="color: #B3261E;">
-            <div class="stat-val"><?php echo $absent_count; ?></div>
-            <div class="stat-lbl">Absent</div>
-        </div>
-        <div class="vr mx-3 opacity-25"></div>
-        <div style="color: #E65100;">
-            <div class="stat-val"><?php echo $bunk_count; ?></div>
-            <div class="stat-lbl">Bunked</div>
-        </div>
-    </div>
-
-    <div class="filter-card shadow-sm">
-        <form method="GET" class="row g-2">
-            <div class="col-12">
-                <div class="form-floating mb-2">
-                    <input type="date" name="report_date" class="form-control" id="dateInput" value="<?php echo $report_date; ?>">
-                    <label for="dateInput">Report Date</label>
-                </div>
+<main class="pb-5 mt-2">
+    <div class="filter-card">
+        <form method="GET" class="row gx-2 align-items-center">
+            <div class="col-5">
+                <select name="cls" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <?php foreach ($cteacher_data as $c): ?>
+                        <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-            <div class="col-6">
-                <div class="form-floating mb-2">
-                    <select name="cls" class="form-select" id="clsSelect">
-                        <?php foreach ($cteacher_data as $c): ?>
-                            <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <label for="clsSelect">Class</label>
-                </div>
+            <div class="col-4">
+                <select name="sec" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <?php foreach ($cteacher_data as $c): ?>
+                        <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-            <div class="col-6">
-                <div class="form-floating mb-2">
-                    <select name="sec" class="form-select" id="secSelect">
-                        <?php foreach ($cteacher_data as $c): ?>
-                            <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <label for="secSelect">Section</label>
-                </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold shadow-sm" style="border-radius: 6px; height: 38px;">VIEW</button>
             </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
-                    <i class="bi bi-search me-2"></i> UPDATE LIST
-                </button>
-            </div>
+            <input type="hidden" name="year" value="<?php echo $current_session; ?>">
         </form>
     </div>
 
-    <h6 class="ms-4 mb-3 text-secondary fw-bold small text-uppercase tracking-wider">Defaulting Students</h6>
-
-    <div class="list-container">
-        <?php if (count($absent_list) > 0): ?>
-            <?php foreach ($absent_list as $student): 
-                $stid = $student['stid'];
-                $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
-                if ($st_idx === false) continue;
-
-                $p = $datam_st_profile[$st_idx];
-                $photo = "https://eimbox.com/students/noimg.jpg";
-                if (file_exists('../students/' . $stid . '.jpg')) {
-                    $photo = $BASE_PATH_URL_FILE . 'students/' . $stid . '.jpg';
-                }
+    <div class="routine-container">
+        <?php if (empty($routine_data)): ?>
+            <div class="text-center py-5 opacity-25">
+                <i class="bi bi-calendar-x display-1"></i>
+                <p class="fw-bold mt-2">No routine found for <?php echo $classname; ?>.</p>
+            </div>
+        <?php else: ?>
+            <?php foreach ($days_order as $day): 
+                if (!isset($routine_data[$day])) continue;
             ?>
-                <div class="student-card shadow-sm">
-                    <img src="<?php echo $photo; ?>" class="student-pic shadow-sm" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
-                    
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="fw-bold text-dark text-truncate small"><?php echo $p['stnameeng']; ?></div>
-                        <div class="d-flex align-items-center gap-2 mt-1">
-                            <span class="badge rounded-pill bg-light text-dark border small" style="font-size: 0.6rem;">Roll: <?php echo $student['rollno']; ?></span>
-                            <?php if ($student['bunk'] == '1'): ?>
-                                <span class="chip chip-bunk">Bunk</span>
-                            <?php else: ?>
-                                <span class="chip chip-absent">Absent</span>
-                            <?php endif; ?>
-                        </div>
+                <div class="day-card shadow-sm">
+                    <div class="day-header">
+                        <span><i class="bi bi-calendar-check me-2"></i><?php echo strtoupper($day); ?></span>
+                        <span class="small opacity-50"><?php echo count($routine_data[$day]); ?> Classes</span>
                     </div>
-
-                    <div class="d-flex gap-2 ms-2">
-                        <a href="tel:<?php echo $p['guarmobile']; ?>" class="btn-action btn-call shadow-sm">
-                            <i class="bi bi-telephone-fill small"></i>
-                        </a>
-                        <a href="sms:<?php echo $p['guarmobile']; ?>" class="btn-action btn-sms shadow-sm">
-                            <i class="bi bi-chat-left-text-fill small"></i>
-                        </a>
+                    
+                    <div class="periods-list">
+                        <?php foreach ($routine_data[$day] as $p): 
+                            $time_s = date('h:i A', strtotime($p['timestart']));
+                            $time_e = date('h:i A', strtotime($p['timeend']));
+                        ?>
+                            <div class="period-item">
+                                <div class="time-box">
+                                    <span class="time-start"><?php echo $time_s; ?></span>
+                                    <span class="time-end"><?php echo $time_e; ?></span>
+                                </div>
+                                <div class="sub-info">
+                                    <span class="sub-name text-truncate">
+                                        <?php echo $p['subject']; ?>
+                                        <span class="period-badge">P-<?php echo $p['period']; ?></span>
+                                    </span>
+                                    <span class="teacher-name"><i class="bi bi-person me-1"></i><?php echo $p['teachername'] ?: 'Not Assigned'; ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
-        <?php else: ?>
-            <div class="text-center py-5 mx-4 bg-white rounded-4 shadow-sm border border-success-subtle">
-                <i class="bi bi-check-circle-fill display-4 text-success opacity-50"></i>
-                <p class="text-success fw-bold mt-2 mb-0">Excellent!</p>
-                <p class="text-muted small">No absences or bunks for this class today.</p>
-            </div>
         <?php endif; ?>
     </div>
 </main>
 
-<div style="height: 70px;"></div>
-
-<?php include 'footer.php'; ?>
+<div style="height: 75px;"></div> <?php include 'footer.php'; ?>

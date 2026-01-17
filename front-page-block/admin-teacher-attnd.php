@@ -1,20 +1,23 @@
 <?php
 // ফাইল: front-page-block/admin-teacher-attnd.php
 
+// সেশন হ্যান্ডলিং (ড্যাশবোর্ড থেকে পাস করা না থাকলে ব্যাকআপ)
+$current_session = $current_session ?? $sy;
+
 $teacher_att_summary = [
     'total' => 0, 'present' => 0, 'on_leave' => 0, 'absent' => 0, 'rate' => 0,
     'absent_list' => []
 ];
 
 if (isset($conn, $sccode, $td)) {
-    // দক্ষ কুয়েরি: শিক্ষকদের উপস্থিতি এবং ছুটির তথ্য একসাথে আনা
+    // শিক্ষকদের উপস্থিতি এবং ছুটির তথ্য একসাথে আনার দক্ষ কুয়েরি
     $sql = "SELECT t.tid, t.tname, t.position, ta.statusin, tl.tid AS on_leave
             FROM teacher t
             LEFT JOIN teacherattnd ta ON t.tid = ta.tid AND ta.sccode = ? AND ta.adate = ?
             LEFT JOIN teacher_leave_app tl ON t.tid = tl.tid AND tl.sccode = ? AND tl.status = 1 
                  AND ? BETWEEN tl.date_from AND tl.date_to
             WHERE t.sccode = ?
-            ORDER BY t.sl ASC, t.id ASC";
+            ORDER BY t.ranks ASC, t.id ASC";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssss", $sccode, $td, $sccode, $td, $sccode);
@@ -49,63 +52,84 @@ if (isset($conn, $sccode, $td)) {
 if ($teacher_att_summary['total'] > 0):
 ?>
 
-<div class="m-card elevation-1 border-0 mb-4 overflow-hidden">
-    <div class="p-1">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold mb-0 text-secondary small text-uppercase tracking-wider">Teacher Attendance</h6>
-            <div class="rounded-circle bg-primary-subtle p-2">
-                <i class="bi bi-briefcase-fill text-primary fs-5"></i>
-            </div>
-        </div>
+<style>
+    .att-widget-card { background: #fff; border-radius: 8px; padding: 12px; }
+    
+    .att-header-lbl { font-size: 0.65rem; font-weight: 800; color: #6750A4; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .metric-val { font-size: 1.5rem; font-weight: 800; color: #1C1B1F; line-height: 1.2; }
+    .metric-unit { font-size: 0.7rem; font-weight: 600; color: #49454F; }
+    
+    .m3-progress-thin { background: #EADDFF; height: 6px; border-radius: 3px; overflow: hidden; }
+    .m3-progress-bar-fill { background: #6750A4; height: 100%; transition: width 0.6s ease; }
 
-        <div class="row align-items-end mb-3">
-            <div class="col-8">
-                <h2 class="display-6 fw-bold mb-0 text-dark"><?php echo $teacher_att_summary['present']; ?></h2>
-                <p class="text-muted small mb-0">Present of <?php echo $teacher_att_summary['total']; ?> Teachers</p>
-            </div>
-            <div class="col-4 text-end">
-                <span class="h5 fw-bold text-primary"><?php echo $teacher_att_summary['rate']; ?>%</span>
-            </div>
-        </div>
+    .absent-row { 
+        background: #F3EDF7; border-radius: 8px; padding: 8px; 
+        margin-bottom: 6px; border: 1px solid #EADDFF;
+    }
+    .squircle-avatar { 
+        width: 36px; height: 36px; border-radius: 8px; /* আপনার নির্দেশিত ৮ পিক্সেল */
+        object-fit: cover; border: 1px solid #fff;
+    }
+    
+    .st-chip-m3 { font-size: 0.55rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .chip-absent { background: #F9DEDC; color: #B3261E; }
+    .chip-leave { background: #FFECB3; color: #E46C0A; }
+</style>
 
-        <div class="progress rounded-pill mb-4" style="height: 8px; background-color: var(--md-surface-variant);">
-            <div class="progress-bar bg-primary rounded-pill" role="progressbar" 
-                 style="width: <?php echo $teacher_att_summary['rate']; ?>%"></div>
+<div class="att-widget-card shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="att-header-lbl"><i class="bi bi-people-fill me-1"></i> Staff Attendance</span>
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.6rem;">TODAY</span>
+    </div>
+
+    <div class="d-flex align-items-end justify-content-between mb-2">
+        <div>
+            <span class="metric-val"><?php echo $teacher_att_summary['present']; ?></span>
+            <span class="metric-unit">/ <?php echo $teacher_att_summary['total']; ?> Present</span>
         </div>
+        <div class="fw-bold text-primary" style="font-size: 0.9rem;"><?php echo $teacher_att_summary['rate']; ?>%</div>
+    </div>
+
+    <div class="m3-progress-thin mb-3">
+        <div class="m3-progress-bar-fill" style="width: <?php echo $teacher_att_summary['rate']; ?>%"></div>
     </div>
 
     <?php if (!empty($teacher_att_summary['absent_list'])): ?>
-    <div class="mx-n3 px-3 py-2 bg-light border-top">
-        <h6 class="mb-2 mt-1 small fw-bold text-secondary">Absent or On Leave (<?php echo count($teacher_att_summary['absent_list']); ?>)</h6>
-        
-        <div class="d-flex flex-column gap-2">
-            <?php foreach ($teacher_att_summary['absent_list'] as $teacher): 
+        <div class="mt-2">
+            <div class="mb-2 small fw-bold text-muted" style="font-size: 0.65rem;">OFF-DUTY STAFF (<?php echo count($teacher_att_summary['absent_list']); ?>)</div>
+            
+            <?php foreach (array_slice($teacher_att_summary['absent_list'], 0, 3) as $teacher): 
                 $photo = "teacher/" . $teacher['tid'] . ".jpg";
-                $status_class = ($teacher['status'] == 'On Leave') ? 'bg-warning-subtle text-warning-emphasis' : 'bg-danger-subtle text-danger-emphasis';
+                $is_leave = ($teacher['status'] == 'On Leave');
             ?>
-            <div class="d-flex align-items-center p-2 rounded-3 bg-white border-bottom-0 shadow-sm-sm">
-                <img src="<?php echo $photo; ?>" 
-                     class="rounded-circle me-3 border" 
-                     style="width: 42px; height: 42px; object-fit: cover;" 
-                     onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
-                
-                <div class="flex-grow-1">
-                    <div class="fw-bold small text-dark"><?php echo htmlspecialchars($teacher['tname']); ?></div>
-                    <div class="text-muted" style="font-size: 0.7rem;"><?php echo htmlspecialchars($teacher['position']); ?></div>
+                <div class="absent-row d-flex align-items-center shadow-sm">
+                    <img src="<?php echo $photo; ?>" class="squircle-avatar me-2" 
+                         onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
+                    
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.75rem;"><?php echo htmlspecialchars($teacher['tname']); ?></div>
+                        <div class="text-muted" style="font-size: 0.6rem;"><?php echo htmlspecialchars($teacher['position']); ?></div>
+                    </div>
+                    
+                    <span class="st-chip-m3 <?php echo $is_leave ? 'chip-leave' : 'chip-absent'; ?>">
+                        <?php echo $is_leave ? 'Leave' : 'Absent'; ?>
+                    </span>
                 </div>
-                
-                <span class="badge rounded-pill <?php echo $status_class; ?> px-2 py-1" style="font-size: 0.65rem;">
-                    <?php echo strtoupper($teacher['status']); ?>
-                </span>
-            </div>
             <?php endforeach; ?>
+            
+            <?php if (count($teacher_att_summary['absent_list']) > 3): ?>
+                <div class="text-center small text-muted opacity-75 fw-bold mt-1" style="font-size: 0.6rem;">
+                    + <?php echo count($teacher_att_summary['absent_list']) - 3; ?> MORE STAFF
+                </div>
+            <?php endif; ?>
         </div>
-    </div>
     <?php endif; ?>
-    
-    <div class="p-2 mt-2">
-        <a href="teacher-attnd-report.php" class="btn btn-link btn-sm w-100 text-decoration-none fw-bold">
-            Full Attendance Report <i class="bi bi-chevron-right ms-1"></i>
+
+    <div class="mt-2 pt-2 border-top">
+        <a href="teacher-attnd-report.php?year=<?php echo $current_session; ?>" 
+           class="btn btn-link btn-sm w-100 text-decoration-none fw-bold p-0" style="font-size: 0.7rem;">
+            FULL LOGS <i class="bi bi-arrow-right-short"></i>
         </a>
     </div>
 </div>

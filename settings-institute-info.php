@@ -1,8 +1,11 @@
 <?php
-include 'inc.php'; // এটি header.php এবং DB কানেকশন লোড করবে
+include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. ডাটা ফেচিং (Prepared Statement - Secure & Optimized)
-$scname = $scadd1 = $scadd2 = $ps = $dist = $logo = $mobile = $rootuser = "";
+// ১. সেশন হ্যান্ডলিং (প্রয়োজনীয় ক্ষেত্রে সেশন ইয়ার যোগ করা যেতে পারে)
+$current_session = $_GET['year'] ?? $_COOKIE['query-session'] ?? $sy;
+
+// ২. ডাটা ফেচিং (Prepared Statement)
+$scname = $scadd1 = $scadd2 = $ps = $dist = $logo = $mobile = "";
 
 $stmt = $conn->prepare("SELECT * FROM scinfo WHERE sccode = ? LIMIT 1");
 $stmt->bind_param("s", $sccode);
@@ -19,117 +22,105 @@ if ($row = $result->fetch_assoc()) {
     $mobile = $row["mobile"];
 }
 $stmt->close();
+
+$page_title = "Institution Profile";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
-    /* Institution Identity Card */
-    .identity-card {
-        background: linear-gradient(135deg, #6750A4, #9581CD);
-        border-radius: 28px;
-        color: white;
-        padding: 30px 20px;
-        margin-bottom: 24px;
-        text-align: center;
-        border: none;
+    /* Full-Width M3 App Bar (8px radius bottom) */
+    .m3-app-bar {
+        width: 100%; position: sticky; top: 0; z-index: 1050;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin: 0;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Condensed Identity Section */
+    .hero-section {
+        background: #fff; padding: 24px 16px; text-align: center;
+        border-bottom: 1px solid #E7E0EC; margin-bottom: 16px;
     }
     
-    .inst-logo-container {
-        width: 100px;
-        height: 100px;
-        background: white;
-        border-radius: 24px;
-        padding: 10px;
-        margin: 0 auto 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .logo-box {
+        width: 80px; height: 80px; background: #F3EDF7;
+        border-radius: 8px; /* ৮ পিক্সেল রেডিয়াস */
+        padding: 8px; margin: 0 auto 12px;
+        border: 1px solid #EADDFF; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-    .inst-logo-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+    .logo-box img { width: 100%; height: 100%; object-fit: contain; }
+
+    .inst-name { font-size: 1.15rem; font-weight: 800; color: #1C1B1F; margin-bottom: 4px; }
+    .eiin-chip {
+        font-size: 0.7rem; background: #EADDFF; color: #21005D;
+        padding: 2px 12px; border-radius: 4px; font-weight: 800; display: inline-block;
     }
 
-    /* Form Card Styling */
-    .m3-form-card {
-        background: white;
-        border-radius: 28px;
-        padding: 24px;
-        border: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    /* M3 Condensed Form (8px Radius) */
+    .m3-card-form {
+        background: #fff; border-radius: 8px; padding: 16px;
+        margin: 0 12px 20px; border: 1px solid #f0f0f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
 
-    /* M3 Floating Labels */
     .form-floating > .form-control {
-        border-radius: 12px;
-        border: 1px solid #79747E;
-        background: transparent;
+        border-radius: 8px !important; border: 1px solid #79747E;
+        font-size: 0.9rem; font-weight: 600; background: transparent;
     }
-    .form-floating > .form-control:focus {
-        border-color: #6750A4;
-        box-shadow: 0 0 0 1px #6750A4;
-    }
+    .form-floating > label { font-size: 0.75rem; color: #6750A4; font-weight: 700; }
+    .form-floating > .form-control:focus { border-color: #6750A4; box-shadow: 0 0 0 1px #6750A4; }
 
-    .btn-update {
-        background-color: #6750A4;
-        color: white;
-        border-radius: 100px;
-        padding: 12px 30px;
-        font-weight: 600;
-        font-size: 1rem;
-        border: none;
-        transition: 0.2s;
+    .btn-m3-save {
+        background-color: #6750A4; color: #fff; border-radius: 8px;
+        padding: 12px; font-weight: 800; border: none; width: 100%;
+        letter-spacing: 0.5px; transition: transform 0.15s ease;
     }
-    .btn-update:active { transform: scale(0.95); opacity: 0.9; }
+    .btn-m3-save:active { transform: scale(0.97); background-color: #4F378B; }
 
-    .input-icon {
-        position: absolute;
-        right: 15px;
-        top: 18px;
-        color: #6750A4;
-        z-index: 5;
-    }
+    .icon-inline { position: absolute; right: 12px; top: 18px; color: #6750A4; opacity: 0.6; z-index: 5; }
 </style>
 
-<main class="container mt-3 pb-5">
-    <div class="d-flex align-items-center mb-4 px-2">
-        <a href="settings_admin.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-        <h4 class="fw-bold mb-0">Institution Profile</h4>
-    </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="settings_admin.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons"><i class="bi bi-shield-check text-success fs-5"></i></div>
+</header>
 
-    <div class="identity-card shadow-lg">
-        <div class="inst-logo-container">
+<main class="pb-5">
+    <div class="hero-section">
+        <div class="logo-box">
             <img src="<?php echo $BASE_PATH_URL . 'logo/' . $sccode . '.png'; ?>" 
                  onerror="this.src='https://eimbox.com/images/no-image.png'">
         </div>
-        <h3 class="fw-bold mb-1"><?php echo $scname; ?></h3>
-        <div class="badge rounded-pill bg-white text-primary px-3 py-2 mb-2">EIIN: <?php echo $sccode; ?></div>
-        <p class="small opacity-75 mb-0">Established Institution of EIMBox Network</p>
+        <div class="inst-name"><?php echo $scname; ?></div>
+        <div class="eiin-chip">EIIN: <?php echo $sccode; ?></div>
     </div>
 
-    <div class="m3-form-card shadow-sm">
-        <h6 class="text-secondary fw-bold small text-uppercase mb-4">Edit Basic Information</h6>
+    <div class="m3-card-form shadow-sm">
+        <div class="mb-3 small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Basic Information</div>
         
-        <form id="instForm">
+        <form id="instEditForm">
             <div class="form-floating mb-3 position-relative">
                 <input type="text" id="scname" class="form-control" placeholder="Name" value="<?php echo $scname; ?>">
-                <label for="scname">Institution Name</label>
-                <i class="bi bi-bank input-icon"></i>
+                <label for="scname">Full Institution Name</label>
+                <i class="bi bi-bank icon-inline"></i>
             </div>
 
             <div class="form-floating mb-3 position-relative">
-                <input type="text" id="add1" class="form-control" placeholder="Address 1" value="<?php echo $scadd1; ?>">
-                <label for="add1">Address Line 1</label>
-                <i class="bi bi-geo-alt input-icon"></i>
+                <input type="text" id="add1" class="form-control" placeholder="Address" value="<?php echo $scadd1; ?>">
+                <label for="add1">Primary Address</label>
+                <i class="bi bi-geo-alt icon-inline"></i>
             </div>
 
             <div class="form-floating mb-3 position-relative">
-                <input type="text" id="add2" class="form-control" placeholder="Address 2" value="<?php echo $scadd2; ?>">
-                <label for="add2">Address Line 2 (Optional)</label>
-                <i class="bi bi-geo input-icon"></i>
+                <input type="text" id="add2" class="form-control" placeholder="Village" value="<?php echo $scadd2; ?>">
+                <label for="add2">Village / Ward</label>
+                <i class="bi bi-geo icon-inline"></i>
             </div>
 
-            <div class="row g-2">
+            <div class="row gx-2">
                 <div class="col-6">
                     <div class="form-floating mb-3">
                         <input type="text" id="ps" class="form-control" placeholder="Upazila" value="<?php echo $ps; ?>">
@@ -147,51 +138,51 @@ $stmt->close();
             <div class="form-floating mb-4 position-relative">
                 <input type="tel" id="mno" class="form-control" placeholder="Mobile" value="<?php echo $mobile; ?>">
                 <label for="mno">Official Mobile Number</label>
-                <i class="bi bi-telephone input-icon"></i>
+                <i class="bi bi-phone icon-inline"></i>
             </div>
 
-            <div class="text-center mt-2">
-                <button type="button" class="btn-update w-100 shadow-sm" onclick="update_institute_info();">
-                    <i class="bi bi-cloud-check-fill me-2"></i> Save Changes
-                </button>
-                <div id="px" class="mt-3"></div>
-            </div>
+            <button type="button" class="btn-m3-save shadow-sm" onclick="saveInstituteProfile();">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i> UPDATE INFORMATION
+            </button>
+            <div id="syncStatus" class="mt-3 text-center small fw-bold text-primary"></div>
         </form>
     </div>
 </main>
 
-<div style="height: 70px;"></div>
+<div style="height: 75px;"></div> <script>
+    function saveInstituteProfile() {
+        const data = {
+            sccode: '<?php echo $sccode; ?>',
+            scname: encodeURIComponent(document.getElementById("scname").value),
+            add1: document.getElementById("add1").value,
+            add2: document.getElementById("add2").value,
+            ps: document.getElementById("ps").value,
+            dist: document.getElementById("dist").value,
+            mno: document.getElementById("mno").value
+        };
 
-<script>
-    function update_institute_info() {
-        const scname = encodeURIComponent(document.getElementById("scname").value);
-        const add1 = document.getElementById("add1").value;
-        const add2 = document.getElementById("add2").value;
-        const ps = document.getElementById("ps").value;
-        const dist = document.getElementById("dist").value;
-        const mno = document.getElementById("mno").value;
-
-        const infor = `sccode=<?php echo $sccode; ?>&scname=${scname}&add1=${add1}&add2=${add2}&ps=${ps}&dist=${dist}&mno=${mno}`;
+        const infor = Object.keys(data).map(key => `${key}=${data[key]}`).join('&');
 
         $.ajax({
             type: "POST",
             url: "backend/update-sc-info.php",
             data: infor,
             beforeSend: function () {
-                $('#px').html('<div class="spinner-border spinner-border-sm text-primary" role="status"></div> Updating...');
+                $('#syncStatus').html('<div class="spinner-border spinner-border-sm me-2"></div> Syncing data...');
             },
-            success: function (html) {
+            success: function () {
                 Swal.fire({
-                    title: 'Updated!',
-                    text: 'Institute information saved successfully.',
+                    title: 'Success!',
+                    text: 'Institute profile updated.',
                     icon: 'success',
-                    confirmButtonColor: '#6750A4'
+                    confirmButtonColor: '#6750A4',
+                    timer: 2000
                 }).then(() => {
                     window.location.href = 'settings_admin.php';
                 });
             },
             error: function() {
-                Swal.fire('Error', 'Failed to update information.', 'error');
+                Swal.fire('Error', 'Update failed.', 'error');
             }
         });
     }

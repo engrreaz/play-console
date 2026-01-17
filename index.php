@@ -109,12 +109,6 @@ if (!empty($cteacher_data) && $cteacher_data[0]['cteachercls'] != '' && $cteache
     }
 }
 
-
-// --- Layout Inclusion ---
-include 'layout_header.php';
-include 'layout_nav.php';
-
-
 // --- Content Routing ---
 // The included files (e.g., index_teacher.php) will need to be refactored next
 // to fit the new design and remove their old, redundant HTML.
@@ -138,8 +132,7 @@ if ($userlevel == 'Guest') {
     include 'index_undef.php';
 }
 
-
-// --- Footer Inclusion ---
-include 'layout_footer.php';
-
 ?>
+
+<?php include 'footer.php'; ?>
+

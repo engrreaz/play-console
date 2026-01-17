@@ -1,135 +1,164 @@
 <?php 
-include 'inc.php';
-$stid=$_GET['stid'];
+include 'inc.php'; // এটি header.php এবং DB কানেকশন লোড করবে
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
+
+$stid = $_GET['stid'] ?? 0;
+$page_title = "Student Profile";
+
+// ২. ডাটা ফেচিং (Prepared Statement - Secure)
+// ছাত্রের ব্যক্তিগত তথ্য এবং বর্তমান সেশনের একাডেমিক তথ্য একসাথে আনা হচ্ছে
+$std = [];
+$sql = "SELECT s.*, si.classname, si.sectionname, si.rollno, si.groupname 
+        FROM students s 
+        LEFT JOIN sessioninfo si ON s.stid = si.stid AND si.sessionyear LIKE ?
+        WHERE s.stid = ? AND s.sccode = ? LIMIT 1";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sss", $sy_param, $stid, $sccode);
+$stmt->execute();
+$res = $stmt->get_result();
+if($row = $res->fetch_assoc()) {
+    $std = $row;
+}
+$stmt->close();
+
+// ভেরিয়েবল সেটআপ
+$photo_path = "https://eimbox.com/students/" . $stid . ".jpg";
+$stnameeng = $std['stnameeng'] ?? 'N/A';
+$stnameben = $std['stnameben'] ?? '';
 ?>
 
-<!doctype html>
-<html lang="en">
+<style>
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-<head>
-  <title>Title</title>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    /* Profile Hero Section (M3 Look) */
+    .hero-container {
+        background: #fff; text-align: center;
+        padding: 30px 16px; margin-bottom: 12px;
+        border-radius: 0 0 8px 8px; /* আপনার নির্দেশিত ৮ পিক্সেল */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
 
-  <!-- Bootstrap CSS v5.2.1 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="stylesheet" href="css.css?v=a">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    
-    <style>
-        .pic{
-            width:45px; height:45px; padding:1px; border-radius:50%; border:1px solid var(--dark); margin:5px;
-        }
+    .large-profile-pic {
+        width: 140px; height: 140px; /* আপনার চাহিদা অনুযায়ী বড় ছবি */
+        border-radius: 12px; object-fit: cover;
+        border: 4px solid #F3EDF7;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
+        margin-bottom: 16px;
+    }
+
+    .st-name-eng { font-size: 1.3rem; font-weight: 800; color: #1C1B1F; margin-bottom: 2px; }
+    .st-name-ben { font-size: 1rem; font-weight: 500; color: #49454F; margin-bottom: 12px; }
+
+    /* Information Card (8px Radius) */
+    .info-card {
+        background: #fff; border-radius: 8px; padding: 16px;
+        margin: 0 12px 10px; border: 1px solid #eee;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .info-row {
+        display: flex; align-items: center; padding: 8px 0;
+        border-bottom: 1px solid #F7F2FA;
+    }
+    .info-row:last-child { border-bottom: none; }
+
+    .info-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        background: #F3EDF7; color: #6750A4;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 12px; font-size: 1.1rem;
+    }
+
+    .info-label { font-size: 0.65rem; font-weight: 700; color: #79747E; text-transform: uppercase; display: block; }
+    .info-value { font-size: 0.9rem; font-weight: 700; color: #1D1B20; }
+
+    .session-badge {
+        font-size: 0.65rem; background: #EADDFF; color: #21005D;
+        padding: 2px 10px; border-radius: 4px; font-weight: 800;
+    }
+</style>
+
+<header class="m3-app-bar shadow-sm">
+    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="session-badge"><?php echo $current_session; ?></span>
+    </div>
+</header>
+
+<main class="pb-5">
+    <div class="hero-container shadow-sm">
+        <img src="<?php echo $photo_path; ?>" class="large-profile-pic shadow" onerror="this.src='https://eimbox.com/students/noimg.jpg';">
+        <div class="st-name-eng"><?php echo $stnameeng; ?></div>
+        <div class="st-name-ben"><?php echo $stnameben; ?></div>
         
-        .a{font-size:18px; font-weight:700; font-style:normal; line-height:22px; color:var(--dark);}
-        .b{font-size:16px; font-weight:600; font-style:normal; line-height:22px;}
-        .c{font-size:11px; font-weight:400; font-style:italic; line-height:16px;}
-        h4{font-size:18px; color:var(--darker); line-height:12px; font-weight:700;}
-        small{font-size:10px; color:var(--dark); line-height:10px;}
-    </style>
-    
-    
-    
-    <!-- Bootstrap JavaScript Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
-    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
-  </script> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  
-  <script>
-  
-
-    
-        // function lnk1(){ window.location.href="tools_allsubjects.php"; }
-
-        
-        
-  </script>
-</head>
-
-<?php
-    $sql0 = "SELECT * FROM students where stid='$stid' and sccode='$sccode'"; //echo $sql0;
-    $result0 = $conn->query($sql0);
-    if ($result0->num_rows > 0) 
-    {while($row0 = $result0->fetch_assoc()) { 
-    $stid=$row0["stid"]; //$=$row0[""]; 
-    $neng=$row0["stnameeng"]; 
-    $nben=$row0["stnameben"]; 
-    }}
-
-?>
-
-<body>
-  <header>
-    <!-- place navbar here -->
-  </header>
-  <main>
-    <div class="container-fluidx">
-
-        <div class="card text-left" style="background:var(--dark); color:var(--lighter);"  onclick="go(<?php echo $id;?>)">
-          
-            <div class="card-body">
-                <table width="100%" style="color:white;">
-                    <tr>
-                        <td>
-                            <div class="logoo"><i class="bi bi-x-diamond-fill"></i></div>
-                            <div style="font-size:20px; text-align:center; padding: 2px 2px 8px; font-weight:700; line-height:15px;">
-                                
-                               My Profile
-                            </div>
-                        </td>
-                    </tr>
-                
-                    
-                </table>
-            </div>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">ID: <?php echo $stid; ?></span>
+            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">Roll: <?php echo $std['rollno'] ?? 'N/A'; ?></span>
         </div>
-
-    
-    
-            <div class="card" style="background:var(--lighter); color:var(--darker);" onclick="lnk3();" >
-              <img class="card-img-top"  alt="">
-              <div class="card-body">
-                <table style="">
-                    <tr>
-                        <td style="width:50px;color:var(--dark);"><i class="material-icons">group</i></td>
-                        <td>
-                            <h4><?php echo $neng;?></h4>
-                            <h5><?php echo $nben;?></h4>
-                            <small>Class & Sections, Subjects, Teachers, Users etc.</small>
-                        </td>
-                    </tr>
-                </table>
-              </div>
-            </div>
-            
-            
-
-        
-        
-        
-        
     </div>
 
-  </main>
-  <div style="height:52px;"></div>
-  <footer>
-    <!-- place footer here -->
-  </footer>
-  
-  
-  
+    <div class="m-3 mb-2 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Academic Identity</div>
+    <div class="info-card shadow-sm">
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-mortarboard"></i></div>
+            <div>
+                <span class="info-label">Class & Section</span>
+                <span class="info-value"><?php echo ($std['classname'] ?? 'N/A') . " (" . ($std['sectionname'] ?? 'N/A') . ")"; ?></span>
+            </div>
+        </div>
+        <?php if(!empty($std['groupname'])): ?>
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-layers"></i></div>
+            <div>
+                <span class="info-label">Group / Category</span>
+                <span class="info-value"><?php echo $std['groupname']; ?></span>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
 
+    <div class="m-3 mb-2 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Guardian Information</div>
+    <div class="info-card shadow-sm">
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-person-heart"></i></div>
+            <div>
+                <span class="info-label">Father's Name</span>
+                <span class="info-value"><?php echo $std['fname'] ?? 'Not Specified'; ?></span>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-person-fill"></i></div>
+            <div>
+                <span class="info-label">Mother's Name</span>
+                <span class="info-value"><?php echo $std['mname'] ?? 'Not Specified'; ?></span>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-telephone-outbound"></i></div>
+            <div>
+                <span class="info-label">Emergency Contact</span>
+                <span class="info-value"><?php echo $std['guarphone'] ?? 'N/A'; ?></span>
+            </div>
+        </div>
+    </div>
 
-    
-    
-  
-</body>
+    <div class="m-3 mb-2 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Home Address</div>
+    <div class="info-card shadow-sm">
+        <div class="info-row">
+            <div class="info-icon"><i class="bi bi-geo-alt"></i></div>
+            <div>
+                <span class="info-label">Permanent Residence</span>
+                <span class="info-value"><?php echo ($std['previll'] ?? '') . ", " . ($std['prepo'] ?? '') . ", " . ($std['preps'] ?? ''); ?></span>
+            </div>
+        </div>
+    </div>
+</main>
 
-</html>
+<div style="height: 65px;"></div> <?php include 'footer.php'; ?>

@@ -1,177 +1,149 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+
+// ১. সেশন হ্যান্ডলিং (প্রয়োজনীয় ক্ষেত্রে সেশন ইয়ার যোগ করা যেতে পারে)
+$current_session = $_GET['year'] ?? $_COOKIE['query-session'] ?? $sy;
+
+$page_title = "My Account";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
-    /* M3 App Bar Style */
+    /* Full-Width Top App Bar (8px Bottom Radius) */
     .m3-app-bar {
-        background-color: #FFFFFF;
-        padding: 20px 16px;
-        border-radius: 0 0 28px 28px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1020;
+        width: 100%; height: 56px; background: #fff; display: flex; align-items: center; 
+        padding: 0 16px; position: sticky; top: 0; z-index: 1050; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 0 0 8px 8px;
     }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
-    /* Account Profile Card (Top Area) */
+    /* Profile Hero Card (8px Radius) */
     .account-hero {
-        background-color: #F3EDF7;
-        border-radius: 24px;
-        padding: 20px;
-        margin: 16px;
-        display: flex;
-        align-items: center;
+        background-color: #F3EDF7; border-radius: 8px; padding: 16px;
+        margin: 12px; display: flex; align-items: center;
+        border: 1px solid #EADDFF; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
-    .avatar-box {
-        width: 64px; height: 64px;
-        border-radius: 50%;
-        background-color: #EADDFF;
-        color: #21005D;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-right: 16px;
+    .avatar-circle {
+        width: 52px; height: 52px; border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
+        background-color: #EADDFF; color: #21005D;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-right: 14px; flex-shrink: 0;
     }
 
-    /* M3 List Item Style */
+    /* Condensed Setting Item (8px Radius) */
     .m3-list-item {
-        background-color: #FFFFFF;
-        border: none;
-        border-radius: 20px;
-        padding: 12px 16px;
-        margin: 0 16px 8px 16px;
-        display: flex;
-        align-items: center;
-        transition: all 0.2s ease;
+        background-color: #fff; border-radius: 8px; padding: 12px 14px;
+        margin: 0 12px 6px; display: flex; align-items: center;
+        border: 1px solid #f0f0f0; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        transition: transform 0.15s ease, background-color 0.15s;
         cursor: pointer;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .m3-list-item:active { transform: scale(0.98); background-color: #F7F2FA; }
+
+    /* Icon Tonal Box (8px Radius) */
+    .icon-box {
+        width: 40px; height: 40px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 14px; flex-shrink: 0; font-size: 1.2rem;
     }
 
-    .m3-list-item:active {
-        background-color: #EADDFF;
-        transform: scale(0.98);
-    }
+    /* Category Specific Tonal Colors */
+    .c-info { background: #F3EDF7; color: #6750A4; }
+    .c-util { background: #E8F5E9; color: #146C32; }
+    .c-secu { background: #FFF3E0; color: #E46C0A; }
+    .c-exit { background: #FFEBEE; color: #B3261E; }
 
-    /* Icon Box with Tonal Background */
-    .item-icon-box {
-        width: 44px; height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 16px;
-        flex-shrink: 0;
-    }
+    .item-info { flex-grow: 1; overflow: hidden; }
+    .st-title { font-weight: 700; color: #1C1B1F; font-size: 0.9rem; margin-bottom: 0; }
+    .st-desc { font-size: 0.7rem; color: #49454F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Category-specific Colors */
-    .bg-account  { background-color: #F3EDF7; color: #6750A4; }
-    .bg-attnd    { background-color: #E3F2FD; color: #1976D2; }
-    .bg-leave    { background-color: #FFF3E0; color: #E65100; }
-    .bg-offline  { background-color: #E8F5E9; color: #2E7D32; }
-    .bg-security { background-color: #FCE4EC; color: #C2185B; }
-    .bg-logout   { background-color: #FFEBEE; color: #D32F2F; }
-
-    .item-title { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; margin-bottom: 0; }
-    .item-desc { font-size: 0.75rem; color: #49454F; line-height: 1.3; }
-
-    .section-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #6750A4;
-        margin: 24px 24px 8px 30px;
-        letter-spacing: 1px;
+    .section-lbl {
+        font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+        color: #6750A4; margin: 20px 0 8px 16px; letter-spacing: 0.8px;
     }
 </style>
 
-<main class="pb-5">
-    <div class="m3-app-bar mb-3">
-        <div class="d-flex align-items-center">
-            <a href="index.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h4 class="fw-bold mb-0">My Account</h4>
-        </div>
-    </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons"><i class="bi bi-gear-wide-connected text-muted fs-5"></i></div>
+</header>
 
+<main class="pb-5 mt-2">
     <div class="account-hero shadow-sm">
-        <div class="avatar-box">
+        <div class="avatar-circle">
             <i class="bi bi-person-fill"></i>
         </div>
         <div>
-            <h5 class="fw-bold mb-0 text-dark"><?php echo $fullname ?? 'Welcome Back'; ?></h5>
-            <div class="small text-muted"><?php echo $userlevel; ?> | EIMBox ID: <?php echo $userid; ?></div>
+            <div class="fw-bold text-dark" style="font-size: 1rem;"><?php echo $fullname ?? 'Staff Member'; ?></div>
+            <div class="small text-muted" style="font-weight: 500;"><?php echo $userlevel; ?> | ID: <?php echo $userid; ?></div>
         </div>
     </div>
 
-    <div class="section-label">Personal Information</div>
+    <div class="section-lbl">Personal Identity</div>
 
     <div class="m3-list-item shadow-sm" onclick="settings_menu_my_profile();">
-        <div class="item-icon-box bg-account"><i class="bi bi-person-circle fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title">My Profile</h6>
-            <div class="item-desc">Edit or update your professional identity</div>
+        <div class="icon-box c-info"><i class="bi bi-person-circle"></i></div>
+        <div class="item-info">
+            <div class="st-title">My Profile</div>
+            <div class="st-desc">View or edit your official credentials</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </div>
 
     <div class="m3-list-item shadow-sm" onclick="profile_menu_my_attendance_summery();">
-        <div class="item-icon-box bg-attnd"><i class="bi bi-fingerprint fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title">My Attendance</h6>
-            <div class="item-desc">Monthly and daily attendance history</div>
+        <div class="icon-box c-info"><i class="bi bi-calendar2-check"></i></div>
+        <div class="item-info">
+            <div class="st-title">Attendance History</div>
+            <div class="st-desc">Personal presence and punctuality log</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </div>
+
+    <div class="section-lbl">Administrative Tools</div>
 
     <div class="m3-list-item shadow-sm" onclick="profile_menu_leave_application();">
-        <div class="item-icon-box bg-leave"><i class="bi bi-box-arrow-down-left fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title">Leaves & Movement</h6>
-            <div class="item-desc">Manage leave requests and off-site logs</div>
+        <div class="icon-box c-util"><i class="bi bi-journal-arrow-down"></i></div>
+        <div class="item-info">
+            <div class="st-title">Leaves & Movement</div>
+            <div class="st-desc">Apply for leaves and track status</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </div>
-
-    <div class="section-label">Utilities & Tools</div>
 
     <div class="m3-list-item shadow-sm" onclick="profile_menu_offline_manager();">
-        <div class="item-icon-box bg-offline"><i class="bi bi-cloud-slash-fill fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title">Offline Manager</h6>
-            <div class="item-desc">Sync and manage locally stored data</div>
+        <div class="icon-box c-util"><i class="bi bi-cloud-slash"></i></div>
+        <div class="item-info">
+            <div class="st-title">Offline Hub</div>
+            <div class="st-desc">Manage locally cached records and data</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </div>
 
-    <div class="section-label">Account Security</div>
+    <div class="section-lbl">Security & Access</div>
 
     <div class="m3-list-item shadow-sm" onclick="settings_menu_login_method();">
-        <div class="item-icon-box bg-security"><i class="bi bi-shield-lock-fill fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title">Security Settings</h6>
-            <div class="item-desc">Password and login authentication methods</div>
+        <div class="icon-box c-secu"><i class="bi bi-shield-lock"></i></div>
+        <div class="item-info">
+            <div class="st-title">Security Settings</div>
+            <div class="st-desc">Manage password and login methods</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </div>
 
     <div class="m3-list-item shadow-sm" onclick="settings_menu_logout();">
-        <div class="item-box bg-logout item-icon-box"><i class="bi bi-box-arrow-left fs-5"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="item-title text-danger">Logout Account</h6>
-            <div class="item-desc text-danger opacity-75">Securely end your current session</div>
+        <div class="icon-box c-exit"><i class="bi bi-power"></i></div>
+        <div class="item-info">
+            <div class="st-title text-danger">End Session</div>
+            <div class="st-desc text-danger opacity-75">Logout securely from this device</div>
         </div>
-        <i class="bi bi-chevron-right text-danger small"></i>
+        <i class="bi bi-chevron-right text-danger opacity-25"></i>
     </div>
 
 </main>
 
-<div style="height: 70px;"></div>
-
-<script>
-    // Navigation Functions (আপনার আগের ফাংশন নামগুলো অপরিবর্তিত)
+<div style="height: 75px;"></div> <script>
     function settings_menu_my_profile() { window.location.href = "my-profile.php"; }
     function profile_menu_my_attendance_summery() { window.location.href = "my-attnd-summery.php"; }
     function profile_menu_leave_application() { window.location.href = "my-leave-application.php"; }
@@ -180,17 +152,15 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
     
     function settings_menu_logout() {
         Swal.fire({
-            title: 'Logout?',
-            text: "Are you sure you want to end your session?",
+            title: 'End Session?',
+            text: "Are you sure you want to logout now?",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#D32F2F',
+            confirmButtonColor: '#B3261E',
             cancelButtonColor: '#79747E',
             confirmButtonText: 'Yes, Logout'
         }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "logout.php";
-            }
+            if (result.isConfirmed) { window.location.href = "logout.php"; }
         });
     }
 </script>

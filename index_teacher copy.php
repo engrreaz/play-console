@@ -282,7 +282,7 @@ include 'front-page-block/clsteacherblock.php';
 
 if ($reallevel == 'Super Administrator' || $userlevel == 'Administrator') {
     ?>
-    <div class="card nored" style="">
+    <div class="card nored" >
         <div class="card-header nored" style="color:var(--lighter); background:var(--dark); border-radius:0;"><b>Student's
                 Attendance (Admin Block)</b></div>
         <div class="card-body" onclick="goclsattall();">

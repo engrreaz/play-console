@@ -1,153 +1,129 @@
 <?php
 session_start();
-include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+include_once 'inc.php'; 
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
+
+$page_title = "Information Hub";
 
 /**
- * ১. লজিক ও ডাটা সোর্সিং (টেবিল বা কলাম অপরিবর্তিত)
- * এখানে সব আইটেমকে ক্যাটাগরি অনুযায়ী সাজানো হয়েছে
+ * ২. মেনু ডাটা সোর্সিং
+ * এখানে সব আইটেম ক্যাটাগরি অনুযায়ী সাজানো হয়েছে
  */
 $categories = [
     'Academic' => [
-        ['onclick' => 'report_menu_student_list();', 'icon' => 'bi-people-fill', 'title' => 'Students', 'level' => 'any'],
+        ['onclick' => 'report_menu_student_list();', 'icon' => 'bi-people', 'title' => 'Students', 'level' => 'any'],
         ['onclick' => 'report_menu_attnd_register();', 'icon' => 'bi-fingerprint', 'title' => 'Attendance', 'level' => 'any'],
         ['onclick' => 'report_menu_absent_bunk_list();', 'icon' => 'bi-slash-circle', 'title' => 'Absent/Bunk', 'level' => 'any'],
-        ['onclick' => 'report_menu_cls_routine();', 'icon' => 'bi-clock-history', 'title' => 'Routine', 'level' => 'any'],
-        ['onclick' => 'report_menu_my_subjects();', 'icon' => 'bi-file-text', 'title' => 'My Subjects', 'level' => 'any'],
-        ['onclick' => 'report_menu_honorable_teachers();', 'icon' => 'bi-file-person', 'title' => 'Teachers', 'level' => 'any']
+        ['onclick' => 'report_menu_cls_routine();', 'icon' => 'bi-calendar3-range', 'title' => 'Routine', 'level' => 'any'],
+        ['onclick' => 'report_menu_my_subjects();', 'icon' => 'bi-journal-text', 'title' => 'Subjects', 'level' => 'any'],
+        ['onclick' => 'report_menu_honorable_teachers();', 'icon' => 'bi-person-workspace', 'title' => 'Staffs', 'level' => 'any']
     ],
     'Finance' => [
-        ['onclick' => 'report_menu_my_collection();', 'icon' => 'bi-coin', 'title' => 'My Collection', 'level' => 'any'],
-        ['onclick' => 'report_menu_daily_collection();', 'icon' => 'bi-currency-exchange', 'title' => 'Institute Cash', 'level' => ['Administrator', 'Super Administrator', 'Accountants']]
+        ['onclick' => 'report_menu_my_collection();', 'icon' => 'bi-wallet2', 'title' => 'My Cash', 'level' => 'any'],
+        ['onclick' => 'report_menu_daily_collection();', 'icon' => 'bi-bank', 'title' => 'Vault', 'level' => ['Administrator', 'Super Administrator', 'Accountants']]
     ],
     'Resources' => [
-        ['onclick' => 'report_menu_ebooks_x();', 'icon' => 'bi-book-half', 'title' => 'E-Library', 'level' => 'any'],
-        ['onclick' => 'report_menu_calendar();', 'icon' => 'bi-calendar-check', 'title' => 'Calendar', 'level' => 'any'],
+        ['onclick' => 'report_menu_ebooks_x();', 'icon' => 'bi-book', 'title' => 'E-Library', 'level' => 'any'],
+        ['onclick' => 'report_menu_calendar();', 'icon' => 'bi-calendar-event', 'title' => 'Calendar', 'level' => 'any'],
         ['onclick' => 'report_menu_notices();', 'icon' => 'bi-megaphone', 'title' => 'Notices', 'level' => 'any'],
-        ['onclick' => 'report_menu_notification();', 'icon' => 'bi-chat-right-fill', 'title' => 'Inbox', 'level' => 'any']
+        ['onclick' => 'report_menu_notification();', 'icon' => 'bi-chat-dots', 'title' => 'Inbox', 'level' => 'any']
     ]
 ];
 
-// 'My Class' বিশেষ কন্ডিশন (অ্যারেতে যোগ করা)
+// 'My Class' বিশেষ কন্ডিশন (Class Teacher হলে শীর্ষে দেখাবে)
 if (isset($count_class) && $count_class > 0) {
-    array_unshift($categories['Academic'], ['onclick' => 'report_menu_my_class();', 'icon' => 'bi-diagram-2-fill', 'title' => 'My Class', 'level' => 'any']);
+    array_unshift($categories['Academic'], ['onclick' => 'report_menu_my_class();', 'icon' => 'bi-microsoft-teams', 'title' => 'My Class', 'level' => 'any']);
 }
 ?>
 
 <style>
-    :root {
-        --m3-surface: #FEF7FF;
-        --m3-surface-variant: #E7E0EC;
-        --m3-primary: #6750A4;
-        --m3-secondary-container: #E8DEF8;
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
+
+    /* Full Width M3 App Bar (8px radius bottom) */
+    .m3-app-bar {
+        width: 100%; height: 56px; background: #fff; display: flex; align-items: center; 
+        padding: 0 16px; position: sticky; top: 0; z-index: 1050; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Category Labels */
+    .m3-category-lbl {
+        font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+        color: #6750A4; margin: 20px 0 10px 16px; letter-spacing: 0.8px;
     }
 
-    body { background-color: var(--m3-surface); }
+    /* Condensed Icon Grid (3 Columns for Mobile) */
+    .m3-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 12px; }
+
+    /* M3 Report Card (8px Radius) */
+    .m3-report-card {
+        background: #fff; border-radius: 8px; padding: 16px 8px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border: 1px solid #f0f0f0; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        transition: transform 0.15s ease, background 0.15s;
+        text-decoration: none !important; aspect-ratio: 1 / 1;
+    }
+    .m3-report-card:active { transform: scale(0.95); background-color: #F3EDF7; border-color: #EADDFF; }
+
+    .icon-box {
+        width: 42px; height: 42px; border-radius: 8px;
+        background: #F7F2FA; color: #6750A4;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 8px; font-size: 1.4rem;
+    }
+
+    .report-title { font-size: 0.7rem; font-weight: 700; color: #1D1B20; text-align: center; line-height: 1.2; }
     
-    .category-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--m3-primary);
-        margin: 24px 0 12px 10px;
-        letter-spacing: 1px;
-    }
-
-    .report-card {
-        background-color: #FFFFFF;
-        border-radius: 20px; /* M3 Medium shape */
-        border: none;
-        padding: 1rem 0.5rem;
-        transition: all 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-decoration: none !important;
-        height: 100%;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    .report-card:active {
-        background-color: var(--m3-secondary-container);
-        transform: scale(0.96);
-    }
-
-    .icon-wrapper {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background-color: var(--m3-surface-variant);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-        color: var(--m3-primary);
-    }
-
-    .report-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #1D1B20;
-        margin: 0;
-        text-align: center;
-    }
-
-    /* Top App Bar Styling */
-    .top-app-bar {
-        background-color: white;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    .session-chip {
+        font-size: 0.65rem; background: #EADDFF; color: #21005D;
+        padding: 2px 10px; border-radius: 4px; font-weight: 800;
     }
 </style>
 
-<main class="container-fluid px-3 pb-5">
-    
-    <div class="top-app-bar mb-4">
-        <div class="d-flex align-items-center">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
-                <i class="bi bi-grid-fill fs-5"></i>
-            </div>
-            <div>
-                <h4 class="fw-bold mb-0">Information Hub</h4>
-                <small class="text-muted">School Reports & Resources</small>
-            </div>
-        </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="session-chip"><?php echo $current_session; ?></span>
     </div>
+</header>
 
+<main class="pb-5">
     <?php foreach ($categories as $cat_name => $items): ?>
         <?php 
-        // ক্যাটাগরিতে অন্তত একটি দেখার যোগ্য আইটেম আছে কি না পরীক্ষা করা
-        $has_visible_item = false;
+        // ক্যাটাগরিতে অন্তত একটি দেখার যোগ্য আইটেম আছে কি না পরীক্ষা
+        $visible_count = 0;
         foreach ($items as $item) {
-            if ($item['level'] === 'any' || (is_array($item['level']) && in_array($userlevel, $item['level']))) {
-                $has_visible_item = true; break;
-            }
+            if ($item['level'] === 'any' || (is_array($item['level']) && in_array($userlevel, $item['level']))) $visible_count++;
         }
         
-        if ($has_visible_item): ?>
-            <div class="category-label"><?php echo $cat_name; ?></div>
-            <div class="row g-2 px-1">
+        if ($visible_count > 0): ?>
+            <div class="m3-category-lbl"><?php echo $cat_name; ?></div>
+            <div class="m3-grid">
                 <?php foreach ($items as $item): 
-                    $display = ($item['level'] === 'any' || (is_array($item['level']) && in_array($userlevel, $item['level'])));
-                    if ($display):
+                    $is_allowed = ($item['level'] === 'any' || (is_array($item['level']) && in_array($userlevel, $item['level'])));
+                    if ($is_allowed):
                 ?>
-                <div class="col-4 col-sm-3 col-md-2">
-                    <div class="report-card shadow-sm" onclick="<?php echo $item['onclick']; ?>">
-                        <div class="icon-wrapper">
-                            <i class="bi <?php echo $item['icon']; ?> fs-4"></i>
+                    <a href="javascript:void(0);" class="m3-report-card shadow-sm" onclick="<?php echo $item['onclick']; ?>">
+                        <div class="icon-box">
+                            <i class="bi <?php echo $item['icon']; ?>"></i>
                         </div>
-                        <h6 class="report-title"><?php echo $item['title']; ?></h6>
-                    </div>
-                </div>
+                        <span class="report-title"><?php echo $item['title']; ?></span>
+                    </a>
                 <?php endif; endforeach; ?>
             </div>
         <?php endif; ?>
     <?php endforeach; ?>
-
 </main>
 
-<div style="height: 70px;"></div> <script>
-    // Navigation Functions (অপরিবর্তিত রাখা হয়েছে)
+<div style="height: 75px;"></div> <script>
+    // Navigation Functions
     function report_menu_my_class() { window.location.href = "my-class-report.php"; }
     function report_menu_student_list() { window.location.href = "student-list.php"; }
     function report_menu_my_collection() { window.location.href = "mypr.php"; }

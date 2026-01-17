@@ -1,0 +1,133 @@
+/* Project: EIMBox UI Framework
+   Style: Material Design 3 (M3) - Condensed for Mobile
+   Radius: 8px Constant
+*/
+
+:root {
+    /* M3 Color Palette */
+    --m3-primary: #6750A4;
+    --m3-on-primary: #FFFFFF;
+    --m3-primary-container: #EADDFF;
+    --m3-on-primary-container: #21005D;
+    
+    --m3-surface: #FEF7FF;
+    --m3-surface-variant: #E7E0EC;
+    --m3-on-surface: #1C1B1F;
+    --m3-on-surface-variant: #49454F;
+    
+    --m3-outline: #79747E;
+    --m3-error: #B3261E;
+    --m3-success: #146C32;
+    --m3-warning: #E46C0A;
+}
+
+/* 1. Global Resets & Typography */
+body {
+    background-color: var(--m3-surface);
+    color: var(--m3-on-surface);
+    font-family: 'Roboto', 'Noto Sans Bengali', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 2. Global 8px Border Radius (আপনার নির্দেশ অনুযায়ী) */
+.card, .m-card, .btn, .form-control, .form-select, 
+.modal-content, .dropdown-menu, .badge, .nav-pills .nav-link {
+    border-radius: 8px !important;
+}
+
+/* 3. Full-Width Top App Bar */
+.m3-app-bar {
+    width: 100%;
+    height: 56px;
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin: 0;
+    border-bottom: 1px solid #eee;
+}
+
+.m3-app-bar .page-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-grow: 1;
+    margin: 0;
+    color: var(--m3-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 4. Condensed UI Cards */
+.m3-card {
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 12px;
+    margin: 8px 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s ease;
+}
+
+.m3-card:active {
+    transform: scale(0.98);
+    background-color: #F7F2FA;
+}
+
+/* 5. M3 Buttons (Condensed) */
+.btn-m3-primary {
+    background-color: var(--m3-primary);
+    color: var(--m3-on-primary);
+    border: none;
+    font-weight: 700;
+    padding: 10px 20px;
+    transition: all 0.2s;
+}
+
+.btn-m3-tonal {
+    background-color: var(--m3-primary-container);
+    color: var(--m3-on-primary-container);
+    border: none;
+    font-weight: 700;
+}
+
+/* 6. Form Inputs */
+.form-control:focus, .form-select:focus {
+    border-color: var(--m3-primary);
+    box-shadow: 0 0 0 1px var(--m3-primary);
+}
+
+/* 7. Bottom Navigation (M3 Style) */
+.m3-navigation-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    height: 70px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #E7E0EC;
+    z-index: 2000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 8. Utility Classes */
+.text-condensed { line-height: 1.2; letter-spacing: -0.2px; }
+.shadow-soft { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.grayscale { filter: grayscale(1); opacity: 0.6; }
+
+/* 9. Mobile Grid (2 column condensed) */
+.m3-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 8px 12px;
+}

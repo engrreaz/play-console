@@ -1,187 +1,187 @@
 <?php
 include 'inc.php'; // header.php এবং কানেকশন লোড করবে
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = '%' . $current_session . '%';
+
+$page_title = "System Settings";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
-    /* Category Header Style */
-    .m3-section-title {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #6750A4;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin: 24px 16px 8px 16px;
-    }
-
-    /* M3 List Item / Card Style */
-    .m3-setting-card {
-        background-color: #FFFFFF;
-        border: none;
-        border-radius: 20px;
-        padding: 12px 16px;
-        margin: 0 12px 8px 12px;
-        display: flex;
-        align-items: center;
-        transition: all 0.2s ease;
-        text-decoration: none !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .m3-setting-card:active {
-        background-color: #EADDFF; /* M3 Primary Container on touch */
-        transform: scale(0.98);
-    }
-
-    /* Icon Container with Tonal Color */
-    .m3-icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 16px;
-        flex-shrink: 0;
-    }
-
-    /* Category Specific Colors */
-    .bg-inst { background-color: #F3EDF7; color: #6750A4; }
-    .bg-acad { background-color: #E3F2FD; color: #1976D2; }
-    .bg-fina { background-color: #E8F5E9; color: #2E7D32; }
-    .bg-user { background-color: #FFF3E0; color: #E65100; }
-    .bg-dev  { background-color: #FCE4EC; color: #C2185B; }
-
-    .setting-title { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; margin-bottom: 0; }
-    .setting-desc { font-size: 0.75rem; color: #49454F; line-height: 1.3; }
-
+    /* Full-Width M3 Top Bar (8px Bottom Radius) */
     .m3-app-bar {
-        background: #fff;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        width: 100%; position: sticky; top: 0; z-index: 1050;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Condensed Category Labels */
+    .m3-cat-label {
+        font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+        color: #6750A4; margin: 20px 0 8px 16px; letter-spacing: 0.8px;
+    }
+
+    /* M3 Setting Card (8px Radius) */
+    .m3-setting-card {
+        background: #fff; border-radius: 8px; padding: 12px;
+        margin: 0 12px 6px; border: 1px solid #f0f0f0;
+        display: flex; align-items: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        transition: transform 0.15s ease, background 0.15s;
+        text-decoration: none !important; color: inherit;
+    }
+    .m3-setting-card:active { transform: scale(0.98); background-color: #F3EDF7; }
+
+    /* Tonal Icon Container (8px Radius) */
+    .icon-box {
+        width: 44px; height: 44px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 14px; flex-shrink: 0; font-size: 1.3rem;
+    }
+
+    /* Category Specific Tonal Colors */
+    .c-inst { background: #F3EDF7; color: #6750A4; }
+    .c-acad { background: #E3F2FD; color: #1976D2; }
+    .c-fina { background: #E8F5E9; color: #2E7D32; }
+    .c-user { background: #FFF3E0; color: #E65100; }
+
+    .setting-info { flex-grow: 1; overflow: hidden; }
+    .st-title { font-weight: 700; color: #1C1B1F; font-size: 0.9rem; margin-bottom: 0; }
+    .st-desc { font-size: 0.7rem; color: #49454F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Dev Console Grid */
+    .dev-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 12px; }
+    .btn-dev { 
+        border-radius: 8px; font-size: 0.75rem; font-weight: 700; 
+        padding: 10px; border: 1px solid #F9DEDC; background: #fff;
+        color: #B3261E; text-decoration: none; text-align: center;
+    }
+    .btn-dev:active { background: #FFEBEE; }
+
+    .session-badge {
+        font-size: 0.65rem; background: #EADDFF; color: #21005D;
+        padding: 2px 10px; border-radius: 4px; font-weight: 800;
     }
 </style>
 
-<main class="pb-5">
-    <div class="m3-app-bar mb-3">
-        <div class="d-flex align-items-center">
-            <a href="index.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h4 class="fw-bold mb-0">System Settings</h4>
-        </div>
+<header class="m3-app-bar shadow-sm">
+    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="session-badge"><?php echo $current_session; ?></span>
     </div>
+</header>
 
-    <div class="m3-section-title">Institution Setup</div>
+<main class="pb-5 mt-2">
     
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_ins_info();">
-        <div class="m3-icon-box bg-inst"><i class="bi bi-bank2 fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Institution Information</h6>
-            <div class="setting-desc">Identity, logo, address and contact info</div>
+    <div class="m3-cat-label">Institution Setup</div>
+    
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_ins_info();">
+        <div class="icon-box c-inst"><i class="bi bi-bank2"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Institute Profile</div>
+            <div class="st-desc">Identity, logo, EIIN and address</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_add_edit_teacher();">
-        <div class="m3-icon-box bg-inst"><i class="bi bi-person-workspace fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Teachers & Staffs</h6>
-            <h6 class="setting-desc">Add, edit and manage employee profiles</h6>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_add_edit_teacher();">
+        <div class="icon-box c-inst"><i class="bi bi-person-workspace"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Staff Management</div>
+            <div class="st-desc">Add or edit teacher and employee profiles</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-section-title">Academic Management</div>
+    <div class="m3-cat-label">Academic Framework</div>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_cls_sec();">
-        <div class="m3-icon-box bg-acad"><i class="bi bi-diagram-3-fill fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Class & Section Manager</h6>
-            <div class="setting-desc">Structure and class-wise settings</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_cls_sec();">
+        <div class="icon-box c-acad"><i class="bi bi-diagram-3-fill"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Class & Sections</div>
+            <div class="st-desc">Manage institute structure</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_subject_setup();">
-        <div class="m3-icon-box bg-acad"><i class="bi bi-book-half fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Subjects Manager</h6>
-            <div class="setting-desc">Subject list and mark distributions</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_subject_setup();">
+        <div class="icon-box c-acad"><i class="bi bi-book-half"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Subjects & Marks</div>
+            <div class="st-desc">Subject list and distribution setup</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup();">
-        <div class="m3-icon-box bg-acad"><i class="bi bi-clock-history fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Routine Setup</h6>
-            <div class="setting-desc">Period management and teacher binding</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup();">
+        <div class="icon-box c-acad"><i class="bi bi-clock-history"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Time Table</div>
+            <div class="st-desc">Period management and routine setup</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-section-title">Students & Finance</div>
+    <div class="m3-cat-label">Student & Finance</div>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_generate();">
-        <div class="m3-icon-box bg-fina"><i class="bi bi-person-vcard-fill fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Student ID Generator</h6>
-            <div class="setting-desc">Auto-generate IDs for profile creation</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_generate();">
+        <div class="icon-box c-fina"><i class="bi bi-person-vcard-fill"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Student ID Wizard</div>
+            <div class="st-desc">Auto-generate IDs for new admissions</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_payment_indivisula();">
-        <div class="m3-icon-box bg-fina"><i class="bi bi-coin fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">Payment Setup (Individual)</h6>
-            <div class="setting-desc">Special fee configurations per student</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_payment_indivisula();">
+        <div class="icon-box c-fina"><i class="bi bi-coin"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Fee Configuration</div>
+            <div class="st-desc">Custom payments and special waivers</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-section-title">System & Access</div>
+    <div class="m3-cat-label">Access Control</div>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_sms_menu();">
-        <div class="m3-icon-box bg-user"><i class="bi bi-chat-right-dots-fill fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">SMS Manager</h6>
-            <div class="setting-desc">Templates, audience and history</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_sms_menu();">
+        <div class="icon-box c-user"><i class="bi bi-chat-right-dots-fill"></i></div>
+        <div class="setting-info">
+            <div class="st-title">SMS Gateway</div>
+            <div class="st-desc">Broadcast templates and logs</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
-    <div class="m3-setting-card shadow-sm" onclick="settings_admin_user_manager();">
-        <div class="m3-icon-box bg-user"><i class="bi bi-person-lock fs-4"></i></div>
-        <div class="flex-grow-1">
-            <h6 class="setting-title">User Account Manager</h6>
-            <div class="setting-desc">Access control and permission levels</div>
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_user_manager();">
+        <div class="icon-box c-user"><i class="bi bi-person-lock"></i></div>
+        <div class="setting-info">
+            <div class="st-title">System Users</div>
+            <div class="st-desc">Roles, passwords and permissions</div>
         </div>
-        <i class="bi bi-chevron-right text-muted small"></i>
-    </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
-    <div class="m3-section-title">Developer Console</div>
-    <div class="mx-3 p-3 rounded-4 bg-light border border-danger-subtle">
-        <div class="row g-2">
-            <div class="col-6"><a href="promotion.php" class="btn btn-outline-danger btn-sm w-100 rounded-pill">Promotion</a></div>
-            <div class="col-6"><a href="studentadmission.php" class="btn btn-outline-danger btn-sm w-100 rounded-pill">Admission</a></div>
-            <div class="col-6"><a href="cashbookview.php" class="btn btn-outline-dark btn-sm w-100 rounded-pill">Cashbook</a></div>
-            <div class="col-6"><a href="trackreport.php" class="btn btn-outline-dark btn-sm w-100 rounded-pill">Tracking</a></div>
-        </div>
+    <div class="m3-cat-label">Developer Console</div>
+    <div class="dev-grid">
+        <a href="promotion.php" class="btn-dev shadow-sm">PROMOTION</a>
+        <a href="studentadmission.php" class="btn-dev shadow-sm">ADMISSION</a>
+        <a href="cashbookview.php" class="btn-dev shadow-sm">CASHBOOK</a>
+        <a href="trackreport.php" class="btn-dev shadow-sm">TRACKING</a>
     </div>
     <?php endif; ?>
 
 </main>
 
-<div style="height:70px;"></div>
-
-<script>
-    // Navigation functions (আপনার আগের ফাংশন নামগুলো ঠিক রাখা হয়েছে)
+<div style="height: 75px;"></div> <script>
     function settings_admin_ins_info() { window.location.href = "settings-institute-info.php"; }
     function settings_admin_add_edit_teacher() { window.location.href = "settingsteacher.php"; }
     function settings_admin_cls_sec() { window.location.href = "settings-class.php"; }
