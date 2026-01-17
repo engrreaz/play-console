@@ -1,17 +1,20 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. প্যারামিটার হ্যান্ডলিং
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
+
+// ২. প্যারামিটার হ্যান্ডলিং
 $cls = $_GET['cls'] ?? '';
 $sec = $_GET['sec'] ?? '';
 $current_month = date('m');
-$page_title = "Dues: $cls ($sec)";
+$page_title = "Dues List";
 
-// ২. ডাটা ফেচিং অপ্টিমাইজেশন (Single Joined Query)
-// এটি 'sessioninfo' থেকে স্টুডেন্ট লিস্ট এবং 'stfinance' থেকে বকেয়া একবারেই নিয়ে আসবে
+// ৩. ডাটা ফেচিং অপ্টিমাইজেশন (Single Joined Query with Prepared Statement)
 $student_list = [];
-$sy_param = "%$sy%";
-
 $sql = "SELECT s.stid, s.rollno, st.stnameeng, st.stnameben, st.previll,
                SUM(f.dues) as total_dues, SUM(f.paid) as total_paid
         FROM sessioninfo s
@@ -37,57 +40,52 @@ $stmt->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Hero Summary Card */
+    /* M3 Standard App Bar (8px radius bottom) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Condensed Hero Summary */
     .hero-stats {
-        background: #F3EDF7; border-radius: 28px;
-        padding: 24px; margin: 16px;
+        background: #F3EDF7; border-radius: 8px;
+        padding: 12px; margin: 8px 12px;
         display: flex; justify-content: space-around; text-align: center;
     }
-    .stat-val { font-size: 1.5rem; font-weight: 800; color: #6750A4; display: block; }
-    .stat-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #49454F; }
+    .stat-val { font-size: 1.2rem; font-weight: 800; color: #6750A4; display: block; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #49454F; }
 
-    /* Student Finance Card Style */
+    /* Condensed Student Card (8px Radius) */
     .st-finance-card {
-        background-color: #FFFFFF;
-        border-radius: 24px;
-        padding: 16px;
-        margin: 0 16px 12px;
-        border: none;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        transition: transform 0.2s, background-color 0.2s;
-        cursor: pointer;
+        background-color: #FFFFFF; border-radius: 8px;
+        padding: 8px 12px; margin: 0 8px 6px;
+        border: 1px solid #eee; display: flex; align-items: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.2s;
     }
-    .st-finance-card:active {
-        transform: scale(0.98);
-        background-color: #F3EDF7;
-    }
+    .st-finance-card:active { transform: scale(0.98); background-color: #F7F2FA; }
 
     .roll-badge {
-        width: 44px; height: 44px;
-        border-radius: 12px;
-        background-color: #EADDFF;
-        color: #21005D;
+        width: 38px; height: 38px; border-radius: 6px;
+        background-color: #EADDFF; color: #21005D;
         display: flex; align-items: center; justify-content: center;
-        font-weight: 800; font-size: 1.1rem;
-        margin-right: 16px; flex-shrink: 0;
+        font-weight: 800; font-size: 1rem; margin-right: 12px; flex-shrink: 0;
     }
 
     .st-info { flex-grow: 1; overflow: hidden; }
-    .st-name { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; margin-bottom: 2px; }
-    .st-id-text { font-size: 0.7rem; color: #49454F; font-weight: 500; }
+    .st-name { font-weight: 700; color: #1C1B1F; font-size: 0.85rem; margin-bottom: 0; }
+    .st-id-text { font-size: 0.65rem; color: #49454F; font-weight: 500; }
 
-    .due-amount-box { text-align: right; min-width: 90px; }
-    .due-val { font-weight: 800; font-size: 1.1rem; line-height: 1; }
-    .due-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+    .due-amount-box { text-align: right; min-width: 80px; }
+    .due-val { font-weight: 800; font-size: 1rem; line-height: 1; }
+    .due-label { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
 
     .btn-history {
-        background-color: #F3EDF7; color: #6750A4;
-        border-radius: 8px; border: none; padding: 4px 8px;
-        font-size: 0.65rem; font-weight: 700; margin-top: 5px;
+        background-color: #F3EDF7; color: #6750A4; border-radius: 4px; border: none;
+        padding: 2px 8px; font-size: 0.6rem; font-weight: 700; margin-top: 4px;
     }
 
     .text-danger-m3 { color: #B3261E; }
@@ -95,37 +93,41 @@ $stmt->close();
 </style>
 
 <header class="m3-app-bar shadow-sm">
-    <a href="finclssec.php" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <a href="finclssec.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <div class="page-title"><?php echo "$cls ($sec)"; ?></div>
     <div class="action-icons">
-        <i class="bi bi-printer" onclick="epos();"></i>
+        <i class="bi bi-printer fs-4" onclick="epos();"></i>
     </div>
 </header>
 
-<main class="pb-5 mt-3">
+<main class="pb-5 mt-2">
     <div class="hero-stats shadow-sm">
         <div>
             <span class="stat-val"><?php echo count($student_list); ?></span>
             <span class="stat-lbl">Students</span>
         </div>
-        <div class="vr mx-3 opacity-25"></div>
+        <div class="vr mx-3 opacity-10"></div>
         <div>
             <span class="stat-val text-danger-m3">৳<?php echo number_format($total_class_dues, 0); ?></span>
-            <span class="stat-lbl">Total Dues</span>
+            <span class="stat-lbl">Class Dues</span>
+        </div>
+        <div class="vr mx-3 opacity-10"></div>
+        <div>
+            <span class="stat-val text-muted"><?php echo $current_session; ?></span>
+            <span class="stat-lbl">Session</span>
         </div>
     </div>
 
-    <div class="container-fluid p-0">
+    <div class="list-container">
         <?php if (empty($student_list)): ?>
             <div class="text-center py-5 opacity-50">
-                <i class="bi bi-person-x fs-1"></i>
-                <p class="mt-2 fw-bold">No records found.</p>
+                <i class="bi bi-person-x display-4"></i>
+                <p class="mt-2 fw-bold small">No records for session <?php echo $current_session; ?></p>
             </div>
         <?php else: ?>
             <?php foreach ($student_list as $st): 
                 $due = $st['total_dues'] ?? 0;
                 $is_defaulter = ($due > 0);
-                $photo_path = "https://eimbox.com/students/" . $st['stid'] . ".jpg";
             ?>
                 <div class="st-finance-card shadow-sm" onclick="go(<?php echo $st['stid']; ?>)">
                     <div class="roll-badge shadow-sm">
@@ -156,24 +158,22 @@ $stmt->close();
     </div>
 </main>
 
-<div style="height: 60px;"></div>
-
-<script>
+<div style="height: 65px;"></div> <script>
     function go(stid) {
-        window.location.href = "stfinancedetails.php?id=" + stid;
+        window.location.href = `stfinancedetails.php?id=${stid}&year=<?php echo $current_session; ?>`;
     }
 
     function epos() {
-        // আপনার আগের লজিক অনুযায়ী লাস্ট পিআর প্রিন্ট করার ফাংশন
         Swal.fire({
             title: 'Print POS?',
-            text: 'Do you want to print the last payment receipt?',
+            text: 'Print the last payment receipt for this section?',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#6750A4'
+            confirmButtonColor: '#6750A4',
+            confirmButtonText: 'Yes, Print'
         }).then((result) => {
             if (result.isConfirmed) {
-                // AJAX call logic here
+                // AJAX logic here
             }
         });
     }

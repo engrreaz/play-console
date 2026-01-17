@@ -1,21 +1,21 @@
 <?php
-session_start();
+include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// Essential includes and session checks
-// The inc.php file should ideally handle database connection ($conn) 
-// and global variables like $usr, $sccode, and user-level details.
-include_once 'inc.inc.php'; 
-include_once 'header.php';
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
 
-// --- Data Fetching ---
+$page_title = "Notifications";
 $notifications = [];
 $unread_count = 0;
 
-// Fetch notifications from the database
-$sql = "SELECT id, title, smstext, datetime, rwstatus, icon, color, value, fromuserid 
+// ২. ডাটা ফেচিং (Prepared Statement - Secure)
+$sql = "SELECT id, title, smstext, datetime, rwstatus, icon, color, value 
         FROM notification 
         WHERE tomail = ? AND sccode = ? 
-        ORDER BY rwstatus ASC, datetime DESC"; // Unread (0) first, then by date
+        ORDER BY rwstatus ASC, datetime DESC LIMIT 50";
 
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -23,177 +23,134 @@ if ($stmt) {
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
-        if ($row['rwstatus'] == 0) {
-            $unread_count++;
-        }
+        if ($row['rwstatus'] == 0) $unread_count++;
         $notifications[] = $row;
     }
     $stmt->close();
 }
 ?>
 
-<!-- Material Design styles for this page -->
 <style>
-    .notification-list-item.unread {
-        background-color: #f0f8ff; /* A light blue for unread items */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
+
+    /* M3 Standard App Bar (8px Bottom Radius) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
     }
-    .notification-list-item .material-icons {
-        vertical-align: middle;
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Notification Item Card (8px Radius) */
+    .notif-item {
+        background-color: #fff; border-radius: 8px; padding: 12px;
+        margin: 0 8px 6px; border: 1px solid #eee;
+        display: flex; align-items: flex-start;
+        transition: background 0.2s; position: relative;
     }
-    .notification-body {
-        flex-grow: 1;
-        margin-left: 16px;
-        margin-right: 16px;
+    .notif-item.unread { background-color: #F3EDF7; border-color: #EADDFF; }
+    .notif-item:active { background-color: #EADDFF; }
+
+    .notif-icon-box {
+        width: 40px; height: 40px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        margin-right: 12px; flex-shrink: 0;
     }
-    .mdc-list-item__meta {
-        align-self: center;
+
+    .notif-content { flex-grow: 1; overflow: hidden; }
+    .notif-title { font-weight: 800; font-size: 0.85rem; color: #1C1B1F; margin-bottom: 2px; }
+    .notif-text { font-size: 0.75rem; color: #49454F; line-height: 1.3; }
+    .notif-time { font-size: 0.65rem; color: #79747E; margin-top: 4px; font-weight: 600; }
+
+    .unread-dot {
+        width: 8px; height: 8px; background-color: #6750A4;
+        border-radius: 50%; position: absolute; top: 12px; right: 12px;
     }
+
+    .btn-mark-all {
+        background: transparent; color: #6750A4; border: none;
+        font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 8px;
+    }
+    .btn-mark-all:active { background: #EADDFF; }
 </style>
 
-<main class="container my-4">
-
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="m-0">Notifications</h4>
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
         <?php if ($unread_count > 0): ?>
-            <!-- MDB Text Button -->
-            <button id="mark-all-read-btn" class="btn btn-link" onclick="markAllAsRead();">
-                <i class="material-icons me-1" style="font-size:16px; vertical-align: text-bottom;">done_all</i>
-                Mark all as read
+            <button class="btn-mark-all" onclick="markAllAsRead();">
+                <i class="bi bi-check2-all me-1"></i> READ ALL
             </button>
         <?php endif; ?>
     </div>
+</header>
 
-    <!-- Notifications Card -->
-    <div class="card">
-        <div class="card-body p-0">
-            <?php if (count($notifications) > 0): ?>
-                <!-- MDB List -->
-                <ul class="list-group list-group-flush" id="notification-list">
-                    <?php 
-                    foreach ($notifications as $notification):
-                        $is_unread = $notification['rwstatus'] == 0;
-                        // Default to a standard notification icon if not specified
-                        $icon = $notification['icon'] ?: 'notifications';
-                    ?>
-                        <li id="notification-<?php echo $notification['id']; ?>" class="list-group-item d-flex align-items-center notification-list-item <?php echo $is_unread ? 'unread fw-bold' : ''; ?>">
-                            
-                            <!-- Icon -->
-                            <i class="material-icons text-primary"><?php echo htmlspecialchars($icon); ?></i>
+<main class="pb-5 mt-2">
+    <?php if (count($notifications) > 0): ?>
+        <div id="notification-list">
+            <?php foreach ($notifications as $n): 
+                $is_unread = ($n['rwstatus'] == 0);
+                $icon = $n['icon'] ?: 'bell-fill';
+                $color = $n['color'] ?: '#6750A4';
+            ?>
+                <div class="notif-item shadow-sm <?php echo $is_unread ? 'unread' : ''; ?>" 
+                     id="notif-<?php echo $n['id']; ?>" onclick="markAsRead(<?php echo $n['id']; ?>);">
+                    
+                    <div class="notif-icon-box shadow-sm" style="background: <?php echo $color; ?>20; color: <?php echo $color; ?>;">
+                        <i class="bi bi-<?php echo $icon; ?> fs-5"></i>
+                    </div>
 
-                            <!-- Notification Text -->
-                            <div class="notification-body">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1"><?php echo htmlspecialchars($notification['title']); ?></h6>
-                                    <small class="text-muted"><?php echo date('d M, h:i A', strtotime($notification['datetime'])); ?></small>
-                                </div>
-                                <p class="mb-1 small text-muted"><?php echo htmlspecialchars($notification['smstext']); ?></p>
-                            </div>
-                            
-                            <!-- Action Button -->
-                            <?php if ($is_unread): ?>
-                                <!-- MDB Icon Button (simulated with btn-link) -->
-                                <button class="btn btn-link btn-sm mark-read-btn" title="Mark as read" onclick="markAsRead(<?php echo $notification['id']; ?>, event);">
-                                    <i class="material-icons">check</i>
-                                </button>
-                            <?php endif; ?>
+                    <div class="notif-content">
+                        <div class="notif-title text-truncate"><?php echo htmlspecialchars($n['title']); ?></div>
+                        <div class="notif-text"><?php echo htmlspecialchars($n['smstext']); ?></div>
+                        <div class="notif-time"><?php echo date('d M, h:i A', strtotime($n['datetime'])); ?></div>
+                    </div>
 
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <!-- Empty State -->
-                <div class="text-center p-5">
-                    <i class="material-icons" style="font-size: 4rem; color: #aaa;">notifications_off</i>
-                    <h5 class="mt-3">All Caught Up!</h5>
-                    <p class="text-muted">You have no new notifications.</p>
+                    <?php if($is_unread): ?>
+                        <div class="unread-dot"></div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+            <?php endforeach; ?>
         </div>
-    </div>
+    <?php else: ?>
+        <div class="text-center py-5 opacity-25">
+            <i class="bi bi-app-indicator display-1"></i>
+            <p class="fw-bold mt-2">No notifications yet.</p>
+        </div>
+    <?php endif; ?>
 </main>
 
-<div style="height:60px;"></div> <!-- Spacer for bottom nav bar -->
-
-<?php include_once 'footer.php'; ?>
-
-<!-- JavaScript for handling notification actions -->
-<script>
-function markAsRead(notificationId, event) {
-    if (event) {
-        event.stopPropagation();
-    }
-
-    fetch('ajax/mark_notification_read.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'id=' + notificationId
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const notificationItem = document.getElementById('notification-' + notificationId);
-            if (notificationItem) {
-                notificationItem.classList.remove('unread', 'fw-bold');
-                const btn = notificationItem.querySelector('.mark-read-btn');
-                if (btn) {
-                    btn.remove();
-                }
-            }
-            // You might want to update the global unread count here as well
-        } else {
-            // Using Swal for a better user experience, since it's in footer.php
-            Swal.fire('Error', 'Failed to mark as read. Please try again.', 'error');
+<div style="height: 65px;"></div> <script>
+function markAsRead(id) {
+    $.ajax({
+        url: 'ajax/mark_notification_read.php',
+        type: 'POST',
+        data: { id: id },
+        success: function(response) {
+            const item = document.getElementById('notif-' + id);
+            item.classList.remove('unread');
+            const dot = item.querySelector('.unread-dot');
+            if(dot) dot.remove();
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire('Error', 'An error occurred while communicating with the server.', 'error');
     });
 }
 
 function markAllAsRead() {
     Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to mark all notifications as read?",
+        title: 'Mark all as read?',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, mark all as read!'
+        confirmButtonColor: '#6750A4',
+        confirmButtonText: 'Yes'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('ajax/mark_notification_read.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'all=true'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const notificationList = document.getElementById('notification-list');
-                    const unreadItems = notificationList.querySelectorAll('.unread');
-                    unreadItems.forEach(item => {
-                        item.classList.remove('unread', 'fw-bold');
-                        const btn = item.querySelector('.mark-read-btn');
-                        if (btn) {
-                            btn.remove();
-                        }
-                    });
-                    const markAllBtn = document.getElementById('mark-all-read-btn');
-                    if(markAllBtn) {
-                        markAllBtn.remove();
-                    }
-                    Swal.fire('Success', 'All notifications have been marked as read.', 'success');
-                } else {
-                    Swal.fire('Error', 'Failed to mark all as read. Please try again.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'An error occurred while communicating with the server.', 'error');
+            $.post('ajax/mark_notification_read.php', { all: true }, function() {
+                location.reload();
             });
         }
     });
 }
 </script>
+
+<?php include 'footer.php'; ?>

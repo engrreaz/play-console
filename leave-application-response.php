@@ -2,7 +2,13 @@
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 include 'datam/datam-teacher.php';
 
-// ১. স্ট্যাটাস আপডেট লজিক (Prepared Statement)
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
+
+// ২. স্ট্যাটাস আপডেট লজিক (Action Handling)
 if (isset($_GET['appid']) && isset($_GET['tail'])) {
     $appid = $_GET['appid'];
     $resp = $_GET['tail'];
@@ -12,168 +18,150 @@ if (isset($_GET['appid']) && isset($_GET['tail'])) {
     $stmt_upd->execute();
     $stmt_upd->close();
     
-    // রিফ্রেশ করে ক্লিন URL রাখা
-    header("Location: leave-application-response.php");
+    header("Location: leave-application-response.php?year=$current_session");
     exit();
 }
 
-// ২. ডাটা ফেচিং (Pending এবং Under Review অ্যাপ্লিকেশন)
+// ৩. ডাটা ফেচিং (Pending এবং Under Review অ্যাপ্লিকেশন)
 $my_app_datam = [];
 $stmt_get = $conn->prepare("SELECT * FROM teacher_leave_app WHERE sccode = ? AND (status = 0 OR status >= 3) ORDER BY apply_date DESC, id DESC");
 $stmt_get->bind_param("s", $sccode);
 $stmt_get->execute();
 $result = $stmt_get->get_result();
-while ($row = $result->fetch_assoc()) {
-    $my_app_datam[] = $row;
-}
+while ($row = $result->fetch_assoc()) { $my_app_datam[] = $row; }
 $stmt_get->close();
+
+$page_title = "Leave Requests";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface */
+    body { background-color: #FEF7FF; font-size: 0.85rem; }
 
-    /* Application Card Style */
-    .app-card {
-        border: none;
-        border-radius: 28px;
-        background-color: #FFFFFF;
-        margin-bottom: 16px;
-        padding: 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        position: relative;
-        overflow: hidden;
+    /* M3 Standard App Bar (8px radius bottom) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
     }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
-    /* Status-based Accents */
-    .status-badge {
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        padding: 4px 12px;
-        border-radius: 100px;
-        display: inline-block;
-        margin-bottom: 10px;
+    /* Condensed Application Card (8px Radius) */
+    .app-card {
+        background: #fff; border-radius: 8px; padding: 12px;
+        margin: 0 8px 10px; border: 1px solid #eee;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: 0.2s;
+    }
+    .app-card:active { transform: scale(0.98); background: #F7F2FA; }
+
+    .status-chip {
+        font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
+        padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 6px;
     }
     .status-0 { background: #EADDFF; color: #21005D; } /* New */
-    .status-3 { background: #FFFBFE; color: #8D5C00; border: 1px solid #FFB900; } /* Review */
+    .status-3 { background: #FFF4E5; color: #663C00; border: 1px solid #FFB900; } /* Review */
 
-    .teacher-name { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; }
-    .leave-info { font-size: 0.85rem; color: #49454F; margin-top: 5px; }
-    .reason-box {
-        background-color: #F7F2FA;
-        border-radius: 16px;
-        padding: 12px;
-        margin: 12px 0;
-        font-size: 0.9rem;
-        color: #1D1B20;
-        border-left: 4px solid #6750A4;
-    }
-
-    /* Action Buttons */
-    .action-bar { display: flex; gap: 10px; margin-top: 15px; }
-    .btn-m3 {
-        border-radius: 100px;
-        padding: 8px 16px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        border: none;
-        transition: 0.2s;
-    }
-    .btn-approve { background-color: #4CAF50; color: white; }
-    .btn-reject { background-color: #F44336; color: white; }
-    .btn-review { background-color: #FF9800; color: white; }
-    .btn-m3:active { transform: scale(0.95); opacity: 0.8; }
+    .t-avatar-sm { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: #eee; margin-right: 12px; }
     
-    .icon-circle {
-        width: 40px; height: 40px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        background: #F3EDF7; color: #6750A4;
+    .reason-box {
+        background-color: #F3EDF7; border-radius: 6px; padding: 10px;
+        margin: 8px 0; font-size: 0.8rem; color: #49454F;
+        border-left: 3px solid #6750A4; font-style: italic;
     }
+
+    /* M3 Button Styling (8px Radius) */
+    .btn-action {
+        border-radius: 8px !important; font-weight: 700; font-size: 0.75rem;
+        padding: 8px 12px; border: none; flex: 1;
+    }
+    .btn-approve { background: #146C32; color: white; }
+    .btn-reject { background: #B3261E; color: white; }
+    .btn-hold { background: #6750A4; color: white; }
 </style>
 
-<main class="container mt-3 pb-5">
-    <div class="d-flex align-items-center mb-4 px-2">
-        <a href="tools.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-        <h4 class="fw-bold mb-0">Leave Responses</h4>
+<header class="m3-app-bar shadow-sm">
+    <a href="tools.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;">Session: <?php echo $current_session; ?></span>
     </div>
+</header>
 
+<main class="pb-5 mt-2">
     <?php if (empty($my_app_datam)): ?>
-        <div class="text-center py-5">
-            <i class="bi bi-file-earmark-check display-1 text-muted opacity-25"></i>
-            <p class="text-muted mt-3">No pending applications found.</p>
+        <div class="text-center py-5 opacity-25">
+            <i class="bi bi-mailbox2 display-1"></i>
+            <p class="fw-bold mt-2">Inbox is empty.</p>
         </div>
     <?php endif; ?>
 
-    <?php foreach ($my_app_datam as $appl): 
-        $appl_id = $appl['id'];
-        $status = $appl['status'];
-        
-        // টিচারের নাম খোঁজা
-        $t_idx = array_search($appl['tid'], array_column($datam_teacher_profile, 'tid'));
-        $tname = ($t_idx !== false) ? $datam_teacher_profile[$t_idx]['tname'] : 'Unknown Teacher';
-        $tphoto = "teacher/" . $appl['tid'] . ".jpg";
-    ?>
-        <div class="app-card shadow-sm border-start border-4 <?php echo ($status == 0) ? 'border-primary' : 'border-warning'; ?>">
-            <div class="d-flex align-items-start">
-                <img src="<?php echo $tphoto; ?>" class="rounded-circle me-3 border" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
-                <div class="flex-grow-1">
-                    <span class="status-badge status-<?php echo $status; ?>">
-                        <?php echo ($status == 0) ? 'New Application' : 'Under Review'; ?>
-                    </span>
-                    <div class="teacher-name"><?php echo htmlspecialchars($tname); ?></div>
-                    <div class="leave-info">
-                        <i class="bi bi-tag-fill me-1"></i> <?php echo htmlspecialchars($appl['leave_type']); ?> 
-                        <span class="mx-2">|</span>
-                        <i class="bi bi-calendar-range me-1"></i> <?php echo $appl['days']; ?> Days
+    <div class="list-container px-1">
+        <?php foreach ($my_app_datam as $appl): 
+            $id = $appl['id'];
+            $st = $appl['status'];
+            
+            // টিচার ডাটা লুকআপ
+            $t_idx = array_search($appl['tid'], array_column($datam_teacher_profile, 'tid'));
+            $tname = ($t_idx !== false) ? $datam_teacher_profile[$t_idx]['tname'] : 'Unknown';
+            $tphoto = "https://eimbox.com/teacher/" . $appl['tid'] . ".jpg";
+        ?>
+            <div class="app-card shadow-sm">
+                <div class="d-flex align-items-center mb-2">
+                    <img src="<?php echo $tphoto; ?>" class="t-avatar-sm shadow-sm" onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
+                    <div class="overflow-hidden flex-grow-1">
+                        <span class="status-chip status-<?php echo $st; ?>">
+                            <?php echo ($st == 0) ? 'Pending Request' : 'Held for Review'; ?>
+                        </span>
+                        <div class="fw-bold text-dark text-truncate"><?php echo $tname; ?></div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-extrabold text-primary h6 mb-0"><?php echo $appl['days']; ?></div>
+                        <small class="text-muted" style="font-size: 0.6rem;">DAYS</small>
                     </div>
                 </div>
-            </div>
 
-            <div class="reason-box">
-                "<?php echo htmlspecialchars($appl['leave_reason']); ?>"
-            </div>
+                <div class="reason-box">
+                    "<?php echo htmlspecialchars($appl['leave_reason']); ?>"
+                </div>
 
-            <div class="small text-muted mb-3">
-                <i class="bi bi-clock-history me-1"></i> Period: <?php echo date('d M', strtotime($appl['date_from'])); ?> to <?php echo date('d M, Y', strtotime($appl['date_to'])); ?>
-            </div>
+                <div class="d-flex justify-content-between align-items-center small text-muted px-1 mb-3" style="font-size: 0.7rem;">
+                    <span><i class="bi bi-calendar3 me-1"></i> <?php echo date('d M', strtotime($appl['date_from'])); ?> - <?php echo date('d M, y', strtotime($appl['date_to'])); ?></span>
+                    <span class="fw-bold"><?php echo $appl['leave_type']; ?></span>
+                </div>
 
-            <div class="action-bar">
-                <button onclick="respond(<?php echo $appl_id; ?>, 1)" class="btn-m3 btn-approve flex-grow-1 justify-content-center">
-                    <i class="bi bi-check2-circle me-2"></i> Approve
-                </button>
-                <button onclick="respond(<?php echo $appl_id; ?>, 2)" class="btn-m3 btn-reject flex-grow-1 justify-content-center">
-                    <i class="bi bi-x-circle me-2"></i> Reject
-                </button>
-                <?php if ($status == 0): ?>
-                    <button onclick="respond(<?php echo $appl_id; ?>, 3)" class="btn-m3 btn-review" title="Hold for Review">
-                        <i class="bi bi-hourglass-split"></i>
+                <div class="d-flex gap-2">
+                    <button onclick="processApp(<?php echo $id; ?>, 1)" class="btn-action btn-approve shadow-sm">
+                        <i class="bi bi-check2-all me-1"></i> APPROVE
                     </button>
-                <?php endif; ?>
+                    <button onclick="processApp(<?php echo $id; ?>, 2)" class="btn-action btn-reject shadow-sm">
+                        <i class="bi bi-x-circle me-1"></i> REJECT
+                    </button>
+                    <?php if ($st == 0): ?>
+                        <button onclick="processApp(<?php echo $id; ?>, 3)" class="btn-action btn-hold shadow-sm" title="Review">
+                            <i class="bi bi-hourglass-split"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
+    </div>
 </main>
 
-<div style="height: 70px;"></div>
-
-<script>
-    function respond(id, tail) {
-        const statusText = tail === 1 ? "Approve" : (tail === 2 ? "Reject" : "Review");
-        const confirmColor = tail === 1 ? "#4CAF50" : (tail === 2 ? "#F44336" : "#FF9800");
+<div style="height: 65px;"></div> <script>
+    function processApp(id, tail) {
+        const actions = { 1: "Approve", 2: "Reject", 3: "Put on Hold" };
+        const colors = { 1: "#146C32", 2: "#B3261E", 3: "#6750A4" };
 
         Swal.fire({
-            title: statusText + ' Application?',
-            text: "Are you sure you want to perform this action?",
+            title: actions[tail] + '?',
+            text: "Are you sure you want to process this leave request?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: confirmColor,
-            cancelButtonColor: '#79747E',
-            confirmButtonText: 'Yes, ' + statusText
+            confirmButtonColor: colors[tail],
+            confirmButtonText: 'Yes, ' + actions[tail],
+            cancelButtonText: 'Cancel'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "leave-application-response.php?appid=" + id + "&tail=" + tail;
+                window.location.href = `leave-application-response.php?appid=${id}&tail=${tail}&year=<?php echo $current_session; ?>`;
             }
         });
     }

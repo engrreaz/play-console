@@ -1,135 +1,145 @@
 <?php
-include 'inc.php'; // Contains header, DB connection, and session data
+include 'inc.php'; 
+include_once 'datam/datam-subject-list.php'; 
 
-// Include subject details for mapping codes to names
-include_once 'datam/datam-subject-list.php'; // Provides $datam_subject_list
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
 
-// --- Filter Handling ---
-$filter_class = isset($_GET['class']) ? $_GET['class'] : '';
-$filter_search = isset($_GET['search']) ? $_GET['search'] : '';
+// ২. ফিল্টার হ্যান্ডলিং
+$filter_class = $_GET['class'] ?? '';
+$filter_search = $_GET['search'] ?? '';
 
-// In a real scenario, you'd query a dedicated 'ebooks' table.
-// For now, we'll generate a list from the subjects data, assuming a file structure.
-$all_books = $datam_subject_list; // Using subject list as the source of books
+$all_books = $datam_subject_list; 
 
-// Apply filters
-$filtered_books = $all_books;
-if (!empty($filter_class)) {
-    $filtered_books = array_filter($filtered_books, fn($book) => $book['classname'] == $filter_class);
-}
-if (!empty($filter_search)) {
-    $filtered_books = array_filter($filtered_books, fn($book) => stripos($book['subject'], $filter_search) !== false || stripos($book['subben'], $filter_search) !== false);
-}
+// ফিল্টার অ্যাপ্লাই করা
+$filtered_books = array_filter($all_books, function($book) use ($filter_class, $filter_search) {
+    $match_class = empty($filter_class) || $book['classname'] == $filter_class;
+    $match_search = empty($filter_search) || 
+                    stripos($book['subject'], $filter_search) !== false || 
+                    stripos($book['subben'], $filter_search) !== false;
+    return $match_class && $match_search;
+});
 
-// Get unique classes for the filter dropdown
+// ড্রপডাউনের জন্য ইউনিক ক্লাস বের করা
 $unique_classes = array_unique(array_column($all_books, 'classname'));
 sort($unique_classes);
+
+$page_title = "E-Library";
 ?>
 
 <style>
-    body { background-color: #f0f2f5; }
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
+
+    /* Standard M3 Top Bar (8px Bottom Radius) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Compact Filter Card (8px Radius) */
+    .m3-card { background: #fff; border-radius: 8px; padding: 12px; margin: 8px 12px; border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    
+    /* Book Card Condensed */
     .book-card {
-        transition: all 0.3s ease-in-out;
+        background: #fff; border-radius: 8px; overflow: hidden; height: 100%;
+        border: 1px solid #f0f0f0; transition: transform 0.2s;
     }
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    .book-card:active { transform: scale(0.97); }
+    
+    .book-cover-wrapper {
+        position: relative; height: 160px; background: #F3EDF7;
+        display: flex; align-items: center; justify-content: center;
     }
-    .book-cover {
-        height: 250px;
-        object-fit: cover;
+    .book-cover-img { height: 100%; width: 100%; object-fit: cover; }
+    
+    .book-info { padding: 8px; }
+    .book-title { font-weight: 800; font-size: 0.8rem; color: #1C1B1F; margin-bottom: 2px; line-height: 1.2; }
+    .book-subtitle { font-size: 0.7rem; color: #49454F; margin-bottom: 5px; height: 2.4em; overflow: hidden; }
+    
+    .class-badge {
+        background: #EADDFF; color: #21005D; padding: 2px 8px;
+        border-radius: 4px; font-size: 0.6rem; font-weight: 800;
     }
+
+    .btn-read {
+        background: #6750A4; color: white; border: none; width: 100%;
+        padding: 6px; font-size: 0.75rem; font-weight: 700; border-radius: 0 0 8px 8px;
+    }
+
+    .input-m3 { border-radius: 8px !important; border: 1px solid #79747E; font-size: 0.85rem; padding: 6px 10px; }
 </style>
 
-<main class="container mt-4">
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons"><i class="bi bi-bookmark-star fs-5 text-primary"></i></div>
+</header>
 
-    <div class="card mb-4">
-        <div class="card-body d-flex align-items-center">
-            <i class="bi bi-book-half text-primary me-3" style="font-size: 2.5rem;"></i>
-            <div>
-                <h1 class="h4 mb-0">E-Library</h1>
-                <p class="mb-0 text-muted">Browse and read digital books and resources.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter and Search Card -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" action="" class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label for="search" class="form-label">Search by Title</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="search" id="search" name="search" class="form-control" placeholder="e.g., Physics" value="<?php echo htmlspecialchars($filter_search); ?>">
-                    </div>
+<main class="pb-5">
+    <div class="m3-card shadow-sm">
+        <form method="GET" action="">
+            <div class="row g-2">
+                <div class="col-8">
+                    <input type="search" name="search" class="form-control input-m3" 
+                           placeholder="Search books..." value="<?php echo htmlspecialchars($filter_search); ?>">
                 </div>
-                <div class="col-md-5">
-                    <label for="class" class="form-label">Filter by Class</label>
-                    <select id="class" name="class" class="form-select">
-                        <option value="">All Classes</option>
+                <div class="col-4">
+                    <select name="class" class="form-select input-m3" onchange="this.form.submit()">
+                        <option value="">Class</option>
                         <?php foreach ($unique_classes as $class_name): ?>
                             <option value="<?php echo $class_name; ?>" <?php echo ($class_name == $filter_class) ? 'selected' : ''; ?>>
-                                Class <?php echo htmlspecialchars($class_name); ?>
+                                <?php echo $class_name; ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
-        </div>
+                <input type="hidden" name="year" value="<?php echo $current_session; ?>">
+            </div>
+        </form>
     </div>
 
-    <!-- E-Books Grid -->
-    <div class="row">
-        <?php
-        if (count($filtered_books) > 0) {
-            foreach ($filtered_books as $book) {
-                $subcode = $book['subcode'];
-                $seng = $book['subject'];
-                $sben = $book['subben'];
-                $clsname = $book['classname'];
-
-                // Assume a file path for the book PDF and cover
-                $book_pdf_path = strtolower('assets/ebooks/' . $sctype . '_' . $clsname . '_' . $subcode . '.pdf');
-                $cover_jpg_path = strtolower($BASE_PATH_URL . 'books/' . $sctype . '_' . $clsname . '_' . $subcode . '_cover.jpg');
-                $cover_png_path = strtolower($BASE_PATH_URL . 'books/' . $sctype . '_' . $clsname . '_' . $subcode . '_cover.png');
-                
-                $cover_url = $BASE_PATH_URL_FILE . 'books/no-image.png'; // Default
-                if (file_exists($cover_jpg_path)) {
-                    $cover_url = strtolower($BASE_PATH_URL_FILE . 'books/' . $sctype . '_' . $clsname . '_' . $subcode . '_cover.jpg');
-                } elseif (file_exists($cover_png_path)) {
-                    $cover_url = strtolower($BASE_PATH_URL_FILE . 'books/' . $sctype . '_' . $clsname . '_' . $subcode . '_cover.png');
-                }
-        ?>
-            <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                <div class="card h-100 book-card">
-                    <img src="<?php echo $cover_url; ?>" class="card-img-top book-cover" alt="Cover of <?php echo htmlspecialchars($seng); ?>">
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="card-title fw-bold"><?php echo htmlspecialchars($seng); ?></h6>
-                        <p class="card-text small text-muted"><?php echo htmlspecialchars($sben); ?></p>
-                        <div class="mt-auto">
-                            <span class="badge bg-primary">Class: <?php echo htmlspecialchars($clsname); ?></span>
+    <div class="container-fluid px-3">
+        <div class="row gx-2 gy-3">
+            <?php if (count($filtered_books) > 0): ?>
+                <?php foreach ($filtered_books as $book): 
+                    $subcode = $book['subcode'];
+                    $clsname = $book['classname'];
+                    
+                    // ফাইল পাথ লজিক
+                    $book_pdf = strtolower('assets/ebooks/'.$sctype.'_'.$clsname.'_'.$subcode.'.pdf');
+                    $cover_url = "https://eimbox.com/books/".strtolower($sctype.'_'.$clsname.'_'.$subcode)."_cover.jpg";
+                ?>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="book-card shadow-sm">
+                        <div class="book-cover-wrapper">
+                            <img src="<?php echo $cover_url; ?>" class="book-cover-img" 
+                                 onerror="this.src='https://eimbox.com/books/no-image.png'">
+                            <div class="position-absolute bottom-0 start-0 p-1">
+                                <span class="class-badge">Cls: <?php echo $clsname; ?></span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-footer text-center">
-                        <a href="<?php echo $book_pdf_path; ?>" class="btn btn-primary btn-sm w-100" target="_blank">
-                            <i class="bi bi-eye-fill me-2"></i>View Book
+                        <div class="book-info">
+                            <div class="book-title text-truncate"><?php echo $book['subject']; ?></div>
+                            <div class="book-subtitle small"><?php echo $book['subben']; ?></div>
+                        </div>
+                        <a href="<?php echo $book_pdf; ?>" target="_blank" class="text-decoration-none">
+                            <button class="btn-read"><i class="bi bi-book me-1"></i> READ NOW</button>
                         </a>
                     </div>
                 </div>
-            </div>
-        <?php
-            } // end foreach
-        } else {
-            echo '<div class="col-12"><div class="alert alert-warning">No books found matching your criteria.</div></div>';
-        }
-        ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center py-5 opacity-50">
+                    <i class="bi bi-journal-x display-4"></i>
+                    <p class="fw-bold small mt-2">No digital resources found.</p>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </main>
 
-<div style="height:52px;"></div>
-
-<?php include 'footer.php'; ?>
+<div style="height: 65px;"></div> <?php include 'footer.php'; ?>

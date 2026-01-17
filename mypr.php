@@ -2,199 +2,194 @@
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 include 'datam/datam-stprofile.php';
 
-// ১. ডিলিট করার সময়সীমা (৭ দিন = ৬০৪৮০০ সেকেন্ড)
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
+
+// ২. ডিলিট করার সময়সীমা (৭ দিন) এবং পেজ টাইটেল
 $delete_timeout = 604800; 
-$accountant_settled = 0; // এটি ডাটাবেজ থেকে পরে ডাইনামিক করা যাবে
+$accountant_settled = 0; // এটি পরে আপনার ডাটাবেজ লজিক অনুযায়ী আপডেট হবে
+$page_title = "My Collections";
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Hero Stats Card */
+    /* M3 Standard App Bar (8px radius bottom) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Condensed Hero Banner */
     .hero-stats {
         background: linear-gradient(135deg, #6750A4, #9581CD);
-        border-radius: 0 0 32px 32px;
-        padding: 40px 20px 30px;
-        color: white;
-        text-align: center;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.2);
+        border-radius: 0 0 8px 8px; /* গাইডলাইন অনুযায়ী স্লিম রেডিয়াস */
+        padding: 24px 16px; margin-bottom: 12px;
+        color: white; text-align: center;
+        box-shadow: 0 4px 8px rgba(103, 80, 164, 0.15);
     }
+    .stat-main-val { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .stat-label { font-size: 0.7rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .stat-main-val { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
-    .stat-label { font-size: 0.8rem; font-weight: 600; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
-
-    /* Stats Chips */
-    .tonal-chip-container {
-        display: flex; gap: 10px; padding: 0 16px; margin-bottom: 20px;
-    }
+    /* M3 Tonal Chips (8px radius) */
+    .chip-container { display: flex; gap: 8px; padding: 0 12px; margin-bottom: 16px; }
     .m3-tonal-chip {
-        flex: 1; background: #F3EDF7; border-radius: 16px; padding: 12px;
-        text-align: center; border: none;
+        flex: 1; background: #F3EDF7; border-radius: 8px; padding: 8px;
+        text-align: center; border: 1px solid #EADDFF;
     }
-    .chip-val { font-weight: 800; color: #1C1B1F; font-size: 1rem; display: block; }
-    .chip-lbl { font-size: 0.65rem; font-weight: 700; color: #6750A4; text-transform: uppercase; }
+    .chip-val { font-weight: 800; color: #1C1B1F; font-size: 0.9rem; display: block; }
+    .chip-lbl { font-size: 0.55rem; font-weight: 700; color: #6750A4; text-transform: uppercase; }
 
-    /* Receipt Card Item */
+    /* Condensed Receipt Card (8px Radius) */
     .receipt-card {
-        background: #fff; border-radius: 24px; padding: 16px;
-        margin: 0 16px 12px; border: none;
+        background: #fff; border-radius: 8px; padding: 10px 12px;
+        margin: 0 8px 6px; border: 1px solid #eee;
         display: flex; align-items: center;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         transition: transform 0.2s;
     }
     .receipt-card:active { transform: scale(0.98); background: #F7F2FA; }
 
-    .st-img-wrapper {
-        width: 52px; height: 52px; border-radius: 14px;
-        overflow: hidden; margin-right: 15px; flex-shrink: 0;
+    .st-avatar-sm {
+        width: 44px; height: 44px; border-radius: 6px;
+        overflow: hidden; margin-right: 12px; flex-shrink: 0;
         background: #eee; border: 1px solid #E7E0EC;
     }
-    .st-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .st-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
 
     .receipt-info { flex-grow: 1; overflow: hidden; }
-    .st-name { font-weight: 700; color: #1C1B1F; font-size: 0.95rem; margin-bottom: 2px; }
-    .receipt-meta { font-size: 0.75rem; color: #49454F; line-height: 1.3; }
+    .st-name-text { font-weight: 700; color: #1C1B1F; font-size: 0.85rem; margin-bottom: 0; }
+    .receipt-meta { font-size: 0.65rem; color: #49454F; line-height: 1.3; }
 
-    .amount-badge {
-        text-align: right; min-width: 80px;
-    }
-    .amt-val { font-weight: 800; color: #6750A4; font-size: 1.1rem; display: block; }
+    .amt-badge { text-align: right; min-width: 75px; }
+    .amt-val { font-weight: 800; color: #6750A4; font-size: 1rem; display: block; }
     
-    .btn-delete-receipt {
+    .btn-del-sm {
         background: #FFEBEE; color: #B3261E; border: none;
-        border-radius: 100px; padding: 4px 12px; font-size: 0.65rem;
-        font-weight: 700; margin-top: 5px;
+        border-radius: 4px; padding: 2px 8px; font-size: 0.55rem;
+        font-weight: 700; margin-top: 4px;
     }
-    .btn-delete-receipt:disabled { opacity: 0.3; }
 </style>
 
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons"><i class="bi bi-funnel fs-5"></i></div>
+</header>
+
 <main class="pb-5">
-    <div class="hero-stats">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="reporthome.php" class="text-white"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h6 class="fw-bold mb-0">Collections Report</h6>
-            <div style="width: 24px;"></div>
-        </div>
-        
-        <div class="stat-label">Current Cash-in-hand</div>
-        <div class="stat-main-val" id="cash_display">৳ 0.00</div>
-        <div class="small opacity-75"><i class="bi bi-clock-history me-1"></i> Updated Just Now</div>
+    <div class="hero-stats shadow-sm">
+        <div class="stat-label">Net Cash-in-hand</div>
+        <div class="stat-main-val" id="cash_label">৳ 0.00</div>
+        <div class="small opacity-75" style="font-size: 0.65rem;">Session: <?php echo $current_session; ?></div>
     </div>
 
-    <div class="tonal-chip-container">
+    <div class="chip-container">
         <div class="m3-tonal-chip shadow-sm">
-            <span class="chip-val" id="count_display">0</span>
+            <span class="chip-val" id="count_label">0</span>
             <span class="chip-lbl">Receipts</span>
         </div>
         <div class="m3-tonal-chip shadow-sm">
-            <span class="chip-val" id="total_display">৳ 0</span>
+            <span class="chip-val" id="total_label">৳ 0</span>
             <span class="chip-lbl">Collected</span>
         </div>
         <div class="m3-tonal-chip shadow-sm">
-            <span class="chip-val text-danger">৳ <?php echo number_format($accountant_settled, 0); ?></span>
+            <span class="chip-val text-danger">৳<?php echo number_format($accountant_settled); ?></span>
             <span class="chip-lbl">Settled</span>
         </div>
     </div>
 
-    <h6 class="ms-4 mb-3 text-secondary fw-bold small text-uppercase tracking-wider">Recent Transactions</h6>
+    <h6 class="fw-bold text-secondary mb-3 ms-3 small uppercase tracking-wider">Transaction Timeline</h6>
 
     <div id="receipt-list">
         <?php
         $cnt = 0; $cntamt = 0;
         
-        // ২. ডাটা ফেচিং (Prepared Statement - Secure)
+        // ৩. ডাটা ফেচিং (Prepared Statement with Session Priority)
         $stmt = $conn->prepare("SELECT stid, rollno, prno, prdate, amount, entrytime, classname, sectionname 
                                 FROM stpr 
-                                WHERE sessionyear LIKE ? AND sccode = ? AND entryby = ? AND entrytime >= '2025-01-01' 
-                                ORDER BY entrytime DESC");
-        $sy_param = "%$sy%";
+                                WHERE sessionyear LIKE ? AND sccode = ? AND entryby = ? 
+                                ORDER BY entrytime DESC LIMIT 50");
         $stmt->bind_param("sss", $sy_param, $sccode, $usr);
         $stmt->execute();
         $result = $stmt->get_result();
 
-        while ($row = $result->fetch_assoc()):
-            $stid = $row["stid"];
-            $prno = $row["prno"];
-            $amount = $row["amount"];
-            $entrytime = $row["entrytime"];
-            
-            $cnt++;
-            $cntamt += $amount;
+        if ($result->num_rows > 0):
+            while ($row = $result->fetch_assoc()):
+                $stid = $row["stid"];
+                $prno = $row["prno"];
+                $amount = $row["amount"];
+                $etime = $row["entrytime"];
+                
+                $cnt++;
+                $cntamt += $amount;
 
-            // স্টুডেন্ট প্রোফাইল ডাটা লুকআপ
-            $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
-            $neng = $datam_st_profile[$st_idx]["stnameeng"] ?? 'Unknown Student';
-            $vill = $datam_st_profile[$st_idx]["previll"] ?? '';
-            
-            // ফটো পাথ
-            include 'component/student-image-path.php'; // $pth ভেরিয়েবল প্রদান করে
-
-            // ডিলিট করার অনুমতি চেক (আপনার লজিক অনুযায়ী)
-            $can_delete = (strtotime($cur) - strtotime($entrytime) < $delete_timeout);
+                // স্টুডেন্ট প্রোফাইল ডাটা লুকআপ
+                $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
+                $neng = $datam_st_profile[$st_idx]["stnameeng"] ?? 'Unknown Student';
+                
+                // ডিলিট চেক
+                $can_delete = (strtotime($cur) - strtotime($etime) < $delete_timeout);
         ?>
             <div class="receipt-card shadow-sm" id="block<?php echo $prno; ?>">
-                <div class="st-img-wrapper shadow-sm">
-                    <img src="<?php echo $pth; ?>" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
+                <div class="st-avatar-sm shadow-sm">
+                    <img src="https://eimbox.com/students/<?php echo $stid; ?>.jpg" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
                 </div>
                 
                 <div class="receipt-info">
-                    <div class="st-name text-truncate"><?php echo $neng; ?></div>
+                    <div class="st-name-text text-truncate"><?php echo $neng; ?></div>
                     <div class="receipt-meta">
                         <span class="fw-bold text-primary">Roll: <?php echo $row['rollno']; ?></span> | ID: <?php echo $stid; ?><br>
-                        <i class="bi bi-receipt me-1"></i> #<?php echo $prno; ?> <i class="bi bi-dot"></i> <?php echo date('d M, Y', strtotime($row['prdate'])); ?>
+                        <i class="bi bi-receipt me-1"></i> #<?php echo $prno; ?> <i class="bi bi-dot"></i> <?php echo date('d M, y', strtotime($row['prdate'])); ?>
                     </div>
                 </div>
 
-                <div class="amount-badge">
+                <div class="amt-badge">
                     <span class="amt-val">৳<?php echo number_format($amount, 0); ?></span>
-                    <button class="btn-delete-receipt" onclick="deleteReceipt(<?php echo $prno; ?>)" <?php echo $can_delete ? '' : 'disabled'; ?>>
-                        <i class="bi bi-trash3-fill me-1"></i> DELETE
+                    <button class="btn-del-sm" onclick="delReceipt(<?php echo $prno; ?>)" <?php echo $can_delete ? '' : 'disabled'; ?>>
+                        <i class="bi bi-trash3-fill"></i> DELETE
                     </button>
                 </div>
             </div>
-        <?php endwhile; $stmt->close(); ?>
+        <?php endwhile; else: ?>
+            <div class="text-center py-5 opacity-25">
+                <i class="bi bi-receipt-cutoff display-4"></i>
+                <p class="small fw-bold mt-2">No records found for <?php echo $current_session; ?></p>
+            </div>
+        <?php endif; $stmt->close(); ?>
     </div>
 </main>
 
 <div style="height: 70px;"></div>
 
-
-
 <script>
-    // পরিসংখ্যান আপডেট করা
-    document.getElementById("count_display").innerText = "<?php echo $cnt; ?>";
-    document.getElementById("total_display").innerText = "৳ <?php echo number_format($cntamt, 0); ?>";
-    document.getElementById("cash_display").innerText = "৳ <?php echo number_format($cntamt - $accountant_settled, 2); ?>";
+    // ৪. ডাইনামিক ইউআই আপডেট
+    document.getElementById("count_label").innerText = "<?php echo $cnt; ?>";
+    document.getElementById("total_label").innerText = "৳ <?php echo number_format($cntamt); ?>";
+    document.getElementById("cash_label").innerText = "৳ <?php echo number_format($cntamt - $accountant_settled, 2); ?>";
 
-    function deleteReceipt(pr) {
+    function delReceipt(pr) {
         Swal.fire({
             title: 'Delete Receipt?',
-            text: "This action will remove receipt #" + pr + " from records.",
+            text: "This will remove PR #" + pr + " from records.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#B3261E',
-            confirmButtonText: 'Yes, Delete It'
+            confirmButtonText: 'Yes, Delete'
         }).then((result) => {
             if (result.isConfirmed) {
-                $.ajax({
-                    type: "POST",
-                    url: "backend/delmypr.php",
-                    data: { prno: pr },
-                    beforeSend: function () {
-                        $("#block" + pr).css("opacity", "0.5");
-                    },
-                    success: function (html) {
-                        $("#block" + pr).fadeOut(300, function(){ $(this).remove(); });
-                        Swal.fire('Deleted!', 'The receipt has been removed.', 'success');
-                        // এখানে আপনি চাইলে পেজ রিলোড বা স্ট্যাটাস আপডেট করতে পারেন
-                    }
+                $.post("backend/delmypr.php", { prno: pr }, function() {
+                    $("#block" + pr).fadeOut(300);
+                    Swal.fire('Deleted!', '', 'success').then(() => location.reload());
                 });
             }
         });
     }
-
-    function gox(id) { window.location.href = "stfinancedetails.php?id=" + id; }
 </script>
 
 <?php include 'footer.php'; ?>

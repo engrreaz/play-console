@@ -1,558 +1,233 @@
 <?php
+include 'inc.php'; 
 include 'datam/datam-stprofile.php';
 
-$classname = $_GET['cls'];
-$sectionname = $_GET['sec'];
-if (isset($_GET['dt'])) {
-    $td = $_GET['dt'];
-}
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
 
+// ২. প্যারামিটার হ্যান্ডলিং
+$classname = $_GET['cls'] ?? '';
+$sectionname = $_GET['sec'] ?? '';
+$td = $_GET['dt'] ?? date('Y-m-d');
+$page_title = "Class Attendance";
 
-
+// ৩. বর্তমান পিরিয়ড নির্ধারণ (Prepared Statement)
 $ccur = date('H:i:s');
-$sql0 = "SELECT * FROM classschedule where sccode = '$sccode' and sessionyear LIKE '%$sy%' and timestart<='$ccur' and timeend>='$ccur';";
-// echo $sql0 ;
-$result0rtx = $conn->query($sql0);
-if ($result0rtx->num_rows > 0) {
-    while ($row0 = $result0rtx->fetch_assoc()) {
-        $period = $row0["period"];
-        $ts = $row0["timestart"];
-        $te = $row0["timeend"];
-        $dur = $row0["duration"];
-    }
-} else {
-    $period = 1;
-    $ts = 0;
-    $te = 0;
-    $dur = 0;
-}
-// $period = 3;
+$period = 1;
+$stmt_sc = $conn->prepare("SELECT period FROM classschedule WHERE sccode = ? AND sessionyear LIKE ? AND timestart <= ? AND timeend >= ? LIMIT 1");
+$stmt_sc->bind_param("ssss", $sccode, $sy_param, $ccur, $ccur);
+$stmt_sc->execute();
+$res_sc = $stmt_sc->get_result();
+if ($r = $res_sc->fetch_assoc()) { $period = $r["period"]; }
+$stmt_sc->close();
 
-$sql00 = "SELECT * FROM stattnd where  (adate='$td' and sccode='$sccode' and sessionyear LIKE '%$sy%'  and classname = '$classname' and sectionname='$sectionname') or yn=100 order by rollno";
-// echo $sql00 ;
-$result00gt = $conn->query($sql00);
-if ($result00gt->num_rows > 0) {
-    while ($row00 = $result00gt->fetch_assoc()) {
-        $datam[] = $row00;
-    }
-}
+// ৪. আজকের উপস্থিতির ডাটা লোড করা
+$datam = [];
+$stmt_att = $conn->prepare("SELECT * FROM stattnd WHERE adate = ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
+$stmt_att->bind_param("sssss", $td, $sccode, $sy_param, $classname, $sectionname);
+$stmt_att->execute();
+$res_att = $stmt_att->get_result();
+while($r = $res_att->fetch_assoc()) { $datam[$r['stid']] = $r; }
+$stmt_att->close();
 
-$from = date("Y-m-d", strtotime("-7 days"));
-$stattnd_7 = [];
-$sql00 = "SELECT * FROM stattnd where  (adate between '$from' and  '$td' and sccode='$sccode' and sessionyear LIKE '%$sy%'  and classname = '$classname' and sectionname='$sectionname') or yn=100 order by rollno, adate";
-// echo $sql00 ;
-$result00gt = $conn->query($sql00);
-if ($result00gt->num_rows > 0) {
-    while ($row00 = $result00gt->fetch_assoc()) {
-        $stattnd_7[] = $row00;
-    }
-}
-// echo '<pre>';
-// print_r($datam);
-// echo '</pre>';
+// ৫. গত ৭ দিনের হিস্ট্রি (History Dots)
+$from_date = date("Y-m-d", strtotime("-7 days"));
+$hist_map = [];
+$stmt_h = $conn->prepare("SELECT stid, adate, yn, bunk FROM stattnd WHERE adate BETWEEN ? AND ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
+$stmt_h->bind_param("ssssss", $from_date, $td, $sccode, $sy_param, $classname, $sectionname);
+$stmt_h->execute();
+$res_h = $stmt_h->get_result();
+while($r = $res_h->fetch_assoc()) { $hist_map[$r['stid']][$r['adate']] = $r; }
+$stmt_h->close();
 
+// ৬. সাবমিশন স্ট্যাটাস চেক
+$subm = 0;
+$stmt_sum = $conn->prepare("SELECT attndrate FROM stattndsummery WHERE date = ? AND sccode = ? AND sessionyear = ? AND classname = ? AND sectionname = ?");
+$stmt_sum->bind_param("sssss", $td, $sccode, $current_session, $classname, $sectionname);
+$stmt_sum->execute();
+if ($stmt_sum->get_result()->num_rows > 0) { $subm = 1; }
+$stmt_sum->close();
 
-$sql00 = "SELECT * FROM stattndsummery where  date='$td' and sccode='$sccode' and sessionyear='$sy' and classname = '$classname' and sectionname='$sectionname'";
-$result00gtt = $conn->query($sql00);
-if ($result00gtt->num_rows > 0) {
-    while ($row00 = $result00gtt->fetch_assoc()) {
-        $rate = $row00["attndrate"];
-        $subm = 1;
-        $fun = 'grpssx0';
-    }
-} else {
-    $subm = 0;
-    $fun = 'grpssx';
-}
-
-if ($period >= 2) {
-    $fun = 'grpssx2';
-}
-
-// 	echo var_dump($datam);
+$fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
 ?>
 
 <style>
-    .chk {
-        font-size: 36px;
-    }
+    body { background-color: #FEF7FF; font-size: 0.85rem; }
 
-    .red {
-        color: red;
+    /* M3 Components (8px Radius) */
+    .m3-card { background: #fff; border-radius: 8px; padding: 12px; margin: 0 8px 8px; border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .hero-stats { 
+        background: <?php echo ($subm == 1) ? '#B3261E' : '#6750A4'; ?>; 
+        color: #fff; border-radius: 0 0 8px 8px; padding: 16px; margin-bottom: 12px; 
     }
+    
+    /* Compact Student Card */
+    .att-row { 
+        display: flex; align-items: center; padding: 8px 12px; background: #fff; 
+        border-radius: 8px; margin: 0 8px 6px; border: 1px solid #f0f0f0; transition: 0.2s; 
+    }
+    .att-row.present { background-color: #fff; border-left: 4px solid #146C32; }
+    .att-row.absent { background-color: #F7F2FA; opacity: 0.7; border-left: 4px solid #eee; }
 
-    .green {
-        color: seagreen;
-    }
+    .st-avatar-tiny { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #eee; margin-right: 12px; }
+    
+    /* Attendance Dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 2px; }
+    .bg-p { background: #4CAF50; } .bg-a { background: #F44336; } .bg-b { background: #FF9800; } .bg-g { background: #eee; }
 
-    .blue {
-        color: darkcyan;
-    }
+    /* Checkbox M3 */
+    .m3-check { width: 22px; height: 22px; border-radius: 4px; border: 2px solid #6750A4; margin-right: 12px; }
 </style>
 
+<header class="m3-app-bar shadow-sm">
+    <a href="student-list.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <div class="page-title"><?php echo "$classname ($sectionname)"; ?></div>
+    <div class="text-end fw-bold text-primary">P-<?php echo $period; ?></div>
+</header>
 
-<main>
-    <div class="container-fluidx">
-        <div class="card text-left" style="background:<?php if ($subm == 1) {
-            echo 'red';
-        } else {
-            echo 'var(--dark)';
-        } ?>; color:var(--lighter);" onclick="gol(<?php echo $id; ?>)">
-
-            <div class="card-body page-top-box">
-                <table width="100%" style="color:white;">
-                    <tr>
-                        <td colspan="2">
-                            <div class="menu-icon"><i class="bi bi-fingerprint"></i></div>
-                            <div class="menu-text"> Attendance </div>
-                        </td>
-                    </tr>
-                </table>
+<main class="pb-5">
+    <div class="hero-stats shadow-sm">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="h3 fw-bold mb-0"><span id="att_count">0</span>/<span id="total_count">0</span></div>
+                <div class="small opacity-80">Present Students</div>
+                <?php if($subm == 1): ?>
+                    <span class="badge bg-white text-danger mt-2" style="font-size: 0.6rem;">SUBMITTED</span>
+                <?php endif; ?>
             </div>
-            <div class="card-body page-info-box">
-                <table width="100%" style="color:white;">
-                    <tr>
-                        <td>
-                            <div class="stname-eng">
-                                <?php echo strtoupper($classname); ?> | <?php echo strtoupper($sectionname); ?>
-                            </div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">Name
-                                of Class | Section</div>
-                            <br>
-                            <div class="roll-no" style="font-size:24px;">
-                                <?php echo strtoupper($period); ?>
-                            </div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">
-                                Period </div>
-                        </td>
-                        <td style="text-align:right;">
-                            <div style="font-size:30px; font-weight:700; line-height:40px;"><span id="att"></span>/<span
-                                    id="cnt"></span></div>
-                            <div class="st-id">Bunk : <b><span id="bunk">0</span></b> out of <span id="found2"></span>
-                            </div>
-                            <div
-                                style="font-size:12px; font-weight:400; font-style:italic; line-height:24px; color:var(--light);">
-                                Attendance Found
-                            </div>
-
-
-                            <div  id="dddate">
-                                <input onchange="dtcng();" max="<?php echo $td; ?>" id="xp"
-                                    class="form-control text-center  pt-2" type="date" value="<?php echo $td; ?>" <?php if ($period > 1) {
-                                           echo 'disabled';
-                                       } ?> />
-
-                            </div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:24px;">Date
-                            </div>
-
-
-                        </td>
-                    </tr>
-
-                    <?php if ($subm == 1) { ?>
-                        <tr>
-                            <td colspan="2">
-                                <div
-                                    style="text-align:center; font-size:14px; font-weight:400; font-style:italic; padding: 5px 10px; background:red; color:white; border-radius:15px;; border:1px solid white; ">
-                                    Attendance already submitted.</div>
-                            </td>
-                        </tr>
-                    <?php } ?>
-
-                </table>
+            <div class="text-end">
+                <input type="date" id="xp" class="form-control form-control-sm border-0 bg-white text-dark fw-bold mb-1" 
+                       style="border-radius: 6px; width: 130px;" value="<?php echo $td; ?>" onchange="dtcng();" 
+                       <?php if($period > 1) echo 'disabled'; ?>>
+                <div class="small opacity-75">Bunk: <span id="bunk_count" class="fw-bold">0</span></div>
             </div>
         </div>
-
-
-        <?php
-        $cnt = 0;
-        $found = 0;
-        $bunk = 0;
-        $sql0 = "SELECT * FROM sessioninfo where sessionyear LIKE '%$sy%' and sccode='$sccode' and classname='$classname' and sectionname = '$sectionname' order by $stattnd_sort";
-        $result0 = $conn->query($sql0);
-        if ($result0->num_rows > 0) {
-            while ($row0 = $result0->fetch_assoc()) {
-                $stid = $row0["stid"];
-                $rollno = $row0["rollno"];
-                $card = $row0["icardst"];
-                $dtid = $row0["id"];
-                $status = $row0["status"];
-                $rel = $row0["religion"];
-                $four = $row0["fourth_subject"];
-
-                include 'component/student-image-path.php';
-
-                $st_ind = array_search($stid, array_column($datam_st_profile, 'stid'));
-                $neng = $datam_st_profile[$st_ind]["stnameeng"];
-                $nben = $datam_st_profile[$st_ind]["stnameben"];
-                $vill = $datam_st_profile[$st_ind]["previll"];
-                $grnametxt = '';
-
-
-                // $sql00 = "SELECT * FROM students where  sccode='$sccode' and stid='$stid' LIMIT 1";
-                // $result00 = $conn->query($sql00);
-                // if ($result00->num_rows > 0) {
-                //     while ($row00 = $result00->fetch_assoc()) {
-                //         $neng = $row00["stnameeng"];
-                //         $nben = $row00["stnameben"];
-                //         $vill = $row00["previll"];
-                //         $grnametxt = '';
-                //     }
-                // }
-        
-
-                //if($card == '1'){$qrc = '<img src="https://chart.googleapis.com/chart?chs=20x20&cht=qr&chl=http://www.students.eimbox.com/myinfo.php?id=5000&choe=UTF-8&chld=L|0" />';} else {$qrc = '';}
-        
-
-
-                $key = array_search($stid, array_column($datam, 'stid'));
-                if ($key != NULL || $key != '') {
-                    $status = $datam[$key]['yn'];
-
-                    $per1 = $datam[$key]['period1'];
-                    $per2 = $datam[$key]['period2'];
-                    $per3 = $datam[$key]['period3'];
-                    $per4 = $datam[$key]['period4'];
-                    $per5 = $datam[$key]['period5'];
-                    $per6 = $datam[$key]['period6'];
-                    $per7 = $datam[$key]['period7'];
-                    $per8 = $datam[$key]['period8'];
-                    $bunk = $datam[$key]['bunk'];
-                } else {
-                    $status = 0;
-                    $per1 = '5';
-                    $per2 = '5';
-                    $per3 = '5';
-                    $per4 = '5';
-                    $per5 = '5';
-                    $per6 = '5';
-                    $per7 = '5';
-                    $per8 = '5';
-                    $bunk = 0;
-                }
-
-                if ($status == 0 || $bunk == 1) {
-                    $bgc = '--light';
-                    $dsbl = ' disabled';
-                    $gip = '';
-                    $found += 0;
-                } else {
-                    $bgc = '--lighter';
-                    $dsbl = '';
-                    $gip = 'checked';
-                    $found++;
-
-                    if ($per1 * $per2 * $per3 * $per4 * $per5 * $per6 * $per7 * $per8 == 0) {
-                        $bunk++;
-                    }
-                }
-
-                $day7 = '';
-                for ($u = 0; $u < 7; $u++) {
-                    $curdatet = strtotime($from) + $u * 86400;
-                    $curdate = date('Y-m-d', $curdatet);
-                    $clra = 'gray';
-                    foreach ($stattnd_7 as $iii => $st) {
-                        if ($st['stid'] == $stid && $st['adate'] == $curdate) {
-                            if ($st['yn'] == 1) {
-                                $clra = 'green';
-                            } else {
-                                $clra = 'red';
-                            }
-                            if ($st['bunk'] == 1) {
-                                $clra = 'orange';
-                            }
-                            unset($stattnd_7[$iii]);
-                        }
-                    }
-                    $day7 .= '<div class="attnd-dot" style="background:' . $clra . '; "></div>';
-                }
-
-
-                ?>
-                <div class="card text-center" style="background:var(<?php echo $bgc; ?>); color:var(--darker);"
-                    onclick="<?php echo $fun; ?>(<?php echo $stid; ?>, <?php echo $rollno; ?>, <?php echo $bunk; ?>)"
-                    id="block<?php echo $stid; ?>" <?php echo $dsbl; ?>>
-                    <img class="card-img-top" alt="">
-                    <div class="card-body">
-                        <table width="100%">
-                            <tr>
-                                <td style="padding-left:10px; width:50px;">
-                                    <?php if ($period < 2) { ?>
-                                        <input style="scale:1.5; border:1px solid var(--dark); " class="form-check-input"
-                                            type="checkbox" name="darkmode" id="sta<?php echo $stid; ?>"
-                                            onchange="grpssx(<?php echo $stid; ?>, <?php echo $rollno; ?>);" <?php echo $gip; ?>
-                                            disabled>
-                                    <?php } else { ?>
-                                        <input style="scale:1.5; border:1px solid black; " class="form-check-input" type="checkbox"
-                                            name="darkmodes" id="sta2<?php echo $stid; ?>"
-                                            onchange="grpssx2(<?php echo $stid; ?>, <?php echo $rollno; ?>);" <?php echo $gip; ?>
-                                            disabled>
-                                    <?php } ?>
-                                    <!--<label for="sta<?php echo $stid; ?>">&nbsp;&nbsp;&nbsp;Present</label>-->
-                                </td>
-                                <td style="width:40px;"><span
-                                        style="font-size:24px; font-weight:700;"><?php echo $rollno; ?></span>
-                                    <span>
-                                        <?php $qrc = '';
-                                        echo $qrc; ?>
-                                    </span>
-                                </td>
-                                <td style="text-align:left; padding-left:5px;">
-                                    <div class="stname-eng"><?php echo $neng; ?></div>
-                                    <div class="stname-ben"><?php echo $nben; ?></div>
-                                    <div class="st-id" style="font-weight:600; font-style:normal; color:gray;">ID #
-                                        <?php echo $stid . $grnametxt; ?>
-                                    </div>
-                                    <div class="st-id text-secondary"><?php echo $vill;
-                                    ; ?>
-
-                                        <div class="d-flex">
-                                            <div style="font-size:11px; font-weight:bold; padding-right:8px;">Today </div>
-
-                                            <?php
-                                            for ($u = 1; $u <= 8; $u++) {
-                                                if ($per1 == 0) {
-                                                    $clr = 'clr-2';
-                                                } else if ($per1 == 5) {
-                                                    $clr = 'clr-5';
-                                                } else {
-                                                    $clr = 'clr-5';
-                                                    $varvar = 'per' . $u;
-                                                    if ($$varvar == '1') {
-                                                        $clr = 'clr-1';
-                                                    } else if ($$varvar == '0') {
-                                                        $clr = 'clr-0';
-                                                    } else if ($$varvar == '5') {
-                                                        $clr = 'clr-2';
-                                                    }
-                                                }
-
-                                                // echo $clr;
-                                                ?>
-                                                <div class="attnd-dot <?php echo $clr; ?>"></div>
-                                                <?php
-                                            }
-                                            ?>
-                                        </div>
-
-                                        <div class="d-flex mt-1">
-                                            <div style="font-size:11px; font-weight:bold; padding-right:8px;">Last 7 days </div>
-                                            <?php echo $day7; ?>
-                                        </div>
-
-
-                                    </div>
-                                </td>
-                                <td style="text-align:right;" id="ut<?php echo $stid; ?>"><img src="<?php echo $pth; ?>"
-                                        class="st-pic-normal" /></td>
-                            </tr>
-                        </table>
-
-
-                    </div>
-                </div>
-                <div class="card text-center sele gg"
-                    style="background:var(<?php echo $bgc; ?>); display:none; color:var(--darker);"
-                    id="blocksel<?php echo $dtid; ?>">
-
-                </div>
-
-                <?php
-                $cnt++;
-            }
-        }
-
-        ?>
-
-
-        <?php if ($subm == 0) { ?>
-            <div class="card text-center" id="sfinal" style="padding:8px;"><button style="padding:15px; border-radius:5px;"
-                    class="btn btn-danger" onclick="submitfinal();">Submit
-                    Attendance</button></div>
-        <?php } ?>
     </div>
 
+    <div class="list-container px-1">
+        <?php
+        $total = 0; $present = 0; $bunks = 0;
+        $stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
+        $stmt_st->bind_param("ssss", $sy_param, $sccode, $classname, $sectionname);
+        $stmt_st->execute();
+        $res_st = $stmt_st->get_result();
+
+        while ($row = $res_st->fetch_assoc()):
+            $stid = $row["stid"];
+            $roll = $row["rollno"];
+            $total++;
+
+            $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
+            $neng = $datam_st_profile[$st_idx]["stnameeng"] ?? 'Unknown';
+            
+            $att = $datam[$stid] ?? null;
+            $is_p = ($att && $att['yn'] == 1);
+            $has_bunked = ($att && $att['bunk'] == 1);
+            
+            if ($is_p && !$has_bunked) $present++;
+            if ($has_bunked) $bunks++;
+        ?>
+            <div class="att-row shadow-sm <?php echo ($is_p && !$has_bunked) ? 'present' : 'absent'; ?>" 
+                 id="block_<?php echo $stid; ?>" onclick="<?php echo $fun; ?>('<?php echo $stid; ?>', '<?php echo $roll; ?>', <?php echo (int)$has_bunked; ?>)">
+                
+                <input type="checkbox" class="form-check-input m3-check" id="chk_<?php echo $stid; ?>" <?php echo $is_p ? 'checked' : ''; ?> disabled>
+                
+                <img src="https://eimbox.com/students/<?php echo $stid; ?>.jpg" class="st-avatar-tiny" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
+                
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem;"><?php echo $neng; ?></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-extrabold text-primary" style="font-size: 0.75rem;">Roll: <?php echo $roll; ?></span>
+                        <div class="ms-1">
+                            <?php 
+                            for ($i = 6; $i >= 0; $i--) {
+                                $cd = date('Y-m-d', strtotime("-$i days", strtotime($td)));
+                                $h = $hist_map[$stid][$cd] ?? null;
+                                $c = 'bg-g';
+                                if($h) $c = ($h['yn'] == 1) ? ($h['bunk'] == 1 ? 'bg-b' : 'bg-p') : 'bg-a';
+                                echo "<span class='dot $c'></span>";
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="ms-2" id="sync_<?php echo $stid; ?>"><i class="bi bi-check2-circle opacity-25"></i></div>
+            </div>
+        <?php endwhile; $stmt_st->close(); ?>
+    </div>
+
+    <?php if ($subm == 0): ?>
+        <div class="fixed-bottom p-3 bg-white border-top shadow-lg d-grid" style="bottom: 56px; border-radius: 12px 12px 0 0;">
+            <button class="btn btn-danger btn-lg fw-bold" style="border-radius: 8px;" onclick="submitFinal();">
+                <i class="bi bi-cloud-upload me-2"></i> SUBMIT ATTENDANCE
+            </button>
+        </div>
+    <?php endif; ?>
 </main>
-<div style="height:52px;"></div>
-
 
 <script>
-
-
-    function grp(id) {
-        var val = document.getElementById("sel" + id).value;
-        var infor = "dtid=" + id + "&val=" + val + "&opt=1";
-        $("#blocksel" + id).html("");
-
-        $.ajax({
-            type: "POST",
-            url: "grpupd.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $("#blocksel" + id).html('<span class=""><center>Fetching Section Name....</center></span>');
-            },
-            success: function (html) {
-                $("#blocksel" + id).html(html);
-            }
-        });
-    }
-
-    function grpp(id) {
-        var val = document.getElementById("sel" + id).value;
-        var infor = "dtid=" + id + "&val=" + val + "&opt=1";
-        $("#blocksel" + id).html("");
-
-        $.ajax({
-            type: "POST",
-            url: "fourupd.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $("#blocksel" + id).html('<span class=""><center>Fetching Section Name....</center></span>');
-            },
-            success: function (html) {
-                $("#blocksel" + id).html(html);
-            }
-        });
-    }
-
-
-
-
-    function grpss(id) {
-        var val = document.getElementById("sta" + id).checked;
-        var infor = "dtid=" + id + "&val=" + val + "&opt=3";
-        $("#blocksel" + id).html("");
-
-        $.ajax({
-            type: "POST",
-            url: "grpupd.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $("#blocksel" + id).html('<span class=""><center>Fetching Section Name....</center></span>');
-            },
-            success: function (html) {
-                $("#blocksel" + id).html(html);
-            }
-        });
-    }
-</script>
-<script>
-    function submitfinal() {
-        var fnd = parseInt(document.getElementById("att").innerHTML) * 1;
-        var cnt = parseInt(document.getElementById("cnt").innerHTML) * 1;
-        var infor = "cnt=" + cnt + "&fnd=" + fnd + "&opt=5&cls=<?php echo $classname; ?>&sec=<?php echo $sectionname; ?>&adate=<?php echo $td; ?>";
-        // alert(infor);
-        $("#sfinal").html("");
-        $.ajax({
-            type: "POST",
-            url: "backend/save-st-attnd.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $("#sfinal").html('<span class="chk blue"><i class="bi bi-floppy-fill"></i></span>');
-            },
-            success: function (html) {
-                $("#sfinal").html(html);
-            }
-        });
-    }
-</script>
-
-<script>
-    document.getElementById("cnt").innerHTML = "<?php echo $cnt; ?>";
-    document.getElementById("att").innerHTML = "<?php echo $found; ?>";
-    document.getElementById("found2").innerHTML = "<?php echo $found; ?>";
-    document.getElementById("bunk").innerHTML = "<?php echo $bunk; ?>";
-
-    function go(id) {
-        window.location.href = "student.php?id=" + id;
-    }  
-</script>
-
-<script>
-    function att(id, roll, bl, per) {
-        if (per >= 2) {
-            var val = document.getElementById("sta2" + id).checked;
-        } else {
-            var val = document.getElementById("sta" + id).checked;
-        }
-
-        var infor = "stid=" + id + "&roll=" + roll + "&val=" + val + "&opt=2&cls=<?php echo $classname; ?>&sec=<?php echo $sectionname; ?>&per=" + per + "&adate=<?php echo $td; ?>";
-        $("#ut" + id).html("");
-
-        $.ajax({
-            type: "POST",
-            url: "backend/save-st-attnd.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $("#ut" + id).html('<span class="chk blue"><i class="bi bi-server"></i></span>');
-            },
-            success: function (html) {
-                $("#ut" + id).html(html);
-            }
-        });
-    }
-
+    document.getElementById("att_count").innerText = "<?php echo $present; ?>";
+    document.getElementById("total_count").innerText = "<?php echo $total; ?>";
+    document.getElementById("bunk_count").innerText = "<?php echo $bunks; ?>";
 
     function dtcng() {
-        var ddd = document.getElementById("xp").value;
-        window.location.href = 'stattnd.php?cls=<?php echo $classname; ?>&sec=<?php echo $sectionname; ?>&dt=' + ddd;
+        const d = document.getElementById("xp").value;
+        window.location.href = `stattnd.php?cls=<?php echo urlencode($classname); ?>&sec=<?php echo urlencode($sectionname); ?>&dt=${d}&year=<?php echo $current_session; ?>`;
     }
 
+    function toggleAtt(id, roll, per) {
+        const chk = document.getElementById("chk_" + id);
+        const card = document.getElementById("block_" + id);
+        const sync = document.getElementById("sync_" + id);
+        let count = parseInt(document.getElementById("att_count").innerText);
+
+        chk.checked = !chk.checked;
+        if(chk.checked) { count++; card.classList.replace('absent', 'present'); }
+        else { count--; card.classList.replace('present', 'absent'); }
+        document.getElementById("att_count").innerText = count;
+
+        sync.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
+        $.post('backend/save-st-attnd.php', { 
+            stid: id, roll: roll, val: chk.checked ? 1 : 0, opt: 2, 
+            cls: '<?php echo $classname; ?>', sec: '<?php echo $sectionname; ?>', 
+            per: per, adate: '<?php echo $td; ?>' 
+        }, function() {
+            sync.innerHTML = '<i class="bi bi-check-all text-success fs-5"></i>';
+        });
+    }
 
     function grpssx(id, roll, bunk) {
-        // alert(0);
-        if (bunk == 1) {
-            Swal.fire({
-                title: "<small>Already Bunked</small>",
-                icon: "warning",
-                draggable: true
-            });
-        } else {
-            var bl = document.getElementById("sta" + id).checked;
-            var per = 1;
-            var cnt = parseInt(document.getElementById("att").innerHTML) * 1;
-            if (bl == true) {
-                document.getElementById("sta" + id).checked = false;
-                cnt--;
-            } else {
-                document.getElementById("sta" + id).checked = true;
-                cnt++;
-            }
-            document.getElementById("att").innerHTML = cnt;
-            att(id, roll, bl, per);
-        }
+        if(bunk == 1) { Swal.fire('Already Bunked', '', 'warning'); return; }
+        toggleAtt(id, roll, 1);
     }
 
     function grpssx2(id, roll, bunk) {
-        // alert(2);
+        if(bunk == 1) { Swal.fire('Already Bunked', '', 'warning'); return; }
+        toggleAtt(id, roll, <?php echo $period; ?>);
+    }
 
-        if (bunk == 1) {
-            Swal.fire({
-                title: "<small>Already Bunked</small>",
-                icon: "warning",
-                draggable: true
-            });
-        } else {
-            var per = <?php echo $period; ?>;
-
-            var bl = document.getElementById("sta2" + id).checked;
-            var cnt = parseInt(document.getElementById("att").innerHTML) * 1;
-            if (bl == true) {
-                document.getElementById("sta2" + id).checked = false;
-                cnt--;
-            } else {
-                document.getElementById("sta2" + id).checked = true;
-                cnt++;
+    function submitFinal() {
+        Swal.fire({
+            title: 'Confirm Submission?',
+            text: 'You cannot change attendance after submission.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#6750A4'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const fnd = document.getElementById("att_count").innerText;
+                const cnt = document.getElementById("total_count").innerText;
+                $.post('backend/save-st-attnd.php', { 
+                    cnt: cnt, fnd: fnd, opt: 5, 
+                    cls: '<?php echo $classname; ?>', sec: '<?php echo $sectionname; ?>', 
+                    adate: '<?php echo $td; ?>' 
+                }, function() { location.reload(); });
             }
-            document.getElementById("att").innerHTML = cnt;
-            att(id, roll, bl, per);
-        }
+        });
     }
 </script>
+
+<?php include 'footer.php'; ?>

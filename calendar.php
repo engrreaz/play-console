@@ -1,91 +1,121 @@
 <?php
-include 'inc.php'; // Contains header, DB connection, and session data
-
-// Fetch calendar events and weekend settings
+include 'inc.php'; 
 include_once 'datam/datam-calendar.php'; // Provides $datam_calendar_events
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+
+// ২. উইকেন্ড সেটিংস ফেচ করা
 $wday_ind = array_search('Weekends', array_column($ins_all_settings, 'setting_title'));
 $wday_text = ($wday_ind !== false) ? $ins_all_settings[$wday_ind]['settings_value'] : '';
 
-// Format events for FullCalendar
+// ৩. FullCalendar-এর জন্য ইভেন্ট ডাটা ফরম্যাট করা
 $fullcalendar_events = [];
 foreach ($datam_calendar_events as $event) {
-    $is_holiday = false;
     $day_name = date('l', strtotime($event['date']));
-    if (str_contains($wday_text, $day_name)) {
-        $is_holiday = true;
-    }
+    $is_holiday = str_contains($wday_text, $day_name);
 
     $fullcalendar_events[] = [
         'title' => $event['descrip'],
         'start' => $event['date'],
-        'allDay' => true, // Assuming all events are all-day events
-        'color' => $is_holiday ? '#dc3545' : ($event['color'] ?: '#0d6efd'), // Red for holidays, default blue otherwise
+        'allDay' => true,
+        'color' => $is_holiday ? '#B3261E' : ($event['color'] ?: '#6750A4'), // M3 Red for holidays, Purple for events
         'extendedProps' => [
-            'icon' => $is_holiday ? 'x-square-fill' : $event['icon']
+            'icon' => $is_holiday ? 'calendar-x' : ($event['icon'] ?: 'dot')
         ]
     ];
 }
+
+$page_title = "Academic Calendar";
 ?>
 
 <style>
-    body { background-color: #f0f2f5; }
-    #calendar {
-        background-color: #fff;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.46875rem 2.1875rem rgba(4,9,20,0.03), 0 0.9375rem 1.40625rem rgba(4,9,20,0.03), 0 0.25rem 0.53125rem rgba(4,9,20,0.05);
+    body { background-color: #FEF7FF; font-size: 0.85rem; }
+
+    /* M3 Standard App Bar (8px Bottom Radius) */
+    .m3-app-bar {
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
     }
-    .fc-event-title {
-        white-space: normal !important; /* Allow event titles to wrap */
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Compact Calendar Container (8px Radius) */
+    .calendar-card {
+        background: #fff; border-radius: 8px; padding: 8px;
+        margin: 12px 8px; border: 1px solid #eee;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
+
+    /* FullCalendar M3 Customization */
+    .fc { font-family: inherit; }
+    .fc .fc-toolbar-title { font-size: 1rem !important; font-weight: 800; color: #6750A4; }
+    .fc .fc-button-primary { 
+        background-color: #F3EDF7 !important; border: none !important; color: #6750A4 !important; 
+        font-weight: 700 !important; font-size: 0.8rem !important; border-radius: 8px !important;
+    }
+    .fc .fc-button-active { background-color: #6750A4 !important; color: #fff !important; }
+    
+    .fc-daygrid-day-number { font-weight: 700; font-size: 0.8rem; color: #49454F; text-decoration: none !important; }
+    .fc-event { border-radius: 4px !important; border: none !important; padding: 1px 4px !important; font-size: 0.65rem !important; }
+    
+    /* Highlight Weekends/Holidays */
+    .holiday-cell { background-color: #FFF0F0 !important; }
 </style>
 
-<main class="container-fluid mt-4">
+<header class="m3-app-bar shadow-sm">
+    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.7rem;"><?php echo $current_session; ?></span>
+    </div>
+</header>
 
-    <div class="card mb-4">
-        <div class="card-body d-flex align-items-center">
-            <i class="bi bi-calendar3-week text-primary me-3" style="font-size: 2.5rem;"></i>
-            <div>
-                <h1 class="h4 mb-0">Academic Calendar</h1>
-                <p class="mb-0 text-muted">View institution events, holidays, and schedules.</p>
-            </div>
-        </div>
+<main class="pb-5">
+    <div class="calendar-card shadow-sm">
+        <div id='calendar'></div>
     </div>
 
-    <div id='calendar'></div>
-
+    <div class="px-3 d-flex gap-3 justify-content-center opacity-75">
+        <div class="small d-flex align-items-center"><span class="badge bg-danger rounded-circle p-1 me-1">&nbsp;</span> Holiday</div>
+        <div class="small d-flex align-items-center"><span class="badge bg-primary rounded-circle p-1 me-1">&nbsp;</span> Event</div>
+    </div>
 </main>
 
-<div style="height:52px;"></div>
+<div style="height: 65px;"></div> <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
-    
-    // Get events data from PHP
     var eventsData = <?php echo json_encode($fullcalendar_events); ?>;
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        themeSystem: 'bootstrap5',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listWeek'
-        },
         initialView: 'dayGridMonth',
-        weekends: true, // Show weekends
+        headerToolbar: {
+            left: 'prev,next',
+            center: 'title',
+            right: 'today'
+        },
+        height: 'auto',
         events: eventsData,
+        firstDay: 6, // Saturday start (BD Standard)
         eventContent: function(arg) {
-            // Custom event rendering to include an icon
-            let iconEl = document.createElement('i');
-            let iconName = arg.event.extendedProps.icon || 'dot';
-            iconEl.className = 'bi bi-' + iconName + ' me-2';
-
-            let titleEl = document.createElement('span');
-            titleEl.innerHTML = arg.event.title;
-            
-            let arrayOfDomNodes = [ iconEl, titleEl ];
-            return { domNodes: arrayOfDomNodes };
+            let iconName = arg.event.extendedProps.icon || 'dot-fill';
+            return {
+                html: `<div class="d-flex align-items-center px-1">
+                        <i class="bi bi-${iconName} me-1" style="font-size: 0.6rem;"></i>
+                        <span class="text-truncate">${arg.event.title}</span>
+                      </div>`
+            };
+        },
+        dayCellClassNames: function(arg) {
+            // উইকেন্ড হাইলাইট করার লজিক (JS এ)
+            const day = arg.date.getDay(); 
+            const weekends = "<?php echo $wday_text; ?>";
+            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            if (weekends.includes(dayNames[day])) { return ['holiday-cell']; }
         }
     });
 

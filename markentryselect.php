@@ -1,11 +1,17 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. এক্সাম লিস্ট ফেচ করা (Prepared Statement)
+// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
+                   ?? $_COOKIE['query-session'] 
+                   ?? $sy;
+$sy_param = "%" . $current_session . "%";
+
+$page_title = "Marks Entry Wizard";
+
+// ২. এক্সাম লিস্ট ফেচ করা (Prepared Statement)
 $exam_options = "";
 $exn_default = 'Annual';
-$sy_param = "%$sy%";
-
 $stmt_ex = $conn->prepare("SELECT examtitle FROM examlist WHERE sccode = ? AND sessionyear LIKE ? ORDER BY id ASC");
 $stmt_ex->bind_param("ss", $sccode, $sy_param);
 $stmt_ex->execute();
@@ -17,7 +23,7 @@ while ($row = $res_ex->fetch_assoc()) {
 }
 $stmt_ex->close();
 
-// ২. ক্লাস লিস্ট ফেচ করা
+// ৩. ক্লাস লিস্ট ফেচ করা
 $class_options = "";
 $stmt_cl = $conn->prepare("SELECT areaname FROM areas WHERE sessionyear LIKE ? AND user = ? GROUP BY areaname ORDER BY idno ASC");
 $stmt_cl->bind_param("ss", $sy_param, $rootuser);
@@ -31,152 +37,112 @@ $stmt_cl->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; font-size: 0.9rem; }
 
-    /* Top App Bar Style */
+    /* Standard M3 Top Bar (8px Bottom Radius) */
     .m3-app-bar {
-        background-color: #FFFFFF;
-        padding: 16px;
-        border-radius: 0 0 24px 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        position: sticky;
-        top: 0;
-        z-index: 1020;
+        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
+        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border-radius: 0 0 8px 8px;
     }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
-    /* Form Container Card */
+    /* Selection Card (8px Radius) */
     .selection-card {
-        background: #FFFFFF;
-        border-radius: 28px;
-        padding: 24px;
-        margin: 15px;
-        border: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background: #FFFFFF; border-radius: 8px; padding: 20px;
+        margin: 12px 8px; border: 1px solid #eee;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    /* Floating Labels M3 Style */
+    /* Condensed Input Fields */
     .form-floating > .form-select, .form-floating > .form-control {
-        border-radius: 16px;
-        border: 1px solid #79747E;
-        background-color: transparent;
+        border-radius: 8px; border: 1px solid #79747E; background-color: transparent;
+        height: 52px; font-size: 0.85rem; font-weight: 600;
     }
+    .form-floating > label { font-size: 0.75rem; color: #6750A4; font-weight: 700; }
 
-    .form-floating > .form-select:focus {
-        border-color: #6750A4;
-        box-shadow: 0 0 0 1px #6750A4;
-    }
+    .step-header { display: flex; align-items: center; margin-bottom: 16px; color: #6750A4; }
+    .step-icon { width: 32px; height: 32px; border-radius: 6px; background: #F3EDF7; display: flex; align-items: center; justify-content: center; margin-right: 10px; }
 
-    /* Step Indicator Icon */
-    .step-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background-color: #EADDFF;
-        color: #21005D;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-    }
-
-    /* Button M3 Style */
+    /* Button M3 (8px Radius) */
     .btn-m3-primary {
-        background-color: #6750A4;
-        color: #FFFFFF;
-        border-radius: 100px;
-        padding: 14px 24px;
-        font-weight: 700;
-        border: none;
-        width: 100%;
-        box-shadow: 0 2px 6px rgba(103, 80, 164, 0.3);
-        transition: transform 0.2s;
+        background-color: #6750A4; color: #FFFFFF; border-radius: 8px;
+        padding: 12px; font-weight: 700; border: none; width: 100%;
+        transition: transform 0.1s;
     }
-    .btn-m3-primary:active { transform: scale(0.96); opacity: 0.9; }
+    .btn-m3-primary:active { transform: scale(0.97); }
 
-    .loading-overlay {
-        font-size: 0.85rem;
-        color: #6750A4;
-        font-weight: 600;
-        text-align: center;
-        padding: 10px;
-    }
+    .loading-hint { font-size: 0.7rem; color: #6750A4; text-align: center; margin-top: 5px; font-weight: 600; }
 </style>
 
+<header class="m3-app-bar shadow-sm">
+    <a href="tools.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
+    <h1 class="page-title"><?php echo $page_title; ?></h1>
+    <div class="action-icons">
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;">
+            SY: <?php echo $current_session; ?>
+        </span>
+    </div>
+</header>
+
 <main class="pb-5">
-    <div class="m3-app-bar mb-3">
-        <div class="d-flex align-items-center">
-            <a href="tools.php" class="btn btn-link text-dark p-0 me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-            <div>
-                <h4 class="fw-bold mb-0">Marks Entry</h4>
-                <small class="text-muted">Result Management Wizard</small>
+    <div class="selection-card shadow-sm">
+        <div class="step-header">
+            <div class="step-icon"><i class="bi bi-filter-circle-fill"></i></div>
+            <h6 class="fw-bold mb-0">Select Parameters</h6>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" id="exam">
+                <?php echo $exam_options; ?>
+            </select>
+            <label for="exam">Examination Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" id="classname" onchange="fetchsection();">
+                <option value="" disabled selected>Select Class</option>
+                <?php echo $class_options; ?>
+            </select>
+            <label for="classname">Academic Class</label>
+        </div>
+
+        <div id="sectionblock">
+            <div class="form-floating mb-3">
+                <select class="form-select" id="sectionname" disabled>
+                    <option value="">Select Class First</option>
+                </select>
+                <label for="sectionname">Section / Group</label>
             </div>
         </div>
+
+        <div id="subblock">
+            <div class="form-floating mb-4">
+                <select class="form-select" id="subject" disabled>
+                    <option value="">Select Section First</option>
+                </select>
+                <label for="subject">Subject List</label>
+            </div>
+        </div>
+
+        <button class="btn-m3-primary shadow-sm" onclick="gob();">
+            <i class="bi bi-pencil-square me-2"></i> START MARK ENTRY
+        </button>
     </div>
 
-    <div class="container-fluid">
-        <div class="selection-card shadow-sm">
-            <div class="d-flex align-items-center mb-4">
-                <div class="step-icon">
-                    <i class="bi bi-clipboard-check-fill"></i>
-                </div>
-                <h6 class="fw-bold mb-0 text-dark">Selection Criteria</h6>
-            </div>
-
-            <div class="form-floating mb-3">
-                <select class="form-select" id="exam">
-                    <?php echo $exam_options; ?>
-                </select>
-                <label for="exam" class="text-muted"><i class="bi bi-calendar-event me-2"></i>Select Examination</label>
-            </div>
-
-            <div class="form-floating mb-3">
-                <select class="form-select" id="classname" onchange="fetchsection();">
-                    <option value="" disabled selected>Choose a Class</option>
-                    <?php echo $class_options; ?>
-                </select>
-                <label for="classname" class="text-muted"><i class="bi bi-mortarboard me-2"></i>Academic Class</label>
-            </div>
-
-            <div id="sectionblock">
-                <div class="form-floating mb-3">
-                    <select class="form-select" id="sectionname" disabled>
-                        <option value="">Select Class First</option>
-                    </select>
-                    <label for="sectionname" class="text-muted"><i class="bi bi-diagram-3 me-2"></i>Section/Group</label>
-                </div>
-            </div>
-
-            <div id="subblock">
-                <div class="form-floating mb-4">
-                    <select class="form-select" id="subject" disabled>
-                        <option value="">Select Section First</option>
-                    </select>
-                    <label for="subject" class="text-muted"><i class="bi bi-book me-2"></i>My Subjects</label>
-                </div>
-            </div>
-
-            <button class="btn-m3-primary shadow" onclick="gob();">
-                <i class="bi bi-arrow-right-circle-fill me-2"></i> PROCEED TO ENTRY
-            </button>
-        </div>
-
-        <div class="px-4 mt-2">
-            <div class="d-flex align-items-start text-muted">
-                <i class="bi bi-info-circle me-2 mt-1"></i>
-                <p style="font-size: 0.75rem; line-height: 1.4;">
-                    Only subjects assigned to your ID will appear in the list. For corrections, contact your system administrator.
-                </p>
-            </div>
+    <div class="px-4 mt-1">
+        <div class="d-flex align-items-start text-muted opacity-75">
+            <i class="bi bi-info-circle me-2 mt-1 fs-6"></i>
+            <p style="font-size: 0.7rem; line-height: 1.3;">
+                Ensure all student profiles are up to date for session <?php echo $current_session; ?> before starting mark entry.
+            </p>
         </div>
     </div>
 </main>
 
 <div style="height: 70px;"></div>
 
-
-
 <script>
-    // মেইন নেভিগেশন লজিক
     function gob() {
         const cls = document.getElementById("classname").value;
         const sec = document.getElementById("sectionname")?.value;
@@ -184,53 +150,38 @@ $stmt_cl->close();
         const exam = document.getElementById("exam").value;
 
         if(!cls || !sec || !sub || !exam) {
-            Swal.fire({
-                title: 'Selection Required',
-                text: 'Please fill out all fields before proceeding.',
-                icon: 'warning',
-                confirmButtonColor: '#6750A4'
-            });
+            Swal.fire({ title: 'Missing Info', text: 'All fields are mandatory.', icon: 'warning', confirmButtonColor: '#6750A4' });
             return;
         }
 
-        const tail = `?exam=${exam}&cls=${cls}&sec=${sec}&sub=${sub}&assess=n/a`;
-        window.location.href = "markentry.php" + tail;
+        window.location.href = `markentry.php?exam=${exam}&cls=${cls}&sec=${sec}&sub=${sub}&year=<?php echo $current_session; ?>`;
     }
 
-    // সেকশন ফেচ করার AJAX
     function fetchsection() {
         const cls = document.getElementById("classname").value;
-        const infor = `user=<?php echo $rootuser; ?>&cls=${cls}`;
-
         $.ajax({
             type: "POST",
             url: "backend/fetch-section-mark.php",
-            data: infor,
+            data: { user: '<?php echo $rootuser; ?>', cls: cls },
             beforeSend: function () {
-                $('#sectionblock').html('<div class="loading-overlay"><div class="spinner-border spinner-border-sm me-2"></div> Fetching Sections...</div>');
+                $('#sectionblock').html('<div class="loading-hint"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</div>');
             },
-            success: function (html) {
-                $("#sectionblock").html(html);
-            }
+            success: function (html) { $("#sectionblock").html(html); }
         });
     }
 
-    // সাবজেক্ট ফেচ করার AJAX
+    // Note: fetchsubject() সাধারণত section dropdown এর onchange এ কল হবে যা fetch-section-mark.php থেকে আসবে।
     function fetchsubject() {
         const cls = document.getElementById("classname").value;
         const sec = document.getElementById("sectionname").value;
-        const infor = `sccode=<?php echo $sccode; ?>&tid=<?php echo $userid; ?>&cls=${cls}&sec=${sec}`;
-
         $.ajax({
             type: "POST",
             url: "backend/fetch-subject-mark.php",
-            data: infor,
+            data: { sccode: '<?php echo $sccode; ?>', tid: '<?php echo $userid; ?>', cls: cls, sec: sec },
             beforeSend: function () {
-                $('#subblock').html('<div class="loading-overlay"><div class="spinner-border spinner-border-sm me-2"></div> Retriving Subjects...</div>');
+                $('#subblock').html('<div class="loading-hint"><div class="spinner-border spinner-border-sm me-2"></div>Fetching...</div>');
             },
-            success: function (html) {
-                $("#subblock").html(html);
-            }
+            success: function (html) { $("#subblock").html(html); }
         });
     }
 </script>

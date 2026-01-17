@@ -150,13 +150,13 @@ if (isset($count_class) && $count_class > 0) {
     // Navigation Functions (অপরিবর্তিত রাখা হয়েছে)
     function report_menu_my_class() { window.location.href = "my-class-report.php"; }
     function report_menu_student_list() { window.location.href = "student-list.php"; }
-    function report_menu_my_collection() { window.location.href = "my-collection.php"; }
+    function report_menu_my_collection() { window.location.href = "mypr.php"; }
     function report_menu_daily_collection() { window.location.href = "dailycollection.php"; }
     function report_menu_attnd_register() { window.location.href = "st-attnd-register.php"; }
     function report_menu_absent_bunk_list() { window.location.href = "absent-bunk-list.php"; }
     function report_menu_cls_routine() { window.location.href = "clsroutine.php"; }
     function report_menu_my_subjects() { window.location.href = "my-subject-list.php"; }
-    function report_menu_honorable_teachers() { window.location.href = "teacher-list.php"; }
+    function report_menu_honorable_teachers() { window.location.href = "teachers-list.php"; }
     function report_menu_ebooks_x() { window.location.href = "e-books.php"; }
     function report_menu_calendar() { window.location.href = "calendar.php"; }
     function report_menu_notices() { window.location.href = "notices.php"; }

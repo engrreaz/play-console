@@ -1,5 +1,6 @@
 <?php
 session_start();
+$page_title = "Class Students";
 include_once 'inc.php'; 
 include_once 'datam/datam-stprofile.php';
 
@@ -21,7 +22,7 @@ $settings_map = array_column($ins_all_settings, 'settings_value', 'setting_title
 if (isset($settings_map['Collection']) && strpos($settings_map['Collection'], $userlevel) !== false) $collection_permission = 1;
 if (isset($settings_map['Profile Entry']) && strpos($settings_map['Profile Entry'], $userlevel) !== false) $profile_entry_permission = 1;
 
-$page_title = "Class Students";
+
 ?>
 
 <style>
@@ -60,8 +61,9 @@ $page_title = "Class Students";
     .st-card.expanded .action-bar { display: grid; }
     .st-card.expanded { border-color: #6750A4; background-color: #F7F2FA; }
 
-    .action-item { background: #fff; border-radius: 8px; padding: 6px; border: 1px solid #E7E0EC; text-align: center; text-decoration: none !important; }
-    .action-item i { font-size: 1.1rem; color: #6750A4; display: block; }
+    .action-item {  border-radius: 8px; padding: 6px; border: 0px solid #E7E0EC; text-align: center; text-decoration: none !important; }
+    .action-item:hover { background: #F7F2FA; color:#6750A4;}
+    .action-item i { font-size: 1.5rem;  display: block; }
     .action-lbl { font-size: 0.55rem; font-weight: 700; color: #49454F; margin-top: 2px; text-transform: uppercase; }
 
     .scroll-hide::-webkit-scrollbar { display: none; }

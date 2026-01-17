@@ -30,7 +30,7 @@ $stmt_rt->close();
 
 // সাবজেক্ট এবং টিচার ডাটা লোড (Assuming these arrays are available from inc.php)
 include_once 'datam/datam-subject-list.php'; 
-include_once 'datam/datam-teacher-list.php';
+include_once 'datam/datam-teacher.php';
 
 $week_days = [
     1 => 'Sat', 2 => 'Sun', 3 => 'Mon', 4 => 'Tue', 5 => 'Wed', 6 => 'Thu', 7 => 'Fri'
