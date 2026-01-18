@@ -1,90 +1,129 @@
 <?php
-// ডাটাবেজ থেকে আজকের রুটিন ফেচ করার অপ্টিমাইজড কোড (এটি ফাংশন ফাইলে রাখলে ভালো)
-$day_today = date('l'); // e.g., 'Monday'
+// ফাইল: front-page-block/schedule.php
+
+$day_today = date('l'); 
 $now_time = date('H:i:s');
-
-// ১. বর্তমান ক্লাস এবং পরবর্তী ক্লাস একসাথে বের করার কোয়েরি
-// নোট: আপনার টেবিলের নাম 'routine' এবং কলাম 'period_start', 'period_end' ধরে নিচ্ছি।
-$stmt_sched = $conn->prepare("
-    (SELECT *, 'current' as status FROM classroutine 
-     WHERE sccode = ? AND day = ? AND ? BETWEEN periodtime AND periodtimeend LIMIT 1)
-    UNION
-    (SELECT *, 'next' as status FROM classroutine 
-     WHERE sccode = ? AND day = ? AND periodtime > ? 
-     ORDER BY periodtime ASC LIMIT 1)
-");
-
-$stmt_sched->bind_param("isssis", $sccode, $day_today, $now_time, $sccode, $day_today, $now_time);
-$stmt_sched->execute();
-$res_sched = $stmt_sched->get_result();
-
 $current_class = null;
 $next_class = null;
 
-while ($row = $res_sched->fetch_assoc()) {
-    if ($row['status'] == 'current') $current_class = $row;
-    else $next_class = $row;
+if (isset($conn, $sccode)) {
+    // ১. বর্তমান ক্লাস এবং পরবর্তী ক্লাস একসাথে বের করার অপ্টিমাইজড কুয়েরি
+    $sql_sched = "
+        (SELECT *, 'current' as status FROM classroutine 
+         WHERE sccode = ? AND day = ? AND ? BETWEEN periodtime AND periodtimeend LIMIT 1)
+        UNION
+        (SELECT *, 'next' as status FROM classroutine 
+         WHERE sccode = ? AND day = ? AND periodtime > ? 
+         ORDER BY periodtime ASC LIMIT 1)
+    ";
+
+    $stmt_sched = $conn->prepare($sql_sched);
+    $stmt_sched->bind_param("ssssss", $sccode, $day_today, $now_time, $sccode, $day_today, $now_time);
+    $stmt_sched->execute();
+    $res_sched = $stmt_sched->get_result();
+
+    while ($row = $res_sched->fetch_assoc()) {
+        if ($row['status'] == 'current') $current_class = $row;
+        else $next_class = $row;
+    }
+    $stmt_sched->close();
 }
 ?>
 
-<div class="m-card elevation-1 mb-4 border-0" style="background-color: var(--md-surface-variant, #f0f0f0);">
-    <div class="d-flex align-items-center mb-3">
-        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-            <i class="bi bi-clock-fill fs-6"></i>
-        </div>
-        <h6 class="ms-2 mb-0 fw-bold">Class Schedule</h6>
+<style>
+    .m3-schedule-card { background: #fff; border-radius: 8px; padding: 12px; }
+    
+    .ongoing-box { 
+        background: #F3EDF7; border-radius: 8px; padding: 12px; 
+        border: 1px solid #EADDFF; position: relative;
+    }
+    
+    .status-pill {
+        font-size: 0.55rem; font-weight: 800; padding: 2px 8px; 
+        border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+        background: #C8E6C9; color: #1B5E20; display: inline-flex; align-items: center;
+    }
+
+    .sub-name-m3 { font-size: 1.1rem; font-weight: 800; color: #1C1B1F; margin: 4px 0; }
+    .time-rem { font-size: 0.7rem; font-weight: 700; color: #6750A4; }
+
+    .m3-progress-slim { background: #E7E0EC; height: 4px; border-radius: 2px; overflow: hidden; margin-top: 10px; }
+    .m3-progress-fill-active { 
+        background: #6750A4; height: 100%; width: 60%; 
+        background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+        background-size: 1rem 1rem; animation: progress-bar-stripes 1s linear infinite;
+    }
+
+    .next-strip {
+        background: #f8f9fa; border-radius: 8px; padding: 8px 12px;
+        margin-top: 8px; border: 1px solid #eee; display: flex; align-items: center;
+    }
+    .next-lbl { font-size: 0.6rem; font-weight: 800; color: #79747E; text-transform: uppercase; margin-right: 8px; }
+    .next-val { font-size: 0.75rem; font-weight: 700; color: #1D1B20; }
+</style>
+
+<div class="m3-schedule-card shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.8px;">
+            <i class="bi bi-clock-fill me-1 text-primary"></i> Class Schedule
+        </span>
+        <span class="badge bg-light text-dark border-0" style="font-size: 0.6rem; font-weight: 700;"><?php echo date('h:i A'); ?></span>
     </div>
 
     <?php if ($current_class): ?>
-        <div class="p-3 rounded-4 bg-white border border-primary-subtle position-relative overflow-hidden shadow-sm">
+        <div class="ongoing-box shadow-sm">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <span class="badge rounded-pill text-bg-success mb-2 px-3 py-1">
-                        <span class="spinner-grow spinner-grow-sm me-1" role="status"></span> ONGOING
-                    </span>
-                    <h4 class="fw-bold mb-1 text-dark"><?php echo htmlspecialchars($current_class['subject']); ?></h4>
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-geo-alt me-1"></i> Room: <?php echo htmlspecialchars($current_class['room_no'] ?? 'N/A'); ?>
-                    </p>
+                    <div class="status-pill mb-1">
+                        <span class="spinner-grow spinner-grow-sm me-1" style="width: 8px; height: 8px;"></span> Ongoing
+                    </div>
+                    <div class="sub-name-m3 text-truncate"><?php echo htmlspecialchars($current_class['subject']); ?></div>
+                    <div class="small text-muted fw-medium">
+                        <i class="bi bi-geo-alt me-1"></i> Room: <?php echo $current_class['room_no'] ?? 'N/A'; ?>
+                    </div>
                 </div>
                 <div class="text-end">
-                    <div class="fw-bold text-primary"><?php echo date('h:i A', strtotime($current_class['period_end'])); ?></div>
-                    <div class="small text-muted">Ends at</div>
+                    <div class="time-rem"><?php echo date('h:i A', strtotime($current_class['periodtimeend'])); ?></div>
+                    <div style="font-size: 0.55rem; font-weight: 700; color: #79747E; text-transform: uppercase;">Ends At</div>
                 </div>
             </div>
             
-            <div class="progress mt-3" style="height: 4px;">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 65%;"></div>
+            <div class="m3-progress-slim">
+                <div class="m3-progress-fill-active"></div>
             </div>
         </div>
 
         <?php if ($next_class): ?>
-            <div class="mt-3 d-flex align-items-center p-2 rounded-3" style="background: rgba(0,0,0,0.03);">
-                <i class="bi bi-arrow-right-circle me-2 text-secondary"></i>
-                <div class="small flex-grow-1">
-                    <span class="text-muted">Next up: </span>
-                    <span class="fw-medium"><?php echo htmlspecialchars($next_class['subject']); ?></span>
-                </div>
-                <div class="small fw-bold text-secondary">
-                    <?php echo date('h:i A', strtotime($next_class['period_start'])); ?>
-                </div>
+            <div class="next-strip">
+                <span class="next-lbl">Up Next:</span>
+                <span class="next-val flex-grow-1 text-truncate"><?php echo htmlspecialchars($next_class['subject']); ?></span>
+                <span class="badge bg-white text-dark border px-2" style="font-size: 0.6rem;"><?php echo date('h:i A', strtotime($next_class['periodtime'])); ?></span>
             </div>
         <?php endif; ?>
 
     <?php elseif ($next_class): ?>
-        <div class="text-center py-3">
-            <div class="mb-2 text-primary">
-                <i class="bi bi-hourglass-split display-6"></i>
-            </div>
-            <h5 class="fw-bold mb-1"><?php echo htmlspecialchars($next_class['subject']); ?></h5>
-            <p class="text-muted small mb-3">Starting at <?php echo date('h:i A', strtotime($next_class['period_start'])); ?></p>
-            <button class="btn btn-outline-primary btn-sm rounded-pill px-4">View Full Routine</button>
+        <div class="text-center py-3 bg-light rounded-3 border border-dashed">
+            <i class="bi bi-hourglass-split text-primary fs-3 opacity-50"></i>
+            <div class="fw-bold text-dark mt-1" style="font-size: 0.9rem;"><?php echo htmlspecialchars($next_class['subject']); ?></div>
+            <div class="small text-muted fw-bold" style="font-size: 0.65rem;">Starts at <?php echo date('h:i A', strtotime($next_class['periodtime'])); ?></div>
+            <a href="clsroutine.php" class="btn btn-link btn-sm text-decoration-none fw-bold p-0 mt-2" style="font-size: 0.7rem;">VIEW FULL ROUTINE</a>
         </div>
 
     <?php else: ?>
-        <div class="text-center py-4 text-muted">
-            <i class="bi bi-calendar-check fs-1 opacity-25"></i>
-            <p class="mt-2 mb-0 small">Great! All classes finished for today.</p>
+        <div class="text-center py-4 opacity-50">
+            <i class="bi bi-calendar-check display-6"></i>
+            <p class="fw-bold mt-2 mb-0" style="font-size: 0.75rem;">All classes finished for today.</p>
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+    // প্রগ্রেস বার সিমুলেশন (প্রকৃত সময়ের ওপর ভিত্তি করে আপডেট করা সম্ভব)
+    document.addEventListener("DOMContentLoaded", function() {
+        const bar = document.querySelector('.m3-progress-fill-active');
+        if(bar) {
+            // এখানে আপনি PHP দিয়ে (বর্তমান সময় - শুরু সময়) / মোট সময় এর পারসেন্টেজ বসাতে পারেন
+            bar.style.width = '65%'; 
+        }
+    });
+</script>

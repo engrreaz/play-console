@@ -1,9 +1,60 @@
 <?php
 // Initialization: Sets up session, DB connection, and global vars
-include 'inc.php'; 
+include 'inc.php';
 
-// Page Title for the new layout
-$page_title = 'Dashboard';
+$sy_param = '%' . $sessionyear . '%';
+
+$page_title = "Dashboard";
+
+
+$hour = date('H');
+$greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "Good Evening");
+?>
+
+<header class="m3-app-bar">
+    <div class="d-flex align-items-center flex-grow-1">
+        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
+            style="width: 38px; height: 38px; background: #6750A4 !important;">
+            <img src="iimg/logo.png" width="100%">
+        </div>
+        <div>
+            <div class="app-bar-title my-0">EIM<span style="color: #6750A4;">Box</span></div>
+            <div class="text-small my-0"><?= $scname ?></div>
+        </div>
+
+    </div>
+ 
+    
+<div class="d-flex align-items-center gap-2 position-relative">
+    <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
+         style="width: 34px; height: 34px; cursor:pointer;" 
+         onclick="toggleAvatarMenu()">
+        <img src="<?= $pth ?>" width="100%">
+    </div>
+
+    <div id="avatarMenu" class="avatar-dropdown shadow-sm">
+        <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
+        <div class="dd-divider"></div>
+
+        <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
+        <div class="dd-item" onclick="goMy()">👤 My Profile</div>
+        <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
+        <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
+
+        <div class="dd-divider"></div>
+        <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
+        <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
+    </div>
+</div>
+
+
+
+
+</header>
+
+
+
+<?php
 
 // --- Data Fetching & Business Logic (Now Secured) ---
 // TODO: This logic should be moved into functions for better organization.
@@ -91,8 +142,10 @@ $notice_block = 0;
 $find_app_notice = array_search('App Notice', array_column($ins_all_settings, 'setting_title'));
 if ($find_app_notice !== false) {
     $settings_value = $ins_all_settings[$find_app_notice]['settings_value'];
-    if (strpos($settings_value, 'Marque') !== false) $notice_marque = 1;
-    if (strpos($settings_value, 'Block') !== false) $notice_block = 1;
+    if (strpos($settings_value, 'Marque') !== false)
+        $notice_marque = 1;
+    if (strpos($settings_value, 'Block') !== false)
+        $notice_block = 1;
 }
 
 // Get active notices
@@ -104,7 +157,7 @@ $notices = $result_notice->fetch_all(MYSQLI_ASSOC);
 
 // --- Class Teacher Info ---
 if (!empty($cteacher_data) && $cteacher_data[0]['cteachercls'] != '' && $cteacher_data[0]['cteachersec'] != '') {
-    if($userlevel != 'Staff'){
+    if ($userlevel != 'Staff') {
         $cteacher_text = htmlspecialchars($cteacher_data[0]['cteachercls'] . ' : ' . $cteacher_data[0]['cteachersec']);
     }
 }
@@ -117,14 +170,16 @@ if ($userlevel == 'Guest') {
 } else if ($userlevel == 'Student') {
     include 'index_student.php';
 } else if ($userlevel == 'Asstt. Head Teacher' || $userlevel == 'Head Teacher' || $userlevel == 'Administrator') {
-    if ($notice_marque == 1) include 'front-page-block/marque.php';
+    if ($notice_marque == 1)
+        include 'front-page-block/marque.php';
     include 'index_teacher.php';
 } else if ($userlevel == 'Visitor') {
     include 'index_visitor.php';
 } else if ($userlevel == 'Guardian') {
     include 'index_guardian.php';
 } else if ($userlevel == 'Teacher' || $userlevel == 'Asstt. Teacher' || $userlevel == 'Class Teacher') {
-    if ($notice_marque == 1) include 'front-page-block/marque.php';
+    if ($notice_marque == 1)
+        include 'front-page-block/marque.php';
     include 'index_asstt_teacher.php';
 } else if ($userlevel == 'Staff') {
     include 'index_staff.php';
@@ -135,4 +190,3 @@ if ($userlevel == 'Guest') {
 ?>
 
 <?php include 'footer.php'; ?>
-

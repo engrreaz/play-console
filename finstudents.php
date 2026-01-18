@@ -1,11 +1,6 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
-
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
+$sy_param = "%" . $sessionyear . "%";
 
 // ২. প্যারামিটার হ্যান্ডলিং
 $cls = $_GET['cls'] ?? '';
@@ -15,28 +10,50 @@ $page_title = "Dues List";
 
 // ৩. ডাটা ফেচিং অপ্টিমাইজেশন (Single Joined Query with Prepared Statement)
 $student_list = [];
-$sql = "SELECT s.stid, s.rollno, st.stnameeng, st.stnameben, st.previll,
-               SUM(f.dues) as total_dues, SUM(f.paid) as total_paid
-        FROM sessioninfo s
-        JOIN students st ON s.stid = st.stid
-        LEFT JOIN stfinance f ON s.stid = f.stid 
-             AND f.sessionyear LIKE ? 
-             AND f.month <= ?
-        WHERE s.sccode = ? AND s.classname = ? AND s.sectionname = ? AND s.status = '1'
-        GROUP BY s.stid
-        ORDER BY s.rollno ASC";
+echo $sy_param;
+$sql = "
+SELECT 
+    s.stid,
+    s.rollno,
+    st.stnameeng,
+    st.stnameben,
+    st.previll,
+    IFNULL(SUM(f.dues), 0)   AS total_dues,
+    IFNULL(SUM(f.paid), 0)   AS total_paid,
+    IFNULL(SUM(f.dues - f.paid), 0) AS total_due
+FROM sessioninfo s
+INNER JOIN students st 
+        ON st.stid = s.stid
+LEFT JOIN stfinance f 
+       ON f.stid = s.stid
+      AND f.sessionyear LIKE ?      -- exact match, NOT LIKE
+      AND f.month <= ?
+WHERE 
+    s.sccode      = ?
+    AND s.classname   = ?
+    AND s.sectionname = ?
+    AND s.sessionyear LIKE ?        -- sessioninfo থেকেও filter
+    AND s.status      = '1'
+GROUP BY 
+    s.stid, s.rollno, st.stnameeng, st.stnameben, st.previll
+ORDER BY s.rollno ASC;
+
+";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sssss", $sy_param, $current_month, $sccode, $cls, $sec);
+$stmt->bind_param("siisss", $sy_param, $current_month, $sccode, $cls, $sec, $sy_param);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $total_class_dues = 0;
+$student_list = [];
+
 while ($row = $result->fetch_assoc()) {
     $student_list[] = $row;
-    $total_class_dues += ($row['total_dues'] ?? 0);
+    $total_class_dues += $row['total_due'];
 }
 $stmt->close();
+
 ?>
 
 <style>
@@ -113,7 +130,7 @@ $stmt->close();
         </div>
         <div class="vr mx-3 opacity-10"></div>
         <div>
-            <span class="stat-val text-muted"><?php echo $current_session; ?></span>
+            <span class="stat-val text-muted"><?php echo $sessionyear; ?></span>
             <span class="stat-lbl">Session</span>
         </div>
     </div>
@@ -122,11 +139,11 @@ $stmt->close();
         <?php if (empty($student_list)): ?>
             <div class="text-center py-5 opacity-50">
                 <i class="bi bi-person-x display-4"></i>
-                <p class="mt-2 fw-bold small">No records for session <?php echo $current_session; ?></p>
+                <p class="mt-2 fw-bold small">No records for session <?php echo $sessionyear; ?></p>
             </div>
         <?php else: ?>
             <?php foreach ($student_list as $st): 
-                $due = $st['total_dues'] ?? 0;
+                $due = $st['total_due'];
                 $is_defaulter = ($due > 0);
             ?>
                 <div class="st-finance-card shadow-sm" onclick="go(<?php echo $st['stid']; ?>)">

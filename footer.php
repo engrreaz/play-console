@@ -68,7 +68,8 @@ if (empty($usr) || $userlevel == 'Guest') {
 <style>
     :root {
         --nav-bg: #ffffff;
-        --nav-primary: #6750A4; /* Material M3 Primary */
+        --nav-primary: #6750A4;
+        /* Material M3 Primary */
         --nav-secondary: #79747E;
     }
 
@@ -79,8 +80,9 @@ if (empty($usr) || $userlevel == 'Guest') {
         left: 0;
         right: 0;
         background: var(--nav-bg);
-        box-shadow: 0 -2px 15px rgba(0,0,0,0.08);
-        padding-bottom: env(safe-area-inset-bottom); /* আইফোনের জন্য */
+        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+        padding-bottom: env(safe-area-inset-bottom);
+        /* আইফোনের জন্য */
         z-index: 9999;
         border-top: 1px solid #eee;
     }
@@ -114,7 +116,8 @@ if (empty($usr) || $userlevel == 'Guest') {
         font-weight: 500;
     }
 
-    .nav-item:active, .nav-item.active {
+    .nav-item:active,
+    .nav-item.active {
         color: var(--nav-primary);
         transform: scale(0.95);
     }
@@ -124,3 +127,52 @@ if (empty($usr) || $userlevel == 'Guest') {
         padding-bottom: 75px !important;
     }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+function toggleAvatarMenu(){
+    const m = document.getElementById("avatarMenu");
+    m.style.display = (m.style.display === "block") ? "none" : "block";
+}
+
+document.addEventListener("click", e=>{
+    if(!e.target.closest(".top-avatar")) {
+        document.getElementById("avatarMenu").style.display="none";
+    }
+});
+
+function goProfile(){ location.href="institute_profile.php"; }
+function goMy(){ location.href="my_profile.php"; }
+function goTicket(){ location.href="support_ticket.php"; }
+function goNotify(){ location.href="notifications.php"; }
+
+function doLogout(){
+    if(confirm("Logout now?")){
+        location.href="logout.php";
+    }
+}
+
+function toggleTheme(){
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", 
+        document.body.classList.contains("dark-mode") ? "dark":"light");
+}
+
+// auto apply theme
+if(localStorage.getItem("theme")==="dark"){
+    document.body.classList.add("dark-mode");
+}
+</script>

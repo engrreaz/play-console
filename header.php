@@ -14,8 +14,8 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Bootstrap Bundle JS (JS + Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Bundle JS (JS + Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -29,6 +29,7 @@
     <?php endif; ?>
 
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/console.css">
 
     <style>
         :root {
@@ -106,16 +107,25 @@
 </head>
 
 <body>
-    <header class="m3-app-bar">
-        <a href="javascript:history.back()" class="back-btn">
-            <i class="bi bi-arrow-left fs-4"></i>
-        </a>
-        <h1 class="page-title">
-            <?php echo $page_title ?? 'EIMBox'; ?>
-        </h1>
-        <div class="action-icons">
-            <i class="bi bi-person-circle fs-4 text-secondary"></i>
-        </div>
-    </header>
 
-    <div style="margin-top: 8px;"></div>
+    <?php
+    if (basename($_SERVER['PHP_SELF']) != 'index.php') {
+        ?>
+
+        <header class="m3-app-bar">
+            <a href="javascript:history.back()" class="back-btn">
+                <i class="bi bi-arrow-left fs-4"></i>
+            </a>
+            <h1 class="page-title">
+                <?php echo $page_title ?? 'EIMBox'; ?>
+            </h1>
+            <div class="action-icons">
+                <i class="bi bi-person-circle fs-4 text-secondary"></i>
+            </div>
+        </header>
+
+        <div style="margin-top: 8px;"></div>
+
+    <?php
+    }
+    ?>
