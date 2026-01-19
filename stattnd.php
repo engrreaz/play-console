@@ -2,11 +2,7 @@
 include 'inc.php'; 
 include 'datam/datam-stprofile.php';
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
+
 
 // ২. প্যারামিটার হ্যান্ডলিং
 $classname = $_GET['cls'] ?? '';
@@ -18,7 +14,7 @@ $page_title = "Class Attendance";
 $ccur = date('H:i:s');
 $period = 1;
 $stmt_sc = $conn->prepare("SELECT period FROM classschedule WHERE sccode = ? AND sessionyear LIKE ? AND timestart <= ? AND timeend >= ? LIMIT 1");
-$stmt_sc->bind_param("ssss", $sccode, $sy_param, $ccur, $ccur);
+$stmt_sc->bind_param("ssss", $sccode, $sessionyear_param, $ccur, $ccur);
 $stmt_sc->execute();
 $res_sc = $stmt_sc->get_result();
 if ($r = $res_sc->fetch_assoc()) { $period = $r["period"]; }
@@ -27,7 +23,7 @@ $stmt_sc->close();
 // ৪. আজকের উপস্থিতির ডাটা লোড করা
 $datam = [];
 $stmt_att = $conn->prepare("SELECT * FROM stattnd WHERE adate = ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_att->bind_param("sssss", $td, $sccode, $sy_param, $classname, $sectionname);
+$stmt_att->bind_param("sssss", $td, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_att->execute();
 $res_att = $stmt_att->get_result();
 while($r = $res_att->fetch_assoc()) { $datam[$r['stid']] = $r; }
@@ -37,7 +33,7 @@ $stmt_att->close();
 $from_date = date("Y-m-d", strtotime("-7 days"));
 $hist_map = [];
 $stmt_h = $conn->prepare("SELECT stid, adate, yn, bunk FROM stattnd WHERE adate BETWEEN ? AND ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_h->bind_param("ssssss", $from_date, $td, $sccode, $sy_param, $classname, $sectionname);
+$stmt_h->bind_param("ssssss", $from_date, $td, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_h->execute();
 $res_h = $stmt_h->get_result();
 while($r = $res_h->fetch_assoc()) { $hist_map[$r['stid']][$r['adate']] = $r; }
@@ -45,11 +41,14 @@ $stmt_h->close();
 
 // ৬. সাবমিশন স্ট্যাটাস চেক
 $subm = 0;
-$stmt_sum = $conn->prepare("SELECT attndrate FROM stattndsummery WHERE date = ? AND sccode = ? AND sessionyear = ? AND classname = ? AND sectionname = ?");
-$stmt_sum->bind_param("sssss", $td, $sccode, $current_session, $classname, $sectionname);
+$stmt_sum = $conn->prepare("SELECT attndrate FROM stattndsummery WHERE date = ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
+$stmt_sum->bind_param("sssss", $td, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_sum->execute();
 if ($stmt_sum->get_result()->num_rows > 0) { $subm = 1; }
 $stmt_sum->close();
+
+if($subm == 1 && $period < 2)
+    $period = 2;
 
 $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
 ?>
@@ -82,7 +81,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
     .m3-check { width: 22px; height: 22px; border-radius: 4px; border: 2px solid #6750A4; margin-right: 12px; }
 </style>
 
-<header class="m3-app-bar shadow-sm">
+<header class="m3-app-bar shadow-sm" style="z-index:999;">
     <a href="student-list.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
     <div class="page-title"><?php echo "$classname ($sectionname)"; ?></div>
     <div class="text-end fw-bold text-primary">P-<?php echo $period; ?></div>
@@ -111,7 +110,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
         <?php
         $total = 0; $present = 0; $bunks = 0;
         $stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
-        $stmt_st->bind_param("ssss", $sy_param, $sccode, $classname, $sectionname);
+        $stmt_st->bind_param("ssss", $sessionyear_param, $sccode, $classname, $sectionname);
         $stmt_st->execute();
         $res_st = $stmt_st->get_result();
 
@@ -178,30 +177,144 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
         window.location.href = `stattnd.php?cls=<?php echo urlencode($classname); ?>&sec=<?php echo urlencode($sectionname); ?>&dt=${d}&year=<?php echo $current_session; ?>`;
     }
 
-    function toggleAtt(id, roll, per) {
-        const chk = document.getElementById("chk_" + id);
-        const card = document.getElementById("block_" + id);
-        const sync = document.getElementById("sync_" + id);
-        let count = parseInt(document.getElementById("att_count").innerText);
+    
 
-        chk.checked = !chk.checked;
-        if(chk.checked) { count++; card.classList.replace('absent', 'present'); }
-        else { count--; card.classList.replace('present', 'absent'); }
-        document.getElementById("att_count").innerText = count;
+let attLock = false; // prevent rapid clicks
 
-        sync.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
-        $.post('backend/save-st-attnd.php', { 
-            stid: id, roll: roll, val: chk.checked ? 1 : 0, opt: 2, 
-            cls: '<?php echo $classname; ?>', sec: '<?php echo $sectionname; ?>', 
-            per: per, adate: '<?php echo $td; ?>' 
-        }, function() {
-            sync.innerHTML = '<i class="bi bi-check-all text-success fs-5"></i>';
-        });
+function toggleAtt(id, roll, per) {
+    if (attLock) return;
+    attLock = true;
+
+    const chk  = document.getElementById("chk_" + id);
+    const card = document.getElementById("block_" + id);
+    const sync = document.getElementById("sync_" + id);
+    const cnt  = document.getElementById("att_count");
+
+    if (!chk || !card || !sync || !cnt) {
+        attLock = false;
+        return;
     }
+
+    chk.checked = !chk.checked;
+    let count = parseInt(cnt.innerText);
+
+    if (chk.checked) {
+        count++;
+        card.classList.replace('absent', 'present');
+    } else {
+        count--;
+        card.classList.replace('present', 'absent');
+    }
+    cnt.innerText = count;
+
+    // spinner only inside the card
+    sync.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
+
+    fetch('backend/save-st-attnd.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            stid: id,
+            roll: roll,
+            val: chk.checked ? 1 : 0,
+            opt: 2,
+            cls: '<?= $classname ?>',
+            sec: '<?= $sectionname ?>',
+            per: per,
+            adate: '<?= $td ?>'
+        })
+    })
+    .then(res => res.text())
+    .then(txt => {
+        txt = txt.trim();
+        if (txt === "OK") {
+            sync.innerHTML = '<i class="bi bi-check-all text-success fs-5"></i>';
+        } else if (txt === "LOCKED") {
+            sync.innerHTML = '<i class="bi bi-x-circle text-danger fs-5"></i>';
+            // revert
+            chk.checked = !chk.checked;
+            card.classList.replace(chk.checked ? 'absent':'present', chk.checked ? 'present':'absent');
+            let currentCount = parseInt(cnt.innerText);
+            cnt.innerText = chk.checked ? currentCount + 1 : currentCount - 1;
+        } else {
+            sync.innerHTML = '<i class="bi bi-exclamation-circle text-warning fs-5"></i>';
+        }
+        attLock = false;
+    })
+    .catch(err => {
+        console.error(err);
+        sync.innerHTML = '<i class="bi bi-x-circle text-danger fs-5"></i>';
+        attLock = false;
+    });
+}
+
+function submitFinal() {
+    if (attLock) return;
+    attLock = true;
+
+    const cnt = document.getElementById("total_count").innerText;
+    const fnd = document.getElementById("att_count").innerText;
+
+    fetch('backend/save-st-attnd.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            opt: 5,
+            cnt: cnt,
+            fnd: fnd,
+            cls: '<?= $classname ?>',
+            sec: '<?= $sectionname ?>',
+            adate: '<?= $td ?>', 
+            sy:'<?= $sessionyear ?>'
+        })
+    })
+    .then(res => res.text())
+    .then(txt => {
+        // alert(JSON.stringify(txt));
+        if (txt.trim() === "SUBMITTED") {
+            alert("Attendance submitted successfully."); // simple alert
+           history.back(-1);
+        } else {
+            alert("Error submitting attendance.");
+        }
+        attLock = false;
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Network error.");
+        attLock = false;
+    });
+}
+
+// ✅ Updated group functions without SweetAlert
+function grpssx(id, roll, bunk) {
+    if (bunk === 1) {
+        console.warn("Already Bunked");
+        return;
+    }
+    toggleAtt(id, roll, 1);
+}
+
+function grpssx2(id, roll, bunk) {
+    if (bunk === 1) {
+        console.warn("Already Bunked");
+        return;
+    }
+    toggleAtt(id, roll, <?= $period ?>);
+}
+
+
+
+
 
     function grpssx(id, roll, bunk) {
         if(bunk == 1) { Swal.fire('Already Bunked', '', 'warning'); return; }
         toggleAtt(id, roll, 1);
+    }
+ 
+ 
+    function grpssx0(id, roll, bunk) {
+      toggleAtt(id, roll, 1);
     }
 
     function grpssx2(id, roll, bunk) {
@@ -209,25 +322,6 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
         toggleAtt(id, roll, <?php echo $period; ?>);
     }
 
-    function submitFinal() {
-        Swal.fire({
-            title: 'Confirm Submission?',
-            text: 'You cannot change attendance after submission.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#6750A4'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const fnd = document.getElementById("att_count").innerText;
-                const cnt = document.getElementById("total_count").innerText;
-                $.post('backend/save-st-attnd.php', { 
-                    cnt: cnt, fnd: fnd, opt: 5, 
-                    cls: '<?php echo $classname; ?>', sec: '<?php echo $sectionname; ?>', 
-                    adate: '<?php echo $td; ?>' 
-                }, function() { location.reload(); });
-            }
-        });
-    }
 </script>
 
 <?php include 'footer.php'; ?>

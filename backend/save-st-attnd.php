@@ -1,102 +1,193 @@
 <?php
-
 include('inc.back.php');
-;
-$adate = $_POST['adate'];
-;
-$cn = $_POST['cls'];
-$sn = $_POST['sec'];
-$opt = $_POST['opt'];
 
-if ($opt == 2) {  // save attandance
-    $iii = $_POST['stid'];
-    $roll = $_POST['roll'];
-    $yn = $_POST['val'];
-    $per = $_POST['per'];
-    if ($yn == 'true') {
-        $yn = 1;
-    } else {
-        $yn = 0;
-    }
+$adate = $_POST['adate'] ?? '';
+$cn = $_POST['cls'] ?? '';
+$sn = $_POST['sec'] ?? '';
+$opt = (int) ($_POST['opt'] ?? 0);
 
+/* =========================
+   OPTION 2 : SINGLE STUDENT
+========================= */
+if ($opt === 2) {
+
+    $stid = $_POST['stid'] ?? '';
+    $roll = $_POST['roll'] ?? '';
+    $yn = (int) ($_POST['val'] ?? 0);
+    $per = (int) ($_POST['per'] ?? 1);
+
+    /* ---------- submission lock check ---------- */
     $submit_found = 0;
-    $sql00 = "SELECT * FROM stattndsummery where  date='$td' and sccode='$sccode' and sessionyear LIKE '%$sy%'  and classname = '$cn' and sectionname='$sn' ";
-    $result00gt_check_submit = $conn->query($sql00);
-    if ($result00gt_check_submit->num_rows > 0) {
+    $sy_like = "%$sy%";
+
+    $chk = $conn->prepare("
+        SELECT 1 FROM stattndsummery
+        WHERE date=? AND sccode=? AND sessionyear LIKE ?
+        AND classname=? AND sectionname=? LIMIT 1
+    ");
+    $chk->bind_param("sssss", $adate, $sccode, $sy_like, $cn, $sn);
+    $chk->execute();
+    if ($chk->get_result()->num_rows > 0) {
         $submit_found = 1;
     }
+    $chk->close();
 
-    $sql0 = "SELECT * FROM stattnd where stid='$iii' and adate='$adate' and sessionyear LIKE '%$sy%' ";
-    $result0 = $conn->query($sql0);
-    if ($result0->num_rows > 0) {
-        if ($per < 2) {
-            $query33 = "UPDATE stattnd SET yn = '$yn', period1 = '$yn', period2 = '$yn', period3 = '$yn', period4 = '$yn', period5 = '$yn', period6 = '$yn', period7 = '$yn', period8 = '$yn', entryby = '$usr' WHERE stid='$iii' and adate='$adate' and sessionyear LIKE '%$sy%'  and sccode='$sccode'";
-        } else {
-            $cd = '';
-            for ($i = $per; $i <= 8; $i++) {
-                $cd .= 'period' . $i . '=' . $yn . ', ';
-            }
-            if ($yn == 0) {
-                $bunk = 1;
-                $query338 = "UPDATE stattndsummery set bunk = bunk+1 WHERE date='$adate' and sessionyear  LIKE '%$sy%'   and sccode='$sccode'";
-                $conn->query(query: $query338);
+    /* ---------- attendance exists? ---------- */
+    $chk2 = $conn->prepare("
+        SELECT id FROM stattnd
+        WHERE stid=? AND adate=? AND sccode=?
+        AND sessionyear LIKE ? AND classname=? AND sectionname=? LIMIT 1
+    ");
+    $chk2->bind_param("ssssss", $stid, $adate, $sccode, $sy_like, $cn, $sn);
+    $chk2->execute();
+    $exists = ($chk2->get_result()->num_rows > 0);
+    $chk2->close();
 
+    /* ---------- CASE 1: attendance NOT exists ---------- */
+    if (!$exists) {
 
-            } else {
-                $bunk = 0;
-            }
-            $cd .= 'period1=1 ';
-            $query33 = "UPDATE stattnd SET $cd , bunk = '$bunk' WHERE stid='$iii' and adate='$adate' and sessionyear  LIKE '%$sy%'   and sccode='$sccode'";
-        }
-        $conn->query(query: $query33);
-    } else {
-        if ($submit_found == 0) {
-            $query33 = "insert into stattnd (id, sccode, sessionyear, stid, adate, yn, entryby, classname, sectionname, rollno, period1) values 	(NULL, '$sccode', '$sy', '$iii','$adate','$yn','$usr','$cn','$sn', '$roll', '$yn')";
-            $conn->query($query33);
-        } else {
-            echo '<span class="chk red"><i class="bi bi-x-circle-fill"></i></span>';
-        }
+        $one = 1; $zero = 0;
+        $stmt = $conn->prepare("
+            INSERT INTO stattnd
+            (sccode, sessionyear, stid, adate, yn, bunk,
+             period1, period2, period3, period4,
+             period5, period6, period7, period8,
+             entryby, classname, sectionname, rollno)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ");
 
+        $stmt->bind_param(
+            "isssiiiiiiiiissssi",
+            $sccode,
+            $sy,
+            $stid,
+            $adate,
+            $one,
+            $zero,
+            $one,
+            $one,
+            $one,
+            $one,
+            $one,
+            $one,
+            $one,
+            $one,
+            $usr,
+            $cn,
+            $sn,
+            $roll
+        );
+        $stmt->execute();
+        $stmt->close();
+
+        echo "OK";
+        exit;
     }
-    // echo $query33;
+
+    /* ---------- CASE 2: attendance EXISTS ---------- */
+
+    // submit_found = 0 → full absent
     if ($submit_found == 0) {
-        if ($yn == 1) {
-            echo '<span class="chk green"><i class="bi bi-check2-circle"></i></span>';
-        } else {
-            echo '<span class="chk red"><i class="bi bi-x-circle"></i></span>';
-        }
-    } else {
-        if ($yn == 1) {
-            echo '<span class="chk red"><i class="bi bi-x-circle"></i></span>';
-        } else {
-            echo '<span class="chk orange"><i class="bi bi-x-circle"></i></span>';
-        }
+
+        $stmt = $conn->prepare("
+            UPDATE stattnd SET
+            yn=0, bunk=1,
+            period1=0, period2=0, period3=0, period4=0,
+            period5=0, period6=0, period7=0, period8=0,
+            entryby=?
+            WHERE stid=? AND adate=? AND sccode=?
+            AND sessionyear LIKE ? AND classname=? AND sectionname=?
+        ");
+
+        $stmt->bind_param(
+            "sssssss",
+            $usr,
+            $stid,
+            $adate,
+            $sccode,
+            $sy_like,
+            $cn,
+            $sn
+        );
+        $stmt->execute();
+        $stmt->close();
+
+        echo "OK";
+        exit;
     }
 
-    // echo $per;
+    /* ---------- submit_found = 1 ---------- */
 
-} else if ($opt == 5) { // save final submition
-
-
-
-    $cnt = $_POST['cnt'];
-    $fnd = $_POST['fnd'];
-
-    $sql0 = "SELECT count(*) as cnt FROM stattnd where sccode = '$sccode' and sessionyear LIKE '%$sy%'  and adate='$adate' and classname='$cn' and sectionname='$sn' and yn=1;";
-    // echo $sql0 ;
-    $result0rtx__stattnd = $conn->query($sql0);
-    if ($result0rtx__stattnd->num_rows > 0) {
-        while ($row0 = $result0rtx__stattnd->fetch_assoc()) {
-            $fnd = $row0["cnt"];
-        }
+    if ($per < 2) {
+        $per = 2;
     }
 
+    // dynamic period zeroing
+    $sets = [];
+    for ($i = $per; $i <= 8; $i++) {
+        $sets[] = "period$i=0";
+    }
+    $set_sql = implode(", ", $sets);
+
+    $stmt = $conn->prepare("
+        UPDATE stattnd SET
+        yn=0,
+        bunk=1,
+        $set_sql,
+        entryby=?
+        WHERE stid=? AND adate=? AND sccode=?
+        AND sessionyear LIKE ? AND classname=? AND sectionname=?
+    ");
+
+    $stmt->bind_param(
+        "sssssss",
+        $usr,
+        $stid,
+        $adate,
+        $sccode,
+        $sy_like,
+        $cn,
+        $sn
+    );
+    $stmt->execute();
+    $stmt->close();
+
+    echo "OK";
+    exit;
+}
 
 
-    $rate = $fnd * 100 / $cnt;
-    $query33 = "insert into stattndsummery (id, sccode, sessionyear, date, classname, sectionname, totalstudent, attndstudent, attndrate, submitby, submittime) 
-                                            values 	(NULL, '$sccode', '$sy', '$adate','$cn','$sn','$cnt','$fnd','$rate', '$usr', '$cur')";
-    $conn->query($query33);
+/* =========================
+   OPTION 5 : FINAL SUMMARY
+========================= */
+if ($opt === 5) {
+    $cnt = (int) ($_POST['cnt'] ?? 0);
+    $fnd = (int) ($_POST['fnd'] ?? 0);
 
-    echo '<i class="bi bi-check-circle-fill text-success"></i> Submit Successfully.';
+    $rate = ($cnt > 0) ? ($fnd * 100 / $cnt) : 0;
+
+    $stmt = $conn->prepare("
+        INSERT INTO stattndsummery
+        (sccode, sessionyear, date, classname, sectionname,
+         totalstudent, attndstudent, attndrate, submitby, submittime)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+    ");
+    $stmt->bind_param(
+        "issssiidss",
+        $sccode,
+        $sy,
+        $adate,
+        $cn,
+        $sn,
+        $cnt,
+        $fnd,
+        $rate,
+        $usr,
+        $cur
+    );
+    $stmt->execute();
+    $stmt->close();
+
+    echo "SUBMITTED";
+    exit;
 }

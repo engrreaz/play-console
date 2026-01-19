@@ -15,18 +15,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Bundle JS (JS + Popper) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <?php if (basename($_SERVER['PHP_SELF']) == 'calendar.php'): ?>
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <?php endif; ?>
+
+
+
 
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/console.css">
@@ -119,13 +123,31 @@
             <h1 class="page-title">
                 <?php echo $page_title ?? 'EIMBox'; ?>
             </h1>
-            <div class="action-icons">
-                <i class="bi bi-person-circle fs-4 text-secondary"></i>
+
+            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
+                style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
+                <img src="<?= $pth ?>" width="100%">
             </div>
+
+
+            <div id="avatarMenu" class="avatar-dropdown shadow-sm" >
+                <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
+                <div class="dd-divider"></div>
+
+                <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
+                <div class="dd-item" onclick="goMy()">👤 My Profile</div>
+                <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
+                <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
+
+                <div class="dd-divider"></div>
+                <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
+                <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
+            </div>
+
         </header>
 
         <div style="margin-top: 8px;"></div>
 
-    <?php
+        <?php
     }
     ?>

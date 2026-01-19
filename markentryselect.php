@@ -92,6 +92,11 @@ $stmt_cl->close();
             <h6 class="fw-bold mb-0">Select Parameters</h6>
         </div>
 
+         <?php
+            $chain_param = '-c 4 -t Choose Values -u -r -b View List -h exam,subject';
+            include 'component/tree-ui.php';
+            ?>
+
         <div class="form-floating mb-3">
             <select class="form-select" id="exam">
                 <?php echo $exam_options; ?>
