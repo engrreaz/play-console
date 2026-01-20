@@ -192,3 +192,10 @@ $stmt_cl->close();
 </script>
 
 <?php include 'footer.php'; ?>
+
+
+<script>
+    function btn_chain_function(){
+        console.log('Chain function executed');
+    }
+</script>

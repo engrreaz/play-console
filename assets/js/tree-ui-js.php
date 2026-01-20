@@ -74,7 +74,7 @@
 
                 if (isAutoLoad && cookieMap['#section-main']) {
                     setTimeout(function () {
-                        console.log('Auto loading section from cookie');
+                        console.log('Auto loading section from cookie'+cookieMap['#section-main']);
                         $('#section-main').val(cookieMap['#section-main']).trigger('change');
                         $('#section-main').val(cookieMap['#section-main']).trigger('click');
                     }, 50); // 🔑 small delay
@@ -92,6 +92,7 @@
         $('#section-main').on('change click', function () {
             let section = $(this).val();
             if (!section) return;
+            setCookie("chain-section", section);
 
             $('#subject-main').html('<option value="">Loading...</option>');
 
@@ -421,4 +422,15 @@
             .addClass('modal-lg');
     });
 
+</script>
+
+<script>
+$(document).ready(function () {
+
+    $('#btn-chain').on('click', function (e) {
+        e.preventDefault(); // যদি button/form submit টাইপ হয়
+        btn_chain_function();
+    });
+
+});
 </script>
