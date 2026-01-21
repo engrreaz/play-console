@@ -117,7 +117,7 @@
     if (basename($_SERVER['PHP_SELF']) != 'index.php') {
         ?>
 
-        <header class="m3-app-bar">
+        <header class="m3-app-bar" style="z-index: 25999;;">
             <a href="javascript:history.back()" class="back-btn">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
@@ -126,12 +126,12 @@
             </h1>
 
             <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
-                style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
+                style="width: 34px; height: 34px; cursor:pointer; z-index:25999;" onclick="toggleAvatarMenu()">
                 <img src="<?= $pth ?>" width="100%">
             </div>
 
 
-            <div id="avatarMenu" class="avatar-dropdown shadow-sm" >
+            <div id="avatarMenu" class="avatar-dropdown shadow-sm"  >
                 <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
                 <div class="dd-divider"></div>
 

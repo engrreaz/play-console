@@ -1,7 +1,5 @@
 <?php
-
-require_once '../db.php';
-require_once '../inc.php';
+require_once '../inc.light.php';
 
 $slot = $_POST['slot'] ?? '';
 $sy = $_POST['session'] ?? '';

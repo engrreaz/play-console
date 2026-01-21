@@ -11,4 +11,5 @@ firebase.json
 firebase.php
 *.json
 *.md
+inc.light.php
 

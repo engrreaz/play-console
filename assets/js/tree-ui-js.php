@@ -24,7 +24,7 @@
         /* ===============================
            2️⃣ Session → Class
            =============================== */
-        $('#session-main').on('change', function () {
+        $('#session-main').on('change click', function () {
             let slot = $('#slot-main').val();
             let session = $(this).val();
             if (!session) return;
@@ -73,11 +73,11 @@
                 $('#section-main').html(res);
 
                 if (isAutoLoad && cookieMap['#section-main']) {
-                    setTimeout(function () {
-                        console.log('Auto loading section from cookie'+cookieMap['#section-main']);
+          
+                        // console.log('Auto loading section from cookie'+cookieMap['#section-main']);
                         $('#section-main').val(cookieMap['#section-main']).trigger('change');
                         $('#section-main').val(cookieMap['#section-main']).trigger('click');
-                    }, 50); // 🔑 small delay
+                
                 }
             });
 
@@ -110,28 +110,26 @@
                         $('#subject-main').val(cookieMap['#subject-main']);
                     }, 50);
                 }
-
                 isAutoLoad = false; // 🔓 only after subject done
             });
         });
 
 
 
-        $('#session-main').on('change', function () {
-            $('#class-main').trigger('click');
-            document.cookie = "chain-session=" + $(this).val() + "; path=/";
-        });
+   
 
         $('#slot-main').on('change', function () {
             document.cookie = "chain-slot=" + $(this).val() + "; path=/";
         });
 
-        $('#exam-main').on('change', function () {
-            document.cookie = "chain-exam=" + $(this).val() + "; path=/";
+        $('#exam-main').on('change click', function () {
+            if (!$(this).val()) return;
+            setCookie("chain-exam", $(this).val());
         });
 
         $('#subject-main').on('change', function () {
-            document.cookie = "chain-subject=" + $(this).val() + "; path=/";
+            if (!$(this).val()) return;
+            setCookie("chain-subject", $(this).val());
         });
 
         $('#date-from-main').on('change', function () {
@@ -183,8 +181,6 @@
 
     function loadNodes(type, context, container) {
 
-
-
         let chainInput = $('#chainInput').val();
 
         $.post('component/node-tree.php', {
@@ -194,7 +190,6 @@
 
             let data = JSON.parse(res);
 
-            // alert(JSON.stringify(data));
             data.forEach(item => {
 
                 let li = $('<li>');
@@ -233,6 +228,7 @@
                     if (type === 'section' && chainInput.includes('subject')) {
 
                         // show right panel
+                        $('#treeColumn').addClass('d-none');
                         $('#subjectColumn').removeClass('d-none');
 
                         // modal auto expand
@@ -303,9 +299,10 @@
                         children.slideDown();
                         toggle.text('-');
                     } else {
+                        setTimeout(() => {
+                            finalizeSelection(ctx, item);
+                        }, 50);
 
-                        finalizeSelection(ctx, item);
-                        alert('Selection completed: ' + item.text);
                         if (hasReload) {
                             window.location.reload();
                         }
@@ -334,55 +331,56 @@
             final_text: item.text,
             final_id: item.id
         };
-        alert(JSON.stringify(selected));
-
 
         if ($('#slot-main').length) {
-            $('#slot-main').val(selected.slot);
-            setCookie('chain-slot', selected.slot);
+            $('#slot-main').val(selected.slot).trigger('change');
+            setCookie("chain-slot", selected.slot);
         }
 
         if ($('#session-main').length) {
-            $('#session-main').val(selected.session);
-            setCookie('chain-session', selected.session);
+            $('#session-main').val(selected.session).trigger('change');
+            setCookie("chain-session", selected.session);
         }
 
         if ($('#exam-main').length) {
-            $('#exam-main').val(selected.exam);
-            setCookie('chain-exam', selected.exam);
+            $('#exam-main').val(selected.exam).trigger('change');
+            setCookie("chain-exam", selected.exam);
         }
 
         if ($('#class-main').length) {
-            $('#class-main').val(selected.class);
-            setCookie('chain-class', selected.class);
+            $('#class-main').val(selected.class).trigger('change');
+            setCookie("chain-class", selected.class);
         }
 
         if ($('#section-main').length) {
-            $('#section-main').val(selected.section);
-            setCookie('chain-section', selected.section);
+            $('#section-main').val(selected.section).trigger('change');
+            setCookie("chain-section", selected.section);
         }
 
         if ($('#subject-main').length) {
-            $('#subject-main').val(selected.subject);
-            setCookie('chain-subject', selected.subject);
+            $('#subject-main').val(selected.subject).trigger('change');
+            setCookie("chain-subject", selected.subject);
         }
 
         $('#selectedTree').val(JSON.stringify(selected));
 
-        let nodeTreeBlock = document.getElementById('nodeTreeModal');
+        // 🔑 সব কাজ শেষ, এখন modal hide
+        document.body.focus();
+        let modal = bootstrap.Modal.getInstance(
+            document.getElementById('nodeTreeModal')
+        );
+        if (modal) modal.hide();
 
-        // Bootstrap 5 modal hide করতে
-        if (nodeTreeBlock) {
-            let modal = bootstrap.Modal.getOrCreateInstance(nodeTreeBlock);
-            modal.hide();
-        }
-
+        window.location.reload();
     }
 
 
 
+
     function loadSubjectList(ctx) {
-        // alert(JSON.stringify(ctx));
+        let chainInput = $('#chainInput').val();
+        let hasReload = /\breload\b/.test(chainInput);
+
         $.post('component/node-tree.php', {
             type: 'subject',
             context: ctx
@@ -397,14 +395,21 @@
 
                 let li = $('<li class="list-group-item">')
                     .text(item.text)
-                    .on('click', function () {
+                    .on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
 
                         ul.find('.list-group-item').removeClass('active');
                         $(this).addClass('active');
 
                         ctx.subject = item.text;
 
-                        finalizeSelection(ctx, item);
+                        setTimeout(() => {
+                            finalizeSelection(ctx, item);
+                        }, 50);
+
+
+                
                     });
 
                 ul.append(li);
@@ -416,21 +421,17 @@
 
         $('#subjectColumn').addClass('d-none');
         $('#subjectList').html('');
-
-        $('#nodeTreeModal .modal-dialog')
-            .removeClass('modal-xl')
-            .addClass('modal-lg');
     });
 
 </script>
 
 <script>
-$(document).ready(function () {
+    $(document).ready(function () {
 
-    $('#btn-chain').on('click', function (e) {
-        e.preventDefault(); // যদি button/form submit টাইপ হয়
-        btn_chain_function();
+        $('#btn-chain').on('click', function (e) {
+            e.preventDefault(); // যদি button/form submit টাইপ হয়
+            btn_chain_function();
+        });
+
     });
-
-});
 </script>
