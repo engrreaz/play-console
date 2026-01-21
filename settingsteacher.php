@@ -14,7 +14,7 @@ $current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $
 // ২. ফটো ডিরেক্টরি পাথ (Web Accessible Path)
 // dirname(dirname(__DIR__)) সাধারণত রুট ফোল্ডার বোঝায়। 
 // আপনার ওয়েব সার্ভারের পাথ অনুযায়ী এটি সমন্বয় করে নিন (যেমন: /photos/staff/)
-$photo_dir = dirname(__DIR__) . '/teacher/';
+$photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 
 ?>
 
