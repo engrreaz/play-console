@@ -1,193 +1,242 @@
 <?php
-include 'inc.php'; // এটি header.php এবং DB কানেকশন লোড করবে
+/**
+ * User Profile View & Edit - M3-EIM-Floating Style
+ * Standards: 8px Radius | Tonal Containers | Modal Edit | Android WebView Optimized
+ */
+$page_title = "My Profile";
+include 'inc.php'; 
 
-// ১. ডাটা ফেচিং (Prepared Statement - Secure)
-$user_data = [];
+// ১. ডাটা ফেচিং (Prepared Statement)
 $stmt = $conn->prepare("SELECT * FROM usersapp WHERE email = ? LIMIT 1");
-$stmt->bind_param("s", $usr);
+$stmt->bind_param("s", $usr); // $usr আসে inc.php থেকে
 $stmt->execute();
-$result = $stmt->get_result();
-
-if ($row = $result->fetch_assoc()) {
-    $user_data = $row;
-}
+$user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// ফটো পাথ হ্যান্ডলিং
-$photo_path = $user_data['photourl'] ?? "";
-if (strlen($photo_path) < 10) {
-    $photo_path = "https://eimbox.com/teacher/no-img.jpg";
+if (!$user) {
+    die("<div class='text-center mt-5'><p class='fw-bold'>User session expired. Please login again.</p></div>");
 }
+
+
+
+// ফটো পাথ হ্যান্ডলিং
+$photo_path = (empty($user['photourl']) || strlen($user['photourl']) < 10) 
+              ? "https://eimbox.com/teacher/no-img.jpg" 
+              : $user['photourl'];
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; margin: 0; padding: 0; }
 
-    /* Profile Header Styling */
+    /* M3 App Bar */
+    .m3-app-bar {
+        width: 100%; position: sticky; top: 0; z-index: 1050;
+        background: #fff; height: 56px; display: flex; align-items: center; 
+        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
+
+    /* Profile Hero Card */
     .profile-hero {
-        background: linear-gradient(180deg, #6750A4 0%, #9581CD 100%);
-        padding: 40px 20px 80px;
-        border-radius: 0 0 32px 32px;
-        text-align: center;
-        color: white;
-        margin-bottom: -40px;
-        position: relative;
+        background: #fff; padding: 32px 16px; text-align: center;
+        border-radius: 0 0 16px 16px; margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .profile-pic-box {
+        width: 100px; height: 100px; border-radius: 8px; /* Strict 8px */
+        background: #F3EDF7; border: 3px solid #EADDFF;
+        margin: 0 auto 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
+    }
+    .profile-pic-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .user-name { font-size: 1.2rem; font-weight: 900; color: #1C1B1F; margin-bottom: 2px; }
+    .user-level-badge {
+        font-size: 0.65rem; background: #EADDFF; color: #21005D;
+        padding: 3px 12px; border-radius: 6px; font-weight: 800; display: inline-block;
+        text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    .profile-pic-frame {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 4px solid #fff;
-        background: #fff;
-        margin: 0 auto;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        overflow: hidden;
-        position: relative;
-        z-index: 5;
+    /* Info Card Design */
+    .m3-info-card {
+        background: #fff; border-radius: 8px; padding: 16px;
+        margin: 0 16px 12px; border: 1px solid #f0f0f0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
-    .profile-pic-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .card-label { font-size: 0.65rem; font-weight: 800; color: #6750A4; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 
-    .photo-edit-btn {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        background: #6750A4;
-        color: white;
-        width: 32px; height: 32px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        border: 2px solid white;
-    }
+    .data-row { display: flex; align-items: flex-start; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #F3EDF7; }
+    .data-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .data-icon { width: 32px; height: 32px; border-radius: 6px; background: #F7F2FA; color: #6750A4; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0; }
+    .data-key { font-size: 0.65rem; color: #79747E; font-weight: 700; }
+    .data-val { font-size: 0.85rem; color: #1C1B1F; font-weight: 700; word-break: break-all; }
 
-    /* M3 Input Group Style */
-    .m3-card {
-        background: #fff;
-        border-radius: 28px;
-        padding: 24px;
-        margin-top: 15px;
-        border: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
+    /* Modal Floating Label Overrides */
+    .modal-content { border-radius: 8px !important; }
+    .modal-body { max-height: 65vh; overflow-y: auto; padding: 24px 20px; }
+    .m3-floating-group { position: relative; margin-bottom: 20px; }
+    .m3-field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6750A4; font-size: 1.2rem; }
+    .m3-floating-label { position: absolute; left: 44px; top: -10px; background: #fff; padding: 0 6px; font-size: 0.75rem; font-weight: 700; color: #6750A4; z-index: 15; text-transform: uppercase; }
+    .m3-input-floating { width: 100%; height: 52px; padding: 12px 16px 12px 48px; font-size: 0.95rem; font-weight: 600; border: 2px solid #CAC4D0; border-radius: 8px !important; }
 
-    .form-floating > .form-control {
-        border-radius: 12px;
-        border: 1px solid #79747E;
-        background: transparent;
-    }
-    .form-floating > .form-control:focus {
-        border-color: #6750A4;
-        box-shadow: 0 0 0 1px #6750A4;
-    }
-
-    .btn-update {
-        background-color: #6750A4;
-        color: white;
-        border-radius: 100px;
-        padding: 14px 24px;
-        font-weight: 600;
-        width: 100%;
-        border: none;
-        box-shadow: 0 2px 6px rgba(103, 80, 164, 0.3);
-        transition: transform 0.2s;
-    }
-    .btn-update:active { transform: scale(0.96); }
-
-    .input-icon {
-        position: absolute;
-        right: 15px;
-        top: 18px;
-        color: #6750A4;
-        z-index: 5;
+    .btn-fab {
+        position: fixed; bottom: 85px; right: 20px;
+        width: 56px; height: 56px; border-radius: 16px;
+        background: #6750A4; color: #fff; display: flex;
+        align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3); z-index: 1000; border: none;
     }
 </style>
 
-<main class="pb-5">
-    <div class="profile-hero shadow">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <a href="build.php" class="text-white"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h5 class="fw-bold mb-0">Personal Profile</h5>
-            <div style="width: 24px;"></div>
-        </div>
 
-        <div class="profile-pic-frame shadow-lg">
-            <img src="<?php echo $photo_path; ?>" onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
-            <div class="photo-edit-btn"><i class="bi bi-camera-fill small"></i></div>
+<main class="pb-5">
+    <div class="profile-hero shadow-sm">
+        <div class="profile-pic-box shadow-sm">
+            <img src="<?php echo $photo_path; ?>" alt="User Photo">
         </div>
+        <div class="user-name" id="disp_profilename"><?php echo $user['profilename']; ?></div>
+        <div class="user-level-badge mb-3"><?php echo $user['userlevel']; ?></div>
         
-        <h4 class="mt-3 fw-bold mb-0"><?php echo $user_data['profilename']; ?></h4>
-        <p class="small opacity-75"><?php echo $usr; ?></p>
+        <div class="d-flex justify-content-center gap-2">
+            <div class="small fw-bold text-muted"><i class="bi bi-envelope-fill me-1"></i><?php echo $user['email']; ?></div>
+        </div>
     </div>
 
-    <div class="container-fluid px-3 pt-5">
-        <div class="m3-card shadow-sm mt-4">
-            <h6 class="text-secondary fw-bold small text-uppercase mb-4">Account Settings</h6>
-            
-            <form id="profileForm">
-                <div class="form-floating mb-3 position-relative">
-                    <input type="text" id="dispname" class="form-control" placeholder="Full Name" 
-                           value="<?php echo $user_data['profilename']; ?>">
-                    <label for="dispname">Display Name</label>
-                    <i class="bi bi-person-circle input-icon"></i>
-                </div>
-
-                <div class="form-floating mb-4 position-relative">
-                    <input type="tel" id="mobile" class="form-control" placeholder="Mobile" 
-                           value="<?php echo $user_data['mobile']; ?>">
-                    <label for="mobile">Mobile Number</label>
-                    <i class="bi bi-telephone-fill input-icon"></i>
-                </div>
-
-                <button type="button" class="btn-update shadow-sm" 
-                        onclick="update_user_profile_info(<?php echo $user_data['id']; ?>);">
-                    <i class="bi bi-cloud-check-fill me-2"></i> Update Profile Info
-                </button>
-                
-                <div id="px" class="text-center mt-3 fw-bold text-primary small"></div>
-            </form>
+    <div class="m3-info-card shadow-sm">
+        <div class="card-label"><i class="bi bi-shield-lock-fill"></i> Administrative Context</div>
+        <div class="data-row">
+            <div class="data-icon"><i class="bi bi-building"></i></div>
+            <div><div class="data-key">Institution Code (EIIN)</div><div class="data-val"><?php echo $user['sccode']; ?></div></div>
         </div>
+        <div class="data-row">
+            <div class="data-icon"><i class="bi bi-person-badge"></i></div>
+            <div><div class="data-key">System User ID</div><div class="data-val"><?php echo $user['userid']; ?></div></div>
+        </div>
+    </div>
 
-        <div class="px-4 mt-4">
-            <div class="d-flex align-items-start text-muted">
-                <i class="bi bi-info-circle me-2 mt-1"></i>
-                <p style="font-size: 0.75rem; line-height: 1.4;">
-                    Your profile information is visible to the institution administration. Keep your contact number updated for system alerts.
-                </p>
+    <div class="m3-info-card shadow-sm">
+        <div class="card-label"><i class="bi bi-person-lines-fill"></i> Personal & Contact</div>
+        <div class="data-row">
+            <div class="data-icon"><i class="bi bi-phone"></i></div>
+            <div><div class="data-key">Mobile Number</div><div class="data-val" id="disp_mobile"><?php echo $user['mobile']; ?></div></div>
+        </div>
+        <div class="data-row">
+            <div class="data-icon"><i class="bi bi-geo-alt"></i></div>
+            <div><div class="data-key">Address / Area</div><div class="data-val"><?php echo $user['area'] . ", " . $user['ps'] . ", " . $user['dist']; ?></div></div>
+        </div>
+    </div>
+
+    <div class="m3-info-card shadow-sm" style="background: #F7F2FA; border: none;">
+        <div class="card-label"><i class="bi bi-clock-history"></i> Recent Activity</div>
+        <div class="data-row" style="border-bottom-color: #EADDFF;">
+            <div class="data-icon" style="background: #fff;"><i class="bi bi-box-arrow-in-right"></i></div>
+            <div><div class="data-key">Last Login</div><div class="data-val small"><?php echo $user['lastlogin']; ?></div></div>
+        </div>
+    </div>
+
+    <button class="btn-fab" onclick="openEditModal();">
+        <i class="bi bi-pencil-fill fs-4"></i>
+    </button>
+</main>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header border-0">
+                <h6 class="modal-title fw-bold">Edit Personal Info</h6>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_id" value="<?php echo $user['id']; ?>">
+                
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">Display Name</label>
+                    <i class="bi bi-person m3-field-icon"></i>
+                    <input type="text" id="edit_profilename" class="m3-input-floating" value="<?php echo $user['profilename']; ?>">
+                </div>
+
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">Mobile Number</label>
+                    <i class="bi bi-phone m3-field-icon"></i>
+                    <input type="tel" id="edit_mobile" class="m3-input-floating" value="<?php echo $user['mobile']; ?>">
+                </div>
+
+                <div class="row gx-2">
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <label class="m3-floating-label">Area</label>
+                            <input type="text" id="edit_area" class="m3-input-floating" style="padding-left:16px;" value="<?php echo $user['area']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <label class="m3-floating-label">District</label>
+                            <input type="text" id="edit_dist" class="m3-input-floating" style="padding-left:16px;" value="<?php echo $user['dist']; ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="small text-muted p-2" style="font-size: 0.65rem;">
+                    <i class="bi bi-info-circle me-1"></i> These details are used for official communications and system identification.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-light fw-bold m3-8px" data-bs-dismiss="modal">CANCEL</button>
+                <button class="btn btn-primary fw-bold px-4 m3-8px" onclick="saveProfileChanges();">
+                    <i class="bi bi-cloud-check-fill me-2"></i>SAVE CHANGES
+                </button>
             </div>
         </div>
     </div>
-</main>
+</div>
 
-<div style="height: 60px;"></div>
+<div style="height: 75px;"></div>
 
-
+<?php 
+// আপনার নির্দেশ অনুযায়ী JS স্ক্রিপ্ট শুরু করার আগে footer.php ইনক্লুড করা হলো
+include 'footer.php'; 
+?>
 
 <script>
-    function update_user_profile_info(id) {
-        const nameeng = document.getElementById("dispname").value;
-        const mno = document.getElementById("mobile").value;
+    const editModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
 
-        if(!nameeng) {
+    function openEditModal() {
+        editModal.show();
+    }
+
+    function saveProfileChanges() {
+        const payload = {
+            id: $('#edit_id').val(),
+            profilename: $('#edit_profilename').val(),
+            mobile: $('#edit_mobile').val(),
+            area: $('#edit_area').val(),
+            dist: $('#edit_dist').val()
+        };
+alert(JSON.stringify(payload));
+        if(!payload.profilename) {
             Swal.fire('Required', 'Display Name cannot be empty.', 'warning');
             return;
         }
 
-        const infor = `dispname=${encodeURIComponent(nameeng)}&mno=${encodeURIComponent(mno)}&id=${id}`;
-
         $.ajax({
             type: "POST",
             url: "backend/update-user-profile.php",
-            data: infor,
+            data: payload,
             beforeSend: function () {
-                $('#px').html('<div class="spinner-border spinner-border-sm me-1"></div> Syncing Data...');
+                Swal.fire({ title: 'Syncing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
             },
-            success: function (html) {
-                $("#px").html(html);
+            success: function (res) {
+                // UI ডাইনামিকভাবে আপডেট
+                $('#disp_profilename').text(payload.profilename);
+                $('#disp_mobile').text(payload.mobile);
+                
+                editModal.hide();
                 Swal.fire({
                     title: 'Profile Updated',
-                    text: 'Your information has been saved successfully.',
+                    text: 'Your changes have been saved successfully.',
                     icon: 'success',
-                    confirmButtonColor: '#6750A4'
+                    timer: 2000,
+                    showConfirmButton: false
                 });
             },
             error: function() {
@@ -196,5 +245,3 @@ if (strlen($photo_path) < 10) {
         });
     }
 </script>
-
-<?php include 'footer.php'; ?>

@@ -1,134 +1,172 @@
 <?php
-// ইউজার লগিন না থাকলে রিডাইরেক্ট
+/**
+ * Footer Navigation Bar - M3-EIM Style
+ * Features: Dynamic Active Highlighting via $curfile
+ */
+
+// ১. ইউজার লগিন না থাকলে রিডাইরেক্ট
 if (empty($usr) || $userlevel == 'Guest') {
     echo "<script>window.location.href='login.php';</script>";
     exit;
+}
+
+// বর্তমানে কোন ফাইলে আছে তা চেক করার ফাংশন (Inline Active Check)
+function isActive($targetFile, $currentFile)
+{
+    return ($targetFile === $currentFile) ? 'active' : '';
 }
 ?>
 
 <div class="bottom-nav-container noprint">
     <div class="bottom-nav">
+
         <?php if (in_array($userlevel, ['Head Teacher', 'Asstt. Head Teacher', 'Administrator', 'Super Administrator'])): ?>
-            <a href="index.php" class="nav-item">
-                <i class="bi bi-house-fill"></i>
+            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
                 <span>Home</span>
             </a>
-            <a href="reporthome.php" class="nav-item">
-                <i class="bi bi-mortarboard-fill"></i>
+            <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
                 <span>Reports</span>
             </a>
-            <a href="tools.php" class="nav-item">
-                <i class="bi bi-grid-fill"></i>
+            <a href="tools.php" class="nav-item <?= isActive('tools.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-grid-fill"></i></div>
                 <span>Tools</span>
             </a>
-            <a href="settings_admin.php" class="nav-item">
-                <i class="bi bi-gear-fill"></i>
+            <a href="settings_admin.php" class="nav-item <?= isActive('settings_admin.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-gear-fill"></i></div>
                 <span>Settings</span>
             </a>
-            <a href="build.php" class="nav-item">
-                <i class="bi bi-person-circle"></i>
+            <a href="build.php" class="nav-item <?= isActive('build.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-person-circle"></i></div>
                 <span>Profile</span>
             </a>
 
         <?php elseif (in_array($userlevel, ['Teacher', 'Asstt. Teacher', 'Class Teacher'])): ?>
-            <a href="index.php" class="nav-item">
-                <i class="bi bi-house-fill"></i>
+            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
                 <span>Home</span>
             </a>
-            <a href="reporthome.php" class="nav-item">
-                <i class="bi bi-mortarboard-fill"></i>
+            <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
                 <span>Academic</span>
             </a>
-            <a href="tools.php" class="nav-item">
-                <i class="bi bi-plus-circle-fill"></i>
+            <a href="tools.php" class="nav-item <?= isActive('tools.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-plus-circle-fill"></i></div>
                 <span>Tools</span>
             </a>
-            <a href="build.php" class="nav-item">
-                <i class="bi bi-person-circle"></i>
+            <a href="build.php" class="nav-item <?= isActive('build.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-person-circle"></i></div>
                 <span>Profile</span>
             </a>
 
         <?php elseif ($userlevel == "Student" || $userlevel == "Guardian"): ?>
-            <a href="index.php" class="nav-item">
-                <i class="bi bi-house-fill"></i>
+            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
                 <span>Home</span>
             </a>
-            <a href="my-profile.php" class="nav-item">
-                <i class="bi bi-person-fill"></i>
+            <a href="my-profile.php" class="nav-item <?= isActive('my-profile.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-person-fill"></i></div>
                 <span>Profile</span>
             </a>
-            <a href="globalsetting.php" class="nav-item">
-                <i class="bi bi-sliders"></i>
+            <a href="globalsetting.php" class="nav-item <?= isActive('globalsetting.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-sliders"></i></div>
                 <span>Settings</span>
             </a>
         <?php endif; ?>
+
     </div>
 </div>
 
 <style>
     :root {
-        --nav-bg: #ffffff;
-        --nav-primary: #6750A4;
-        /* Material M3 Primary */
-        --nav-secondary: #79747E;
+        --m3-nav-bg: #FFFFFF;
+        --m3-primary: #6750A4;
+        --m3-secondary: #49454F;
+        --m3-tonal-pill: #EADDFF;
     }
 
-    /* বটম বার ফিক্সড পজিশন */
+    /* Container Styling */
     .bottom-nav-container {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: var(--nav-bg);
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.08);
+        background: var(--m3-nav-bg);
+        box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.05);
         padding-bottom: env(safe-area-inset-bottom);
-        /* আইফোনের জন্য */
         z-index: 9999;
-        border-top: 1px solid #eee;
+        border-top: 1px solid #F3EDF7;
     }
 
     .bottom-nav {
         display: flex;
         justify-content: space-around;
         align-items: center;
-        height: 65px;
+        height: 75px;
         max-width: 600px;
         margin: 0 auto;
     }
 
+    /* Nav Item Base */
     .nav-item {
         display: flex;
         flex-direction: column;
         align-items: center;
         text-decoration: none;
-        color: var(--nav-secondary);
-        transition: all 0.2s ease;
+        color: var(--m3-secondary);
+        transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         flex: 1;
+        padding-top: 8px;
+    }
+
+    /* Icon Tonal Pill Effect (Material 3 Style) */
+    .icon-wrapper {
+        width: 64px;
+        height: 32px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+        margin-bottom: 4px;
     }
 
     .nav-item i {
         font-size: 22px;
-        margin-bottom: 2px;
+        transition: transform 0.2s ease;
     }
 
     .nav-item span {
         font-size: 11px;
-        font-weight: 500;
+        font-weight: 800;
+        letter-spacing: 0.3px;
     }
 
-    .nav-item:active,
+    /* Active State (Highlight) */
     .nav-item.active {
-        color: var(--nav-primary);
-        transform: scale(0.95);
+        color: var(--m3-primary);
     }
 
-    /* বডি গ্যাপ যাতে কন্টেন্ট ঢাকা না পড়ে */
+    .nav-item.active .icon-wrapper {
+        background-color: var(--m3-tonal-pill);
+        /* Active Pill Background */
+    }
+
+    .nav-item.active i {
+        color: #21005D;
+        transform: scale(1.1);
+    }
+
+    .nav-item.active span {
+        font-weight: 900;
+    }
+
+    /* Body Gap to prevent content overlap */
     body {
-        padding-bottom: 75px !important;
+        padding-bottom: 90px !important;
     }
 </style>
-
-
 
 
 
@@ -259,5 +297,3 @@ if (empty($usr) || $userlevel == 'Guest') {
         if (bd) bd.remove();
     });
 </script>
-
-

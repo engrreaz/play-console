@@ -3,6 +3,7 @@
  * Teacher Profile View & Edit - M3-EIM-Floating Style
  * Standards: 8px Radius | Modal Edit | AJAX Update | Android WebView Optimized
  */
+$page_title = "Staff Profile";
 include 'inc.php'; 
 
 // ১. ডাটা ফেচিং
@@ -19,7 +20,7 @@ if (!$data) {
     die("<div class='text-center mt-5 py-5'><i class='bi bi-search display-1 opacity-25'></i><p class='fw-bold'>Teacher Not Found!</p></div>");
 }
 
-$page_title = "Staff Profile";
+
 
 // ফটোর পাথ লজিক
 $photo_dir = "../../photos/staff/"; 
@@ -64,10 +65,7 @@ $display_photo = (file_exists($photo_path)) ? $photo_path : "https://eimbox.com/
     .m3-input-floating { width: 100%; height: 52px; padding: 12px 16px 12px 48px; font-size: 0.95rem; font-weight: 600; border: 2px solid #CAC4D0; border-radius: 8px !important; }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="teacher-manager.php" class="text-dark me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-</header>
+
 
 <main class="pb-5">
     <div class="profile-hero shadow-sm">

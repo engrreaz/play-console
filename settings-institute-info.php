@@ -164,12 +164,6 @@ $mobile = $row["mobile"] ?? "";
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="settings_admin.php" class="text-dark me-3"><i class="bi bi-arrow-left fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <span class="badge bg-light text-primary border rounded-pill px-3 py-1" style="font-size: 0.65rem;">SC:
-        <?php echo $sccode; ?></span>
-</header>
 
 <main class="pb-5">
     <div class="m3-identity-hero shadow-sm">

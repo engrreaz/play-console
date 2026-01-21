@@ -91,7 +91,7 @@ if (strpos($chain, 'class') !== false) {
 
 ?>
 
-<input id="selectedTree" type="text" value="333" >
+<input id="selectedTree" type="text" value="333">
 
 
 <?php
@@ -422,7 +422,8 @@ if (strpos($chain, 'class') !== false) {
         border-radius: 8px !important;
         border: 1px solid #E0E0E0;
         margin-bottom: 24px;
-        box-shadow: 0 8px 24px rgba(103, 80, 164, 0.08); /* Soft Elevation */
+        box-shadow: 0 8px 24px rgba(103, 80, 164, 0.08);
+        /* Soft Elevation */
         overflow: hidden;
     }
 
@@ -442,7 +443,9 @@ if (strpos($chain, 'class') !== false) {
         margin: 0;
     }
 
-    .m3-body-floating { padding: 24px 20px; }
+    .m3-body-floating {
+        padding: 24px 20px;
+    }
 
     /* Floating Label Container */
     .m3-floating-group {
@@ -464,10 +467,10 @@ if (strpos($chain, 'class') !== false) {
     }
 
     /* Floating Label Styling */
-  
+
 
     /* সিলেক্ট বক্স - আইকনের জন্য বামে পর্যাপ্ত জায়গা (Padding) */
-  
+
 
     .m3-select-floating:focus {
         border-color: #6750A4;
@@ -500,9 +503,15 @@ if (strpos($chain, 'class') !== false) {
     }
 
     .tonal-icon-btn {
-        width: 40px; height: 40px; border-radius: 8px;
-        background: #EADDFF; color: #21005D;
-        border: none; display: flex; align-items: center; justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #EADDFF;
+        color: #21005D;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>
 
@@ -528,7 +537,7 @@ if (strpos($chain, 'class') !== false) {
                         <?php
                         $q = $conn->query("SELECT slotname FROM slots WHERE sccode='$sccode' ORDER BY slotname");
                         while ($r = $q->fetch_assoc()) {
-                            echo "<option value='".htmlspecialchars($r['slotname'])."'>".htmlspecialchars($r['slotname'])."</option>";
+                            echo "<option value='" . htmlspecialchars($r['slotname']) . "'>" . htmlspecialchars($r['slotname']) . "</option>";
                         }
                         ?>
                     </select>
@@ -544,14 +553,14 @@ if (strpos($chain, 'class') !== false) {
                         <?php
                         $q = $conn->query("SELECT syear FROM sessionyear WHERE sccode='$sccode' AND active=1 ORDER BY syear DESC");
                         while ($r = $q->fetch_assoc()) {
-                            echo "<option value='".htmlspecialchars($r['syear'])."'>".htmlspecialchars($r['syear'])."</option>";
+                            echo "<option value='" . htmlspecialchars($r['syear']) . "'>" . htmlspecialchars($r['syear']) . "</option>";
                         }
                         ?>
                     </select>
                 </div>
             </div>
-
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <?php $hide = (strpos($chain, 'exam') === false) ? 'hidden' : ''; ?>
+            <div class="col-md-<?= $chain_md ?> col-12" <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Examination</label>
                     <i class="bi bi-journal-check m3-field-icon"></i>
@@ -581,7 +590,9 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <?php $hide = (strpos($chain, 'subject') === false) ? 'hidden' : ''; ?>
+
+            <div class="col-md-<?= $chain_md ?> col-12" <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Subject</label>
                     <i class="bi bi-book m3-field-icon"></i>
@@ -593,8 +604,9 @@ if (strpos($chain, 'class') !== false) {
 
             <div class="col-12">
                 <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain">
-            
-                    <i class="bi bi-arrow-right-circle-fill"></i>        <span><?= htmlspecialchars($chain_button_text) ?></span>
+
+                    <i class="bi bi-arrow-right-circle-fill"></i>
+                    <span><?= htmlspecialchars($chain_button_text) ?></span>
                 </button>
             </div>
 
