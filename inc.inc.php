@@ -34,7 +34,7 @@ if ($result0xrtyv->num_rows > 0) {
 $sccode = $eiin;
 
 
-$sessionyear = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] ?? $_COOKIE['query-session'] ?? $sy;
+$sessionyear = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] ?? $_COOKIE['query-session'] ?? $SY;
 $sessionyear_param = '%' . $sessionyear . '%';
 // echo $sy_param;'
 
@@ -311,8 +311,7 @@ $exam = $curexam;//'Half Yearly';
 $curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
 $curfile = basename($_SERVER["SCRIPT_FILENAME"]);
 
-// echo $curfile;
-
+$permission = 3;
 
 $ins_all_settings = array();
 $sql0x = "SELECT * FROM settings where sccode='$sccode'";

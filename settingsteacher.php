@@ -1,126 +1,188 @@
 <?php
-include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+/**
+ * Staff Manager - M3-EIM-Floating Style
+ * Standards: 8px Radius | Floating Labels | Leading Icons | Modal UI | Photo Integration
+ */
+$page_title = "Staff Management";
+$drop_down_menu_1 = "👤 New Teacher";
+include 'inc.php';
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = '%' . $current_session . '%';
 
-$page_title = "Teacher Manager";
+// ১. সেশন ইয়ার হ্যান্ডলিং
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $sy;
+
+// ২. ফটো ডিরেক্টরি পাথ (Web Accessible Path)
+// dirname(dirname(__DIR__)) সাধারণত রুট ফোল্ডার বোঝায়। 
+// আপনার ওয়েব সার্ভারের পাথ অনুযায়ী এটি সমন্বয় করে নিন (যেমন: /photos/staff/)
+$photo_dir = dirname(__DIR__) . '/teacher/';
+
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
+    body {
+        background-color: #FEF7FF;
+        font-size: 0.9rem;
+        margin: 0;
+        padding: 0;
+    }
 
-    /* Full Width M3 App Bar (8px Bottom Radius) */
+    /* M3 App Bar */
     .m3-app-bar {
-        width: 100%; position: sticky; top: 0; z-index: 1050;
-        background: #fff; height: 56px; display: flex; align-items: center; 
-        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
-
-    /* Register Card (M3 Tonal Style - 8px Radius) */
-    .m3-register-card {
-        background: #F3EDF7; border-radius: 8px; padding: 16px; margin: 12px;
-        border: 1px solid #EADDFF; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    /* M3 Inputs (8px Radius) */
-    .form-floating > .form-control, .form-floating > .form-select {
-        border-radius: 8px !important; border: 1px solid #79747E;
-        background: transparent; font-size: 0.9rem; font-weight: 600;
-    }
-    .form-floating > label { font-size: 0.75rem; color: #6750A4; font-weight: 700; }
-
-    /* Teacher Profile Card (8px Radius) */
-    .teacher-item-card {
-        background: #fff; border-radius: 8px; padding: 12px; margin: 0 12px 10px;
-        border: 1px solid #f0f0f0; display: flex; align-items: flex-start;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: 0.2s;
-    }
-    .teacher-item-card:active { background-color: #F7F2FA; }
-
-    .staff-avatar {
-        width: 50px; height: 50px; border-radius: 8px;
-        background: #EADDFF; color: #21005D;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; margin-right: 14px; flex-shrink: 0;
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 1050;
+        background: #fff;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    /* Action Buttons (8px Radius) */
-    .btn-m3-tool {
-        border-radius: 8px; padding: 6px 12px; font-size: 0.7rem;
-        font-weight: 800; border: none; text-transform: uppercase;
-        display: inline-flex; align-items: center; gap: 4px;
+    .m3-app-bar .page-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1C1B1F;
+        flex-grow: 1;
+        margin: 0;
     }
-    .btn-m3-edit { background: #EADDFF; color: #21005D; }
-    .btn-m3-del { background: #FFEBEE; color: #B3261E; }
 
-    .staff-id-chip {
-        font-size: 0.6rem; background: #eee; color: #666;
-        padding: 1px 6px; border-radius: 4px; font-weight: 800;
+    /* Teacher List Styling */
+    .teacher-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 0 12px 10px;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .staff-img-box {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        /* 8px strict */
+        background: #F3EDF7;
+        overflow: hidden;
+        margin-right: 14px;
+        border: 1px solid #EADDFF;
+        flex-shrink: 0;
+    }
+
+    .staff-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .staff-id-badge {
+        font-size: 0.6rem;
+        background: #EADDFF;
+        color: #21005D;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: 800;
+    }
+
+    /* Modal Styling (M3-EIM-Floating) */
+    .modal-content {
+        border-radius: 8px !important;
+        border: none;
+        background: #fff;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #F3EDF7;
+        padding: 16px 20px;
+    }
+
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 24px 20px;
+    }
+
+    /* Custom Scrollbar for Modal Body */
+    .modal-body::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #EADDFF;
+        border-radius: 10px;
+    }
+
+    /* M3-EIM-Floating Input Styles (As established) */
+    .m3-floating-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .m3-field-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6750A4;
+        font-size: 1.2rem;
+        z-index: 10;
+    }
+
+    .m3-floating-label {
+        position: absolute;
+        left: 44px;
+        top: -10px;
+        background: #fff;
+        padding: 0 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6750A4;
+        z-index: 15;
+        text-transform: uppercase;
+    }
+
+    .m3-input-floating {
+        width: 100%;
+        height: 52px;
+        padding: 12px 16px 12px 48px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: 2px solid #CAC4D0;
+        border-radius: 8px !important;
+    }
+
+    .m3-input-floating:focus {
+        border-color: #6750A4;
+        outline: none;
+    }
+
+    .btn-m3-tonal {
+        background: #EADDFF;
+        color: #21005D;
+        border-radius: 8px;
+        font-weight: 800;
+        border: none;
+    }
+
+    .btn-m3-primary {
+        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        color: #fff;
+        border-radius: 8px;
+        font-weight: 800;
+        border: none;
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="settings_admin.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;"><?php echo $current_session; ?></span>
+
+
+
+<main class="pb-5 mt-3">
+    <div class="px-3 mb-3 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Honourable Staff Members
     </div>
-</header>
-
-<main class="pb-5 mt-2">
-    <?php if (in_array($userlevel, ['Administrator', 'Head Teacher', 'Super Administrator'])): ?>
-        <div class="m3-register-card shadow-sm">
-            <div class="d-flex align-items-center justify-content-between" onclick="toggleTeacherForm();" style="cursor:pointer;">
-                <div class="d-flex align-items-center">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width:36px; height:36px;">
-                        <i class="bi bi-person-plus-fill fs-5"></i>
-                    </div>
-                    <div class="fw-bold text-dark">Register New Staff</div>
-                </div>
-                <i class="bi bi-chevron-down" id="form-toggle-icon"></i>
-            </div>
-
-            <div id="teacher-form-ui" style="display:none;" class="mt-4">
-                <input type="hidden" id="tid" value="">
-                
-                <div class="form-floating mb-3">
-                    <input type="text" id="tname" class="form-control" placeholder="Name">
-                    <label for="tname">Full Legal Name</label>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <select class="form-select" id="pos">
-                        <option value="">Select Designation</option>
-                        <option value="Principal">Principal</option>
-                        <option value="Head Teacher">Head Teacher</option>
-                        <option value="Asstt. Head Teacher">Asstt. Head Teacher</option>
-                        <option value="Senior Teacher">Senior Teacher</option>
-                        <option value="Lecturer">Lecturer</option>
-                        <option value="Asstt. Teacher">Asstt. Teacher</option>
-                        <option value="Accountant">Accountant</option>
-                        <option value="Office Assistant">Office Assistant</option>
-                    </select>
-                    <label for="pos">Position / Rank</label>
-                </div>
-
-                <div class="form-floating mb-4">
-                    <input type="tel" id="mno" class="form-control" placeholder="Mobile">
-                    <label for="mno">Mobile Number</label>
-                </div>
-
-                <button class="btn btn-primary w-100 py-3 shadow-sm fw-bold" style="border-radius: 8px;" onclick="saveTeacherProfile();">
-                    <i class="bi bi-cloud-check-fill me-2"></i> UPDATE STAFF RECORDS
-                </button>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <div class="px-3 mb-3 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Honourable Staff Members</div>
 
     <div id="teacher-list-data">
         <?php
@@ -129,133 +191,212 @@ $page_title = "Teacher Manager";
         $stmt->execute();
         $res = $stmt->get_result();
 
-        if ($res->num_rows > 0):
-            while ($row = $res->fetch_assoc()):
-                $tid_val = $row["tid"];
-        ?>
-            <div class="teacher-item-card shadow-sm">
-                <div class="staff-avatar">
-                    <i class="bi bi-person-badge"></i>
+        while ($row = $res->fetch_assoc()):
+            $tid = $row["tid"];
+            // ফটোর পাথ চেক লজিক
+            $photo_path = $photo_dir . $tid . ".jpg";
+            $photo_path_alt = $photo_dir . "no-img.png";
+
+            $display_photo = (file_exists($photo_path)) ? $photo_path : $photo_path_alt;
+            ?>
+            <div class="teacher-card shadow-sm showDetails" data-tid="<?php echo $tid; ?>" id="card-<?php echo $tid; ?>">
+                <div class="staff-img-box shadow-sm">
+                    <img src="<?php echo $display_photo; ?>" alt="Profile">
                 </div>
-                
                 <div class="flex-grow-1 overflow-hidden">
-                    <div class="staff-id-chip mb-1">ID: <span id="tid<?php echo $tid_val; ?>"><?php echo $tid_val; ?></span></div>
-                    <div class="fw-bold text-dark text-truncate" id="tname<?php echo $tid_val; ?>"><?php echo $row["tname"]; ?></div>
-                    <div class="text-muted small" id="pos<?php echo $tid_val; ?>" style="font-weight: 500;"><?php echo $row["position"]; ?></div>
-                    <div class="text-primary small fw-bold mt-1" id="mno<?php echo $tid_val; ?>">
-                        <i class="bi bi-telephone-outbound me-1"></i><?php echo $row["mobile"]; ?>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="staff-id-badge">ID: <?php echo $tid; ?></span>
+                        <div class="dropdown" onclick="event.stopPropagation();">
+                            <i class="bi bi-three-dots-vertical text-muted px-2" data-bs-toggle="dropdown"
+                                style="cursor:pointer;"></i>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 m3-8px">
+                                <li><a class="dropdown-item fw-bold small" onclick="editTeacher(<?php echo $tid; ?>);"><i
+                                            class="bi bi-pencil-square me-2 text-primary"></i> Edit Profile</a></li>
+                                <li><a class="dropdown-item fw-bold small text-danger"
+                                        onclick="showDeleteConfirm(<?php echo $tid; ?>);"><i class="bi bi-trash3 me-2"></i>
+                                        Remove Staff</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    
-                    <div class="d-flex gap-2 mt-3">
-                        <button class="btn-m3-tool btn-m3-edit shadow-sm" onclick="editTeacher(<?php echo $tid_val; ?>);">
-                            <i class="bi bi-pencil-square"></i> Edit
-                        </button>
-                        
-                        <div id="del-box-<?php echo $tid_val; ?>">
-                            <button class="btn-m3-tool btn-m3-del shadow-sm" onclick="showDeleteConfirm(<?php echo $tid_val; ?>);">
-                                <i class="bi bi-trash3"></i> Remove
-                            </button>
-                        </div>
-                        
-                        <div id="conf-box-<?php echo $tid_val; ?>" style="display:none;">
-                            <button class="btn btn-danger btn-sm fw-bold rounded-3 py-1" onclick="deleteTeacher(<?php echo $tid_val; ?>);">SURE?</button>
-                            <button class="btn btn-link btn-sm text-muted" onclick="cancelDelete(<?php echo $tid_val; ?>);">No</button>
-                        </div>
+                    <div class="fw-bold text-dark text-truncate mt-1" id="tname<?php echo $tid; ?>">
+                        <?php echo $row["tname"]; ?>
+                    </div>
+                    <div class="text-muted small fw-bold" id="pos<?php echo $tid; ?>"><?php echo $row["position"]; ?></div>
+                    <div class="text-primary small fw-bold mt-1" id="mno<?php echo $tid; ?>">
+                        <i class="bi bi-telephone-outbound me-1"></i><?php echo $row["mobile"]; ?>
                     </div>
                 </div>
             </div>
-        <?php 
-            endwhile;
-        else:
-            echo '<div class="text-center py-5 opacity-25"><i class="bi bi-people-fill display-1"></i><p class="fw-bold mt-2">No records found.</p></div>';
-        endif; $stmt->close();
-        ?>
+        <?php endwhile;
+        $stmt->close(); ?>
     </div>
 </main>
 
+<div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0">
+                <h6 class="modal-title fw-bold" id="modalTitle">Register New Staff</h6>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
+                    style="font-size: 0.7rem;"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tid" value="">
+
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">Full Legal Name</label>
+                    <i class="bi bi-person-badge m3-field-icon"></i>
+                    <input type="text" id="tname" class="m3-input-floating" placeholder="Enter Name">
+                </div>
+
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">Position / Rank</label>
+                    <i class="bi bi-briefcase m3-field-icon"></i>
+                    <select id="pos" class="m3-input-floating">
+                        <option value="">Select Position</option>
+                        <option value="Head Teacher">Head Teacher</option>
+                        <option value="Asstt. Head Teacher">Asstt. Head Teacher</option>
+                        <option value="Senior Teacher">Senior Teacher</option>
+                        <option value="Lecturer">Lecturer</option>
+                        <option value="Asstt. Teacher">Asstt. Teacher</option>
+                        <option value="Office Assistant">Office Assistant</option>
+                    </select>
+                </div>
+
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">Mobile Number</label>
+                    <i class="bi bi-phone m3-field-icon"></i>
+                    <input type="tel" id="mno" class="m3-input-floating" placeholder="017xx-xxxxxx">
+                </div>
+
+                <div class="small text-muted mb-4 px-2" style="font-size: 0.65rem; line-height: 1.3;">
+                    <i class="bi bi-info-circle me-1"></i> Ensure all information is accurate as per official service
+                    records.
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3">
+                <button type="button" class="btn btn-light fw-bold px-4 m3-8px text-muted"
+                    data-bs-dismiss="modal">CANCEL</button>
+                <button type="button" class="btn btn-m3-primary px-4 py-2 shadow-sm" onclick="saveTeacherProfile();">
+                    <i class="bi bi-cloud-check-fill me-2"></i>SAVE CHANGES
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div style="height: 75px;"></div>
 
+<?php include 'footer.php'; ?>
+
 <script>
-    function toggleTeacherForm() {
-        const ui = document.getElementById("teacher-form-ui");
-        const icon = document.getElementById("form-toggle-icon");
-        if (ui.style.display === "none") {
-            ui.style.display = "block";
-            icon.className = "bi bi-chevron-up";
+    const staffModal = new bootstrap.Modal(document.getElementById('staffModal'));
+
+    function drop_down_menu_1() {
+        if (<?php echo $permission; ?> == 3) {
+            document.getElementById('tid').value = "";
+            document.getElementById('modalTitle').innerText = "Register New Staff";
+            document.getElementById('tname').value = "";
+            document.getElementById('pos').value = "";
+            document.getElementById('mno').value = "";
+            staffModal.show();
         } else {
-            ui.style.display = "none";
-            icon.className = "bi bi-chevron-down";
-            resetForm();
-        }
-    }
-
-    function resetForm() {
-        document.getElementById("tid").value = "";
-        document.getElementById("tname").value = "";
-        document.getElementById("pos").value = "";
-        document.getElementById("mno").value = "";
-    }
-
-    function saveTeacherProfile() {
-        const tid = document.getElementById("tid").value;
-        const tname = document.getElementById("tname").value;
-        const pos = document.getElementById("pos").value;
-        const mno = document.getElementById("mno").value;
-
-        if(!tname || !pos) {
-            Swal.fire('Required', 'Staff name and position are mandatory.', 'warning');
-            return;
+            Swal.fire('Access Denied', 'You do not have permission to add new staff members.', 'error');
         }
 
-        const data = `rootuser=<?php echo $sccode; ?>&tname=${encodeURIComponent(tname)}&pos=${encodeURIComponent(pos)}&mno=${mno}&tid=${tid}&action=1`;
-
-        $.ajax({
-            type: "POST",
-            url: "addeditteacher.php",
-            data: data,
-            beforeSend: function () {
-                $('#teacher-list-data').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
-            },
-            success: function (res) {
-                $("#teacher-list-data").html(res);
-                toggleTeacherForm();
-                Swal.fire({ title: 'Synced!', icon: 'success', timer: 1500, showConfirmButton: false });
-            }
-        });
     }
 
     function editTeacher(id) {
         document.getElementById("tid").value = id;
-        document.getElementById("tname").value = document.getElementById("tname" + id).innerText;
+        document.getElementById('modalTitle').innerText = "Edit Staff Profile";
+        document.getElementById("tname").value = document.getElementById("tname" + id).innerText.trim();
         document.getElementById("pos").value = document.getElementById("pos" + id).innerText.trim();
-        document.getElementById("mno").value = document.getElementById("mno" + id).innerText;
-        
-        if(document.getElementById("teacher-form-ui").style.display === "none") toggleTeacherForm();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById("mno").value = document.getElementById("mno" + id).innerText.trim();
+        staffModal.show();
     }
 
+    function saveTeacherProfile() {
+        const payload = {
+            tid: document.getElementById("tid").value,
+            tname: document.getElementById("tname").value,
+            pos: document.getElementById("pos").value,
+            mno: document.getElementById("mno").value,
+            rootuser: '<?php echo $sccode; ?>',
+            action: 1
+        };
+
+        if (!payload.tname || !payload.pos) {
+            Swal.fire('Warning', 'Name and Position are required.', 'warning');
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "settings/addeditteacher.php",
+            data: payload,
+            success: function (res) {
+                const tid = document.getElementById("tid").value;
+
+                if (tid === "") {
+                    // নতুন টিচার হলে লিস্টের সবার উপরে অ্যাড করো
+                    $("#teacher-list-data").prepend(res);
+                } else {
+                    // এডিট হলে পুরনো কার্ডটি নতুন কার্ড দিয়ে রিপ্লেস করো
+                    $("#card-" + tid).replaceWith(res);
+                }
+
+                staffModal.hide();
+                Swal.fire({ title: 'Staff Record Updated', icon: 'success', timer: 1500, showConfirmButton: false });
+            }
+        });
+    }
+
+    // ডিলিট কনফার্মেশন (SweetAlert2 ব্যবহার করলে আরও আধুনিক হবে)
     function showDeleteConfirm(id) {
-        document.getElementById("del-box-" + id).style.display = 'none';
-        document.getElementById("conf-box-" + id).style.display = 'block';
-    }
-
-    function cancelDelete(id) {
-        document.getElementById("del-box-" + id).style.display = 'block';
-        document.getElementById("conf-box-" + id).style.display = 'none';
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently remove the staff member.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#B3261E',
+            cancelButtonColor: '#79747E',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteTeacher(id);
+            }
+        });
     }
 
     function deleteTeacher(id) {
-        const data = `rootuser=<?php echo $sccode; ?>&tid=${id}&action=0`;
         $.ajax({
             type: "POST",
             url: "addeditteacher.php",
-            data: data,
+            data: { rootuser: '<?php echo $sccode; ?>', tid: id, action: 0 },
             success: function (res) {
-                $("#teacher-list-data").html(res);
-                Swal.fire('Removed', 'Staff member deleted.', 'info');
+                if (res === "DELETED") {
+                    $("#card-" + id).fadeOut(300, function () { $(this).remove(); });
+                    Swal.fire('Removed', 'Staff member deleted.', 'success');
+                }
             }
         });
     }
 </script>
 
-<?php include 'footer.php'; ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".showDetails").forEach(function (card) {
+            card.addEventListener("click", function () {
+
+                let teacherId = this.getAttribute("data-tid");
+
+                if (teacherId) {
+                    window.location.href = "teacher-profile.php?tid=" + teacherId;
+                }
+
+            });
+        });
+
+    });
+</script>

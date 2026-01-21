@@ -135,6 +135,7 @@ if (empty($usr) || $userlevel == 'Guest') {
 
 
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 
@@ -258,3 +259,5 @@ if (empty($usr) || $userlevel == 'Guest') {
         if (bd) bd.remove();
     });
 </script>
+
+

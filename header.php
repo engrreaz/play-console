@@ -131,7 +131,22 @@
             </div>
 
 
-            <div id="avatarMenu" class="avatar-dropdown shadow-sm"  >
+            <div id="avatarMenu" class="avatar-dropdown shadow-sm">
+                <?php
+                if (isset($drop_down_menu_1) && $drop_down_menu_1 !== '') {
+                    echo '<div id="drop-down-menu-1 " class="dd-item text-primary" onclick="drop_down_menu_1()">' . $drop_down_menu_1 . '</div>';
+                }
+                if (isset($drop_down_menu_2) && $drop_down_menu_2 !== '') {
+                    echo '<div id="drop-down-menu-2 " class="dd-item text-primary" onclick="drop_down_menu_2()">' . $drop_down_menu_2 . '</div>';
+                }
+                if (isset($drop_down_menu_3) && $drop_down_menu_3 !== '') {
+                    echo '<div id="drop-down-menu-3" class="dd-item  text-primary" onclick="drop_down_menu_3()">' . $drop_down_menu_3 . '</div>';
+                }
+    
+                ?>
+
+                <div class="dd-divider"></div>
+
                 <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
                 <div class="dd-divider"></div>
 
