@@ -5,7 +5,7 @@ function student_profile_image_path($student_id) {
     
     $possible_extensions = ['jpg'];
     foreach ($possible_extensions as $ext) {
-        $file_path = dirname(__DIR__) . 'students/' . $student_id . '.' . $ext;
+        $file_path = dirname(__DIR__) . '/students/' . $student_id . '.' . $ext;
         if (file_exists($file_path)) {
             return $BASE_PATH_URL . 'students/' . $student_id . '.' . $ext;
         }
