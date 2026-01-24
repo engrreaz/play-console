@@ -1,10 +1,9 @@
 <?php
 $page_title = "Management Tools";
-include_once 'inc.php'; // DB সংযোগ এবং প্রাথমিক ডাটা লোড করে
+include_once 'inc.php'; 
 
-
-
-
+// সেশন ইয়ার নিশ্চিত করা
+$current_session = $current_session ?? $sy;
 
 /**
  * ২. মডিউল কনফিগারেশন
@@ -14,21 +13,21 @@ $academic_tools = [
         'title' => 'Marks Entry',
         'desc' => 'Manage exam marks & results',
         'icon' => 'bi-pencil-square',
-        'color' => '#6750A4', // M3 Primary
+        'color' => 'c-inst', 
         'url' => 'markentryselect.php'
     ],
     [
         'title' => 'Class Test',
         'desc' => 'Assessments & class tests',
         'icon' => 'bi-journal-check',
-        'color' => '#7D5260', // M3 Tertiary
+        'color' => 'c-util', 
         'url' => 'class_test.php'
     ],
     [
         'title' => 'Co-Curricular',
         'desc' => 'Extra-curricular activities',
         'icon' => 'bi-trophy',
-        'color' => '#146C32', // M3 Success
+        'color' => 'c-fina', 
         'url' => 'co_curricular_entry.php'
     ]
 ];
@@ -38,77 +37,134 @@ $admin_tools = [
         'title' => 'Leave Applications',
         'desc' => 'Respond to staff leave requests',
         'icon' => 'bi-file-earmark-person',
-        'color' => '#B3261E', // M3 Error
+        'color' => 'c-exit', 
         'url' => 'leave-application-response.php'
     ],
     [
         'title' => 'Notice Manager',
         'desc' => 'Broadcast institute notifications',
         'icon' => 'bi-megaphone',
-        'color' => '#6750A4',
-        'url' => 'noticemanager.php'
+        'color' => 'c-acad',
+        'url' => 'add-notice.php'
     ]
 ];
 ?>
 
+<style>
+    /* ক্লিক নিশ্চিত করার জন্য স্টাইল */
+    .m3-list-item {
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        display: flex !important; /* নিশ্চিত করে যে এটি পুরো জায়গা নেবে */
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    /* হিরো কন্টেইনার অ্যাডজাস্টমেন্ট */
+    .hero-management {
+        padding-bottom: 30px;
+        margin-bottom: 20px;
+        border-radius: 0 0 24px 24px;
+    }
+</style>
 
-
-
-<main class="pb-5 mt-2">
-    <div class="m3-cat-label">Class Management</div>
-    <?php if (!empty($cteacher_data)): ?>
-        <?php foreach ($cteacher_data as $class): ?>
-            <a href="stattnd.php?cls=<?php echo urlencode($class['cteachercls']); ?>&sec=<?php echo urlencode($class['cteachersec']); ?>&year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
-                <div class="icon-box shadow-sm" style="background-color: #E3F2FD; color: #1976D2;">
-                    <i class="bi bi-fingerprint"></i>
+<main>
+    <div class="hero-container hero-management">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;" onclick="location.href='reporthome.php'">
+                    <i class="bi bi-grid-fill"></i>
                 </div>
-                <div class="tool-info">
-                    <div class="tool-name">Roll Call</div>
-                    <div class="tool-meta">Attendance for <b><?php echo $class['cteachercls'] . " (" . $class['cteachersec'] . ")"; ?></b></div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;">Management</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Institute Administration Tools</div>
                 </div>
-                <i class="bi bi-chevron-right text-muted opacity-25"></i>
-            </a>
+            </div>
+            <div style="text-align: right;">
+                 <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
+                    YEAR: <?php echo $current_session; ?>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="widget-grid" style="padding-bottom: 100px;">
+        
+        <div class="m3-section-title px-3">Class Management</div>
+        <?php if (!empty($cteacher_data)): ?>
+            <?php foreach ($cteacher_data as $class): 
+                $lnk = "cls=" . urlencode($class['cteachercls']) . "&sec=" . urlencode($class['cteachersec']) . "&year=" . $current_session;
+            ?>
+                <div class="m3-list-item shadow-sm" onclick="go('stattnd.php', '<?php echo $lnk; ?>')">
+                    <div class="icon-box c-acad">
+                        <i class="bi bi-fingerprint"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="st-title">Roll Call</div>
+                        <div class="st-desc">Attendance for <b><?php echo $class['cteachercls'] . " (" . $class['cteachersec'] . ")"; ?></b></div>
+                    </div>
+                    <div style="color: var(--m3-outline); opacity: 0.3;"><i class="bi bi-chevron-right"></i></div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="m3-list-item shadow-sm" onclick="go('stattnd.php', 'year=<?php echo $current_session; ?>')">
+                <div class="icon-box c-inst">
+                    <i class="bi bi-person-check"></i>
+                </div>
+                <div class="item-info">
+                    <div class="st-title">General Attendance</div>
+                    <div class="st-desc">Student presence tracking system</div>
+                </div>
+                <div style="color: var(--m3-outline); opacity: 0.3;"><i class="bi bi-chevron-right"></i></div>
+            </div>
+        <?php endif; ?>
+
+        <div class="m3-section-title px-3 mt-3">Academic Excellence</div>
+        <?php foreach ($academic_tools as $item): ?>
+            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $current_session; ?>')">
+                <div class="icon-box <?php echo $item['color']; ?>">
+                    <i class="bi <?php echo $item['icon']; ?>"></i>
+                </div>
+                <div class="item-info">
+                    <div class="st-title"><?php echo $item['title']; ?></div>
+                    <div class="st-desc"><?php echo $item['desc']; ?></div>
+                </div>
+                <div style="color: var(--m3-outline); opacity: 0.3;"><i class="bi bi-chevron-right"></i></div>
+            </div>
         <?php endforeach; ?>
-    <?php else: ?>
-        <a href="stattnd.php?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
-            <div class="icon-box shadow-sm" style="background-color: #F3EDF7; color: #6750A4;">
-                <i class="bi bi-person-check"></i>
-            </div>
-            <div class="tool-info">
-                <div class="tool-name">Attendance</div>
-                <div class="tool-meta">Daily student presence tracking</div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-    <?php endif; ?>
 
-    <div class="m3-cat-label">Academic Excellence</div>
-    <?php foreach ($academic_tools as $item): ?>
-        <a href="<?php echo $item['url']; ?>?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
-            <div class="icon-box shadow-sm" style="background: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
-                <i class="bi <?php echo $item['icon']; ?>"></i>
+        <div class="m3-section-title px-3 mt-3">Administration</div>
+        <?php foreach ($admin_tools as $item): ?>
+            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $current_session; ?>')">
+                <div class="icon-box <?php echo $item['color']; ?>">
+                    <i class="bi <?php echo $item['icon']; ?>"></i>
+                </div>
+                <div class="item-info">
+                    <div class="st-title"><?php echo $item['title']; ?></div>
+                    <div class="st-desc"><?php echo $item['desc']; ?></div>
+                </div>
+                <div style="color: var(--m3-outline); opacity: 0.3;"><i class="bi bi-chevron-right"></i></div>
             </div>
-            <div class="tool-info">
-                <div class="tool-name"><?php echo $item['title']; ?></div>
-                <div class="tool-meta"><?php echo $item['desc']; ?></div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
 
-    <div class="m3-cat-label">Administration</div>
-    <?php foreach ($admin_tools as $item): ?>
-        <a href="<?php echo $item['url']; ?>?year=<?php echo $current_session; ?>" class="tool-card shadow-sm">
-            <div class="icon-box shadow-sm" style="background: <?php echo $item['color']; ?>15; color: <?php echo $item['color']; ?>;">
-                <i class="bi <?php echo $item['icon']; ?>"></i>
-            </div>
-            <div class="tool-info">
-                <div class="tool-name"><?php echo $item['title']; ?></div>
-                <div class="tool-meta"><?php echo $item['desc']; ?></div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-    <?php endforeach; ?>
+    </div>
 </main>
 
-<div style="height: 75px;"></div> <?php include_once 'footer.php'; ?>
+
+
+<script>
+    /**
+     * নেভিগেশন ফাংশন (ক্লিক কাজ না করার সমাধান)
+     * @param {string} page - গন্তব্য পেজ
+     * @param {string} params - কুয়েরি প্যারামিটার
+     */
+    function go(page, params) {
+        if (!page) return;
+        const url = params ? `${page}?${params}` : page;
+        window.location.href = url;
+    }
+</script>
+
+<div style="height: 80px;"></div> 
+<?php include_once 'footer.php'; ?>

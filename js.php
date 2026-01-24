@@ -374,7 +374,7 @@
     function settings_admin_ins_info() { window.location.href = "settings-institute-info.php"; }
     function settings_admin_add_edit_teacher() { window.location.href = "settingsteacher.php"; }
     function settings_admin_cls_sec() { window.location.href = "settings-class.php"; }
-    function settings_admin_st_id_generate() { window.location.href = "settings-student.php"; }
+    // function settings_admin_st_id_generate() { window.location.href = "settings-student.php"; }
     function settings_admin_st_id_payment_indivisula() { window.location.href = "st-payment-setup-indivisual.php"; }
     function settings_admin_subject_setup() { window.location.href = "settings-subject.php"; }
     function settings_admin_subject_list_teacher_bind() { window.location.href = "tools_all-subjects.php"; }

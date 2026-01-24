@@ -30,7 +30,7 @@
     <?php endif; ?>
 
 
-
+    <link rel="icon" type="image/png" href="iimg/logo.png">
 
     <!-- <link rel="stylesheet" href="assets/style.css"> -->
     <!-- <link rel="stylesheet" href="assets/console.css"> -->
