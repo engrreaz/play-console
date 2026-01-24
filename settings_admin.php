@@ -112,6 +112,11 @@ $sy_param = '%' . $current_session . '%';
             <a href="studentadmission.php" class="btn-dev shadow-sm">ADMISSION</a>
             <a href="cashbookview.php" class="btn-dev shadow-sm">CASHBOOK</a>
             <a href="trackreport.php" class="btn-dev shadow-sm">TRACKING</a>
+             <div class="m3-cat-label">Co-Curricular Activities</div>
+            <a href="activity_manager.php" class="btn-dev shadow-sm">CCA</a>
+            <a href="student_activity_entry.php" class="btn-dev shadow-sm">Entry</a>
+            <a href="student_activity_list.php" class="btn-dev shadow-sm">Student CCA</a>
+            <a href="all_activities.php" class="btn-dev shadow-sm">All CCA</a>
         </div>
     <?php endif; ?>
 
