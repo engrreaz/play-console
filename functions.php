@@ -19,7 +19,7 @@ function teacher_profile_image_path($teacher_id) {
     
     $possible_extensions = ['jpg', 'jpeg', 'png', 'gif'];
     foreach ($possible_extensions as $ext) {
-        $file_path = $BASE_PATH_URL_FILE . 'teacher/' . $teacher_id . '.' . $ext;
+        $file_path = dirname(__DIR__) . '/teacher/'  . $teacher_id . '.' . $ext;
         if (file_exists($file_path)) {
             return $BASE_PATH_URL . 'teacher/' . $teacher_id . '.' . $ext;
         }
