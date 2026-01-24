@@ -85,7 +85,7 @@ if ($token_found == 1 && $devicetoken != '') {
     $conn->query($query33pxy_device_token);
 
 }
-if (isset($_SESSION["devicetoken"]) && $usr !='') {
+if (isset($_SESSION["devicetoken"]) && $usr != '') {
     $devicetoken = $_SESSION["devicetoken"];
     $query33pxy_device_token = "UPDATE usersapp set token='$devicetoken' where email='$usr';";
     $conn->query($query33pxy_device_token);
@@ -330,20 +330,18 @@ include 'component/sms-func.php';
 include 'header.php';
 
 ?>
-    <style>
-  #mbox {
-  background:red;
-  position:absolute;
-  top:25%;
-  right:0px;
-  bottom:25%;
-  left:0px;
-  z-index:1000;
-}
-    </style>
-  
-  <div id="sms-send-response-block"></div>
+<style>
+    #mbox {
+        background: red;
+        position: absolute;
+        top: 25%;
+        right: 0px;
+        bottom: 25%;
+        left: 0px;
+        z-index: 1000;
+    }
+</style>
 
-    <div id="mbox2"></div>
-    
- 
+<div id="sms-send-response-block"></div>
+
+<div id="mbox2"></div>

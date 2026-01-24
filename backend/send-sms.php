@@ -1,5 +1,5 @@
 <?php
-include 'inc.back.php';
+include '../inc.light.php';
 
 $camp = "";
 $type = "";

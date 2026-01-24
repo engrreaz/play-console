@@ -171,9 +171,30 @@ function isActive($targetFile, $currentFile)
 
 
 
+<!-- ----------------------------------------------------------- -->
+<!-- SESSION MODAL -->
+
+<div id="sessionModal" style="display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.5); justify-content:center; align-items:center; z-index:9999;">
+
+    <div style="background:#fff; width:75%; max-width: 80%; margin:auto; max-height:80%; 
+    border-radius:8px; padding:15px; overflow:auto; position:relative;">
+
+        <h4>Select Session</h4>
+
+        <span onclick="closeSessionModal()" style="position:absolute; right:15px; top:10px;
+            cursor:pointer;font-size:20px;font-weight:bold;">×</span>
+
+        <div id="sessionList"></div>
+    </div>
+</div>
+
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
 
 
@@ -183,6 +204,51 @@ function isActive($targetFile, $currentFile)
         let d = new Date();
         d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
         document.cookie = name + "=" + value + "; expires=" + d.toUTCString() + "; path=/";
+    }
+
+</script>
+
+
+
+<script>
+
+    // open modal when pill clicked
+    document.querySelectorAll('.session-pill').forEach(el => {
+        el.onclick = function () {
+            openSessionModal();
+        }
+    });
+
+    function openSessionModal() {
+        document.getElementById('sessionModal').style.display = 'flex';
+        loadSessions();
+    }
+
+    function closeSessionModal() {
+        document.getElementById('sessionModal').style.display = 'none';
+    }
+
+    // load active sessions
+    function loadSessions() {
+        fetch('ajax/get_active_sessions.php')
+            .then(r => r.json())
+            .then(data => {
+                let html = '';
+                data.forEach(s => {
+                    html += `<div class="session-item" onclick="selectSession('${s.sessionyear}')">
+                ${s.sessionyear}
+            </div>`;
+                });
+                document.getElementById('sessionList').innerHTML = html;
+            });
+    }
+
+    // select + cookie + reload
+    function selectSession(val) {
+
+        document.cookie = "query-session=" + val + "; path=/";
+
+        location.reload();
     }
 
 </script>

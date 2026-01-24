@@ -1,4 +1,5 @@
 <?php
+$page_title = "Classes & Sections";
 include 'inc.php';
 ?>
 
@@ -16,11 +17,12 @@ include 'inc.php';
 
         <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
-                <span class="session-pill">SESSION <?php echo $sy; ?></span>
+                <span class="session-pill">SESSION <?php echo $sessionyear; ?></span>
             </div>
             <div style="text-align: right;">
                 <div id="cnt" style="font-size: 1.8rem; font-weight: 900; line-height: 1;">0</div>
-                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; opacity: 0.9;">Total Students</div>
+                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; opacity: 0.9;">Total
+                    Students</div>
             </div>
         </div>
     </div>
@@ -49,7 +51,7 @@ include 'inc.php';
         // ---------- OUTPUT GROUPED ----------
         foreach ($classes as $className => $sections) {
 
-            echo '<div class="m3-section-title">'.strtoupper($className).'</div>';
+            echo '<div class="m3-section-title" style="padding: 0 8px;">' . strtoupper($className) . '</div>';
             echo '<div class="widget-gridx">';
 
             foreach ($sections as $row0) {
@@ -62,16 +64,14 @@ include 'inc.php';
                     $ico = 'iimg/default.png';
                 }
 
-                $lnk = "cls=".$cls.'&sec='.$sec;
+                $lnk = "cls=" . $cls . '&sec=' . $sec;
                 ?>
 
-                <div class="tool-card shadow-sm"
-                     onclick="class_section_list_for_student_list_edit('<?php echo $lnk; ?>')">
+                <div class="tool-card shadow-sm" onclick="class_section_list_for_student_list_edit('<?php echo $lnk; ?>')">
 
                     <div class="icon-box c-inst">
-                        <img src="<?php echo $ico; ?>"
-                             onerror="this.src='iimg/default.png'"
-                             style="width:28px;height:28px;object-fit:contain;" />
+                        <img src="<?php echo $ico; ?>" onerror="this.src='iimg/default.png'"
+                            style="width:28px;height:28px;object-fit:contain;" />
                     </div>
 
                     <div class="item-info">

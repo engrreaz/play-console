@@ -1,4 +1,5 @@
 <?php
+$page_title = "Student List";
 include 'inc.php';
 include 'datam/datam-stprofile.php';
 
@@ -39,10 +40,10 @@ $cnt = count($stslist);
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div>
                     <span class="session-pill" style="background: rgba(255,255,255,0.2); color: #fff; border:none;">
-                        CLASS <?php echo strtoupper($classname); ?>
+                        CLASS &mdash; <?php echo strtoupper($classname); ?>
                     </span>
-                    <div style="font-size: 1.6rem; font-weight: 900; margin-top: 8px; letter-spacing: -0.5px;">
-                        Section: <?php echo strtoupper($sectionname); ?>
+                    <div style="font-size: 1.0rem; font-weight: 500; margin-top: 8px; letter-spacing: -0.5px;">
+                        Section &mdash; <b><?php echo strtoupper($sectionname); ?></b> 
                     </div>
                 </div>
                 <div style="text-align: right;">
