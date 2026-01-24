@@ -2,12 +2,12 @@
 include 'inc.php'; 
 include 'datam/datam-stprofile.php';
 
-
-
 // ২. প্যারামিটার হ্যান্ডলিং
 $classname = $_GET['cls'] ?? '';
 $sectionname = $_GET['sec'] ?? '';
 $td = $_GET['dt'] ?? date('Y-m-d');
+$current_session = $_GET['year'] ?? $sy;
+$sessionyear_param = '%' . $current_session . '%';
 $page_title = "Class Attendance";
 
 // ৩. বর্তমান পিরিয়ড নির্ধারণ (Prepared Statement)
@@ -30,7 +30,7 @@ while($r = $res_att->fetch_assoc()) { $datam[$r['stid']] = $r; }
 $stmt_att->close();
 
 // ৫. গত ৭ দিনের হিস্ট্রি (History Dots)
-$from_date = date("Y-m-d", strtotime("-7 days"));
+$from_date = date("Y-m-d", strtotime("-7 days", strtotime($td)));
 $hist_map = [];
 $stmt_h = $conn->prepare("SELECT stid, adate, yn, bunk FROM stattnd WHERE adate BETWEEN ? AND ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
 $stmt_h->bind_param("ssssss", $from_date, $td, $sccode, $sessionyear_param, $classname, $sectionname);
@@ -47,66 +47,112 @@ $stmt_sum->execute();
 if ($stmt_sum->get_result()->num_rows > 0) { $subm = 1; }
 $stmt_sum->close();
 
-if($subm == 1 && $period < 2)
-    $period = 2;
-
+if($subm == 1 && $period < 2) $period = 2;
 $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.85rem; }
-
-    /* M3 Components (8px Radius) */
-    .m3-card { background: #fff; border-radius: 8px; padding: 12px; margin: 0 8px 8px; border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-    .hero-stats { 
-        background: <?php echo ($subm == 1) ? '#B3261E' : '#6750A4'; ?>; 
-        color: #fff; border-radius: 0 0 8px 8px; padding: 16px; margin-bottom: 12px; 
-    }
+    /* Attendance Specific M3 Enhancements */
+    .hero-container { padding-bottom: 30px; margin-bottom: 0; border-radius: 0 0 24px 24px; }
     
-    /* Compact Student Card */
-    .att-row { 
-        display: flex; align-items: center; padding: 8px 12px; background: #fff; 
-        border-radius: 8px; margin: 0 8px 6px; border: 1px solid #f0f0f0; transition: 0.2s; 
+    .stats-card-overlay {
+        margin: -25px 16px 16px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
     }
-    .att-row.present { background-color: #fff; border-left: 4px solid #146C32; }
-    .att-row.absent { background-color: #F7F2FA; opacity: 0.7; border-left: 4px solid #eee; }
 
-    .st-avatar-tiny { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #eee; margin-right: 12px; }
-    
-    /* Attendance Dots */
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 2px; }
-    .bg-p { background: #4CAF50; } .bg-a { background: #F44336; } .bg-b { background: #FF9800; } .bg-g { background: #eee; }
+    .att-item-card {
+        background: #fff;
+        border-radius: var(--m3-radius) !important;
+        margin: 0 12px 8px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        border: 1px solid #f0f0f0;
+        transition: transform 0.1s;
+    }
+    .att-item-card.present { border-left: 5px solid #4CAF50; background: #fff; }
+    .att-item-card.absent { border-left: 5px solid #eee; background: #fafafa; opacity: 0.8; }
+    .att-item-card:active { transform: scale(0.98); }
 
-    /* Checkbox M3 */
-    .m3-check { width: 22px; height: 22px; border-radius: 4px; border: 2px solid #6750A4; margin-right: 12px; }
+    /* M3 Custom Checkbox Look */
+    .m3-checkbox-box {
+        width: 24px; height: 24px;
+        border-radius: 6px;
+        border: 2px solid var(--m3-primary);
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+    .present .m3-checkbox-box { background: var(--m3-primary); border-color: var(--m3-primary); }
+    .present .m3-checkbox-box::after {
+        content: '\F26E'; font-family: 'bootstrap-icons';
+        color: white; font-size: 14px; font-weight: 900;
+    }
+
+    /* History Dots */
+    .dot-box { display: flex; gap: 3px; margin-top: 4px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-p { background: #4CAF50; } 
+    .dot-a { background: #F44336; } 
+    .dot-b { background: #FF9800; } 
+    .dot-g { background: #EADDFF; }
+
+    .submit-bar {
+        position: fixed; bottom: 64px; left: 0; right: 0;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(10px);
+        padding: 12px 16px;
+        border-top: 1px solid #eee;
+        z-index: 1000;
+    }
 </style>
 
-<header class="m3-app-bar shadow-sm" style="z-index:999;">
-    <a href="student-list.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <div class="page-title"><?php echo "$classname ($sectionname)"; ?></div>
-    <div class="text-end fw-bold text-primary">P-<?php echo $period; ?></div>
-</header>
-
-<main class="pb-5">
-    <div class="hero-stats shadow-sm">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <div class="h3 fw-bold mb-0"><span id="att_count">0</span>/<span id="total_count">0</span></div>
-                <div class="small opacity-80">Present Students</div>
-                <?php if($subm == 1): ?>
-                    <span class="badge bg-white text-danger mt-2" style="font-size: 0.6rem;">SUBMITTED</span>
-                <?php endif; ?>
+<main>
+    <div class="hero-container" style="<?php echo ($subm == 1) ? 'background: linear-gradient(135deg, #B3261E 0%, #E53935 100%);' : ''; ?>">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff;" onclick="history.back()">
+                    <i class="bi bi-arrow-left"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.3rem; font-weight: 900; line-height: 1;"><?php echo "$classname ($sectionname)"; ?></div>
+                    <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 700; margin-top: 4px;">
+                        <i class="bi bi-clock-history"></i> Period: <?php echo $period; ?>
+                    </div>
+                </div>
             </div>
-            <div class="text-end">
-                <input type="date" id="xp" class="form-control form-control-sm border-0 bg-white text-dark fw-bold mb-1" 
-                       style="border-radius: 6px; width: 130px;" value="<?php echo $td; ?>" onchange="dtcng();" 
-                       <?php if($period > 1) echo 'disabled'; ?>>
-                <div class="small opacity-75">Bunk: <span id="bunk_count" class="fw-bold">0</span></div>
+            <div style="text-align: right;">
+                <input type="date" id="xp" class="form-control form-control-sm" 
+                       style="border-radius: 8px; border: none; font-weight: 800; font-size: 0.8rem; width: 135px;" 
+                       value="<?php echo $td; ?>" onchange="dtcng();" <?php if($period > 1) echo 'disabled'; ?>>
             </div>
         </div>
     </div>
 
-    <div class="list-container px-1">
+    <div class="stats-card-overlay shadow-sm">
+        <div style="text-align: center; flex: 1; border-right: 1px solid #eee;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: var(--m3-primary);" id="att_count">0</div>
+            <div style="font-size: 0.65rem; font-weight: 800; color: #777; text-transform: uppercase;">Present</div>
+        </div>
+        <div style="text-align: center; flex: 1; border-right: 1px solid #eee;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: #B3261E;" id="bunk_count">0</div>
+            <div style="font-size: 0.65rem; font-weight: 800; color: #777; text-transform: uppercase;">Bunked</div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: #1C1B1F;" id="total_count">0</div>
+            <div style="font-size: 0.65rem; font-weight: 800; color: #777; text-transform: uppercase;">Total</div>
+        </div>
+    </div>
+
+    <div class="widget-grid" style="padding-bottom: 120px;">
         <?php
         $total = 0; $present = 0; $bunks = 0;
         $stmt_st = $conn->prepare("SELECT stid, rollno FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND status='1' ORDER BY rollno ASC");
@@ -120,7 +166,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             $total++;
 
             $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
-            $neng = $datam_st_profile[$st_idx]["stnameeng"] ?? 'Unknown';
+            $neng = $datam_st_profile[$st_idx]["stnameeng"] ?? 'ID: '.$stid;
             
             $att = $datam[$stid] ?? null;
             $is_p = ($att && $att['yn'] == 1);
@@ -129,45 +175,57 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             if ($is_p && !$has_bunked) $present++;
             if ($has_bunked) $bunks++;
         ?>
-            <div class="att-row shadow-sm <?php echo ($is_p && !$has_bunked) ? 'present' : 'absent'; ?>" 
+            <div class="att-item-card shadow-sm <?php echo ($is_p && !$has_bunked) ? 'present' : 'absent'; ?>" 
                  id="block_<?php echo $stid; ?>" onclick="<?php echo $fun; ?>('<?php echo $stid; ?>', '<?php echo $roll; ?>', <?php echo (int)$has_bunked; ?>)">
                 
-                <input type="checkbox" class="form-check-input m3-check" id="chk_<?php echo $stid; ?>" <?php echo $is_p ? 'checked' : ''; ?> disabled>
+                <div class="m3-checkbox-box" id="box_<?php echo $stid; ?>"></div>
+                <input type="checkbox" id="chk_<?php echo $stid; ?>" <?php echo $is_p ? 'checked' : ''; ?> hidden>
                 
-                <img src="https://eimbox.com/students/<?php echo $stid; ?>.jpg" class="st-avatar-tiny" onerror="this.src='https://eimbox.com/students/noimg.jpg'">
+                <img src="<?php student_profile_image_path($stid); ?>" class="st-avatar-tiny" 
+                     style="width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover;"
+                     onerror="this.src='https://eimbox.com/students/noimg.jpg'">
                 
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem;"><?php echo $neng; ?></div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-extrabold text-primary" style="font-size: 0.75rem;">Roll: <?php echo $roll; ?></span>
-                        <div class="ms-1">
+                <div style="flex-grow: 1; overflow: hidden;">
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #1C1B1F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <?php echo $neng; ?>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.75rem; font-weight: 800; color: var(--m3-primary);">ROLL: <?php echo $roll; ?></span>
+                        <div class="dot-box">
                             <?php 
                             for ($i = 6; $i >= 0; $i--) {
                                 $cd = date('Y-m-d', strtotime("-$i days", strtotime($td)));
                                 $h = $hist_map[$stid][$cd] ?? null;
-                                $c = 'bg-g';
-                                if($h) $c = ($h['yn'] == 1) ? ($h['bunk'] == 1 ? 'bg-b' : 'bg-p') : 'bg-a';
-                                echo "<span class='dot $c'></span>";
+                                $dot_c = 'dot-g';
+                                if($h) $dot_c = ($h['yn'] == 1) ? ($h['bunk'] == 1 ? 'dot-b' : 'dot-p') : 'dot-a';
+                                echo "<span class='dot $dot_c'></span>";
                             }
                             ?>
                         </div>
                     </div>
                 </div>
-                <div class="ms-2" id="sync_<?php echo $stid; ?>"><i class="bi bi-check2-circle opacity-25"></i></div>
+                
+                <div id="sync_<?php echo $stid; ?>" style="margin-left: 8px;">
+                    <i class="bi bi-cloud-check" style="opacity: 0.2; font-size: 1.2rem;"></i>
+                </div>
             </div>
         <?php endwhile; $stmt_st->close(); ?>
     </div>
 
     <?php if ($subm == 0): ?>
-        <div class="fixed-bottom p-3 bg-white border-top shadow-lg d-grid" style="bottom: 56px; border-radius: 12px 12px 0 0;">
-            <button class="btn btn-danger btn-lg fw-bold" style="border-radius: 8px;" onclick="submitFinal();">
-                <i class="bi bi-cloud-upload me-2"></i> SUBMIT ATTENDANCE
+        <div class="submit-bar shadow-lg">
+            <button class="btn-m3-submit" style="margin: 0; width: 100%; height: 56px;" onclick="submitFinal();">
+                <i class="bi bi-cloud-arrow-up-fill" style="font-size: 1.3rem;"></i> 
+                <span>SUBMIT FINAL ATTENDANCE</span>
             </button>
         </div>
     <?php endif; ?>
 </main>
 
+<?php include 'footer.php'; ?>
+
 <script>
+    // স্ক্রিপ্ট ডাটা ইনিশিয়ালাইজেশন
     document.getElementById("att_count").innerText = "<?php echo $present; ?>";
     document.getElementById("total_count").innerText = "<?php echo $total; ?>";
     document.getElementById("bunk_count").innerText = "<?php echo $bunks; ?>";
@@ -177,151 +235,93 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
         window.location.href = `stattnd.php?cls=<?php echo urlencode($classname); ?>&sec=<?php echo urlencode($sectionname); ?>&dt=${d}&year=<?php echo $current_session; ?>`;
     }
 
-    
+    let attLock = false;
 
-let attLock = false; // prevent rapid clicks
+    function toggleAtt(id, roll, per) {
+        if (attLock) return;
+        attLock = true;
 
-function toggleAtt(id, roll, per) {
-    if (attLock) return;
-    attLock = true;
+        const chk = document.getElementById("chk_" + id);
+        const card = document.getElementById("block_" + id);
+        const sync = document.getElementById("sync_" + id);
+        const cnt = document.getElementById("att_count");
 
-    const chk  = document.getElementById("chk_" + id);
-    const card = document.getElementById("block_" + id);
-    const sync = document.getElementById("sync_" + id);
-    const cnt  = document.getElementById("att_count");
+        if (!chk || !card || !sync || !cnt) { attLock = false; return; }
 
-    if (!chk || !card || !sync || !cnt) {
-        attLock = false;
-        return;
-    }
+        chk.checked = !chk.checked;
+        let count = parseInt(cnt.innerText);
 
-    chk.checked = !chk.checked;
-    let count = parseInt(cnt.innerText);
-
-    if (chk.checked) {
-        count++;
-        card.classList.replace('absent', 'present');
-    } else {
-        count--;
-        card.classList.replace('present', 'absent');
-    }
-    cnt.innerText = count;
-
-    // spinner only inside the card
-    sync.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div>';
-
-    fetch('backend/save-st-attnd.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            stid: id,
-            roll: roll,
-            val: chk.checked ? 1 : 0,
-            opt: 2,
-            cls: '<?= $classname ?>',
-            sec: '<?= $sectionname ?>',
-            per: per,
-            adate: '<?= $td ?>'
-        })
-    })
-    .then(res => res.text())
-    .then(txt => {
-        txt = txt.trim();
-        if (txt === "OK") {
-            sync.innerHTML = '<i class="bi bi-check-all text-success fs-5"></i>';
-        } else if (txt === "LOCKED") {
-            sync.innerHTML = '<i class="bi bi-x-circle text-danger fs-5"></i>';
-            // revert
-            chk.checked = !chk.checked;
-            card.classList.replace(chk.checked ? 'absent':'present', chk.checked ? 'present':'absent');
-            let currentCount = parseInt(cnt.innerText);
-            cnt.innerText = chk.checked ? currentCount + 1 : currentCount - 1;
+        if (chk.checked) {
+            count++;
+            card.classList.add('present'); card.classList.remove('absent');
         } else {
-            sync.innerHTML = '<i class="bi bi-exclamation-circle text-warning fs-5"></i>';
+            count--;
+            card.classList.add('absent'); card.classList.remove('present');
         }
-        attLock = false;
-    })
-    .catch(err => {
-        console.error(err);
-        sync.innerHTML = '<i class="bi bi-x-circle text-danger fs-5"></i>';
-        attLock = false;
-    });
-}
+        cnt.innerText = count;
 
-function submitFinal() {
-    if (attLock) return;
-    attLock = true;
+        sync.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" style="width: 1rem; height: 1rem;"></div>';
 
-    const cnt = document.getElementById("total_count").innerText;
-    const fnd = document.getElementById("att_count").innerText;
-
-    fetch('backend/save-st-attnd.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            opt: 5,
-            cnt: cnt,
-            fnd: fnd,
-            cls: '<?= $classname ?>',
-            sec: '<?= $sectionname ?>',
-            adate: '<?= $td ?>', 
-            sy:'<?= $sessionyear ?>'
+        fetch('backend/save-st-attnd.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                stid: id, roll: roll, val: chk.checked ? 1 : 0, opt: 2,
+                cls: '<?= $classname ?>', sec: '<?= $sectionname ?>',
+                per: per, adate: '<?= $td ?>'
+            })
         })
-    })
-    .then(res => res.text())
-    .then(txt => {
-        // alert(JSON.stringify(txt));
-        if (txt.trim() === "SUBMITTED") {
-            alert("Attendance submitted successfully."); // simple alert
-           history.back(-1);
-        } else {
-            alert("Error submitting attendance.");
-        }
-        attLock = false;
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Network error.");
-        attLock = false;
-    });
-}
-
-// ✅ Updated group functions without SweetAlert
-function grpssx(id, roll, bunk) {
-    if (bunk === 1) {
-        console.warn("Already Bunked");
-        return;
-    }
-    toggleAtt(id, roll, 1);
-}
-
-function grpssx2(id, roll, bunk) {
-    if (bunk === 1) {
-        console.warn("Already Bunked");
-        return;
-    }
-    toggleAtt(id, roll, <?= $period ?>);
-}
-
-
-
-
-
-    function grpssx(id, roll, bunk) {
-        if(bunk == 1) { Swal.fire('Already Bunked', '', 'warning'); return; }
-        toggleAtt(id, roll, 1);
-    }
- 
- 
-    function grpssx0(id, roll, bunk) {
-      toggleAtt(id, roll, 1);
+        .then(res => res.text())
+        .then(txt => {
+            if (txt.trim() === "OK") {
+                sync.innerHTML = '<i class="bi bi-check-circle-fill text-success" style="font-size: 1.2rem;"></i>';
+            } else {
+                sync.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+            }
+            attLock = false;
+        })
+        .catch(err => {
+            sync.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+            attLock = false;
+        });
     }
 
-    function grpssx2(id, roll, bunk) {
-        if(bunk == 1) { Swal.fire('Already Bunked', '', 'warning'); return; }
-        toggleAtt(id, roll, <?php echo $period; ?>);
+    function submitFinal() {
+        if (attLock) return;
+        if (!confirm("Are you sure to submit final attendance?")) return;
+        attLock = true;
+
+        const cnt = document.getElementById("total_count").innerText;
+        const fnd = document.getElementById("att_count").innerText;
+
+        fetch('backend/save-st-attnd.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                opt: 5, cnt: cnt, fnd: fnd,
+                cls: '<?= $classname ?>', sec: '<?= $sectionname ?>',
+                adate: '<?= $td ?>', sy:'<?= $current_session ?>'
+            })
+        })
+        .then(res => res.text())
+        .then(txt => {
+            if (txt.trim() === "SUBMITTED") {
+                alert("Attendance Submitted!");
+                history.back();
+            } else {
+                alert("Submission Failed: " + txt);
+            }
+            attLock = false;
+        })
+        .catch(err => {
+            alert("Network Error.");
+            attLock = false;
+        });
     }
 
+    // পিরিয়ড অনুযায়ী ফাংশন কল
+    function grpssx(id, roll, bunk) { if(bunk == 1) return; toggleAtt(id, roll, 1); }
+    function grpssx0(id, roll, bunk) { toggleAtt(id, roll, 1); }
+    function grpssx2(id, roll, bunk) { if(bunk == 1) return; toggleAtt(id, roll, <?= $period ?>); }
 </script>
 
-<?php include 'footer.php'; ?>

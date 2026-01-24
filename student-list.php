@@ -163,7 +163,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                     <div class="st-card shadow-sm <?php echo $is_active ? '' : 'opacity-50 grayscale'; ?>" 
                          onclick="this.classList.toggle('expanded')">
                         <div class="d-flex align-items-center">
-                            <img src="https://eimbox.com/students/<?php echo $stid; ?>.jpg" class="st-avatar shadow-sm" 
+                            <img src="<?= student_profile_image_path($stid) ?>" class="st-avatar shadow-sm" 
                                  onerror="this.src='https://eimbox.com/students/noimg.jpg'">
                             <div class="ms-3 flex-grow-1 overflow-hidden">
                                 <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><?php echo $p["stnameeng"]; ?></div>

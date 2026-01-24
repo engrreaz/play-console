@@ -1,124 +1,127 @@
 <?php
+$page_title = "Teachers & Staff";
 include 'inc.php';
 include 'datam/datam-teacher.php';
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
 
-$page_title = "Teachers & Staff";
+
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
-
-    /* M3 Standard App Bar (8px radius bottom) */
-    .m3-app-bar {
-        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
-        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-radius: 0 0 8px 8px;
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
-
-    /* Hero Summary Card */
-    .hero-stats {
-        background: #F3EDF7; border-radius: 8px;
-        padding: 12px; margin: 8px 12px;
-        display: flex; justify-content: center; align-items: center;
-        text-align: center; border: 1px solid #EADDFF;
-    }
-    .stat-val { font-size: 1.4rem; font-weight: 800; color: #6750A4; margin-right: 8px; }
-    .stat-lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #49454F; letter-spacing: 0.5px; }
-
-    /* Condensed Teacher Card (8px Radius) */
-    .teacher-card {
-        background-color: #FFFFFF; border-radius: 8px;
-        padding: 10px 12px; margin: 0 8px 6px;
-        border: 1px solid #eee; display: flex; align-items: center;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.2s, background-color 0.2s;
-        cursor: pointer;
-    }
-    .teacher-card:active { transform: scale(0.98); background-color: #F7F2FA; }
-
-    .teacher-avatar {
-        width: 52px; height: 52px; border-radius: 6px;
-        object-fit: cover; background: #eee;
-        margin-right: 14px; border: 1px solid #E7E0EC;
+    /* Directory Specific Enhancements */
+    .teacher-photo-box {
+        width: 58px;
+        height: 58px;
+        border-radius: 8px;
+        /* Strict 8px Radius */
+        background: var(--m3-tonal-surface);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-right: 14px;
+        flex-shrink: 0;
     }
 
-    .info-box { flex-grow: 1; overflow: hidden; }
-    .t-name-eng { font-weight: 700; color: #1C1B1F; font-size: 0.9rem; margin-bottom: 0; line-height: 1.2; }
-    .t-name-ben { font-size: 0.8rem; color: #6750A4; font-weight: 600; }
-    .t-meta { font-size: 0.7rem; color: #49454F; margin-top: 2px; }
+    .teacher-photo-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-    .id-badge {
-        background: #EADDFF; color: #21005D;
-        padding: 2px 8px; border-radius: 4px;
-        font-size: 0.65rem; font-weight: 800;
+    .rank-badge {
+        font-size: 0.65rem;
+        background: var(--m3-tonal-container);
+        color: var(--m3-on-tonal-container);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 800;
+        text-transform: uppercase;
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <i class="bi bi-search fs-5"></i>
-    </div>
-</header>
+<main>
+    <div class="hero-container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;"
+                    onclick="location.href='reporthome.php'">
+                    <i class="bi bi-arrow-left"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;">Staff Directory</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Faculty & Employees</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div id="cnt_display" style="font-size: 2.2rem; font-weight: 900; line-height: 1;">0</div>
+                <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; opacity: 0.9;">Total
+                    Members</div>
+            </div>
+        </div>
 
-<main class="pb-5 mt-2">
-    <div class="hero-stats shadow-sm">
-        <span class="stat-val" id="cnt_display">0</span>
-        <span class="stat-lbl">Active Staff Members</span>
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
+                YEAR: <?php echo $current_session; ?>
+            </span>
+            <div class="tonal-icon-btn"
+                style="background: rgba(255,255,255,0.15); color: #fff; border:none; width:38px; height:38px;">
+                <i class="bi bi-search"></i>
+            </div>
+        </div>
     </div>
 
-    <div class="list-container">
+    <div class="widget-grid" style="margin-top: 15px; padding: 0 12px;">
+        <div class="m3-section-title" style="margin-left: 4px;">Active Staff Members</div>
+
         <?php
         $cnt = 0;
         foreach ($datam_teacher_profile as $teacher) {
             $tid = $teacher["tid"];
-            $status = $teacher["status"] ?? 1; // ডিফল্ট ১ ধরা হয়েছে
+            $status = $teacher["status"] ?? 1;
 
-            // ইনএকটিভ স্টাফদের জন্য কার্ডের স্টাইল পরিবর্তন
-            $card_opacity = ($status == 0) ? 'opacity: 0.6; filter: grayscale(1);' : '';
+            // ইনএকটিভ স্টাফদের জন্য স্টাইল
+            $card_style = ($status == 0) ? 'style="opacity: 0.6; filter: grayscale(1);"' : '';
 
             // ফটো লজিক
             $photo_path = $BASE_PATH_URL . 'teacher/' . $tid . ".jpg";
-            if (!file_exists($photo_path)) {
-                $display_photo = "https://eimbox.com/teacher/no-img.jpg";
-            } else {
-                $display_photo = $BASE_PATH_URL_FILE . 'teacher/' . $tid . ".jpg";
-            }
-        ?>
-            <div class="teacher-card shadow-sm" style="<?php echo $card_opacity; ?>" 
-                 onclick="go(<?php echo $tid; ?>)">
-                
-                <img src="<?php echo $display_photo; ?>" class="teacher-avatar" alt="Profile">
-                
-                <div class="info-box">
-                    <div class="t-name-eng text-truncate"><?php echo $teacher['tname']; ?></div>
-                    <div class="t-name-ben"><?php echo $teacher['tnameb']; ?></div>
-                    <div class="t-meta d-flex align-items-center gap-2">
-                        <span class="id-badge">ID: <?php echo $tid; ?></span>
-                        <span class="small opacity-75"><?php echo $teacher['ranks'] ?? ''; ?></span>
+            // Note: file_exists usually works on local paths, for URLs check headers or assume path
+            $display_photo = $BASE_PATH_URL_FILE . 'teacher/' . $tid . ".jpg";
+            ?>
+            <div class="m3-list-item" onclick="go(<?php echo $tid; ?>)" <?php echo $card_style; ?>
+                style="padding: 12px; margin-bottom: 8px;">
+                <div class="teacher-photo-box">
+                    <img src="<?php echo teacher_profile_image_path($tid); ?>" alt="Teacher">
+                </div>
+
+                <div class="item-info">
+                    <div class="st-title" style="font-size: 0.95rem; font-weight: 800; color: #1C1B1F;">
+                        <?php echo $teacher['tname']; ?>
+                    </div>
+                    <div class="st-desc" style="color: var(--m3-primary); font-weight: 700; font-size: 0.82rem;">
+                        <?php echo $teacher['tnameb']; ?>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                        <span class="id-badge" style="font-size: 0.6rem;">ID: <?php echo $tid; ?></span>
+                        <span class="rank-badge"><?php echo $teacher['ranks'] ?? 'Staff'; ?></span>
                     </div>
                 </div>
 
-                <div class="ms-2 opacity-25">
-                    <i class="bi bi-chevron-right fs-5"></i>
+                <div style="color: var(--m3-outline); opacity: 0.4;">
+                    <i class="bi bi-chevron-right" style="font-size: 1.2rem;"></i>
                 </div>
             </div>
-        <?php
+            <?php
             $cnt++;
         }
         ?>
     </div>
 </main>
 
-<div style="height: 65px;"></div> <script>
-    // ডাইনামিক কাউন্ট আপডেট
+<div style="height: 80px;"></div>
+
+
+
+<script>
+    // ডাইনামিক কাউন্টার আপডেট
     document.getElementById("cnt_display").innerText = "<?php echo $cnt; ?>";
 
     function go(id) {

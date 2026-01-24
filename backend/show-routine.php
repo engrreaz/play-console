@@ -1,150 +1,177 @@
 <?php
 
-include('inc.back.php');
+include '../inc.light.php';
 include '../datam/datam-subject-list.php';
 
+// ইনপুট প্যারামিটার
 $rootuser = $_POST['rootuser'];
-$id = $_POST['id'];
 $cls = $_POST['cls'];
 $sec = $_POST['sec'];
 
-//************************************************************************************************************************************************
-//****************************************************************************************************************************************************************
-
-for ($i = 1; $i <= 8; $i++) {
-    for ($j = 1; $j <= 5; $j++) {
-        if ($j == 1) {
-            $day = 'Sunday';
-        } else if ($j == 2) {
-            $day = 'Monday';
-        } else if ($j == 3) {
-            $day = 'Tuesday';
-        } else if ($j == 4) {
-            $day = 'Wednesday';
-        } else if ($j == 5) {
-            $day = 'Thursday';
-        }
-        $sql00xgr = "SELECT * FROM clsroutine where sccode='$sccode' and sessionyear='$sy' and classname='$cls' and sectionname='$sec' and period = '$i' and wday='$j' order by period, wday";
-        // echo $sql00xgr;
-        $result00xgr = $conn->query($sql00xgr);
-        if ($result00xgr->num_rows > 0) {
-            while ($row00xgr = $result00xgr->fetch_assoc()) {
-                $id = $row00xgr["id"];
-                $subcode = $row00xgr["subcode"];
-                $tidd = $row00xgr["tid"];
-            }
-        } else {
-            $id = 0;
-            $subcode = 0;
-            $tidd = 0;
-        }
-        ?>
-        <div class="card" style="background:var(--lighter); color:var(--darker);">
-            <div class="card-body table-responsive">
-                <table class="table">
-                    <tr>
-                        <td style="width:50px; font-size:24px; font-weight:bold; text-align:center;">
-                            <?php if ($j == 1) {
-                                echo $i . '<div class="st-id">Period</div>';
-                            } ?>
-                        </td>
-
-                        <td style="display:none;" id="id<?php echo $i . $j; ?>"><?php echo $id; ?></td>
-                        <td style="display:none;">Period : <span id="per<?php echo $i . $j; ?>"><?php echo $i; ?></span> Day :
-                            <span id="wday<?php echo $i . $j; ?>"><?php echo $j; ?></span><?php echo $day; ?>
-                        </td>
-                        <td style="width:60px;">
-                            <div class="st-id"><?php echo $day; ?></div>
-
-                            <button class="btn btn-dark text-small p-1" onclick="same(<?php echo $i; ?>, <?php echo $j; ?>);"
-                                id="same<?php echo $i . $j; ?>">Apply All</button>
-                        </td>
-
-                        <td>
-                            <div class="">
-                                <select class="form-control" id="subj<?php echo $i . $j; ?>"
-                                    onchange="edit(<?php echo $i . $j; ?>);">
-                                    <option value="">Select Subject</option>
-                                    <?php
-                                    $sql00xgr = "SELECT * FROM subjects where sccategory='$sctype' order by subcode";
-                                    $result00xgr4 = $conn->query($sql00xgr);
-                                    if ($result00xgr4->num_rows > 0) {
-                                        while ($row00xgr = $result00xgr4->fetch_assoc()) {
-                                            $scode = $row00xgr["subcode"];
-                                            $subj = $row00xgr["subject"];
-                                            if ($subcode == $scode) {
-                                                $aa = 'selected';
-                                            } else {
-                                                $aa = '';
-                                            }
-                                            echo '<option value="' . $scode . '" ' . $aa . ' >' . $subj . '</option>';
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-
-                            <div class="">
-                                <select class="form-control " id="tid<?php echo $i . $j; ?>"
-                                    onchange="edit(<?php echo $i . $j; ?>);">
-
-                                    <option value="">Select Teacher</option>
-                                    <?php
-                                    $sql00xgr = "SELECT * FROM teacher where sccode='$sccode' order by ranks, tid";
-                                    $result00xgr4 = $conn->query($sql00xgr);
-                                    if ($result00xgr4->num_rows > 0) {
-                                        while ($row00xgr = $result00xgr4->fetch_assoc()) {
-                                            $tid = $row00xgr["tid"];
-                                            $tname = $row00xgr["tname"];
-                                            if ($tidd == $tid) {
-                                                $bb = 'selected';
-                                            } else {
-                                                $bb = '';
-                                            }
-                                            echo '<option value="' . $tid . '" ' . $bb . ' >' . $tname . '</option>';
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </td>
-                        <td class="pt-4" id="exe<?php echo $i . $j; ?>" >
-
-                            <button class="btn btn-primary p-1" id="bbnt<?php echo $i . $j; ?>"
-                                onclick="edit(<?php echo $i . $j; ?>);"><i class="bi bi-arrow-right-circle"></i></button>
+$today_num = date('w'); // 0=Sunday
+$today_map = [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 => 6, 6 => 7];
+$today_wday = $today_map[$today_num] ?? 1;
 
 
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <?php
-
-        if ($j == 5) {
-            echo '<div style="height:3px; background:var(--darker); "></div>';
-        }
-    }
-
-}
-
+// দিনগুলোর নাম ম্যাপিং
+$days = [1 => 'Sunday', 2 => 'Monday', 3 => 'Tuesday', 4 => 'Wednesday', 5 => 'Thursday', 6 => 'Friday', 7 => 'Saturday'];
 ?>
 
-<script>
-    function same(i, j) {
-        var subj = document.getElementById("subj" + i + '1').value;
-        var tid = document.getElementById("tid" + i + '1').value;
-        if (j == 1) {
-            var k;
-            for (k = 1; k <= 5; k++) {
-                document.getElementById("tid" + i + k).value = tid;
-                document.getElementById("subj" + i + k).value = subj;
-                var m = i * 10 + k;
-                edit(m);
-            }
-        } else {
-            document.getElementById("tid" + i + j).value = tid;
-            document.getElementById("subj" + i + j).value = subj;
-        }
+<style>
+    /* M3 Routine Specific Styles */
+    .period-section {
+        background-color: #F3EDF7;
+        /* Tonal Surface */
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        border: 1px solid #EADDFF;
     }
-</script>
+
+    .period-title {
+        font-size: 0.75rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        color: #6750A4;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .routine-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        transition: 0.2s;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .routine-card:active {
+        background-color: #F7F2FA;
+        transform: scale(0.98);
+    }
+
+    .day-box {
+        width: 45px;
+        text-align: center;
+        border-right: 1px solid #eee;
+        margin-right: 12px;
+        padding-right: 8px;
+        flex-shrink: 0;
+    }
+
+    .day-name {
+        font-size: 0.6rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        color: #79747E;
+    }
+
+    .routine-info {
+        flex-grow: 1;
+        overflow: hidden;
+    }
+
+    .sub-name {
+        font-weight: 800;
+        color: #1C1B1F;
+        font-size: 0.85rem;
+    }
+
+    .teacher-name {
+        font-size: 0.7rem;
+        color: #6750A4;
+        font-weight: 700;
+    }
+
+    .btn-edit-tonal {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #F3EDF7;
+        color: #6750A4;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Modal Floating Style */
+    .modal-content {
+        border-radius: 8px !important;
+        border: none;
+    }
+
+
+
+
+</style>
+
+<main class="px-2 pt-3">
+    <?php
+    // পিরিয়ড লুপ (১ থেকে ৮)
+    
+    for ($i = 1; $i <= 8; $i++):
+        ?>
+        <div class="period-section shadow-sm" id="period-<?php echo $i; ?>">
+            <div class="period-title">
+                <i class="bi bi-clock-fill me-2"></i> Period <?php echo $i; ?>
+
+                <button class="btn btn-sm ms-auto" onclick="toggleExpand(<?php echo $i; ?>)">
+                    <i class="bi bi-arrows-angle-expand"></i>
+                </button>
+            </div>
+
+
+            <?php
+            // দিন লুপ (রবি থেকে বৃহস্পতি)
+            $show_days = [$today_wday];
+
+            if (isset($_POST['expand']) && $_POST['expand'] == 1) {
+                $show_days = [1, 2, 3, 4, 5];
+            }
+            foreach ($show_days as $j):
+                $day_name = $days[$j];
+
+                // ডাটাবেজ থেকে রুটিন ফেচ (Prepared Statement recommended, keeping logic for now)
+                $sql = "SELECT r.*, s.subject as sub_text, t.tname 
+                        FROM clsroutine r 
+                        LEFT JOIN subjects s ON r.subcode = s.subcode 
+                        LEFT JOIN teacher t ON r.tid = t.tid 
+                        WHERE r.sccode='$sccode' AND r.sessionyear='$sy' AND r.classname='$cls' 
+                        AND r.sectionname='$sec' AND r.period = '$i' AND r.wday='$j' LIMIT 1";
+
+                $res = $conn->query($sql);
+                $row = $res->fetch_assoc();
+
+                $id = $row['id'] ?? 0;
+                $sub_code = $row['subcode'] ?? 0;
+                $teacher_id = $row['tid'] ?? 0;
+                $display_sub = $row['sub_text'] ?? '<span class="opacity-25">No Subject</span>';
+                $display_teacher = $row['tname'] ?? 'Not Assigned';
+                ?>
+                <div class="routine-card shadow-sm">
+                    <div class="day-box">
+                        <div class="day-name"><?php echo substr($day_name, 0, 3); ?></div>
+                    </div>
+                    <div class="routine-info">
+                        <div class="sub-name text-truncate"><?php echo $display_sub; ?></div>
+                        <div class="teacher-name text-truncate">
+                            <i class="bi bi-person-badge me-1"></i><?php echo $display_teacher; ?>
+                        </div>
+                    </div>
+                    <button class="btn-edit-tonal shadow-sm"
+                        onclick="openRoutineModal('<?php echo $i; ?>', '<?php echo $j; ?>', '<?php echo $day_name; ?>', '<?php echo $sub_code; ?>', '<?php echo $teacher_id; ?>', '<?php echo $id; ?>');">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endfor; ?>
+</main>
+
+<div style="height: 60px;"></div>

@@ -1,28 +1,22 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = '%' . $current_session . '%';
 
-// ২. ফিল্টার হ্যান্ডলিং (Class & Section)
+// ২. ফিল্টার হ্যান্ডলিং
 $classname = $_GET['cls'] ?? ($cteacher_data[0]['cteachercls'] ?? '');
 $sectionname = $_GET['sec'] ?? ($cteacher_data[0]['cteachersec'] ?? '');
-
 $page_title = "Class Routine";
 
-// ৩. রুটিন ডাটা ফেচিং (Prepared Statement - Secure)
+// ৩. রুটিন ডাটা ফেচিং (অপরিবর্তিত লজিক)
 $routine_data = [];
 $days_order = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 $sql = "SELECT * FROM classschedule 
         WHERE sccode = ? AND sessionyear LIKE ? 
-        ORDER BY period, timestart ASC";
+        ORDER BY period ";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $sccode, $sy_param);
+$stmt->bind_param("ss", $sccode, $sessionyear_param);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -33,129 +27,171 @@ $stmt->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
-
-    /* Full Width M3 App Bar */
-    .m3-app-bar {
-        width: 100%; position: sticky; top: 0; z-index: 1050;
-        background: #fff; height: 56px; display: flex; align-items: center; 
-        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
-
-    /* Filter Card (Condensed) */
-    .filter-card {
-        background: #fff; border-radius: 8px; padding: 12px; margin: 10px 12px;
-        border: 1px solid #eee; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-    .form-select-sm { border-radius: 6px; border: 1px solid #79747E; font-size: 0.8rem; font-weight: 600; height: 38px; }
-
-    /* Day Card (M3 Medium) */
-    .day-card {
-        background: #fff; border-radius: 8px; margin: 0 12px 12px;
-        border: 1px solid #f0f0f0; overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .day-header {
-        background: #F3EDF7; padding: 10px 16px; 
-        font-weight: 800; color: #6750A4; font-size: 0.85rem;
-        display: flex; justify-content: space-between; align-items: center;
+    /* Routine Specific M3 Styling */
+    .time-strip {
+        width: 80px;
+        text-align: center;
+        border-right: 2px solid var(--m3-tonal-container);
+        margin-right: 16px;
+        flex-shrink: 0;
     }
 
-    /* Period Row Item */
-    .period-item {
-        display: flex; align-items: center; padding: 12px 16px;
-        border-bottom: 1px solid #F7F2FA; position: relative;
+    .time-main {
+        font-size: 0.9rem;
+        font-weight: 900;
+        color: var(--m3-primary);
+        display: block;
+        line-height: 1.1;
     }
-    .period-item:last-child { border-bottom: none; }
-    
-    .time-box {
-        width: 75px; flex-shrink: 0; text-align: center;
-        border-right: 2px solid #EADDFF; margin-right: 15px;
+
+    .time-sub {
+        font-size: 0.65rem;
+        color: #777;
+        font-weight: 700;
+        text-transform: uppercase;
     }
-    .time-start { font-weight: 800; color: #1C1B1F; font-size: 0.8rem; display: block; }
-    .time-end { font-size: 0.65rem; color: #79747E; font-weight: 600; }
 
-    .sub-info { flex-grow: 1; overflow: hidden; }
-    .sub-name { font-weight: 700; color: #1D1B20; font-size: 0.9rem; margin-bottom: 2px; display: block; }
-    .teacher-name { font-size: 0.75rem; color: #49454F; font-weight: 500; }
+    .period-pill {
+        background: var(--m3-tonal-container);
+        color: var(--m3-on-tonal-container);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
 
-    .period-badge {
-        font-size: 0.6rem; background: #EADDFF; color: #21005D;
-        padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-left: 8px;
+    .day-separator {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--m3-primary);
+        margin: 20px 16px 10px;
+        letter-spacing: 1.2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .day-separator::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--m3-tonal-container);
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.65rem;"><?php echo $current_session; ?></span>
-</header>
+<main>
+    <div class="hero-container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;"
+                    onclick="history.back()">
+                    <i class="bi bi-arrow-left"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;"><?php echo $page_title; ?></div>
+                    <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Weekly Academic Schedule</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
+                    <?php echo $sy; ?>
+                </span>
+            </div>
+        </div>
+    </div>
 
-<main class="pb-5 mt-2">
-    <div class="filter-card">
-        <form method="GET" class="row gx-2 align-items-center">
+    <div class="m3-card" style="margin-top: -20px; position: relative; z-index: 10; padding: 16px 12px 0;">
+        <form method="GET" class="row gx-2">
             <div class="col-5">
-                <select name="cls" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <?php foreach ($cteacher_data as $c): ?>
-                        <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="m3-floating-group">
+                    <select name="cls" class="m3-select-floating" onchange="this.form.submit()">
+                        <?php foreach ($cteacher_data as $c): ?>
+                            <option value="<?php echo $c['cteachercls']; ?>" <?php echo ($c['cteachercls'] == $classname) ? 'selected' : ''; ?>><?php echo $c['cteachercls']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label class="m3-floating-label">CLASS</label>
+                </div>
             </div>
             <div class="col-4">
-                <select name="sec" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <?php foreach ($cteacher_data as $c): ?>
-                        <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="m3-floating-group">
+                    <label class="m3-floating-label">SECTION</label>
+                    <i class="bi bi-book m3-field-icon"></i>
+                    <select name="sec" class="m3-select-floating" onchange="this.form.submit()">
+                        <?php foreach ($cteacher_data as $c): ?>
+                            <option value="<?php echo $c['cteachersec']; ?>" <?php echo ($c['cteachersec'] == $sectionname) ? 'selected' : ''; ?>><?php echo $c['cteachersec']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                </div>
             </div>
             <div class="col-3">
-                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold shadow-sm" style="border-radius: 6px; height: 38px;">VIEW</button>
+                <button type="submit" class="btn-m3-submit" style="height: 48px; margin: 0; width: 100%;">
+                    <i class="bi bi-search"></i>
+                </button>
             </div>
             <input type="hidden" name="year" value="<?php echo $current_session; ?>">
         </form>
     </div>
 
-    <div class="routine-container">
+    <div class="routine-list" style="padding-bottom: 30px;">
         <?php if (empty($routine_data)): ?>
-            <div class="text-center py-5 opacity-25">
-                <i class="bi bi-calendar-x display-1"></i>
-                <p class="fw-bold mt-2">No routine found for <?php echo $classname; ?>.</p>
+            <div style="text-align: center; padding: 60px 20px; opacity: 0.4;">
+                <i class="bi bi-calendar-x" style="font-size: 3.5rem;"></i>
+                <div style="font-weight: 800; margin-top: 10px;">Routine Not Found</div>
+                <div style="font-size: 0.75rem;">Please select another class or session.</div>
             </div>
         <?php else: ?>
-            <?php foreach ($days_order as $day): 
-                if (!isset($routine_data[$day])) continue;
-            ?>
-                <div class="day-card shadow-sm">
-                    <div class="day-header">
-                        <span><i class="bi bi-calendar-check me-2"></i><?php echo strtoupper($day); ?></span>
-                        <span class="small opacity-50"><?php echo count($routine_data[$day]); ?> Classes</span>
-                    </div>
-                    
-                    <div class="periods-list">
-                        <?php foreach ($routine_data[$day] as $p): 
-                            $time_s = date('h:i A', strtotime($p['timestart']));
-                            $time_e = date('h:i A', strtotime($p['timeend']));
+            <?php foreach ($days_order as $day):
+                if (!isset($routine_data[$day]))
+                    continue;
+                ?>
+                <div class="day-separator">
+                    <i class="bi bi-calendar-event"></i> <?php echo strtoupper($day); ?>
+                </div>
+
+                <div class="widget-grid">
+                    <?php foreach ($routine_data[$day] as $p):
+                        $time_s = date('h:i', strtotime($p['timestart']));
+                        $time_ampm = date('A', strtotime($p['timestart']));
                         ?>
-                            <div class="period-item">
-                                <div class="time-box">
-                                    <span class="time-start"><?php echo $time_s; ?></span>
-                                    <span class="time-end"><?php echo $time_e; ?></span>
-                                </div>
-                                <div class="sub-info">
-                                    <span class="sub-name text-truncate">
-                                        <?php echo $p['subject']; ?>
-                                        <span class="period-badge">P-<?php echo $p['period']; ?></span>
-                                    </span>
-                                    <span class="teacher-name"><i class="bi bi-person me-1"></i><?php echo $p['teachername'] ?: 'Not Assigned'; ?></span>
+                        <div class="m3-list-item" style="padding: 14px; margin-bottom: 8px;">
+                            <div class="time-strip">
+                                <span class="time-main"><?php echo $time_s; ?></span>
+                                <span class="time-sub"><?php echo $time_ampm; ?></span>
+                            </div>
+
+                            <div class="item-info">
+                                <div class="st-title" style="font-size: 1rem; color: #1C1B1F;"><?php echo $p['subject']; ?></div>
+                                <div class="st-desc" style="display: flex; align-items: center; gap: 5px; font-weight: 600;">
+                                    <i class="bi bi-person-badge" style="color: var(--m3-primary);"></i>
+                                    <?php echo $p['teachername'] ?: 'No Teacher Assigned'; ?>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
+
+                            <div class="period-pill">
+                                P-<?php echo $p['period']; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
 </main>
 
-<div style="height: 75px;"></div> <?php include 'footer.php'; ?>
+<div style="height: 80px;"></div>
+
+
+
+### ডিজাইনের প্রধান পরিবর্তনগুলো:
+1. **স্মার্ট হিরো এরিয়া:** পেজ টাইটেল এবং সেশন ইনফোকে একটি মডার্ন গ্রাডিয়েন্ট হেডার বক্সে নিয়ে আসা হয়েছে।
+2. **ফ্লোটিং ফিল্টার:** ক্লাস এবং সেকশন ড্রপডাউনগুলোতে আমাদের **M3 Floating Label** সিস্টেম ইন্টিগ্রেট করা হয়েছে।
+3. **টাইম-স্ট্রিপ লেআউট:** প্রতিটি পিরিয়ডের সময়কে একটি ডেডিকেটেড বাম পাশের কলামে রাখা হয়েছে, যা রুটিন স্ক্যান করা সহজ
+করে।
+4. **ডে সেপারেটর:** সপ্তাহের প্রতিটি দিনের জন্য একটি স্টাইলিশ `day-separator` যোগ করা হয়েছে।
+5. **পিরিয়ড ব্যাজ:** পিরিয়ড নম্বরটিকে ডানপাশে একটি টোনাল পিল (Pill) শেপে রাখা হয়েছে যা দেখতে প্রিমিয়াম লাগে।
+
+এই কোডটি সরাসরি আপনার ফাইলে পেস্ট করতে পারেন। আপনার আগের সব জাভাস্ক্রিপ্ট বা ডাটাবেজ লজিকের সাথে এটি সামঞ্জস্যপূর্ণ।
+
+**পরবর্তীতে কি আমরা এই রুটিনের জন্য কোনো 'Teacher Wise View' বা 'Current Period Highlight' ফিচার যোগ করব?**

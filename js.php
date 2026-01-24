@@ -358,14 +358,14 @@
 
 
     function profile_menu_my_attendance() { window.location.href = "tattnd.php"; }
-    function profile_menu_my_attendance_summery() { window.location.href = "my-attnd-teacher-summery.php"; }
-    function profile_menu_leave_application() { window.location.href = "leave-application.php"; }
+    // function profile_menu_my_attendance_summery() { window.location.href = "my-attnd-teacher-summery.php"; }
+    // function profile_menu_leave_application() { window.location.href = "leave-application.php"; }
     function profile_menu_offline_manager() { window.location.href = "offline-manager.php"; }
 
 
     // Settings Navigation
-    function settings_menu_my_profile() { window.location.href = "globalsetting.php"; }
-    function settings_menu_login_method() { window.location.href = "accountsecurity.php"; }
+  
+    function settings_menu_login_method() { window.location.href = "globalsetting.php"; }
     function settings_menu_logout() { window.location.href = "sout.php"; }
 
 

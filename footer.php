@@ -260,6 +260,7 @@ function isActive($targetFile, $currentFile)
 
 <!-- ----------------------------- TREE - UI ------------------------- -->
 <?php include_once 'assets/js/tree-ui-js.php'; ?>
+<?php include_once 'js.php'; ?>
 
 <script>
     function addParams(params) {

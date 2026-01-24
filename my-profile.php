@@ -26,15 +26,6 @@ $photo_path = (empty($user['photourl']) || strlen($user['photourl']) < 10)
 ?>
 
 <style>
-    body { background-color: #FEF7FF; margin: 0; padding: 0; }
-
-    /* M3 App Bar */
-    .m3-app-bar {
-        width: 100%; position: sticky; top: 0; z-index: 1050;
-        background: #fff; height: 56px; display: flex; align-items: center; 
-        padding: 0 16px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
     /* Profile Hero Card */
     .profile-hero {

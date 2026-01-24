@@ -325,7 +325,7 @@ if ($result0xrtyv->num_rows > 0) {
 
 
 
-
+include 'functions.php';
 include 'component/sms-func.php';
 include 'header.php';
 

@@ -1,17 +1,10 @@
 <?php
+$page_title = "Notice Board";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
-
-$sccode = $_SESSION['sccode'];
-$page_title = "Notice Board";
+$current_session = $sy; // ডিফল্ট সেশন
 
 // ২. ডাটা ফেচিং (Prepared Statement - Secure)
-// নোটিশ যদি সেশন ভিত্তিক হয় তবে LIKE ব্যবহার করা হয়েছে
 $notices = [];
 $sql = "SELECT n.title, n.descrip, n.icon, n.color, n.entrytime, u.profilename 
         FROM notice n
@@ -30,109 +23,149 @@ $stmt->close();
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
-
-    /* M3 Standard App Bar (8px Bottom Radius) */
-    .m3-app-bar {
-        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
-        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-radius: 0 0 8px 8px;
+    /* Notice Specific M3 Style */
+    .notice-item-card {
+        background: #fff;
+        border-radius: 8px !important; /* Strict 8px */
+        margin: 0 12px 10px;
+        border: 1px solid #f0f0f0;
+        overflow: hidden;
+        box-shadow: var(--m3-shadow);
     }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
 
-    /* M3 Accordion Notice Card (8px Radius) */
-    .notice-card {
-        background: #fff; border: 1px solid #eee; border-radius: 8px !important;
-        margin: 0 8px 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-    
-    .accordion-item { border: none !important; background: transparent !important; }
-    
     .accordion-button {
-        padding: 12px 16px; font-size: 0.9rem; font-weight: 700; color: #1C1B1F;
-        background-color: #fff !important; box-shadow: none !important;
+        padding: 14px 16px;
+        background: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        display: flex;
+        align-items: center;
     }
-    .accordion-button:not(.collapsed) { 
-        color: #6750A4; background-color: #F3EDF7 !important; 
-        border-bottom: 1px solid #EADDFF; 
-    }
-    .accordion-button::after { transform: scale(0.8); }
 
-    .notice-icon-wrapper {
-        width: 32px; height: 32px; border-radius: 6px;
+    .accordion-button:not(.collapsed) {
+        background: var(--m3-tonal-surface) !important;
+        color: var(--m3-primary);
+        border-bottom: 1px dashed var(--m3-tonal-container) !important;
+    }
+
+    .notice-icon-box {
+        width: 40px; height: 40px;
+        border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
-        margin-right: 12px; flex-shrink: 0;
+        margin-right: 14px; flex-shrink: 0;
+        font-size: 1.2rem;
     }
 
-    .notice-body { background: #fff; padding: 16px; font-size: 0.85rem; color: #49454F; line-height: 1.5; }
-    
-    .notice-meta {
-        font-size: 0.7rem; color: #79747E; font-weight: 500;
-        margin-bottom: 8px; display: flex; justify-content: space-between;
+    .notice-details {
+        padding: 16px;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: #444;
+        background: #fff;
     }
 
-    .btn-fab {
-        position: fixed; bottom: 80px; right: 20px;
-        width: 56px; height: 56px; border-radius: 16px;
-        background: #EADDFF; color: #21005D;
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2); border: none;
+    .notice-footer {
+        display: flex; justify-content: space-between;
+        margin-top: 12px; padding-top: 8px;
+        border-top: 1px solid #f5f5f5;
+        font-size: 0.7rem; font-weight: 700; color: #888;
+    }
+
+    /* FAB for Admin */
+    .m3-fab-notice {
+        position: fixed; bottom: 85px; right: 20px;
+        background: var(--m3-primary-gradient);
+        color: #fff; width: 56px; height: 56px;
+        border-radius: 16px; display: flex;
+        align-items: center; justify-content: center;
+        box-shadow: 0 4px 15px rgba(103, 80, 164, 0.3);
+        z-index: 1050; border: none;
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="reporthome.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <i class="bi bi-search fs-5 me-2"></i>
-        <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.7rem;"><?php echo $current_session; ?></span>
+<main>
+    <div class="hero-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;" >
+                    <i class="bi bi-chat-left-dots"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;">Notice Board</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Latest Announcements</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 1.8rem; font-weight: 900; line-height: 1;"><?php echo count($notices); ?></div>
+                <div style="font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Active News</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
+                ACADEMIC YEAR: <?php echo $current_session; ?>
+            </span>
+        </div>
     </div>
-</header>
 
-<main class="pb-5 mt-2">
-    <?php if (count($notices) > 0): ?>
-        <div class="accordion" id="noticesAccordion">
+    <div class="px-2" style="margin-top: 15px; padding-bottom: 80px;">
+        <div class="accordion" id="noticeAccordion">
             <?php 
-            $sl = 0;
-            foreach ($notices as $notice):
-                $sl++;
-                $icon = $notice['icon'] ?: 'megaphone';
-                $color = $notice['color'] ?: '#6750A4';
-                $author = $notice['profilename'] ?: 'Admin';
+            if (count($notices) > 0):
+                $sl = 0;
+                foreach ($notices as $notice):
+                    $sl++;
+                    $icon = $notice['icon'] ?: 'megaphone';
+                    $color = $notice['color'] ?: '#6750A4';
+                    $author = $notice['profilename'] ?: 'Admin';
             ?>
-                <div class="notice-card shadow-sm accordion-item">
-                    <h2 class="accordion-header" id="heading<?php echo $sl; ?>">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                data-bs-target="#collapse<?php echo $sl; ?>" aria-expanded="false">
-                            <div class="notice-icon-wrapper shadow-sm" style="background: <?php echo $color; ?>20; color: <?php echo $color; ?>;">
-                                <i class="bi bi-<?php echo htmlspecialchars($icon); ?>"></i>
+                <div class="notice-item-card accordion-item">
+                    <h2 class="accordion-header" id="head<?php echo $sl; ?>">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#not<?php echo $sl; ?>">
+                            <div class="notice-icon-box shadow-sm" style="background: <?php echo $color; ?>15; color: <?php echo $color; ?>;">
+                                <i class="bi bi-<?php echo $icon; ?>"></i>
                             </div>
-                            <span class="text-truncate"><?php echo htmlspecialchars($notice['title']); ?></span>
+                            <div style="flex-grow: 1; overflow: hidden;">
+                                <div style="font-size: 0.9rem; font-weight: 800; color: #1C1B1F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <?php echo $notice['title']; ?>
+                                </div>
+                                <div style="font-size: 0.7rem; color: #888; font-weight: 600;">
+                                    <?php echo date('d M, Y', strtotime($notice['entrytime'])); ?>
+                                </div>
+                            </div>
                         </button>
                     </h2>
-                    <div id="collapse<?php echo $sl; ?>" class="accordion-collapse collapse" 
-                         data-bs-parent="#noticesAccordion">
-                        <div class="notice-body">
-                            <div class="notice-meta border-bottom pb-2">
-                                <span><i class="bi bi-person-circle me-1"></i> <?php echo htmlspecialchars($author); ?></span>
-                                <span><i class="bi bi-calendar3 me-1"></i> <?php echo date('d M, y', strtotime($notice['entrytime'])); ?></span>
+                    <div id="not<?php echo $sl; ?>" class="accordion-collapse collapse" data-bs-parent="#noticeAccordion">
+                        <div class="notice-details">
+                            <p style="margin-bottom: 15px;"><?php echo nl2br($notice['descrip']); ?></p>
+                            
+                            <div class="notice-footer">
+                                <span><i class="bi bi-person-circle me-1"></i> Posted by: <?php echo $author; ?></span>
+                                <span><i class="bi bi-clock me-1"></i> <?php echo date('h:i A', strtotime($notice['entrytime'])); ?></span>
                             </div>
-                            <p class="mt-2 mb-0"><?php echo nl2br(htmlspecialchars($notice['descrip'])); ?></p>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
+            <?php else: ?>
+                <div style="text-align: center; padding: 60px 20px; opacity: 0.4;">
+                    <i class="bi bi-chat-left-dots" style="font-size: 3.5rem;"></i>
+                    <div style="font-weight: 800; margin-top: 10px;">No Notices Found</div>
+                    <div style="font-size: 0.75rem;">Check back later for updates.</div>
+                </div>
+            <?php endif; ?>
         </div>
-    <?php else: ?>
-        <div class="text-center py-5 opacity-25">
-            <i class="bi bi-chat-left-dots display-1"></i>
-            <p class="fw-bold mt-2">No active notices for session <?php echo $current_session; ?></p>
-        </div>
+    </div>
+
+    <?php if($userlevel == 'Administrator'): ?>
+        <button class="m3-fab-notice shadow-lg" onclick="location.href='add-notice.php'">
+            <i class="bi bi-plus-lg" style="font-size: 1.6rem;"></i>
+        </button>
     <?php endif; ?>
 </main>
 
-<?php if($userlevel == 'Administrator'): ?>
-    <button class="btn-fab shadow"><i class="bi bi-pencil-fill fs-4"></i></button>
-<?php endif; ?>
+<div style="height: 40px;"></div>
 
-<div style="height: 65px;"></div> <?php include 'footer.php'; ?>
+
+
+<?php include 'footer.php'; ?>

@@ -1,11 +1,13 @@
 <?php
-include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
-
-// ১. প্যারামিটার হ্যান্ডলিং
+include 'inc.php';
+include 'datam/datam-teacher.php';
+// ১. প্যারামিটার হ্যান্ডলিং (অপরিবর্তিত)
 $tid = $_GET['id'] ?? '';
 $page_title = "Staff Profile";
 
-// ২. ডাটা ফেচিং (Prepared Statement)
+
+
+// ২. ডাটা ফেচিং (Secure Prepared Statement)
 $stmt = $conn->prepare("SELECT * FROM teacher WHERE tid = ? LIMIT 1");
 $stmt->bind_param("s", $tid);
 $stmt->execute();
@@ -13,17 +15,16 @@ $result = $stmt->get_result();
 $tp = $result->fetch_assoc();
 $stmt->close();
 
-if (!$tp) { die("<div class='alert alert-danger m-3'>Teacher profile not found.</div>"); }
-
-// ৩. ফটো লজিক
-$pth = '../teacher/' . $tid . '.jpg';
-if (file_exists($pth)) {
-    $display_photo = 'https://eimbox.com/teacher/' . $tid . '.jpg';
-} else {
-    $display_photo = 'https://eimbox.com/teacher/noimg.jpg';
+if (!$tp) {
+    die("<div class='m3-card c-exit' style='margin:20px; padding:20px; text-align:center; font-weight:800;'>
+            <i class='bi bi-exclamation-triangle me-2'></i> Profile Not Found!
+         </div>");
 }
 
-// ৪. পারমিশন চেকিং (Profile Entry)
+
+$display_photo = teacher_profile_image_path($tid);
+
+// ৪. পারমিশন চেকিং (অপরিবর্তিত)
 $profile_entry_permission = 0;
 $settings_map = array_column($ins_all_settings, 'settings_value', 'setting_title');
 if (isset($settings_map['Profile Entry']) && strpos($settings_map['Profile Entry'], $userlevel) !== false) {
@@ -32,92 +33,128 @@ if (isset($settings_map['Profile Entry']) && strpos($settings_map['Profile Entry
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
-
-    /* M3 Standard App Bar (8px radius bottom) */
-    .m3-app-bar {
-        background: #fff; height: 56px; display: flex; align-items: center; padding: 0 16px;
-        position: sticky; top: 0; z-index: 1050; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-radius: 0 0 8px 8px;
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
-
-    /* Condensed Hero Profile Card */
-    .hero-profile-card {
-        background: linear-gradient(135deg, #6750A4, #9581CD);
-        border-radius: 8px; padding: 20px 16px;
-        margin: 12px 12px 8px; color: white;
-        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.2);
+    /* Profile Specific Enhancements */
+    .hero-profile {
+        padding-bottom: 35px;
+        margin-bottom: 0;
+        border-radius: 0 0 24px 24px;
     }
 
-    .profile-avatar {
-        width: 72px; height: 72px; border-radius: 50%;
-        object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .profile-avatar-box {
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        /* M3 Large Corner */
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden;
+        background: #eee;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
 
-    .t-name-eng { font-size: 1.1rem; font-weight: 800; line-height: 1.2; }
-    .t-name-ben { font-size: 0.9rem; opacity: 0.9; font-weight: 500; }
-    .t-id-badge {
-        background: rgba(255, 255, 255, 0.2); border-radius: 6px;
-        padding: 2px 8px; font-size: 0.75rem; font-weight: 700;
-        display: inline-block; margin-top: 6px;
+    .profile-avatar-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-    /* Section Container for Dynamic Includes */
-    .profile-content { padding: 0 4px; }
-    
-    .btn-m3 { border-radius: 8px !important; font-weight: 700; }
+    .id-tag {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        display: inline-block;
+        margin-top: 8px;
+        backdrop-filter: blur(5px);
+    }
+
+    .info-overlay-card {
+        margin: -25px 16px 20px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.08);
+    }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <?php if($profile_entry_permission): ?>
-            <i class="bi bi-pencil-square fs-5" onclick="edit('<?php echo $tid; ?>')"></i>
-        <?php endif; ?>
-    </div>
-</header>
+<main>
+    <div class="hero-container hero-profile">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
 
-<main class="pb-5">
-    <div class="hero-profile-card shadow">
-        <div class="d-flex align-items-center">
-            <img src="<?php echo $display_photo; ?>" class="profile-avatar me-3" onerror="this.src='https://eimbox.com/teacher/noimg.jpg';">
-            <div class="overflow-hidden">
-                <div class="t-name-eng text-truncate"><?php echo $tp['tname']; ?></div>
-                <div class="t-name-ben text-truncate"><?php echo $tp['tnameb']; ?></div>
-                <div class="t-id-badge">STAFF ID: <?php echo $tp['tid']; ?></div>
+            <?php if ($profile_entry_permission): ?>
+                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;"
+                    onclick="edit('<?php echo $tid; ?>')">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div style="display: flex; align-items: center; margin-top: 20px;">
+            <div class="profile-avatar-box">
+                <img src="<?php echo teacher_profile_image_path($tid); ?>">
+            </div>
+            <div style="margin-left: 18px; overflow: hidden;">
+                <div style="font-size: 1.4rem; font-weight: 900; line-height: 1.2; text-transform: uppercase;">
+                    <?php echo $tp['tname']; ?>
+                </div>
+                <div style="font-size: 1rem; opacity: 0.9; font-weight: 600;"><?php echo $tp['tnameb']; ?></div>
+                <div class="id-tag">STAFF ID: <?php echo $tp['tid']; ?></div>
             </div>
         </div>
     </div>
 
-    <div class="profile-content">
+    <div class="info-overlay-card">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="icon-box c-inst" style="width: 44px; height: 44px; border-radius: 8px;">
+                <i class="bi bi-award-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div style="font-size: 0.65rem; font-weight: 800; color: #777; text-transform: uppercase;">Designation
+                </div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: var(--m3-primary);">
+                    <?php echo $tp['ranks'] ?? 'Faculty Member'; ?>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <span class="session-pill" style="font-size: 0.6rem;">ACTIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content-area" style="padding: 0 4px;">
         <?php
-        if ($userlevel == 'Administrator' || $tid == $userid) {
-            include 'hr-profile-administrator.php';
-        } else if ($userlevel == 'Teacher') {
-            include 'hr-profile-teacher.php';
-        } else if ($userlevel == 'Student') {
-            include 'hr-profile-student.php';
-        } else if ($userlevel == 'guardian') { // Fixed typo from 'guardina'
-            include 'hr-profile-guardian.php';
+        $user_role_map = [
+            'Administrator' => 'hr-profile-administrator.php',
+            'Teacher' => 'hr-profile-teacher.php',
+            'Student' => 'hr-profile-student.php',
+            'guardian' => 'hr-profile-guardian.php'
+        ];
+
+        // লোড করা হচ্ছে ইউজার লেভেল অনুযায়ী ফাইল
+        $include_file = ($tid == $userid && $userlevel != 'Administrator') ? $user_role_map[$userlevel] : ($user_role_map[$userlevel] ?? 'hr-profile-teacher.php');
+
+        if (file_exists($include_file)) {
+            include $include_file;
+        } else {
+            echo "<div class='m3-card c-util' style='margin:12px; padding:15px; font-size:0.8rem;'>
+                    <i class='bi bi-info-circle me-2'></i> Additional details are loading...
+                  </div>";
         }
         ?>
     </div>
 </main>
 
-<div style="height: 65px;"></div> <script>
+<div style="height: 80px;"></div>
+
+<script>
     function edit(id) {
         window.location.href = "teacher-profile-edit.php?id=" + id;
     }
 
     // আপনার অন্যান্য AJAX ফাংশনগুলো এখানে থাকবে
-    function tcamount() {
-        const cause = document.getElementById("cause").value;
-        const taka = document.getElementById("taka").value;
-        // AJAX logic...
-    }
 </script>
 
 <?php include 'footer.php'; ?>
