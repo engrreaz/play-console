@@ -381,7 +381,7 @@
     function settings_admin_bind_teacher_subject() { window.location.href = "classes.php"; }
     function settings_admin_class_routine_setup() { window.location.href = "clsroutine-setup.php"; }
     function settings_sms_menu() { window.location.href = "sms-manager.php"; }
-    function settings_admin_user_manager() { window.location.href = "userlist.php"; }
+    // function settings_admin_user_manager() { window.location.href = "userlist.php"; }
 
 
     function sms_manager_send() { window.location.href = "sms-send.php"; }
