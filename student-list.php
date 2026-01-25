@@ -239,7 +239,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 </style>
 
 
-<main class="pb-5">
+<main class="pb-0">
     <?php if ($count_class > 0): ?>
         <div class="m3-tab-bar-container">
             <div class="m3-section-title ">Class(es)</div>
@@ -319,8 +319,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                             <div class="st-card shadow-sm <?php echo $is_active ? '' : 'opacity-50 grayscale'; ?>"
                                 onclick="this.classList.toggle('expanded')">
                                 <div class="d-flex align-items-center">
-                                    <img src="<?= student_profile_image_path($stid) ?>" class="st-avatar shadow-sm"
-                                        onerror="this.src='https://eimbox.com/students/noimg.jpg'">
+                                    <img src="<?= student_profile_image_path($stid) ?>" class="st-avatar shadow-sm" >
                                     <div class="ms-3 flex-grow-1 overflow-hidden">
                                         <div class="fw-bold text-dark text-truncate" style="font-size: 0.75rem;">
                                             <?= $atx['stnameeng']; ?></div>
@@ -374,4 +373,6 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
     <?php endif; ?>
 </main>
 
-<div style="height: 65px;"></div> <?php include 'footer.php'; ?>
+
+
+</div> <?php include 'footer.php'; ?>
