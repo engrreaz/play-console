@@ -109,6 +109,8 @@ if ($result0->num_rows > 0) {
         // $sy = $row0["session"];
         $otp = $row0["otp"];
         $otptime = $row0["otptime"];
+        $is_chief = $row0["is_chief"];
+        $is_admin = $row0["admin"];
     }
 } else {
     $query33p = "insert into usersapp (sccode, email, token, firstlogin, lastlogin, photourl, userlevel) values ('$eiin', '$usr', '$token', '$cur', '$cur', '$pth' , '$dflt')";
@@ -327,6 +329,7 @@ if ($result0xrtyv->num_rows > 0) {
 
 include 'functions.php';
 include 'component/sms-func.php';
+include_once 'check-access.php';
 include 'header.php';
 
 ?>

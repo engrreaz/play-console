@@ -1,11 +1,8 @@
 <?php
-session_start();
+$page_title = "Attendance Register";
 include_once 'inc.php'; 
 include_once 'datam/datam-stprofile.php';
 
-// ১. সেশন ইয়ার এবং ফিল্টার লজিক (অপরিবর্তিত)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] ?? $_COOKIE['query-session'] ?? $sy;
-$sy_param = '%' . $current_session . '%';
 $year_filter = isset($_GET['y_f']) ? intval($_GET['y_f']) : date('Y');
 $month_filter = isset($_GET['m_f']) ? str_pad(intval($_GET['m_f']), 2, '0', STR_PAD_LEFT) : date('m');
 $classname = $_GET['cls'] ?? ($cteacher_data[0]['cteachercls'] ?? '');
@@ -15,7 +12,6 @@ $date_start = "$year_filter-$month_filter-01";
 $days_in_month = date('t', strtotime($date_start));
 $date_end = "$year_filter-$month_filter-$days_in_month";
 $today_date = date('Y-m-d');
-$page_title = "Monthly Register";
 
 // ২. ডাটা ফেচিং (অপরিবর্তিত)
 $holidays_str = '';
@@ -44,7 +40,7 @@ while ($row = $res_att->fetch_assoc()) {
 }
 $stmt_att->close();
 
-$roll_call_url = "stattnd.php?cls=" . urlencode($classname) . "&sec=" . urlencode($sectionname) . "&year=" . $current_session;
+$roll_call_url = "stattnd.php?cls=" . urlencode($classname) . "&sec=" . urlencode($sectionname) . "&year=" . $sessionyear;
 ?>
 
 <style>
@@ -92,7 +88,6 @@ $roll_call_url = "stattnd.php?cls=" . urlencode($classname) . "&sec=" . urlencod
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <a href="reporthome.php" style="color:#fff; font-size:1.2rem;"><i class="bi bi-arrow-left"></i></a>
                     <span class="session-pill" style="background: rgba(255,255,255,0.2); color: #fff; border:none;">
                         <?php echo date('F Y', strtotime($date_start)); ?>
                     </span>

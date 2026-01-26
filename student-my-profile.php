@@ -1,14 +1,10 @@
 <?php 
+$page_title = "Student Profile";
 include 'inc.php'; // এটি header.php এবং DB কানেকশন লোড করবে
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
 
 $stid = $_GET['stid'] ?? 0;
-$page_title = "Student Profile";
+
 
 // ২. ডাটা ফেচিং (Prepared Statement - Secure)
 // ছাত্রের ব্যক্তিগত তথ্য এবং বর্তমান সেশনের একাডেমিক তথ্য একসাথে আনা হচ্ছে
@@ -34,19 +30,14 @@ $stnameben = $std['stnameben'] ?? '';
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
+
 
     /* Profile Hero Section (M3 Look) */
-    .hero-container {
-        background: #fff; text-align: center;
-        padding: 30px 16px; margin-bottom: 12px;
-        border-radius: 0 0 8px 8px; /* আপনার নির্দেশিত ৮ পিক্সেল */
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
+  
 
     .large-profile-pic {
-        width: 140px; height: 140px; /* আপনার চাহিদা অনুযায়ী বড় ছবি */
-        border-radius: 12px; object-fit: cover;
+        width: 110px; height: 140px; /* আপনার চাহিদা অনুযায়ী বড় ছবি */
+        border-radius: 8px; object-fit: cover;
         border: 4px solid #F3EDF7;
         box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
         margin-bottom: 16px;
@@ -84,13 +75,7 @@ $stnameben = $std['stnameben'] ?? '';
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <span class="session-badge"><?php echo $current_session; ?></span>
-    </div>
-</header>
+
 
 <main class="pb-5">
     <div class="hero-container shadow-sm">

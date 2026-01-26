@@ -1,5 +1,5 @@
 <?php
-    include 'inc.php';
+    include 'inc.light.php';
 
     $id = $_POST['id'];   $tail = $_POST['tail'];  
     

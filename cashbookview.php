@@ -1,410 +1,451 @@
 <?php
+$page_title = "Cashbook Manager";
 include 'inc.php';
 
-$datefrom = '2023-01-01';
-date('Y-m-01');
-$dateto = date('Y-m-t');
+/** ---------------- ১. ডেটা প্রসেসিং (CRUD) ---------------- **/
+if (isset($_COOKIE['form-submitted']) && $_COOKIE['form-submitted'] == "true") {
+    $form_submitted = true;
+} else {
+    $form_submitted = false;
+}
 
+
+// ১.১ এন্ট্রি সেভ/আপডেট লজিক
+if (isset($_POST['save_entry']) && $form_submitted) {
+    $id = $_POST['entry_id'];
+    $date = $_POST['date'];
+    $partid = $_POST['partid']; // sub_head_id
+    $head_id = $_POST['head_code'];
+    $particulars = mysqli_real_escape_string($conn, $_POST['particulars']);
+    $amount = $_POST['amount'];
+    $type = $_POST['type'];
+    $memono = $_POST['memono'] ?? '';
+    $month = $_POST['month'] ?? date('n');
+    $year = $_POST['year'] ?? date('Y');
+    $entryby = $usr;
+    $new_sccode = $sccode * 10; // সরাসরি স্যানকশনড হিসেবে সেভ হবে
+
+    if (!empty($id)) {
+        // Update
+        $sql = "UPDATE cashbook SET date='$date', account_head='$head_id', partid='$partid', particulars='$particulars', amount='$amount', type='$type', memono='$memono', month='$month', year='$year' WHERE id='$id'";
+        $conn->query($sql);
+    } else {
+        // Insert (সরাসরি স্যানকশনড হিসেবে সেভ হবে)
+        $sql = "INSERT INTO cashbook (sccode, date, account_head, partid, particulars, amount, type, memono, month, year, entryby, entrytime, sessionyear) 
+                      VALUES ('$new_sccode', '$date', '$head_id', '$partid', '$particulars', '$amount', '$type', '$memono', '$month', '$year', '$usr', '$cur', '$sessionyear')";
+        $conn->query($sql);
+    }
+    // echo $sql;
+    // header("Location: accounts-cashbook-advanced.php"); exit();
+}
+
+/** ---------------- ২. ডেটা লোড ---------------- **/
+
+// সাব-হেড লিস্ট (ড্রপডাউনের জন্য) - হেড নামসহ জয়েন করা হয়েছে
+$sub_heads = $conn->query("SELECT s.id, s.sub_head, h.account_head ,  s.account_head_id
+                           FROM account_sub_head s 
+                           LEFT JOIN account_head h ON s.account_head_id = h.id 
+                           WHERE s.sccode='$sccode' ORDER BY h.account_head, s.sub_head");
+
+// ক্যাশবুক ডেটা লোড
+$datefrom = date('2025-01-01');
+$dateto = date('Y-m-t');
+$sql_main = "SELECT c.*, s.sub_head as head_name FROM cashbook c 
+             LEFT JOIN account_sub_head s ON c.partid = s.id 
+             WHERE (c.sccode='$sccode' OR c.sccode='" . ($sccode * 10) . "') 
+             AND c.date BETWEEN '$datefrom' AND '$dateto' 
+             ORDER BY c.date DESC, c.id DESC";
+$res_main = $conn->query($sql_main);
+
+$approved = [];
+$pending = [];
+$total_in = 0;
+$total_ex = 0;
+
+while ($row = $res_main->fetch_assoc()) {
+    if ($row['sccode'] == $sccode) {
+        $approved[] = $row;
+        if ($row['type'] == 'Income')
+            $total_in += $row['amount'];
+        else
+            $total_ex += $row['amount'];
+    } else {
+        $pending[] = $row;
+    }
+}
 ?>
 
+<style>
+    /* M3 Custom Styles */
+    .m3-tab-bar {
+        background: #fff;
+        padding: 10px;
+        border-radius: 0 0 20px 20px;
+        box-shadow: var(--m3-shadow-sm);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .filter-chip-group {
+        display: flex;
+        gap: 8px;
+        padding: 15px 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .chip {
+        background: #fff;
+        border: 1px solid var(--m3-outline);
+        border-radius: 8px;
+        padding: 6px 15px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #444;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .chip.active {
+        background: var(--m3-tonal-container);
+        color: var(--m3-primary);
+        border-color: var(--m3-primary);
+    }
+
+    .v-card {
+        padding: 15px;
+        margin: 0 12px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .Income {
+        border-left: 5px solid #2E7D32;
+    }
+
+    .Expenditure {
+        border-left: 5px solid #B3261E;
+    }
+
+    .m3-fab {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--m3-primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: var(--m3-shadow-lg);
+        border: none;
+        z-index: 1000;
+    }
+</style>
+
 <main>
-    <div class="container-fluidx">
-
-        <div class="card text-left" style="background:var(--dark); color:var(--lighter);"
-            onclick="go(<?php echo $id; ?>)">
-
-            <div class="card-body">
-                <div class="page-top-box">
-                    <div class="menu-icon"><i class="bi bi-coin"></i></div>
-                    <div class="menu-text">Cashbook Manager</div>
-                </div>
-                <div class="page-sub-box">
-
-                </div>
-                <style>
-                    .spcl {
-                        font-size: 12px;
-                        font-style: italic;
-                    }
-                </style>
-                <table style="width:100%; display:none;">
-                    <tr>
-                        <td style="text-align:left;">
-                            <div style="font-size:14px; color:white; text-align:center;">
-                                <i class="bi bi-reception-2"></i> <span class="spcl">Under Build</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <i class="bi bi-reception-4"></i> <span class="spcl">On Progress</span>
-                                <br>
-                                <i class="bi bi-exclamation-diamond-fill"></i> <span class="spcl">On Test</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <i class="bi bi-check-circle-fill"></i> <span class="spcl">Done</span>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <i class="bi-shield-fill-check"></i> <span class="spcl">Tested</span>
-
-                                <?php echo $datefrom . '/' . $dateto; ?>
-                            </div>
-                        </td>
-                        <td style="text-align:center; color:white;">
-                            <div style="border:1px solid white; border-radius:5px; padding:5px;" onclick="iss();">
-                                <i style="font-size:40px; color:white;" class="bi bi-plus"></i>
-                                <br><span style="font-size:12px; font-style:italic;">Add a issue</span>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-
+    <div class="hero-container" style="padding-bottom: 40px;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div style="font-size: 1.6rem; font-weight: 950;">
+                    ৳<?php echo number_format($total_in - $total_ex, 2); ?></div>
+                <div style="font-size: 0.7rem; opacity: 0.8; font-weight: 800; letter-spacing: 1px;">CASH IN HAND</div>
             </div>
-
-
-            <div class="card-body" style="display:none;" id="issueblock">
-                <div style="color:white; background:var(--dark);">
-                    <b>Add a Issue</b>
-                    <br>
-                    <span style="font-size:11px; font-style:italic;">Add a new issue or existing module issue</span>
-                    <br>
-
-                    <div style="text-align:left; padding-top:0px;">
-                        <div class="input-group">
-                            <span class="input-group-text" style="color:white;"><i
-                                    class="material-icons ico">reorder</i></span>
-                            <select class="form-control" id="cause"
-                                style="border:0; background:var(--dark); color:white; border-bottom:1px solid lightgray;">
-                                <option>Select a type</option>
-                                <option value="Student">Student </option>
-                                <option value="Teacher">Teacher</option>
-                                <option value="Columner Cashbook">Cash Book Related</option>
-                                <option value="Bank Management">Bank Management</option>
-                                <option value="Report">Reports</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="text-align:left; padding-top:5px;">
-                        <div class="input-group">
-                            <span class="input-group-text" style="color:white;"><i
-                                    class="material-icons ico">description</i></span>
-                            <input style="color:white;" type="text" id="descrip" name="descrip" class="form-control"
-                                placeholder="Your Issue..." value="">
-                        </div>
-                    </div>
-                    <div style="text-align:left; padding-top:5px;">
-                        <div class="input-group">
-                            <span class="input-group-text" style="color:white;"><i
-                                    class="material-icons ico">event</i></span>
-                            <input style="color:white; background:var(--dark); border:0; border-bottom:1px solid white;"
-                                type="date" id="date" name="date" class="form-control" placeholder="Deadline"
-                                value="<?php echo date('Y-m-d'); ?>">
-                        </div>
-                    </div>
-
-                    <div style="padding:5px 60px;">
-                        <button class="btn " style="background:white; color:var(--dark); border-radius:5px;"
-                            onclick="addissue();;"><b>Add a issue</b></button>
-                        <span id="settc"></span>
-                    </div>
-                </div>
+            <div style="text-align: right;">
+                <div class="small fw-bold text-success">In: +<?php echo number_format($total_in); ?></div>
+                <div class="small fw-bold text-danger">Out: -<?php echo number_format($total_ex); ?></div>
             </div>
-
-            <div id="settcc"></div>
-
         </div>
-
-
-
-        <!--<div class="card" style="background:var(--lighter); color:var(--darker);" onclick="lnk3();" >-->
-        <!--  <img class="card-img-top"  alt="">-->
-        <!--  <div class="card-body">-->
-        <!--    <table style="">-->
-        <!--        <tr>-->
-        <!--            <td style="width:50px;color:var(--dark);"><i class="material-icons">group</i></td>-->
-        <!--            <td>-->
-        <!--                <h4>Administrative Setup</h4>-->
-        <!--                <small>Class & Sections, Subjects, Teachers, Users etc.</small>-->
-        <!--            </td>-->
-        <!--        </tr>-->
-        <!--    </table>-->
-        <!--  </div>-->
-        <!--</div>-->
-
-
-        <?php
-
-        $inr = 0;
-        $exr = 0;
-        $inw = 0;
-        $exw = 0;
-        for ($jj = 0; $jj < 2; $jj++) {
-
-            if ($jj == 0) {
-                $ssc = $sccode;
-                $ttxx = 'Sanctioned Bill/Vouchers';
-                $idin = 'in0';
-                $idex = 'ex0';
-            } else if ($jj == 1) {
-                $ssc = $sccode * 10;
-                $ttxx = 'Ignored Bill/Vouchers';
-                $idin = 'in1';
-                $idex = 'ex1';
-                $datefrom = '2023-01-01';
-                $dateto = $td;
-            }
-            ?>
-
-
-            <div class="card-body">
-                <div class="card" style="background:var(--lighter); border:0; color:var(--darker);" onclick="lnk30();">
-                    <div
-                        style=" width:80%; border-radius:35px; background:var(--darker); color:white; font-weight:bold; margin:8px auto; text-align:center; padding:8px;">
-                        <?php echo $ttxx; ?></div>
-                    <table
-                        style="width:65%; margin:0 auto 15px; border-bottom:1px dashed var(--dark); font-size:13px; color:var(--darker);">
-                        <tr>
-                            <td>
-                                <div id="<?php echo $idin; ?>"></div>
-                            </td>
-                            <td>
-                                <div style="text-align:right;" id="<?php echo $idex; ?>"></div>
-                            </td>
-                        </tr>
-                    </table>
-                    <?php
-
-
-                    $sql0 = "SELECT * FROM cashbook where sccode='$ssc' and date between '$datefrom' and '$dateto'  and entryby !='System-Auto' order by date desc, partid";
-                    $result0wwrt = $conn->query($sql0);
-                    if ($result0wwrt->num_rows > 0) {
-                        while ($row0 = $result0wwrt->fetch_assoc()) {
-                            $type = $row0["type"];
-                            $partid = $row0["partid"];
-                            $particul = $row0["particulars"];
-                            $taka = $row0["amount"];
-                            $date = $row0["date"];
-
-                            $eby = $row0["entryby"];
-                            $id = $row0["id"];
-
-                            $sql0 = "SELECT * FROM financesetup where sccode='$sccode' and id='$partid'";
-                            $result0wwrtx = $conn->query($sql0);
-                            if ($result0wwrtx->num_rows > 0) {
-                                while ($row0 = $result0wwrtx->fetch_assoc()) {
-                                    $partxt = $row0["particulareng"] . ' / ' . $row0["particularben"];
-                                }
-                            }
-
-                            if ($type == 'Income') {
-                                $txtclr = 'seagreen';
-                            } else {
-                                $txtclr = 'Tomato';
-                            }
-
-
-
-                            ?>
-                            <div class="box" style="color:<?php echo $txtclr; ?>; border-bottom: 1px solid var(--dark); ">
-                                <div class="box-icon">
-                                    <img onclick="progress(<?php echo $id; ?>);" class="sender"
-                                        src="https://eimbox.com/androidapplicationversion/iimg/icon/<?php echo $partid; ?>.png" />
-                                </div>
-                                <div class="box-text">
-                                    <div style="float:right;text-align:right; right:25px; position:absolute;">
-                                        <div style="font-size:18px; font-weight:700; color:<?php echo $clr; ?>"><?php echo $taka; ?>
-                                        </div>
-                                    </div>
-                                    <div style="font-size:10px; font-weight:700;"><?php echo $partxt; ?></div>
-                                    <div class="box-title" style="width: calc(100% - 60px);"><?php echo $particul; ?></div>
-                                    <div class="box-subtitle">
-                                        <?php echo date('d/m/Y', strtotime($date)) . ' by <b>' . $eby . '</b>'; ?></div>
-                                    <div style="height:10px;"></div>
-                                </div>
-
-                                <div>
-                                    <br>
-
-                                    <span id="ddx<?php echo $id; ?>">
-                                        <button class="btn btn-success" onclick="delitem(<?php echo $id; ?>,2);">Accept</button>
-                                        <button class="btn btn-danger" onclick="delitem(<?php echo $id; ?>,1);">Delete</button>
-                                    </span>
-                                </div>
-
-                            </div>
-                            <?php
-
-                            if ($jj == 0) {
-                                if ($type == 'Income') {
-                                    $inr += $taka;
-                                } else {
-                                    $exr += $taka;
-                                }
-                            } else {
-                                if ($type == 'Income') {
-                                    $inw += $taka;
-                                } else {
-                                    $exw += $taka;
-                                }
-                            }
-                        }
-                    }
-
-
-                    ?>
-
-
-                </div>
-            </div>
-
-
-
-        <?php }
-
-
-        ?>
-
-
-
-        <!-------------------------------------------------------->
-
-
-
-
-
-
-
-
     </div>
 
+    <div class="m3-tab-bar">
+        <ul class="nav nav-pills nav-justified" id="cb-tabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill"
+                    data-bs-target="#approved-list"><i class="bi bi-shield-check me-1"></i> SANCTIONED</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pending-list"><i
+                        class="bi bi-clock-history me-1"></i> PENDING (<?php echo count($pending); ?>)</button></li>
+        </ul>
+    </div>
+
+    <div class="tab-content pb-5">
+        <div class="tab-pane fade show active" id="approved-list">
+            <div class="filter-chip-group">
+                <div class="chip active" onclick="filterData('all', 'approved-list')">All Items</div>
+                <div class="chip" onclick="filterData('Income', 'approved-list')">Incomes</div>
+                <div class="chip" onclick="filterData('Expenditure', 'approved-list')">Expenditures</div>
+            </div>
+
+            <div class="list-container">
+                <?php foreach ($approved as $v): ?>
+                    <div class="m3-list-item v-card shadow-sm <?php echo $v['type']; ?>">
+                        <div class="d-flex justify-content-between w-100">
+                            <div class="d-flex gap-3">
+                                <div class="icon-box <?php echo ($v['type'] == 'Income' ? 'c-inst' : 'c-exit'); ?>"
+                                    style="width: 44px; height: 44px;">
+                                    <i
+                                        class="bi <?php echo ($v['type'] == 'Income' ? 'bi-arrow-down-left' : 'bi-arrow-up-right'); ?>"></i>
+                                </div>
+                                <div>
+                                    <div class="st-title" style="font-size: 0.95rem; font-weight: 850;">
+                                        <?php echo $v['particulars']; ?>
+                                    </div>
+                                    <div class="st-desc"
+                                        style="font-size: 0.75rem; font-weight: 600; color:var(--m3-primary);">
+                                        <?php echo $v['head_name']; ?>
+                                    </div>
+                                    <div class="small text-muted mt-1"><i
+                                            class="bi bi-calendar3 me-1"></i><?php echo date('d M, y', strtotime($v['date'])); ?>
+                                        | Memo: <?php echo $v['memono'] ?: 'N/A'; ?></div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div style="font-weight:900;"
+                                    class="<?php echo $v['type'] == 'Income' ? 'income-text' : 'expense-text'; ?>">
+                                    ৳<?php echo number_format($v['amount']); ?></div>
+                                <div class="d-flex gap-2 mt-2 justify-content-end">
+                                    <i class="bi bi-pencil-square text-primary fs-5"
+                                        onclick='editEntry(<?php echo json_encode($v); ?>)'></i>
+                                    <i class="bi bi-trash3 text-danger fs-5"
+                                        onclick="deleteEntry(<?php echo $v['id']; ?>)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="pending-list">
+            <div class="filter-chip-group">
+                <div class="chip active" onclick="filterData('all', 'pending-list')">All Pending</div>
+                <div class="chip" onclick="filterData('Income', 'pending-list')">Incomes</div>
+                <div class="chip" onclick="filterData('Expenditure', 'pending-list')">Expenditures</div>
+            </div>
+
+            <?php foreach ($pending as $v): ?>
+                <div class="m3-list-item v-card shadow-sm <?php echo $v['type']; ?>" style="background: #FFF9C4;">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div>
+                            <div class="fw-bold"><?php echo $v['particulars']; ?></div>
+                            | by : <?php echo $v['entryby']; ?>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="fs-3 text-muted text-right fw-bold">৳<?php echo $v['amount']; ?></div>
+
+                        <div class="d-flex gap-3">
+                            <i class="bi bi-pencil-square text-primary fs-5"
+                                onclick='editEntry(<?php echo json_encode($v); ?>)'></i>
+                            <i class="bi bi-check-circle-fill text-success fs-5"
+                                onclick="processVoucher(<?php echo $v['id']; ?>, 2)"></i>
+                            <i class="bi bi-x-circle text-danger fs-5"
+                                onclick="processVoucher(<?php echo $v['id']; ?>, 1)"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    </div>
+
+    <button class="m3-fab shadow-lg" onclick="addEntry()"><i class="bi bi-plus-lg"></i></button>
 </main>
-<div style="height:52px;"></div>
+
+
+
+<div class="modal fade" id="entryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content m3-modal-content border-0 shadow-lg" style="width:90vw; margin:auto; padding:20px;">
+            <h5 class="fw-bold mb-4" id="modalTitle" style="color: var(--m3-primary);">Add Transaction</h5>
+            <form method="post" id="entryForm">
+                <input type="hidden" name="entry_id" id="entry_id">
+                <input type="hidden" name="head_code" id="head_code">
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-calendar-event m3-field-icon"></i>
+                            <input type="date" name="date" id="e_date" class="m3-input-floating"
+                                value="<?php echo date('Y-m-d'); ?>" required>
+                            <label class="m3-floating-label">DATE</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-arrow-left-right m3-field-icon"></i>
+                            <select name="type" id="e_type" class="m3-select-floating" required>
+                                <option value="Income">Income</option>
+                                <option value="Expenditure">Expenditure</option>
+                            </select>
+                            <label class="m3-floating-label">TYPE</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="m3-floating-group">
+                    <i class="bi bi-tags m3-field-icon"></i>
+                    <select name="partid" id="e_partid" class="m3-select-floating" required>
+                        <option value=""></option>
+
+                        <?php
+                        $sub_heads->data_seek(0);
+
+                        $current_head = '';
+
+                        while ($sh = $sub_heads->fetch_assoc()):
+
+                            // নতুন group শুরু
+                            if ($current_head != $sh['account_head']) {
+
+                                // আগের group close
+                                if ($current_head != '') {
+                                    echo '</optgroup>';
+                                }
+
+                                echo '<optgroup label="' . $sh['account_head'] . '">';
+
+                                $current_head = $sh['account_head'];
+                            }
+                            ?>
+
+                            <option value="<?php echo $sh['id']; ?>" data-head="<?php echo $sh['account_head_id']; ?>">
+                                <?php echo $sh['sub_head']; ?>
+                            </option>
+
+                        <?php endwhile;
+
+                        // শেষ group close
+                        if ($current_head != '') {
+                            echo '</optgroup>';
+                        }
+                        ?>
+                    </select>
+
+                    <label class="m3-floating-label">ACCOUNT SECTOR (SUB-HEAD)</label>
+                </div>
+
+                <div class="m3-floating-group">
+                    <i class="bi bi-pencil m3-field-icon"></i>
+                    <input type="text" name="particulars" id="e_particulars" class="m3-input-floating" placeholder=" "
+                        required>
+                    <label class="m3-floating-label">DESCRIPTION</label>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-cash-stack m3-field-icon"></i>
+                            <input type="number" name="amount" id="e_amount" class="m3-input-floating" placeholder=" "
+                                required>
+                            <label class="m3-floating-label">AMOUNT</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-hash m3-field-icon"></i>
+                            <input type="text" name="memono" id="e_memono" class="m3-input-floating" placeholder=" ">
+                            <label class="m3-floating-label">MEMO NO.</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="button" class="btn btn-light flex-fill py-2"
+                        style="border-radius:12px; font-weight:700;" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" name="save_entry" class="btn btn-primary flex-fill py-2"
+                        style="border-radius:12px; font-weight:700;">SAVE RECORD</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php include 'footer.php'; ?>
 
 <script>
-    document.getElementById("in0").innerHTML = "Income : <b><?php echo $inr; ?></b>";
-    document.getElementById("in1").innerHTML = "Income : <b><?php echo $inw; ?></b>";
-    document.getElementById("ex0").innerHTML = "Expenditure : <b><?php echo $exr; ?></b>";
-    document.getElementById("ex1").innerHTML = "Expenditure : <b><?php echo $exw; ?></b>";
+    const entryModal = new bootstrap.Modal('#entryModal');
 
-    document.getElementById("cnt").innerHTML = "<?php echo $cnt; ?>";
+    // ১. ফিল্টারিং লজিক
+    function filterData(type, tabId) {
+        const tab = document.getElementById(tabId);
+        const chips = tab.querySelectorAll('.chip');
+        const cards = tab.querySelectorAll('.v-card');
 
+        chips.forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
 
-
-    function iss() {
-        document.getElementById("issueblock").style.display = 'block';
-    }
-
-    function go() {
-        var cls = document.getElementById("classname").value;
-        var sec = document.getElementById("sectionname").value;
-        var sub = document.getElementById("subject").value;
-        var assess = document.getElementById("assessment").value;
-        var exam = document.getElementById("exam").value;
-        let tail = '?exam=' + exam + '&cls=' + cls + '&sec=' + sec + '&sub=' + sub + '&assess=' + assess;
-        if (cls == 'Six' || cls == 'Seven') {
-            window.location.href = "markpibi.php" + tail;
-        } else {
-            window.location.href = "markentry.php" + tail;
-        }
-    }
-
-    function lnk1() { window.location.href = "tools_allsubjects.php"; }
-    function lnk2() { window.location.href = "pibiprocess.php"; }
-    function lnk3() { window.location.href = "settings.php"; }
-    function lnk4() { window.location.href = "transcriptselect.php"; }
-    function lnk5() { window.location.href = "userlist.php"; }
-    function lnk6() { window.location.href = "classes.php"; }
-    function lnk7() { window.location.href = "transcriptselect.php"; }
-    function lnk8() { window.location.href = "transcriptselect.php"; }
-    function lnk31() { window.location.href = "accountsecurity.php"; }
-
-
-</script>
-
-
-<script>
-    function fetchsection() {
-        var cls = document.getElementById("classname").value;
-
-        var infor = "user=<?php echo $rootuser; ?>&cls=" + cls;
-        $("#sectionblock").html("");
-
-        $.ajax({
-            type: "POST",
-            url: "fetchsection.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $('#sectionblock').html('<span class=""><center>Fetching Section Name....</center></span>');
-            },
-            success: function (html) {
-                $("#sectionblock").html(html);
-            }
+        cards.forEach(card => {
+            if (type === 'all' || card.classList.contains(type)) card.style.display = 'block';
+            else card.style.display = 'none';
         });
     }
-</script>
 
-<script>
-    function addissue() {
-        var cause = document.getElementById("cause").value;
-        var descrip = document.getElementById("descrip").value;
-        var date = document.getElementById("date").value;
+    // ২. অ্যাড/এডিট ফাংশন
+    function addEntry() {
+        document.getElementById('modalTitle').innerText = "New Voucher";
+        document.getElementById('entry_id').value = "";
+        document.getElementById('entryForm').reset();
+        document.getElementById('e_type').value = 'Expenditure';
 
-        var infor = "sccode=<?php echo $sccode; ?>&cause=" + cause + "&descrip=" + descrip + "&date=" + date + "&tail=0";
-        $("#settc").html("");
+        $('#e_type').trigger('change');
 
-        $.ajax({
-            type: "POST",
-            url: "saveissue.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $('#settc').html('<span class="">Adding your issue...</span>');
-            },
-            success: function (html) {
-                $("#settc").html(html);
-            }
-        });
+        entryModal.show();
+
+    }
+
+    function editEntry(data) {
+        document.getElementById('modalTitle').innerText = "Edit Voucher";
+        document.getElementById('entry_id').value = data.id;
+        document.getElementById('e_date').value = data.date;
+        document.getElementById('e_partid').value = data.partid;
+        document.getElementById('e_particulars').value = data.particulars;
+        document.getElementById('e_amount').value = data.amount;
+        document.getElementById('e_type').value = data.type;
+        document.getElementById('e_memono').value = data.memono;
+        $('#e_type').trigger('change');
+        entryModal.show();
+    }
+
+    // ৩. ডিলিট এবং অ্যাপ্রুভ
+    function deleteEntry(id) {
+        Swal.fire({ title: 'Delete Item?', text: "This will remove the transaction forever!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#B3261E', confirmButtonText: 'Yes, Delete' })
+            .then((result) => { if (result.isConfirmed) { window.location.href = "accounts-cashbook-advanced.php?del_id=" + id; } });
+    }
+
+    function processVoucher(id, tail) {
+        $.post("delcashbook.php", { sccode: '<?php echo $sccode; ?>', id: id, tail: tail }, function () { setCookie("form-submitted", "true", 1); window.location.href = "cashbookview.php"; });
     }
 </script>
 
 <script>
-    function progress(id) {
-        var infor = "sccode=<?php echo $sccode; ?>&id=" + id + "&tail=1";
-        $("#settcc").html("");
+    document.getElementById('e_type').addEventListener('change', function () {
+
+        let type = this.value;
 
         $.ajax({
-            type: "POST",
-            url: "saveissue.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $('#settcc').html('<span class="">Adding your issue...</span>');
-            },
-            success: function (html) {
-                $("#settcc").html(html);
+            url: 'ajax/ajax-get-subhead.php',
+            type: 'POST',
+            data: { type: type },
+            success: function (data) {
+                $('#e_partid').html(data);
             }
         });
-    }
+
+    });
+
+
+    $('#e_partid').on('change', function () {
+
+        let opt = this.options[this.selectedIndex];
+
+        $('#head_code').val(opt.getAttribute('data-head'));
+
+    });
+
 </script>
-
-<script>
-    function delitem(id, tail) {
-        var infor = "sccode=<?php echo $sccode; ?>&id=" + id + "&tail=" + tail;
-        $("#ddx" + id).html("");
-
-        $.ajax({
-            type: "POST",
-            url: "delcashbook.php",
-            data: infor,
-            cache: false,
-            beforeSend: function () {
-                $('#ddx' + id).html('<span class="">Deleting....</span>');
-            },
-            success: function (html) {
-                $("#ddx" + id).html(html);
-            }
-        });
-    }
-</script>
-
-
-
-</body>
-
-</html>

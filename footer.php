@@ -180,10 +180,12 @@ function isActive($targetFile, $currentFile)
     <div style="background:#fff; width:75%; max-width: 80%; margin:auto; max-height:80%; 
     border-radius:8px; padding:15px; overflow:auto; position:relative;">
 
-        <h4>Select Session</h4>
+        <h4><i class="bi bi-calendar-check me-1"></i> Select Session</h4>
 
         <span onclick="closeSessionModal()" style="position:absolute; right:15px; top:10px;
             cursor:pointer;font-size:20px;font-weight:bold;">×</span>
+        
+        <hr>
 
         <div id="sessionList"></div>
     </div>
@@ -234,11 +236,28 @@ function isActive($targetFile, $currentFile)
             .then(r => r.json())
             .then(data => {
                 let html = '';
+
+                const currentSessionYear = <?= json_encode($sessionyear); ?>;
+
                 data.forEach(s => {
-                    html += `<div class="session-item" onclick="selectSession('${s.sessionyear}')">
-                ${s.sessionyear}
-            </div>`;
+
+                    if (s.sessionyear == currentSessionYear) {
+
+                        html += `<div class="session-item fw-bold text-primary" onclick="selectSession('${s.sessionyear}')">
+            ${s.sessionyear}
+        </div>`;
+
+                    } else {
+
+                        html += `<div class="session-item" onclick="selectSession('${s.sessionyear}')">
+            ${s.sessionyear}
+        </div>`;
+                    }
+
                 });
+
+
+
                 document.getElementById('sessionList').innerHTML = html;
             });
     }

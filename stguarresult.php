@@ -1,14 +1,12 @@
 <?php
+$page_title = "Academic Result";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
-                   ?? $_COOKIE['query-session'] 
-                   ?? $sy;
-$sy_param = "%" . $current_session . "%";
+
 
 $stid = $_GET['stid'] ?? 0;
-$page_title = "Academic Result";
+
 
 // ২. স্টুডেন্ট এবং সেশন ইনফো ফেচ করা (Prepared Statement)
 $std_data = [];
@@ -31,7 +29,8 @@ $roll = $std_data['rollno'] ?? '';
 $stdid = $std_data['stid'] ?? $stid;
 
 // প্রোফাইল পিকচার পাথ
-$photo_path = "https://eimbox.com/students/" . $stdid . ".jpg";
+
+$stinfo = get_student_info_by_id($stid);
 ?>
 
 <style>
@@ -90,18 +89,11 @@ $photo_path = "https://eimbox.com/students/" . $stdid . ".jpg";
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="index.php" class="back-btn"><i class="bi bi-arrow-left me-3 fs-4"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <span class="session-badge"><?php echo $current_session; ?></span>
-    </div>
-</header>
 
 <main class="pb-5">
     <div class="result-hero shadow-sm">
-        <img src="<?php echo $photo_path; ?>" class="large-student-photo" onerror="this.src='https://eimbox.com/students/noimg.jpg';">
-        <div class="h5 fw-bold text-dark mb-1"><?php echo $stnameeng; ?></div>
+        <img src="<?php echo student_profile_image_path($stid); ?>" class="large-student-photo" >
+        <div class="h5 fw-bold text-dark mb-1"><?php echo $stinfo['stnameeng'];; ?></div>
         <div class="d-flex justify-content-center gap-2 mt-2">
             <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Class <?php echo $cls; ?></span>
             <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Roll <?php echo $roll; ?></span>

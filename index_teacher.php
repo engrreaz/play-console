@@ -2,7 +2,7 @@
 
 
 
-<main class="pb-5">
+<main class="pb-0">
     
     <div class="hero-container">
         <div class="small fw-bold opacity-75 text-uppercase mb-1" style="letter-spacing: 1px;">
@@ -76,5 +76,3 @@
         window.location.href = `stattnd.php?cls=${cls}&sec=${sec}&year=<?php echo $current_session; ?>`; 
     }
 </script>
-
-<?php include 'footer.php'; ?>

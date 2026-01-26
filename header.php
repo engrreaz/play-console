@@ -147,17 +147,20 @@
 
                 <div class="dd-divider"></div>
 
-                <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
+                <div class="dd-item text-muted small pb-2"><?= $scname ?></div>
                 <div class="dd-divider"></div>
 
-                <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
-                <div class="dd-item" onclick="goMy()">👤 My Profile</div>
-                <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
-                <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
+                <div class="dd-item text-muted small pb-2">Session <span class="session-pill py-0 float-end m-0"><?= $sessionyear ?></span></div>
+                <div class="dd-divider"></div>
+
+                <div class="dd-item" onclick="goProfile()"> <i class="bi bi-mortarboard-fill me-2"></i> Institute Profile</div>
+                <div class="dd-item" onclick="goMy()"> <i class="bi bi-person-circle me-2"></i> My Profile</div>
+                <div class="dd-item" onclick="goTicket()"> <i class="bi bi-ticket-perforated me-2"></i>Submit a Ticket</div>
+                <div class="dd-item" onclick="goNotify()"> <i class="bi bi-bell me-2"></i>Notifications</div>
 
                 <div class="dd-divider"></div>
-                <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
-                <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
+                <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>
+                <div class="dd-item text-danger" onclick="doLogout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</div>
             </div>
 
         </header>

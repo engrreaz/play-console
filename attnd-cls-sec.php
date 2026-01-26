@@ -1,4 +1,5 @@
 <?php
+$page_title = "Class Attendance Summary";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. ডাটা ফেচিং লজিক (অপরিবর্তিত)
@@ -18,9 +19,6 @@ $stmt_sum->close();
 <main>
     <div class="hero-container">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;" onclick="location.href='reporthome.php'">
-                <i class="bi bi-arrow-left"></i>
-            </div>
             <div>
                 <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;">Attendance Status</div>
                 <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600; margin-top: 4px;">
@@ -31,7 +29,7 @@ $stmt_sum->close();
 
         <div style="margin-top: 22px; display: flex; gap: 10px;">
             <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
-                SESSION <?php echo $sy; ?>
+                SESSION <?php echo $sessionyear; ?>
             </span>
             <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
                 TODAY

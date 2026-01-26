@@ -1,5 +1,5 @@
 <?php
-$page_title = "Payment Collection";
+$page_title = "Collect Payments";
 include 'inc.php';
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
@@ -50,10 +50,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 ?>
 
 <style>
-    body {
-        background-color: #FEF7FF;
-        font-size: 0.85rem;
-    }
+
 
     /* M3 Standard App Bar */
     .m3-app-bar {
@@ -113,8 +110,8 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     }
 
     .st-img-circle {
-        width: 48px;
-        height: 48px;
+        width: 60px;
+        height: 76px;
         border-radius: 6px;
         object-fit: cover;
         border: 2px solid rgba(255, 255, 255, 0.2);
@@ -142,7 +139,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     }
 
     .btn-m3-danger {
-        background: #B3261E;
+        background: #db1308;
         color: white;
         border-radius: 8px;
         font-weight: 700;
@@ -151,18 +148,17 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 
 
 
-<main class="pb-5">
+<main class="pb-0">
     <div class="hero-container shadow-sm">
         <div class="d-flex align-items-center">
-            <img src="<?= student_profile_image_path($stid) ?>" class="st-img-circle me-3"
-                onerror="this.src='https://eimbox.com/students/noimg.jpg'">
+            <img src="<?= student_profile_image_path($stid) ?>" class="st-img-circle me-3">
             <div class="flex-grow-1 overflow-hidden">
                 <div class="fw-bold text-truncate" style="font-size: 0.95rem;"><?php echo $st_profile['stnameeng']; ?>
                 </div>
                 <div class="small opacity-80"><?php echo $si['classname'] . ' - ' . $si['sectionname']; ?> | Roll:
                     <?php echo $si['rollno']; ?>
                 </div>
-                <div class="small fw-bold">Session: <?php echo $current_session; ?></div>
+                <div class="session-pill small fw-bold">Session: <?php echo $sessionyear; ?></div>
             </div>
 
             <div class="text-end">
@@ -177,27 +173,82 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
         </div>
     </div>
 
-    <div class="m3-card shadow-sm">
-        <div class="row g-2">
+
+
+    <style>
+        /* পেমেন্ট কার্ডের কাস্টম স্টাইল */
+        .m3-payment-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 16px;
+            margin: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* পেমেন্ট অ্যামাউন্ট ফিল্ডের বিশেষ হাইলাইট */
+        .amt-highlight {
+            background: var(--m3-tonal-container) !important;
+            color: var(--m3-primary) !important;
+            font-size: 1.2rem !important;
+            font-weight: 900 !important;
+        }
+
+        /* বাটন ফিক্স */
+        .btn-pay-now {
+            height: 48px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(179, 38, 30, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+    </style>
+
+    <div class="m3-payment-card shadow-sm">
+        <div class="row g-3">
             <div class="col-6">
-                <label class="small fw-bold text-muted mb-1">Receipt No.</label>
-                <input type="text" class="form-control input-m3 bg-light" id="prno" value="<?php echo $prno; ?>"
-                    disabled>
+                <div class="m3-floating-group" style="margin-bottom: 0;">
+                    <i class="bi bi-receipt m3-field-icon"></i>
+                    <input type="text" class="m3-input-floating bg-light" id="prno" value="<?php echo $prno; ?>"
+                        disabled>
+                    <label class="m3-floating-label">RECEIPT NO.</label>
+                </div>
             </div>
+
             <div class="col-6">
-                <label class="small fw-bold text-muted mb-1">Payment Date</label>
-                <input type="date" class="form-control input-m3" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
+                <div class="m3-floating-group" style="margin-bottom: 0;">
+                    <i class="bi bi-calendar-check m3-field-icon"></i>
+                    <input type="date" class="m3-input-floating" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
+                    <label class="m3-floating-label">PAYMENT DATE</label>
+                </div>
             </div>
+
             <div class="col-6">
-                <label class="small fw-bold text-primary mb-1">Amount to Pay</label>
-                <input type="number" class="form-control input-m3 border-primary text-primary" id="amt" value="0"
-                    readonly>
+                <div class="m3-floating-group" style="margin-bottom: 0;">
+                    <i class="bi bi-cash-stack m3-field-icon" style="color: var(--m3-primary);"></i>
+                    <input type="number" class="m3-input-floating amt-highlight" id="amt" value="0" readonly>
+                    <label class="m3-floating-label" style="color: var(--m3-primary); font-weight: 800;">AMOUNT TO
+                        PAY</label>
+                </div>
             </div>
-            <div class="col-6 d-grid pt-3">
-                <button class="btn btn-m3-danger shadow-sm" onclick="save();">PAY NOW</button>
+
+            <div class="col-6">
+                <button class="btn btn-m3-danger btn-pay-now w-100 shadow-sm" onclick="save();">
+                    <i class="bi bi-shield-lock-fill"></i> PAY NOW
+                </button>
             </div>
         </div>
     </div>
+
+
+
+
+
+
+
 
     <div class="px-2 mt-3">
         <h6 class="fw-bold text-secondary mb-2 ms-2 small uppercase">Due Breakdowns</h6>

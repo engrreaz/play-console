@@ -1,266 +1,329 @@
-<?php 
+<?php
+$page_title = "Cash Book Ledger";
 include 'inc.php';
-$dtst = date('Y-m-01'); $dted = date('Y-m-d');
+
+// ১. ফিল্টার প্যারামিটার
+$dtst = $_GET['dtst'] ?? $_COOKIE['dtst'] ?? date('Y-m-01');
+$dted = $_GET['dted'] ?? $_COOKIE['dted'] ?? date('Y-m-d');
+
+// ২. ডাটা ফেচিং
+$sql0 = "SELECT id, date, type, partid, particulars, amount, entrytime, entryby, 
+                memono, refno, month, year
+         FROM cashbook
+         WHERE sccode='$sccode'
+         AND date BETWEEN '$dtst' AND '$dted'
+         ORDER BY entrytime DESC";
+
+$result0 = $conn->query($sql0);
+
+$cnt = 0;
+$mottaka = 0;
 ?>
 
-<!doctype html>
-<html lang="en">
-
-<head>
-  <title>Title</title>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <!-- Bootstrap CSS v5.2.1 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
-    <link rel="stylesheet" href="css.css?v=bb">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    
-    <style>
-        .pic{
-            width:45px; height:45px; padding:1px; border-radius:50%; border:1px solid var(--dark); margin:5px;
-        }
-        
-        .a{font-size:18px; font-weight:700; font-style:normal; line-height:22px;}
-        .b{font-size:16px; font-weight:600; font-style:normal; line-height:22px;}
-        .c{font-size:11px; font-weight:400; font-style:italic; line-height:16px;}
-    </style>
-    
-    
-    
-      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
-    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
-  </script> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  
-  
-  
-  <script>
-  
-    function more(){
-        let val = document.getElementById("myswitch").checked;
-        if(val == true){
-            $(".sele").show();
-        } else {
-            $(".sele").hide();
-        }
+<style>
+    /* ১. হিরো সেকশন স্পেসিফিক */
+    .hero-ledger {
+        padding-bottom: 35px;
     }
-  
-    function grp(id) {
-		var val=document.getElementById("sel"+id).value;
-		var infor="dtid=" + id + "&val=" + val + "&opt=1";
-	    $("#blocksel"+id).html( "" );
 
-	    $.ajax({
-			type: "POST",
-			url: "grpupd.php",
-			data: infor,
-			cache: false,
-			beforeSend: function () {
-				$("#blocksel"+id).html('<span class=""><center>Fetching Section Name....</center></span>');
-			},
-			success: function(html) {
-				$("#blocksel"+id).html( html );
-			}
-		});
+    /* ২. ট্রানজ্যাকশন কার্ড */
+    .trans-card {
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
-    
-    function grpp(id) {
-		var val=document.getElementById("sel"+id).value;
-		var infor="dtid=" + id + "&val=" + val + "&opt=1";
-	    $("#blocksel"+id).html( "" );
 
-	    $.ajax({
-			type: "POST",
-			url: "fourupd.php",
-			data: infor,
-			cache: false,
-			beforeSend: function () {
-				$("#blocksel"+id).html('<span class=""><center>Fetching Section Name....</center></span>');
-			},
-			success: function(html) {
-				$("#blocksel"+id).html( html );
-			}
-		});
+    .amt-income {
+        color: #2E7D32;
+        font-weight: 900;
+        font-size: 1.1rem;
     }
-    
-    function grps(id) {
-		var val=document.getElementById("rel"+id).value;
-		var infor="dtid=" + id + "&val=" + val  + "&opt=2";
-	    $("#blocksel"+id).html( "" );
 
-	    $.ajax({
-			type: "POST",
-			url: "grpupd.php",
-			data: infor,
-			cache: false,
-			beforeSend: function () {
-				$("#blocksel"+id).html('<span class=""><center>Fetching Section Name....</center></span>');
-			},
-			success: function(html) {
-				$("#blocksel"+id).html( html );
-			}
-		});
+    .amt-expense {
+        color: #B3261E;
+        font-weight: 900;
+        font-size: 1.1rem;
     }
-    
-    
-    
-    
-    function delpr(pr) {
-		//var val=document.getElementById("sta"+id).checked;
-		//alert(pr);
-		var infor="prno=" + pr;
-	    $("#block"+pr).html( "" );
 
-	    $.ajax({
-			type: "POST",
-			url: "delmypr.php",
-			data: infor,
-			cache: false,
-			beforeSend: function () {
-				$("#block"+pr).html('Deleting....');
-			},
-			success: function(html) {
-				$("#block"+pr).html( html );
-			}
-		});
+    /* ৩. পিরিয়ড চিপ (Actionable) */
+    .period-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--m3-tonal-container);
+        color: var(--m3-primary);
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid transparent;
     }
-  </script>
-    
-    <script>
 
-    function go(id){
-        //window.location.href="stfinancedetails.php?id=" + id; 
-        window.location.href="stfinancedetails.php?id=" + id + "&edit=1";
-    }  
-    function pr(id){
-        let ln = "stprdetails.php?id=" + id;
-        alert(ln);
-        window.location.href = ln; 
-    }  
-  </script>
-</head>
+    .period-chip:active {
+        transform: scale(0.95);
+        background: var(--m3-primary);
+        color: white;
+    }
 
-<body>
-  <header>
-    <!-- place navbar here -->
-  </header>
-  <main>
-    <div class="containerx-fluid">
-        <div class="card text-left" style="background:var(--dark); color:var(--lighter);border-radius:0; "  onclick="gol(<?php echo $id;?>)">
-          
-            <div class="card-body" style="border-radius:0;">
-                <table width="100%" style="color:white;">
-                    <tr>
-                        <td colspan="2">
-                            <div style="font-size:20px; text-align:center; padding: 2px 2px 8px; font-weight:700; line-height:15px;">Cash Book
-                            
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div style="font-size:16px; font-weight:700; line-height:15px;"><?php echo date('d-m-Y',strtotime($dtst));?></div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">Date From</div>
-                            <br>
-                            <div style="font-size:16px; font-weight:700; line-height:15px;"><?php echo date('d-m-Y',strtotime($dted));?></div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">Date To</div>
-                        </td>
-                        <td style="text-align:right;">
-                            <div style="font-size:30px; font-weight:700; line-height:20px;" id="cnt">...</div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:24px;">Memo Found</div>
-                            <br>
-                            <div style="font-size:30px; font-weight:700; line-height:20px;" id="cntamt">...</div>
-                            <div style="font-size:12px; font-weight:400; font-style:italic; line-height:24px;">Total Amount</div>
-                        </td>
-                    </tr>
-                    
-                </table>
+    .session-pill-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+        color: #0D47A1;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: .65rem;
+        font-weight: 800;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 2px 6px rgba(13, 71, 161, .15);
+        transition: .2s ease;
+    }
+
+    .session-pill-date:hover, .period-chip:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(13, 71, 161, .25);
+    }
+
+
+    /* ৪. মডাল কাস্টমাইজেশন */
+    .m3-modal-content {
+        border-radius: 28px;
+        padding: 20px;
+        border: none;
+    }
+</style>
+
+<main>
+    <div class="hero-container hero-ledger">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+
+                <div>
+                    <div style="font-size: 1.4rem; font-weight: 950; line-height: 1.1;">Cash Ledger</div>
+                    <div style="font-size: 0.75rem; opacity: 0.85; font-weight: 600;">Full Transaction View</div>
+                </div>
+            </div>
+            <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;"
+                onclick="location.reload()">
+                <i class="bi bi-arrow-repeat"></i>
             </div>
         </div>
-        <div style="height:1px;"></div>
-    
-        
-        <?php
-        /*
-        $sql0 = "SELECT * FROM sessioninfo where sessionyear='$sy' and sccode='$sccode' and classname='$classname' and sectionname = '$sectionname' order by rollno";
-        $result0 = $conn->query($sql0);
-        if ($result0->num_rows > 0) 
-        {while($row0 = $result0->fetch_assoc()) { 
-            $stid=$row0["stid"];
-        */
-        
-        $cnt = 0; $cntamt = 0; $mottaka = 0;
-        
-        
-        $sql0 = "SELECT * FROM cashbook where sessionyear='$sy' and sccode='$sccode' and date between '$dtst' and '$dted' order by entrytime desc";
-        //echo $sql0; 
-        $result0 = $conn->query($sql0);
-        if ($result0->num_rows > 0) 
-        {while($row0 = $result0->fetch_assoc()) { 
-            $date=$row0["date"]; $type=$row0["type"]; $partid=$row0["partid"];  $memo=$row0["memono"];   $particulars=$row0["particulars"];   $tk=$row0["amount"];   $entrytime=$row0["entrytime"]; $entryby=$row0["entryby"]; 
-            $mottaka += $tk;
-            if($type ==  'Income'){$bgc = 'seagreen'; } else {$bgc = 'red'; }
-            $sql00 = "SELECT * FROM financesetup where  id='$partid'";
-            $result00 = $conn->query($sql00);
-            if ($result00->num_rows > 0) 
-            {while($row00 = $result00->fetch_assoc()) { 
-                $eng=$row00["particulareng"];
-            }}
 
-            
-            
-            ?>
-            <div class="card text-center" style="background:var(--lighter);; color:<?php echo $bgc;?>;border-radius:0;" id="block<?php echo $prno;?>"  <?php echo $dsbl;?> >
-              <div class="card-body" style="border-radius:0; color:<?php echo $bgc;?>;"  onclick="gox(<?php echo $stid;?>)"  >
-                <table width="100%">
-                    <tr>
-                        
-                        <td style="text-align:left; padding-left:5px;">
-                            <div style="font-size:15px; font-weight: 700; color:<?php echo $bgc;?>"><?php echo $eng;?></div>
-                            <div style="font-size:13px; font-weight: 400; color:<?php echo $bgc;?>"><?php echo $particulars;?></div>
-                            <span style="font-size:11px; font-style:italic; font-weight:400; color:gray;">
-                                <?php echo $entryby;?><br>@ <?php echo date('d-m-Y H:i:s', strtotime($entrytime));?>
-                            </span>
-                 
-                        </td>
-                        <td style="text-align:right; font-size:20px; font-weight:600;  color:<?php echo $bgc;?>;">
-                            <?php echo number_format($tk,2,".", ","); 
-                            
-                            if(strtotime($cur) - strtotime($entrytime)>300) {$ddd = 'hidden';} else {$ddd = '';}
-                            
-                            ?>
-                            <br>
-                            <button class="btn btn-danger" onclick="delpr(<?php echo $prno;?>)" <?php echo $ddd;?>>Delete Receipt</button>
-                        </td>
-                    </tr>
-                </table>
-              </div>
-            </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <div
+                style="font-size: 0.65rem; font-weight: 800; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">
+                Total Volume in Period</div>
+            <div style="font-size: 2.2rem; font-weight: 950;" id="hero_total_amt">৳ 0.00</div>
+            <span class="session-pill-date" onclick="openDateRangeModal()">
+                <i class="bi bi-calendar3"></i>
+                <?= date('d M', strtotime($dtst)) ?> - <?= date('d M Y', strtotime($dted)) ?>
+            </span>
 
-            <div style="height:3px;"></div>
-            <?php
-            $cnt++; $cntamt = $cntamt + $totaldues;
-        }}
-        ?>
+        </div>
     </div>
 
-  </main>
-  <div style="height:52px;"></div>
-  <footer>
-    <!-- place footer here -->
-  </footer>
-  <!-- Bootstrap JavaScript Libraries -->
-    <script>
-          document.getElementById("cnt").innerHTML = "<?php echo $cnt;?>";
-          document.getElementById("cntamt").innerHTML = "<?php echo number_format($mottaka,2,".",",");?>";
-    </script>
-</body>
+    <div class="widget-grid" style="padding: 15px 12px 100px;">
+        <div class="m3-section-title" style="margin-left: 5px;">Ledger Records</div>
 
-</html>
+        <?php if ($result0->num_rows): ?>
+            <?php while ($row0 = $result0->fetch_assoc()):
+                $cnt++;
+                $mottaka += $row0['amount'];
+                $id = $row0['id'];
+                $type = $row0['type'];
+                $tk = $row0['amount'];
+
+                // হেড নাম ফেচিং
+                $head_q = $conn->query("SELECT particulareng FROM financesetup WHERE id='{$row0['partid']}'");
+                $head_name = $head_q->num_rows ? $head_q->fetch_assoc()['particulareng'] : "General";
+                ?>
+                <div class="m3-list-item trans-card shadow-sm mx-0"  id="block<?= $id ?>">
+                    <div class="icon-box <?= ($type == 'Income' ? 'c-inst' : 'c-exit') ?>"
+                        style="width: 44px; height: 44px; border-radius: 10px;">
+                        <i class="bi <?= ($type == 'Income' ? 'bi-arrow-down-left-circle' : 'bi-arrow-up-right-circle') ?>"></i>
+                    </div>
+
+                    <div class="item-info">
+                        <div class="st-title" style="font-size: 0.95rem; font-weight: 850;"><?= $head_name ?></div>
+                        <div class="st-desc" style="font-size: 0.75rem; color: #555;"><?= $row0['particulars'] ?></div>
+
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <span class="period-chip shadow-sm"
+                                onclick="openMonthYearModal(<?= $id ?>, '<?= $row0['month'] ?>', '<?= $row0['year'] ?>')">
+                                <i class="bi bi-clock-history"></i> <?= $row0['month'] . '/' . $row0['year'] ?>
+                            </span>
+                            <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">
+                                MEMO: <?= $row0['memono'] ?: 'N/A' ?> | <i class="bi bi-event me-1"></i>
+                                <?= date('d M, Y', strtotime($row0['date'])) ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <div class="<?= ($type == 'Income' ? 'amt-income' : 'amt-expense') ?>">
+                            <?= ($type == 'Income' ? '+' : '-') ?>৳<?= number_format($tk, 0) ?>
+                        </div>
+                        <div style="font-size: 0.55rem; color: #ccc; font-weight: 700; margin-top: 5px;">
+                            ID: #<?= $id ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div style="text-align: center; padding: 80px 20px; opacity: 0.4;">
+                <i class="bi bi-search" style="font-size: 3.5rem;"></i>
+                <div style="font-weight: 800; margin-top: 10px;">No Data Found</div>
+            </div>
+        <?php endif; ?>
+    </div>
+</main>
+
+
+
+<div class="modal fade" id="monthYearModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content m3-modal-content shadow-lg">
+            <h5 class="fw-bold mb-4" style="color: var(--m3-primary);"><i class="bi bi-calendar-event me-2"></i>Adjust
+                Period</h5>
+
+            <form id="monthYearForm">
+                <input type="hidden" id="my_entry_id">
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-calendar-month m3-field-icon"></i>
+                            <input type="number" id="my_month" min="1" max="12" class="m3-input-floating"
+                                placeholder=" ">
+                            <label class="m3-floating-label">MONTH</label>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="m3-floating-group">
+                            <i class="bi bi-calendar-check m3-field-icon"></i>
+                            <input type="number" id="my_year" class="m3-input-floating" placeholder=" ">
+                            <label class="m3-floating-label">YEAR</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-light flex-fill py-2"
+                        style="border-radius: 12px; font-weight: 700;" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary flex-fill py-2"
+                        style="border-radius: 12px; font-weight: 700;">UPDATE DATA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="dateRangeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <h5 class="fw-bold mb-3">Select Date Range</h5>
+
+            <form id="dateRangeForm">
+
+                <div class="row g-2">
+
+                    <div class="col-6">
+                        <label class="small fw-bold">From</label>
+                        <input type="date" id="dr_from" class="form-control" value="<?= $dtst ?>">
+                    </div>
+
+                    <div class="col-6">
+                        <label class="small fw-bold">To</label>
+                        <input type="date" id="dr_to" class="form-control" value="<?= $dted ?>">
+                    </div>
+
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<?php include 'footer.php'; ?>
+
+<script>
+    // ৪. হিরো সেকশনে টোটাল আপডেট
+    document.getElementById("hero_total_amt").innerText = "৳ <?= number_format($mottaka, 2) ?>";
+
+    const myModal = new bootstrap.Modal('#monthYearModal');
+
+    // মডাল ওপেন
+    function openMonthYearModal(id, month, year) {
+        $('#my_entry_id').val(id);
+        $('#my_month').val(month);
+        $('#my_year').val(year);
+        myModal.show();
+    }
+
+    // AJAX সাবমিট
+    $('#monthYearForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const btn = $(this).find('button[type="submit"]');
+        btn.html('<span class="spinner-border spinner-border-sm"></span>');
+
+        $.post('ajax/ajax-update-monthyear.php', {
+            id: $('#my_entry_id').val(),
+            month: $('#my_month').val(),
+            year: $('#my_year').val()
+        }, function () {
+            myModal.hide();
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: 'Transaction period has been updated.',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
+        });
+    });
+</script>
+
+
+<script>
+    const dateRangeModal = new bootstrap.Modal('#dateRangeModal');
+
+    function openDateRangeModal() {
+        dateRangeModal.show();
+    }
+
+    $('#dateRangeForm').on('submit', function (e) {
+
+        e.preventDefault();
+
+        let from = $('#dr_from').val();
+        let to = $('#dr_to').val();
+
+        document.cookie = "dtst=" + from + ";path=/";
+        document.cookie = "dted=" + to + ";path=/";
+
+        location.reload();
+    });
+
+</script>

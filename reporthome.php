@@ -36,7 +36,7 @@ if (isset($count_class) && $count_class > 0) {
 
 
 
-<main class="pb-5">
+<main class="pb-0">
     <?php foreach ($categories as $cat_name => $items): ?>
         <?php
         // ক্যাটাগরিতে অন্তত একটি দেখার যোগ্য আইটেম আছে কি না পরীক্ষা
@@ -65,7 +65,6 @@ if (isset($count_class) && $count_class > 0) {
     <?php endforeach; ?>
 </main>
 
-<div style="height: 75px;"></div>
 <script>
     // Navigation Functions
     function report_menu_my_class() { window.location.href = "my-class-report.php"; }
