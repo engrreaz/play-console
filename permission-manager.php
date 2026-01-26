@@ -382,8 +382,8 @@ while ($gr = $g_res->fetch_assoc()) {
 
 
 
-<div class="modal fade" id="managerModal" tabindex="-1" style="margin:auto; width:85%; height:50%;">
-    <div class="modal-dialog modal-dialog-centered m3-modal-dialog">
+<div class="modal fade" id="managerModal" tabindex="-1" >
+    <div class="modal-dialog modal-dialog-centered m3-modal-dialog"  style="margin:auto; width:85%;">
         <div class="modal-content m3-modal-content shadow-lg">
             <div class="modal-header border-0">
                 <h5 class="fw-bold"><i class="bi bi-sliders2-vertical me-2"></i>Access Controller</h5>
