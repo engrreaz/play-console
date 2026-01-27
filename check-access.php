@@ -29,6 +29,10 @@ if ($result_scinfo->num_rows > 0) {
 $valid_modules = explode(' | ', $valid_module);
 $active_modules = explode(' | ', $active_module);
 
+var_dump($valid_modules);
+var_dump($active_modules);
+
+
 
 $permission = 0; // Default permission
 
