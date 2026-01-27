@@ -10,7 +10,7 @@ $active_module = '';
 
 $sql_scinfo = "SELECT package_id, package_name, tier, valid_module, active_module FROM scinfo WHERE sccode='{$sccode}'";
 $result_scinfo = $conn->query($sql_scinfo);
-
+echo $sql_scinfo;
 if ($result_scinfo->num_rows > 0) {
     // output data of each row
     while ($row_scinfo = $result_scinfo->fetch_assoc()) {
@@ -25,7 +25,7 @@ if ($result_scinfo->num_rows > 0) {
 
 
 echo $valid_module . ' | ' . $active_module;
-    
+
 
 $valid_modules = explode(' | ', $valid_module);
 $active_modules = explode(' | ', $active_module);
