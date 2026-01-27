@@ -24,7 +24,8 @@ if ($result_scinfo->num_rows > 0) {
 
 
 
-
+echo $valid_module . ' | ' . $active_module;
+    
 
 $valid_modules = explode(' | ', $valid_module);
 $active_modules = explode(' | ', $active_module);
