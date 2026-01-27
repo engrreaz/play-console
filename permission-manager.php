@@ -315,6 +315,12 @@ while ($gr = $g_res->fetch_assoc()) {
         justify-content: space-between;
         align-items: center;
     }
+
+    /* পারমিশন ভিত্তিক হালকা ব্যাকগ্রাউন্ড কালার */
+    .bg-p0 { background-color: #f3d2d5 !important; border-color: #fc8d87 !important; } /* লাল - No Access */
+    .bg-p1 { background-color: #f1e3b3 !important; border-color: #f0b863 !important; } /* অরেঞ্জ - Read Only */
+    .bg-p2 { background-color: #E3F2FD !important; border-color: #90CAF9 !important; } /* নীল - Partial */
+    .bg-p3 { background-color: #E8F5E9 !important; border-color: #83d486 !important; } /* সবুজ - Full Access */
 </style>
 
 <main>
@@ -383,7 +389,7 @@ while ($gr = $g_res->fetch_assoc()) {
 
 
 <div class="modal fade" id="managerModal" tabindex="-1" >
-    <div class="modal-dialog modal-dialog-centered m3-modal-dialog"  style="margin:auto; width:85%;">
+    <div class="modal-dialog modal-dialog-centered m3-modal-dialog"  style="margin:auto; width:92%;">
         <div class="modal-content m3-modal-content shadow-lg">
             <div class="modal-header border-0">
                 <h5 class="fw-bold"><i class="bi bi-sliders2-vertical me-2"></i>Access Controller</h5>
@@ -472,10 +478,19 @@ while ($gr = $g_res->fetch_assoc()) {
     /**
      * মডাল ওপেন এবং ডাটা পপুলেট ফাংশন
      */
+
+     function updateRowColor(selectEl) {
+        const val = selectEl.value;
+        const rowEl = selectEl.closest('.user-override-item');
+        if (!rowEl) return;
+
+        // আগের সব ক্লাস রিমুভ করে নতুন পারমিশন ক্লাস যোগ করা
+        rowEl.classList.remove('bg-p0', 'bg-p1', 'bg-p2', 'bg-p3');
+        rowEl.classList.add('bg-p' + val);
+    }
+
     function openManagerModal(pageName, overrides, globals) {
         document.getElementById('modal_page_name').value = pageName;
-        document.getElementById('modal_page_name_user').value = pageName;
-
         const roles = <?php echo json_encode($roles); ?>;
 
         roles.forEach(role => {
@@ -484,29 +499,34 @@ while ($gr = $g_res->fetch_assoc()) {
             const resetBtn = document.getElementById('reset_btn_' + safeId);
 
             if (selectEl) {
-                const customVal = overrides['role_' + role]; // কাস্টম রেকর্ড থেকে ডাটা
-                const globalVal = globals[role]; // sccode=0 থেকে ডিফল্ট ডাটা
+                const customVal = overrides['role_' + role];
+                const globalVal = globals[role];
 
                 if (customVal !== undefined) {
-                    // ১. যদি কাস্টম পারমিশন থাকে
                     selectEl.value = customVal;
                     if (resetBtn) resetBtn.classList.add('visible');
-                    selectEl.style.color = 'var(--m3-primary)'; // কাস্টম হলে বেগুনি/নীল
+                    selectEl.style.color = 'var(--m3-primary)';
                     selectEl.style.fontWeight = '900';
                 } else {
-                    // ২. কাস্টম না থাকলে গ্লোবাল ডাটা সেট হবে (অথবা ০)
                     selectEl.value = (globalVal !== undefined) ? globalVal : 0;
                     if (resetBtn) resetBtn.classList.remove('visible');
-                    selectEl.style.color = '#666'; // ডিফল্ট হলে ধূসর
+                    selectEl.style.color = '#666';
                     selectEl.style.fontWeight = '400';
                 }
+
+                // মডাল খোলার সময় কালার সেট করা
+                updateRowColor(selectEl);
+
+                // ড্রপডাউন পরিবর্তন করলে সাথে সাথে কালার চেঞ্জ হওয়া
+                selectEl.onchange = function() {
+                    updateRowColor(this);
+                };
             }
         });
 
         renderUserOverrides(overrides);
         mModal.show();
     }
-
     /**
      * বিদ্যমান ইউজার পারমিশন লিস্ট তৈরি
      */
