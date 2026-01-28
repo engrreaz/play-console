@@ -1,10 +1,5 @@
 <?php
-// File: front-page-block/cashmanager.php
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (লিঙ্কগুলোর জন্য)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $sy;
-
-// --- Data Fetching & Logic (Prepared Statements) ---
 $net_balance = 0;
 $account_ids = [];
 
@@ -87,10 +82,10 @@ if (isset($conn, $sccode)) {
     </div>
 
     <div class="d-flex gap-2 pt-1">
-        <a href="cashbook.php?year=<?php echo $current_session; ?>" class="btn-m3-tonal-cash shadow-sm">
+        <a href="cashbook.php?year=<?php echo $sessionyear; ?>" class="btn-m3-tonal-cash shadow-sm">
             <i class="bi bi-book-fill"></i> CASHBOOK
         </a>
-        <a href="bank-book.php?year=<?php echo $current_session; ?>" class="btn-m3-tonal-cash btn-m3-tonal-sec shadow-sm">
+        <a href="bank-book.php?year=<?php echo $sessionyear; ?>" class="btn-m3-tonal-cash btn-m3-tonal-sec shadow-sm">
             <i class="bi bi-bank"></i> BANK LOGS
         </a>
     </div>

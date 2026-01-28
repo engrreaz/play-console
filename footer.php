@@ -184,7 +184,7 @@ function isActive($targetFile, $currentFile)
 
         <span onclick="closeSessionModal()" style="position:absolute; right:15px; top:10px;
             cursor:pointer;font-size:20px;font-weight:bold;">×</span>
-        
+
         <hr>
 
         <div id="sessionList"></div>
@@ -263,12 +263,25 @@ function isActive($targetFile, $currentFile)
     }
 
     // select + cookie + reload
-    function selectSession(val) {
+    // function selectSession(val) {
 
-        document.cookie = "query-session=" + val + "; path=/";
+    //     document.cookie = "query-session=" + val + "; path=/";
+
+    //     location.reload();
+    // }
+
+
+    function selectSession(val) {
+        var d = new Date();
+        d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000)); // 7 days
+
+        document.cookie = "query-session=" + val +
+            "; expires=" + d.toUTCString() +
+            "; path=/";
 
         location.reload();
     }
+
 
 </script>
 

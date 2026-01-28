@@ -180,7 +180,10 @@ $stmt->close();
     </div>
 </main>
 
-<div style="height: 80px;"></div>
+
+<!-- <div style="height: 80px;"></div> -->
+
+<?php include 'footer.php'; ?>
 
 
 

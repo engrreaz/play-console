@@ -1,8 +1,4 @@
 <?php
-// ফাইল: front-page-block/admin-teacher-attnd.php
-
-// সেশন হ্যান্ডলিং (ড্যাশবোর্ড থেকে পাস করা না থাকলে ব্যাকআপ)
-$current_session = $current_session ?? $sy;
 
 $teacher_att_summary = [
     'total' => 0, 'present' => 0, 'on_leave' => 0, 'absent' => 0, 'rate' => 0,
@@ -100,12 +96,12 @@ if ($teacher_att_summary['total'] > 0):
             <div class="mb-2 small fw-bold text-muted" style="font-size: 0.65rem;">OFF-DUTY STAFF (<?php echo count($teacher_att_summary['absent_list']); ?>)</div>
             
             <?php foreach (array_slice($teacher_att_summary['absent_list'], 0, 3) as $teacher): 
-                $photo = "teacher/" . $teacher['tid'] . ".jpg";
+                // $photo = "teacher/" . $teacher['tid'] . ".jpg";
+                $photo = teacher_profile_image_path($teacher['tid']);
                 $is_leave = ($teacher['status'] == 'On Leave');
             ?>
                 <div class="absent-row d-flex align-items-center shadow-sm">
-                    <img src="<?php echo $photo; ?>" class="squircle-avatar me-2" 
-                         onerror="this.src='https://eimbox.com/teacher/no-img.jpg';">
+                    <img src="<?php echo $photo; ?>" class="squircle-avatar me-2"  >
                     
                     <div class="flex-grow-1 overflow-hidden">
                         <div class="fw-bold text-dark text-truncate" style="font-size: 0.75rem;"><?php echo htmlspecialchars($teacher['tname']); ?></div>
@@ -127,7 +123,7 @@ if ($teacher_att_summary['total'] > 0):
     <?php endif; ?>
 
     <div class="mt-2 pt-2 border-top">
-        <a href="teacher-attnd-report.php?year=<?php echo $current_session; ?>" 
+        <a href="teacher-attnd-report.php?year=<?php echo $sessionyear; ?>" 
            class="btn btn-link btn-sm w-100 text-decoration-none fw-bold p-0" style="font-size: 0.7rem;">
             FULL LOGS <i class="bi bi-arrow-right-short"></i>
         </a>

@@ -1,12 +1,6 @@
 <?php
-/**
- * Class Teacher Collection Block - Refactored for Android WebView
- * M3 Standards | 8px Radius | High Data Density
- */
 
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $sy;
-$sy_param = "%" . $current_session . "%";
+
 
 $is_collection_user = false;
 $class_teacher_payment_data = [];
@@ -48,6 +42,8 @@ if (isset($ins_all_settings, $userlevel, $cteacher_data, $conn, $sccode)) {
             $class_teacher_payment_data[] = $row;
         }
         $stmt->close();
+    } else {
+        echo 'No Collection';
     }
 }
 
@@ -104,7 +100,7 @@ if (!empty($class_teacher_payment_data)):
         </div>
         <div>
             <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Class Collection</h6>
-            <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">Academic Session: <?php echo $current_session; ?></div>
+            <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">Academic Session: <?php echo $sessionyear; ?></div>
         </div>
     </div>
 
@@ -138,7 +134,7 @@ if (!empty($class_teacher_payment_data)):
                     </div>
                 </div>
 
-                <a href="finstudents.php?cls=<?php echo urlencode($summary['classname']); ?>&sec=<?php echo urlencode($summary['sectionname']); ?>&year=<?php echo $current_session; ?>" 
+                <a href="finstudents.php?cls=<?php echo urlencode($summary['classname']); ?>&sec=<?php echo urlencode($summary['sectionname']); ?>&year=<?php echo $sessionyear; ?>" 
                    class="btn-m3-tonal-sm shadow-sm">
                     <i class="bi bi-person-lines-fill me-1"></i> VIEW STUDENT LIST
                 </a>

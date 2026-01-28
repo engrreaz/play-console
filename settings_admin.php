@@ -113,13 +113,23 @@ $sy_param = '%' . $current_session . '%';
             <a href="cashbookview.php" class="btn-dev shadow-sm">CASHBOOK</a>
             <a href="trackreport.php" class="btn-dev shadow-sm">TRACKING</a>
              <div class="m3-cat-label">Co-Curricular Activities</div>
+             <hr>
             <a href="activity_manager.php" class="btn-dev shadow-sm">CCA</a>
             <a href="student_activity_entry.php" class="btn-dev shadow-sm">Entry</a>
             <a href="student_activity_list.php" class="btn-dev shadow-sm">Student CCA</a>
             <a href="all_activities.php" class="btn-dev shadow-sm">All CCA</a>
   
+            <div class="m3-cat-label">Cashbook</div>
             <hr>
             <a href="accounts-manager.php" class="btn-dev shadow-sm">Charts of Account</a>
+            <a href="cashbookview.php" class="btn-dev shadow-sm">Cashbook View</a>
+            <a href="cashbook.php" class="btn-dev shadow-sm">Cashbook</a>
+
+            <hr>
+            <div class="m3-cat-label">Permission</div>
+            <hr>
+             <a href="permission-mapper.php" class="btn-dev shadow-sm">Mapper</a>
+             <a href="permission-manager.php" class="btn-dev shadow-sm">Manager</a>
         </div>
     <?php endif; ?>
 
@@ -127,7 +137,7 @@ $sy_param = '%' . $current_session . '%';
 
 <div style="height: 75px;"></div>
 <script>
-    function settings_admin_ins_info() { window.location.href = "settings-institute-info.php"; }
+    function settings_admin_ins_info() { window.location.href = "institute-info.php"; }
     function settings_admin_add_edit_teacher() { window.location.href = "settingsteacher.php"; }
     function settings_admin_cls_sec() { window.location.href = "settings-class.php"; }
     function settings_admin_st_id_generate() { window.location.href = "st-id-gen.php"; }
