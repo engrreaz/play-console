@@ -96,7 +96,7 @@
 
         <div class="row gx-2">
             <div class="col-12 col-md-6">
-                <div class="block-units shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
             </div>
 
         </div>
