@@ -98,7 +98,6 @@
             <div class="col-12 col-md-6">
                 <div class="block-unit shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
             </div>
-
         </div>
 
         <div class="m3-section-title">Schedule & Routine</div>

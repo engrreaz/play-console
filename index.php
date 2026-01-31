@@ -11,6 +11,15 @@ $hour = date('H');
 $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "Good Evening");
 ?>
 
+<style>
+    .scname {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <header class="m3-app-bar">
     <div class="d-flex align-items-center flex-grow-1">
         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
@@ -19,33 +28,32 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
         </div>
         <div>
             <div class="app-bar-title my-0">EIM<span style="color: #6750A4;">Box</span></div>
-            <div class="text-small my-0"><?= $scname ?></div>
+            <div class="text-small my-0 scname"><?= $scname ?></div>
         </div>
 
     </div>
- 
-    
-<div class="d-flex align-items-center gap-2 position-relative">
-    <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
-         style="width: 34px; height: 34px; cursor:pointer;" 
-         onclick="toggleAvatarMenu()">
-        <img src="<?= $pth ?>" width="100%">
+
+
+    <div class="d-flex align-items-center gap-2 position-relative">
+        <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
+            style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
+            <img src="<?= $pth ?>" width="100%">
+        </div>
+
+        <div id="avatarMenu" class="avatar-dropdown shadow-sm">
+            <div class="dd-item text-muted small session-pill">Session: <?= $sessionyear ?></div>
+            <div class="dd-divider"></div>
+
+            <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
+            <div class="dd-item" onclick="goMy()">👤 My Profile</div>
+            <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
+            <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
+
+            <div class="dd-divider"></div>
+            <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
+            <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
+        </div>
     </div>
-
-    <div id="avatarMenu" class="avatar-dropdown shadow-sm">
-        <div class="dd-item text-muted small">Session: <?= $sessionyear ?></div>
-        <div class="dd-divider"></div>
-
-        <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
-        <div class="dd-item" onclick="goMy()">👤 My Profile</div>
-        <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
-        <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
-
-        <div class="dd-divider"></div>
-        <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
-        <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
-    </div>
-</div>
 
 
 
