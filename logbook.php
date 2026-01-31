@@ -1,0 +1,44 @@
+<?php
+
+$GLOBALS['script_end'] = microtime(true);
+$GLOBALS['execution_time'] = round(($GLOBALS['script_end'] - $GLOBALS['script_start']), 4);
+
+// echo "Queries: {$GLOBALS['queries_count']}, Time: {$GLOBALS['execution_time']}s";
+
+// echo "<hr>Queries: " . ($GLOBALS['queries_count'] ?? 'NA');
+// var_dump($GLOBALS['query_text']);
+
+
+// var_dump($GLOBALS['query_text']);
+
+$ipaddr = $_SERVER['REMOTE_ADDR'];
+$platform = 'Android'; // চাইলে OS ডিটেক্টর লাইব্রেরি ব্যবহার করতে পারেন
+$browser = $_SERVER['HTTP_USER_AGENT'];
+$location = ''; // চাইলে GeoIP ব্যবহার করতে পারেন
+
+$stmt = $conn->prepare("INSERT INTO logbook (email, sccode, pagename, ipaddr, platform, browser, entrytime) 
+VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sisssss", $usr, $sccode, $curfile, $ipaddr, $platform, $browser, $cur);
+$stmt->execute();
+$log_id = $stmt->insert_id; // পরবর্তী আপডেটের জন্য কাজে লাগবে
+// echo $log_id;
+
+
+// var_dump($GLOBALS['query_text']);
+
+?>
+
+
+
+<script>
+    window.addEventListener("beforeunload", function () {
+        let startTime = window.performance.timing.navigationStart;
+        let endTime = Date.now();
+        let duration = Math.round((endTime - startTime) / 1000); // সেকেন্ডে সময়
+
+        navigator.sendBeacon("core/log_update.php", JSON.stringify({
+            id: "<?php echo $log_id; ?>",
+            duration: duration
+        }));
+    });
+</script>

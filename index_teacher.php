@@ -65,7 +65,7 @@
             </span>
 
             <div class="flex-grow-1"></div>
-            
+
             <div class="hero-action-row text-right">
                 <div class="action-icon-btn" title="What's New">
                     <i class="bi bi-megaphone"></i>
@@ -82,7 +82,9 @@
                 <div class="action-icon-btn position-relative" title="Notifications"
                     onclick="navigateTo('notification.php')">
                     <i class="bi bi-bell"></i>
-                    <span class="btn-badge"></span>
+                    <?php if ($unread_count > 0): ?>
+                        <span class="btn-badge"></span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -91,6 +93,13 @@
     </div>
 
     <div class="widget-grid">
+
+        <div class="row gx-2">
+            <div class="col-12 col-md-6">
+                <div class="block-units shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
+            </div>
+
+        </div>
 
         <div class="m3-section-title">Schedule & Routine</div>
         <div class="row gx-2">
@@ -112,9 +121,11 @@
 
         <div class="m3-section-title">Finance & Stats</div>
         <div class="block-unit shadow-sm"><?php include 'front-page-block/cashmanager.php'; ?></div>
-     
+
+
+
         <div class="block-unit shadow-sm"><?php include 'front-page-block/st-payment-block.php'; ?></div>
-       
+
 
         <div class="block-unit shadow-sm"><?php include 'front-page-block/clsteacherblock.php'; ?></div>
 
@@ -137,7 +148,7 @@
     </div>
 </main>
 
-<div style="height: 80px;"></div>
+
 
 <script>
     // প্রোফেশনাল নেভিগেশন স্ক্রিপ্ট

@@ -142,18 +142,25 @@
                 if (isset($drop_down_menu_3) && $drop_down_menu_3 !== '') {
                     echo '<div id="drop-down-menu-3" class="dd-item  text-primary" onclick="drop_down_menu_3()">' . $drop_down_menu_3 . '</div>';
                 }
-    
+
                 ?>
 
                 <div class="dd-divider"></div>
+                <div class="dd-item text-muted text-center small pb-2">
+                    <img src="https://eimbox.com/logo/<?= $sccode ?>.png" style="height:50px;" />
+                                    <div class="dd-item text-muted text-center small pb-2"><?= $scname ?></div>
 
-                <div class="dd-item text-muted small pb-2"><?= $scname ?></div>
+                </div>
+
+
                 <div class="dd-divider"></div>
 
-                <div class="dd-item text-muted small pb-2">Session <span class="session-pill py-0 float-end m-0"><?= $sessionyear ?></span></div>
+                <div class="dd-item text-muted small pb-2">Session <span
+                        class="session-pill py-0 float-end m-0"><?= $sessionyear ?></span></div>
                 <div class="dd-divider"></div>
 
-                <div class="dd-item" onclick="goProfile()"> <i class="bi bi-mortarboard-fill me-2"></i> Institute Profile</div>
+                <div class="dd-item" onclick="goProfile()"> <i class="bi bi-mortarboard-fill me-2"></i> Institute Profile
+                </div>
                 <div class="dd-item" onclick="goMy()"> <i class="bi bi-person-circle me-2"></i> My Profile</div>
                 <div class="dd-item" onclick="goTicket()"> <i class="bi bi-ticket-perforated me-2"></i>Submit a Ticket</div>
                 <div class="dd-item" onclick="goNotify()"> <i class="bi bi-bell me-2"></i>Notifications</div>

@@ -50,3 +50,19 @@ function get_student_info_by_id($stid)
     $stmt->close();
     return $std_data;
 }
+
+
+function getNotifMeta($type) {
+    $type = strtolower($type);
+    switch ($type) {
+        case 'achievements':
+        case 'achievement':
+            return ['icon' => 'trophy-fill', 'color' => '#FFC107']; // Gold
+        case 'payment':
+            return ['icon' => 'credit-card-fill', 'color' => '#2E7D32']; // Green
+        case 'alert':
+            return ['icon' => 'exclamation-triangle-fill', 'color' => '#B3261E']; // Red
+        default:
+            return ['icon' => 'bell-fill', 'color' => '#6750A4']; // Purple
+    }
+}

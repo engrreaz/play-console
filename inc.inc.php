@@ -6,6 +6,7 @@ $sy = date('y');
 $td = date('Y-m-d');
 $cur = date('Y-m-d H:i:s');
 
+
 $sms_price = 0.4;
 
 $usr = $pass = $token = $pth = '';
@@ -98,6 +99,7 @@ $sql0 = "SELECT * FROM usersapp where email='$usr' LIMIT 1";
 $result0 = $conn->query($sql0);
 if ($result0->num_rows > 0) {
     while ($row0 = $result0->fetch_assoc()) {
+        $user_id_no = $row0["id"];
         $token = $row0["token"];
         $sccode = $row0["sccode"];
         $fullname = $row0["profilename"];
@@ -327,7 +329,7 @@ if ($result0xrtyv->num_rows > 0) {
 
 
 
-include 'functions.php';
+include_once 'functions.php';
 include 'component/sms-func.php';
 include_once 'check-access.php';
 include 'header.php';

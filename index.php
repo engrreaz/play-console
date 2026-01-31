@@ -162,6 +162,9 @@ if (!empty($cteacher_data) && $cteacher_data[0]['cteachercls'] != '' && $cteache
     }
 }
 
+$unread_q = $conn->query("SELECT COUNT(id) as total FROM notifications WHERE user_id = '$user_id_no' AND is_read = 0");
+$unread_count = $unread_q->fetch_assoc()['total'];
+
 // --- Content Routing ---
 // The included files (e.g., index_teacher.php) will need to be refactored next
 // to fit the new design and remove their old, redundant HTML.

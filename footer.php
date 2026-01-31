@@ -10,6 +10,8 @@ if (empty($usr) || $userlevel == 'Guest') {
     exit;
 }
 
+include_once('logbook.php');
+
 // বর্তমানে কোন ফাইলে আছে তা চেক করার ফাংশন (Inline Active Check)
 function isActive($targetFile, $currentFile)
 {
