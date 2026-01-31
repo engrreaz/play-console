@@ -41,7 +41,10 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
         </div>
 
         <div id="avatarMenu" class="avatar-dropdown shadow-sm">
-            <div class="dd-item text-muted small session-pill">Session: <?= $sessionyear ?></div>
+            <div class="dd-item text-muted small ">
+                Session:
+                <span class="float-right session-pill"> <?= $sessionyear ?></span>
+            </div>
             <div class="dd-divider"></div>
 
             <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
