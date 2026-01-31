@@ -33,7 +33,6 @@ if (!empty($students_with_birthday_today)):
         background-color: #F3EDF7; /* M3 Primary Tonal Container */
         border-radius: 8px; /* M3 Extra Large Shape */
         padding: 20px;
-        margin-bottom: 20px;
         border: none;
     }
 
