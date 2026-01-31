@@ -60,7 +60,7 @@ if (!empty($students_with_birthday_today)):
         display: flex;
         overflow-x: auto;
         gap: 16px;
-        padding-bottom: 8px;
+        padding: 8px 0;
         scrollbar-width: none; /* Hide scrollbar for clean look */
     }
     .m3-scroll-container::-webkit-scrollbar { display: none; }
@@ -101,6 +101,10 @@ if (!empty($students_with_birthday_today)):
     @keyframes rotate-ring {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
+    }
+    @keyframes rotate-ring {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
     }
 
     .m3-student-name {
