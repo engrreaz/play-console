@@ -1,13 +1,28 @@
 <?php
 $notices = array();
-$sql0 = "SELECT * FROM notice where sccode = '$sccode' and (expdate = NULL || expdate = '0000-00-00' || expdate >= '$td') order by entrytime desc;";
-// echo $sql0 ;
-$result0rtx_notice = $conn->query($sql0);
+
+// ১. কুয়েরি প্রস্তুত করা (IS NULL এবং জিরো ডেট হ্যান্ডেল করা হয়েছে)
+$sql0 = "SELECT * FROM notice 
+         WHERE sccode = ? 
+         AND (expdate IS NULL OR expdate < '1970-01-01' OR expdate >= ?) 
+         ORDER BY entrytime DESC";
+
+// ২. Prepared Statement ব্যবহার করা (SQL Injection থেকে সুরক্ষার জন্য)
+$stmt_notice = $conn->prepare($sql0);
+$stmt_notice->bind_param("ss", $sccode, $td); // 'ss' মানে দুটি স্ট্রিং প্যারামিটার
+$stmt_notice->execute();
+
+// ৩. রেজাল্ট সংগ্রহ করা
+$result0rtx_notice = $stmt_notice->get_result();
+
 if ($result0rtx_notice->num_rows > 0) {
     while ($row0 = $result0rtx_notice->fetch_assoc()) {
         $notices[] = $row0;
     }
 }
+
+// ৪. স্টেটমেন্ট ক্লোজ করা (অপশনাল কিন্তু ভালো অভ্যাস)
+$stmt_notice->close();
 // var_dump($notices);
 
 $today_iftar = strtotime(date('Y-m-d') . ' 18:02:00') + date('d') * 20;
@@ -92,7 +107,7 @@ if (strtotime($cur) > $i_time)
                     style="border:1px solid var(--lighter); poisition:relative; margin:auto; text-align:center; border-radius:50%; height:72px; width:72px; background-image: conic-gradient(seagreen 0deg, seagreen 100deg, orange 100deg, orange 250deg, red 250deg, red 360deg);">
                     <div
                         style="border:1px solid  var(--light); border-radius:50%; left:5px; top:5px; position:relative; background:var(--light); color:purple;;width:60px; height:60px; padding-top:20px;">
-                        <?php echo date('d')-1; ?>
+                        <?php echo date('d') - 1; ?>
                     </div>
                 </div>
             </div>

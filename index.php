@@ -17,8 +17,135 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        max-width: 100%;
+        display: block;
+        max-width: calc(100%-75px);
+    }
+
+    .m3-app-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100vw;
+        /* ভিউপোর্ট উইডথ অনুযায়ী সেট করা */
+        max-width: 100%;
+        /* প্যারেন্ট এর বাইরে যাবে না */
+        padding: 8px 16px;
+        /* Material 3 স্ট্যান্ডার্ড প্যাডিং */
+        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 1050;
+        box-sizing: border-box;
+        /* প্যাডিং যেন উইডথ বাড়িয়ে না দেয় */
+        margin: 0;
+        /* কোনো ডিফল্ট মার্জিন থাকলে তা মুছে দেবে */
+    }
+
+    /* ড্রপডাউন মেনু যেন স্ক্রিনের বাইরে না যায় */
+    .avatar-dropdown {
+        position: absolute;
+        right: 0;
+        /* ডান দিক থেকে এলাইন হবে */
+        top: 100%;
+        min-width: 200px;
+        z-index: 1100;
+    }
+
+    /* পুরো বডির জন্য সেফগার্ড */
+    body {
+        overflow-x: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* আভাটার কন্টেইনার যেন কখনো সংকুচিত না হয় বা ধাক্কা না খায় */
+    .avatar-section {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* টেক্সট কন্টেইনারকে ছোট হতে অনুমতি দিন */
+
+
+    .m3-app-bar>.d-flex {
+        min-width: 0;
+        flex-wrap: nowrap;
+    }
+
+    .text-container {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+
+    .avatar-dropdown {
+        background: #fff;
+        border-radius: 14px;
+        padding: 8px 0;
+        min-width: 220px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+        font-size: 14px;
+    }
+
+    /* header */
+    .avatar-dd-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 16px;
+    }
+
+    .dd-label {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .session-pill {
+        background: #6750A4;
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+    }
+
+    /* items */
+    .dd-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 16px;
+        cursor: pointer;
+        transition: background .18s ease;
+    }
+
+    .dd-item:hover {
+        background: rgba(103, 80, 164, .08);
+    }
+
+    /* divider */
+    .dd-divider {
+        height: 1px;
+        background: #eee;
+        margin: 6px 0;
+    }
+
+    /* danger */
+    .dd-item.danger {
+        color: #d32f2f;
+    }
+
+    .dd-item.danger:hover {
+        background: rgba(211, 47, 47, .08);
     }
 </style>
+
+
+
+
+
 
 <header class="m3-app-bar">
     <div class="d-flex align-items-center flex-grow-1">
@@ -26,40 +153,66 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
             style="width: 38px; height: 38px; background: #6750A4 !important;">
             <img src="iimg/logo.png" width="100%">
         </div>
-        <div>
+        <div class="flex-grow-1 text-container" style="min-width: 0;">
             <div class="app-bar-title my-0">EIM<span style="color: #6750A4;">Box</span></div>
             <div class="text-small my-0 scname"><?= $scname ?></div>
         </div>
 
-    </div>
-
-
-    <div class="d-flex align-items-center gap-2 position-relative">
-        <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
-            style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
-            <img src="<?= $pth ?>" width="100%">
-        </div>
-
-        <div id="avatarMenu" class="avatar-dropdown shadow-sm">
-            <div class="dd-item text-muted small p-0">
-                Session:
-                <span class="float-right session-pill"> <?= $sessionyear ?></span>
+        <div class="d-flex align-items-center gap-2 position-relative avatar-section">
+            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
+                style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
+                <img src="<?= $pth ?>" width="100%">
             </div>
-            <div class="dd-divider"></div>
 
-            <div class="dd-item" onclick="goProfile()">🏫 Institute Profile</div>
-            <div class="dd-item" onclick="goMy()">👤 My Profile</div>
-            <div class="dd-item" onclick="goTicket()">🎫 Submit a Ticket</div>
-            <div class="dd-item" onclick="goNotify()">🔔 Notifications</div>
+            <div id="avatarMenu" class="avatar-dropdown shadow-lg">
 
-            <div class="dd-divider"></div>
-            <div class="dd-item" onclick="toggleTheme()">🌙 Dark Mode</div>
-            <div class="dd-item text-danger" onclick="doLogout()">⎋ Logout</div>
+                <div class="avatar-dd-header">
+                    <div class="dd-label">Session</div>
+                    <div class="session-pill"><?= $sessionyear ?></div>
+                </div>
+
+                <div class="dd-divider"></div>
+
+                <div class="dd-item" onclick="goProfile()">
+                    <i class="bi bi-building"></i>
+                    Institute Profile
+                </div>
+
+                <div class="dd-item" data-action="Menu-PopUp" data-point="5" onclick="goMy()">
+                    <i class="bi bi-person-circle"></i>
+                    My Profile
+                </div>
+
+                <div class="dd-item" onclick="goTicket()">
+                    <i class="bi bi-ticket-perforated"></i>
+                    Submit Ticket
+                </div>
+
+                <div class="dd-item" onclick="goNotify()">
+                    <i class="bi bi-bell"></i>
+                    Notifications
+                </div>
+
+                <div class="dd-divider"></div>
+
+                <div class="dd-item" onclick="toggleTheme()">
+                    <i class="bi bi-moon-stars"></i>
+                    Dark Mode
+                </div>
+
+                <div class="dd-item danger" onclick="doLogout()">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+                </div>
+
+            </div>
+
+
+
+
         </div>
+
     </div>
-
-
-
 
 </header>
 
@@ -160,7 +313,10 @@ if ($find_app_notice !== false) {
 }
 
 // Get active notices
-$stmt_notice = $conn->prepare("SELECT * FROM notice WHERE sccode = ? AND (expdate IS NULL OR expdate = '0000-00-00' OR expdate >= ?) ORDER BY entrytime DESC");
+$stmt_notice = $conn->prepare("SELECT * FROM notice 
+    WHERE sccode = ? 
+    AND (expdate IS NULL OR expdate <= '1970-01-01' OR expdate >= ?) 
+    ORDER BY entrytime DESC");
 $stmt_notice->bind_param("ss", $sccode, $td);
 $stmt_notice->execute();
 $result_notice = $stmt_notice->get_result();

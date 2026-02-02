@@ -23,7 +23,7 @@ function isActive($targetFile, $currentFile)
     <div class="bottom-nav">
 
         <?php if (in_array($userlevel, ['Head Teacher', 'Asstt. Head Teacher', 'Administrator', 'Super Administrator'])): ?>
-            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
                 <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
                 <span>Home</span>
             </a>
@@ -301,7 +301,7 @@ function isActive($targetFile, $currentFile)
     });
 
     function goProfile() { location.href = "institute_profile.php"; }
-    function goMy() { location.href = "my_profile.php"; }
+    function goMy() {  }
     function goTicket() { location.href = "support_ticket.php"; }
     function goNotify() { location.href = "notifications.php"; }
 
@@ -396,5 +396,38 @@ function isActive($targetFile, $currentFile)
         // পুরো পেজ load হলে backdrop remove
         let bd = document.getElementById('pageBackdrop');
         if (bd) bd.remove();
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ===========================
+        // Track User Interaction
+        // ===========================
+        console.log('Loaded');
+        document.addEventListener("click", e => {
+            console.log('Trigger');
+            const target = e.target.closest("button, a, input, [data-action]");
+            if (!target || target.dataset.notrack) return;
+            const action = target.dataset.feature || target.dataset.action || target.innerText.trim() || target.value;
+            const point = target.dataset.point || 0;
+            const url = window.location.pathname;
+            const sccode = '<?php echo $sccode; ?>';
+            if (sccode == '') sccode = 0;
+            const page = '<?php echo $curfile; ?>';
+            fetch("core/track_action.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "<?php echo $usr ?? ''; ?>",
+                    page: page, url: url, sccode: sccode, action: action, point: point, timestamp: new Date().toISOString()
+                })
+            })
+                .then(res => res.text())
+                .then(data => console.log("Track Response:", data))
+                .catch(err => console.error(err));
+        });
     });
 </script>
