@@ -44,7 +44,7 @@ if (isset($_GET['id'])) {
                             <i class="bi bi-clock me-1"></i>'. date("d M, h:i A", strtotime($row['entry_at'] ?? 'now')) .'
                         </small>
                     </div>
-                    <p class="m-0 text-dark" style="font-size: 0.88rem; line-height: 1.4;">
+                    <p class="m-0 text-dark" style="font-size: 0.65rem; line-height: 1.4;">
                         '. nl2br(htmlspecialchars($row['notes'])) .'
                     </p>
                 </div>

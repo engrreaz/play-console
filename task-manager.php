@@ -1,4 +1,4 @@
-<?php 
+<?php
 $page_title = "Task Manager";
 include 'inc.php'; ?>
 
@@ -8,19 +8,19 @@ function statusColor($s)
 {
     switch ($s) {
         case 'queue':
-            return '#79747E';
+            return '#f31616';
         case 'On Hold':
-            return '#6750A4';
+            return '#f1f526';
         case 'Processing':
             return '#0288D1';
         case 'Trial':
-            return '#6750A4';
+            return '#23cfc1';
         case 'Beta':
-            return '#49454F';
+            return '#7937dd';
         case 'RC':
-            return '#146C32';
+            return '#30ee6f';
         case 'Stable':
-            return '#146C32';
+            return '#2e8d4e';
         default:
             return '#79747E';
     }
@@ -42,24 +42,12 @@ function datalist($field, $value = '')
 
 <!-- ================= CSS (Design as Before) ================= -->
 <style>
-    :root {
-        --m3-primary: #6750A4;
-        --m3-primary-tonal: #EADDFF;
-        --m3-surface: #FEF7FF;
-        --m3-on-surface: #1C1B1F;
-        --m3-outline: #CAC4D0;
-    }
-
-
-
-
-
     .filter-card {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(10px);
         margin: -30px 20px 20px;
         padding: 16px;
-        border-radius: 12px;
+        border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.3);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
@@ -166,9 +154,11 @@ function datalist($field, $value = '')
             <h4 class="fw-bold m-0">Task Manager</h4>
             <p class="small m-0 opacity-75">Track development & modules</p>
         </div>
-        <button id="newTaskBtn" class="btn btn-light btn-sm fw-bold rounded-pill px-3">
+
+        <button id="newTaskBtn" class="btn btn-light btn-sm fw-bold rounded-pill px-3" onclick="openNewTaskModal()"  style="z-index:999;" >
             <i class="bi bi-plus-lg me-1"></i> New Task
         </button>
+
     </div>
 </div>
 
@@ -269,8 +259,8 @@ function datalist($field, $value = '')
 
 <!-- ================= TASK MODAL ================= -->
 <div class="modal fade" id="taskModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-        <div class="modal-content border-0 shadow-lg" style="border-radius:24px;">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content border-0 shadow-lg">
             <form id="taskForm">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="fw-black">Task Details</h5>
@@ -331,19 +321,27 @@ function datalist($field, $value = '')
                             placeholder="Explain the task..."></textarea>
                     </div>
 
-                    <div class="m3-floating-group">
-                        <label class="m3-floating-label">Status</label>
-                        <select name="status" class="form-select rounded-3">
-                            <?php foreach (['queue', 'On Hold', 'Processing', 'Trial', 'Beta', 'RC', 'Stable'] as $s): ?>
-                                <option><?= $s ?></option>
-                            <?php endforeach; ?>
-                        </select>
+
+                    <div class="row g-2 mb-">
+                        <div class="col-4">
+                            <div class="m3-floating-group">
+                                <label class="m3-floating-label">Status</label>
+                                <select name="status" class="form-select rounded-3">
+                                    <?php foreach (['queue', 'On Hold', 'Processing', 'Trial', 'Beta', 'RC', 'Stable'] as $s): ?>
+                                        <option><?= $s ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-2"></div>
+                        <div class="col-6"> <button type="submit" class="btn btn-primary  shadow">Save Task
+                                Settings</button></div>
                     </div>
+
+
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow">Save Task
-                        Settings</button>
-                </div>
+
+
             </form>
         </div>
     </div>
@@ -393,32 +391,6 @@ function datalist($field, $value = '')
 <?php include 'footer.php'; ?>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const btn = document.getElementById('newTaskBtn');
-        if (!btn) {
-            console.error('newTaskBtn not found');
-            return;
-        }
-
-
-        console.log('NEW TASK CLICKED');
-
-        btn.addEventListener('click', function () {
-            console.log('Clicked');
-
-            // const form = document.getElementById('taskForm');
-            // form.reset();
-            // document.getElementById('task_id').value = '';
-
-            // const modalEl = document.getElementById('taskModal');
-            // const modal = new bootstrap.Modal(modalEl);
-            // modal.show();
-        });
-
-    });
-</script>
 
 <script>
     function openResponseModal(id) { $('#res_task_id').val(id); $('#responseModal').modal('show'); }
@@ -443,6 +415,35 @@ function datalist($field, $value = '')
         });
     }
 </script>
+
+
+<script>
+    function openNewTaskModal() {
+        console.log('Opening New Task Modal...');
+
+        // ১. ফর্মটি রিসেট করুন যাতে আগের এডিট করা ডেটা চলে যায়
+        const form = document.getElementById('taskForm');
+        if (form) form.reset();
+
+        // ২. হিডেন আইডি (task_id) খালি করুন (যাতে নতুন এন্ট্রি হিসেবে সেভ হয়)
+        const taskIdField = document.getElementById('task_id');
+        if (taskIdField) taskIdField.value = '';
+
+        // ৩. মডালটি ওপেন করুন (Bootstrap 5 স্ট্যান্ডার্ড)
+        const modalEl = document.getElementById('taskModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        } else {
+            console.error('taskModal element not found!');
+        }
+    }
+</script>
+
+
+</body>
+
+</html>
 
 
 <!-- document.addEventListener('DOMContentLoaded', function () { const btn = document.getElementById('newTaskBtn'); if (!btn) { console.error('newTaskBtn not found'); return; } console.log('NEW TASK CLICKED'); btn.addEventListener('click', function () { console.log('Clicked'); // const form = document.getElementById('taskForm'); // form.reset(); // document.getElementById('task_id').value = ''; // const modalEl = document.getElementById('taskModal'); // const modal = new bootstrap.Modal(modalEl); // modal.show(); }); }); বাটন ক্লিক করলে NEW TASK CLICKED প্রিন্ট হয়, কিন্তু, Clicked প্রিন্ট হয় না -->
