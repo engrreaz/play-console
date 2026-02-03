@@ -166,6 +166,7 @@
                 <div class="dd-item" onclick="goNotify()"> <i class="bi bi-bell me-2"></i>Notifications</div>
 
                 <div class="dd-divider"></div>
+                <div class="dd-item" onclick="task_manager()"> <i class="bi bi-moon-fill me-2"></i>Task Manager</div>
                 <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>
                 <div class="dd-item text-danger" onclick="doLogout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</div>
             </div>
