@@ -406,9 +406,9 @@ function isActive($targetFile, $currentFile)
         // ===========================
         // Track User Interaction
         // ===========================
-        console.log('Loaded');
+        // console.log('Loaded');
         document.addEventListener("click", e => {
-            console.log('Trigger');
+            // console.log('Trigger');
             const target = e.target.closest("button, a, input, [data-action]");
             if (!target || target.dataset.notrack) return;
             const action = target.dataset.feature || target.dataset.action || target.innerText.trim() || target.value;
