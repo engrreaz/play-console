@@ -1,4 +1,6 @@
-<?php include 'inc.php'; ?>
+<?php 
+$page_title = "Task Manager";
+include 'inc.php'; ?>
 
 <?php
 /* ================= STATUS COLORS ================= */

@@ -55,7 +55,8 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup_schedule();">
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm"
+        onclick="settings_admin_class_routine_setup_schedule();">
         <div class="icon-box c-acad"><i class="bi bi-clock-history"></i></div>
         <div class="setting-info">
             <div class="st-title">Time Table</div>
@@ -63,7 +64,7 @@ $sy_param = '%' . $current_session . '%';
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
-    
+
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup();">
         <div class="icon-box c-acad"><i class="bi bi-calendar-week"></i></div>
         <div class="setting-info">
@@ -116,18 +117,30 @@ $sy_param = '%' . $current_session . '%';
 
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
         <div class="m3-cat-label">Developer Console</div>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_task_manager();">
+            <div class="icon-box c-user"><i class="bi bi-bug"></i></div>
+            <div class="setting-warning">
+                <div class="st-title">Task Manager</div>
+                <div class="st-desc">Manage Task, Developing issues, Track Bug, Fixing Issues</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+
+
         <div class="dev-grid">
             <a href="promotion.php" class="btn-dev shadow-sm">PROMOTION</a>
             <a href="studentadmission.php" class="btn-dev shadow-sm">ADMISSION</a>
             <a href="cashbookview.php" class="btn-dev shadow-sm">CASHBOOK</a>
             <a href="trackreport.php" class="btn-dev shadow-sm">TRACKING</a>
-             <div class="m3-cat-label">Co-Curricular Activities</div>
-             <hr>
+            <div class="m3-cat-label">Co-Curricular Activities</div>
+            <hr>
             <a href="activity_manager.php" class="btn-dev shadow-sm">CCA</a>
             <a href="student_activity_entry.php" class="btn-dev shadow-sm">Entry</a>
             <a href="student_activity_list.php" class="btn-dev shadow-sm">Student CCA</a>
             <a href="all_activities.php" class="btn-dev shadow-sm">All CCA</a>
-  
+
             <div class="m3-cat-label">Cashbook</div>
             <hr>
             <a href="accounts-manager.php" class="btn-dev shadow-sm">Charts of Account</a>
@@ -137,8 +150,8 @@ $sy_param = '%' . $current_session . '%';
             <hr>
             <div class="m3-cat-label">Permission</div>
             <hr>
-             <a href="permission-mapper.php" class="btn-dev shadow-sm">Mapper</a>
-             <a href="permission-manager.php" class="btn-dev shadow-sm">Manager</a>
+            <a href="permission-mapper.php" class="btn-dev shadow-sm">Mapper</a>
+            <a href="permission-manager.php" class="btn-dev shadow-sm">Manager</a>
         </div>
     <?php endif; ?>
 
@@ -156,6 +169,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_class_routine_setup() { window.location.href = "clsroutine-setup.php"; }
     function settings_sms_menu() { window.location.href = "sms-manager.php"; }
     function settings_admin_user_manager() { window.location.href = "user-manager.php"; }
+    function settings_admin_task_manager() { window.location.href = "task-manager.php"; }
 </script>
 
 <?php include 'footer.php'; ?>
