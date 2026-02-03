@@ -304,7 +304,7 @@ function isActive($targetFile, $currentFile)
     function goMy() {  }
     function goTicket() { location.href = "support_ticket.php"; }
     function goNotify() { location.href = "notifications.php"; }
-    function task_manager() { location.href = "task_manager.php"; }
+    function task_manager() { location.href = "task-manager.php"; }
 
     function doLogout() {
         if (confirm("Logout now?")) {
