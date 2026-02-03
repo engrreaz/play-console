@@ -55,11 +55,20 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup();">
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup_schedule();">
         <div class="icon-box c-acad"><i class="bi bi-clock-history"></i></div>
         <div class="setting-info">
             <div class="st-title">Time Table</div>
             <div class="st-desc">Period management and routine setup</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
+    
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_class_routine_setup();">
+        <div class="icon-box c-acad"><i class="bi bi-calendar-week"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Setup Class Routine</div>
+            <div class="st-desc">Setup class routine with day/period & teacher attachment</div>
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
@@ -143,6 +152,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_st_id_generate() { window.location.href = "st-id-gen.php"; }
     function settings_admin_st_id_payment_indivisula() { window.location.href = "st-payment-setup-indivisual.php"; }
     function settings_admin_subject_setup() { window.location.href = "settings-subject.php"; }
+    function settings_admin_class_routine_setup_schedule() { window.location.href = "class-schedule-manager.php"; }
     function settings_admin_class_routine_setup() { window.location.href = "clsroutine-setup.php"; }
     function settings_sms_menu() { window.location.href = "sms-manager.php"; }
     function settings_admin_user_manager() { window.location.href = "user-manager.php"; }
