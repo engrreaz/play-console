@@ -140,3 +140,12 @@ include_once 'datam/datam-subject-list.php';
 </main>
 
 <div style="height: 80px;"></div>
+
+<?php include_once 'footer.php'; ?>
+
+
+
+
+
+</body>
+</html>
