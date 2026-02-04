@@ -142,7 +142,7 @@ $days = [1 => 'Sunday', 2 => 'Monday', 3 => 'Tuesday', 4 => 'Wednesday', 5 => 'T
                         FROM clsroutine r 
                         LEFT JOIN subjects s ON r.subcode = s.subcode 
                         LEFT JOIN teacher t ON r.tid = t.tid 
-                        WHERE r.sccode='$sccode' AND r.sessionyear='$sy' AND r.classname='$cls' 
+                        WHERE r.sccode='$sccode' AND r.sessionyear LIKE '$sessionyear_param' AND r.classname='$cls' 
                         AND r.sectionname='$sec' AND r.period = '$i' AND r.wday='$j' LIMIT 1";
 
                 $res = $conn->query($sql);

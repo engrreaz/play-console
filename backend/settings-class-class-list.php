@@ -1,11 +1,19 @@
 <?php
+$sessionyear = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] ?? $_COOKIE['query-session'] ?? $SY;
+
 /**
  * Class List View - M3-EIM-Floating Style
  * Standards: 8px Radius | Tonal Backgrounds | Dynamic Icons
  */
 
 // ১. ইউনিক ক্লাসগুলো ফেচ করা (Group by areaname)
-$sql_classes = "SELECT * FROM areas WHERE user='$rootuser' AND sessionyear LIKE '%$sy%' GROUP BY areaname ORDER BY idno, id";
+$sql_classes = "
+    SELECT DISTINCT areaname
+    FROM areas
+    WHERE (user='$rootuser' OR sccode='$sccode')
+    AND sessionyear LIKE '%$sessionyear%'
+    ORDER BY areaname
+    ";
 $res_classes = $conn->query($sql_classes);
 
 if ($res_classes->num_rows > 0) {
@@ -34,7 +42,7 @@ if ($res_classes->num_rows > 0) {
                 <div class="section-container">
                     <?php
                     // ৩. বর্তমান ক্লাসের অধীনে থাকা সেকশনগুলো ফেচ করা
-                    $sql_sections = "SELECT * FROM areas WHERE user='$rootuser' AND sessionyear LIKE '%$sy%' AND areaname= '$class_name' ORDER BY idno, id";
+                    $sql_sections = "SELECT * FROM areas WHERE user='$rootuser' AND sessionyear LIKE '%$sessionyear%' AND areaname= '$class_name' ORDER BY idno, id";
                     $res_sections = $conn->query($sql_sections);
                     
                     if ($res_sections->num_rows > 0) {

@@ -7,7 +7,7 @@ $page_title = "Class Schedule Manager";
 include_once 'inc.php';
 
 // Filter Data
-$sessions = $conn->query("SELECT DISTINCT sessionyear FROM classschedule WHERE sccode='$sccode' ORDER BY sessionyear DESC");
+$sessions = $conn->query("SELECT DISTINCT syear as sessionyear FROM sessionyear WHERE sccode='$sccode' and active=1 ORDER BY syear DESC");
 $slots_list = $conn->query("SELECT DISTINCT slots FROM classschedule WHERE sccode='$sccode' ORDER BY slots ASC");
 ?>
 

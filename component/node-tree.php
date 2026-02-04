@@ -1,7 +1,7 @@
 <?php
 
-require_once '../db.php';
-require_once '../backend/inc.back.php';
+require_once '../inc.light.php';
+// require_once '../backend/inc.back.php';
 
 $type = $_POST['type'] ?? '';
 $context = $_POST['context'] ?? [];

@@ -48,7 +48,7 @@ foreach ($days as $day) {
     $day_name = $days_map[$day];
 
     $check = $conn->query("SELECT id FROM clsroutine 
-        WHERE sccode='$sccode' AND sessionyear='$sy'
+        WHERE sccode='$sccode' AND sessionyear LIKE '$sessionyear_param'
         AND classname='$cls' AND sectionname='$sec'
         AND period='$period' AND wday='$day'");
 
@@ -72,7 +72,7 @@ foreach ($days as $day) {
         $stmt->bind_param(
             "ssssiisiis",
             $sccode,
-            $sy,
+            $sessionyear,
             $cls,
             $sec,
             $period,

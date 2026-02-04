@@ -6,8 +6,6 @@
 $page_title = "Class & Section";
 include 'inc.php'; 
 
-// সেশন হ্যান্ডলিং
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $sy;
 ?>
 
 <style>
