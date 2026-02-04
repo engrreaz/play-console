@@ -3,14 +3,12 @@ $page_title = 'Class Routing';
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. ইনপুট প্যারামিটার হ্যান্ডলিং (Secure)
-$cls2 = $_GET['cls'] ?? '';
-$sec2 = $_GET['sec'] ?? '';
+$cls2 = $_COOKIE['chain-class'] ?? '';
+$sec2 = $_COOKIE['chain-section'] ?? '';
 ?>
 
 <style>
-    body {
-        background-color: #FEF7FF;
-    }
+
 
     /* M3 Surface Background */
 
@@ -72,9 +70,10 @@ $sec2 = $_GET['sec'] ?? '';
                         <option value="0">Select Subject</option>
                         <?php
                         $sql_s = "SELECT subcode, subject FROM subjects WHERE sccategory='$sctype' ORDER BY subject";
+                        $sql_s = "SELECT subject from subsetup where sccode='$sccode' and sessionyear like '$sessionyear_param' and classname='$cls2' and sectionname='$sec2'  ";
                         $res_s = $conn->query($sql_s);
                         while ($s = $res_s->fetch_assoc())
-                            echo "<option value='{$s['subcode']}'>{$s['subject']}</option>";
+                            echo "<option value='{$s['subject']}'>{$s['subject']}</option>";
                         ?>
                     </select>
                 </div>

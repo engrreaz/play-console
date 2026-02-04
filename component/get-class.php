@@ -3,7 +3,7 @@ require_once '../inc.light.php';
 
 
 $slot = $_COOKIE['chain-slot'] ?? $sctype;
-$sy = $_COOKIE['chain-session'] ?? $SY;
+$sessionyear = $_COOKIE['chain-session'] ?? $SY;
 
 
 echo '<option value=""></option>';

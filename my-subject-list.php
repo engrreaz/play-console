@@ -12,33 +12,14 @@ include 'inc.php'; // DB সংযোগ এবং সেশন লোড কর
 $subjects_taught = [];
 
 $sql = "
-    SELECT DISTINCT 
-        r.subcode,
-        r.classname,
-        r.sectionname,
-        s.subject, s.subben, s.sccode
-
-    FROM clsroutine r
-
-    LEFT JOIN subjects s 
-           ON r.subcode = s.subcode
-          AND r.sccode = s.sccode
-          AND s.sccategory = ?
-
-    WHERE r.sessionyear LIKE ?
-      AND r.sccode = ?
-      AND r.tid = ?
-
-    ORDER BY s.sccode DESC, r.classname, r.sectionname, r.subcode
+    SELECT distinct subcode, classname, sectionname FROM clsroutine  WHERE sccode = ? AND sessionyear LIKE ? AND tid = ? ORDER BY subcode;
 ";
 
 $stmt = $conn->prepare($sql);
 
 $stmt->bind_param(
-    "ssss",
-    $sctype,
+    "sss", $sccode,
     $sessionyear_param,
-    $sccode,
     $userid
 );
 
@@ -49,6 +30,9 @@ while ($row = $result->fetch_assoc()) {
     $subjects_taught[] = $row;
 }
 $stmt->close();
+
+// var_dump($subjects_taught);
+
 
 // সাবজেক্ট বিস্তারিত ডাটা ম্যাপ
 include_once 'datam/datam-subject-list.php'; 
@@ -109,7 +93,7 @@ include_once 'datam/datam-subject-list.php';
         <?php if (!empty($subjects_taught)): ?>
             <?php 
             foreach ($subjects_taught as $info):
-                $subcode = $info['subject'];
+                $subcode = $info['subcode'];
                 $stind = array_search($subcode, array_column($datam_subject_list, 'subcode'));
 
                 if ($stind === false) continue;
@@ -121,12 +105,12 @@ include_once 'datam/datam-subject-list.php';
 
                 // ইমেজ পাথ জেনারেশন
                 $img_name = strtolower($sctype . '_' . $clsname . '_' . $subcode . '_cover.jpg');
-                $display_path = $BASE_PATH_URL_FILE . 'books/' . $img_name;
+                $display_path = $BASE_PATH_URL_FILE . 'assets/books/allbook.webp';
             ?>
                 <div class="m3-list-item" style="padding: 12px; margin-bottom: 10px; align-items: center;">
                     <div class="book-wrapper">
                         <img src="<?php echo $display_path; ?>" 
-                             onerror="this.src='https://eimbox.com/images/no-book-cover.png';" 
+                      
                              alt="Book Cover">
                     </div>
 

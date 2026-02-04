@@ -31,6 +31,8 @@ function teacher_profile_image_path($teacher_id)
 }
 
 
+
+
 function get_student_info_by_id($stid)
 {
     global $conn, $sccode, $sessionyear_param;

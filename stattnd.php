@@ -57,6 +57,8 @@ $stmt_sum->close();
 if ($subm == 1 && $period < 2)
     $period = 2;
 $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
+
+
 ?>
 
 <style>
@@ -175,7 +177,8 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div>
                     <div style="font-size: 1.3rem; font-weight: 900; line-height: 1;">
-                        <?php echo "$classname ($sectionname)"; ?></div>
+                        <?php echo "$classname ($sectionname)"; ?>
+                    </div>
                     <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 700; margin-top: 4px;">
                         <i class="bi bi-clock-history"></i> Period: <?php echo $period; ?>
                     </div>
@@ -205,7 +208,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
         </div>
     </div>
 
-    <div class="widget-grid" style="padding-bottom: 120px;">
+    <div class="widget-grid" style="padding-bottom: 0px;">
         <?php
         $total = 0;
         $present = 0;
@@ -226,18 +229,20 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             $att = $datam[$stid] ?? null;
             $is_p = ($att && $att['yn'] == 1);
             $has_bunked = ($att && $att['bunk'] == 1);
+            $prev_period = ($att && $att['period' . $period-1] == 1);
+
 
             if ($is_p && !$has_bunked)
                 $present++;
             if ($has_bunked)
                 $bunks++;
             ?>
-            <div class="att-item-card shadow-sm <?php echo ($is_p && !$has_bunked) ? 'present' : 'absent'; ?>"
+            <div class="att-item-card shadow-sm <?php echo ($is_p && !$has_bunked)  ? 'present' : 'absent'; ?>"
                 id="block_<?php echo $stid; ?>"
                 onclick="<?php echo $fun; ?>('<?php echo $stid; ?>', '<?php echo $roll; ?>', <?php echo (int) $has_bunked; ?>)">
 
                 <div class="m3-checkbox-box" id="box_<?php echo $stid; ?>"></div>
-                <input type="checkbox" id="chk_<?php echo $stid; ?>" <?php echo $is_p ? 'checked' : ''; ?> hidden>
+                <input type="checkbox" id="chk_<?php echo $stid; ?>" <?php echo $is_p || $prev_period ? 'checked' : ''; ?> hidden>
 
                 <img src="<?php echo student_profile_image_path($stid); ?>" class="st-avatar-tiny"
                     style="width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover;">
@@ -336,6 +341,10 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             .then(txt => {
                 if (txt.trim() === "OK") {
                     sync.innerHTML = '<i class="bi bi-check-circle-fill text-success" style="font-size: 1.2rem;"></i>';
+                } else if (txt.trim() === "DUI") {
+                    sync.innerHTML = '<i class="bi bi-file text-success" style="font-size: 1.2rem;"></i>';
+                } else if (txt.trim() === "TIN") {
+                    sync.innerHTML = '<i class="bi bi-plus text-success" style="font-size: 1.2rem;"></i>';
                 } else {
                     sync.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
                 }
@@ -361,7 +370,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             body: new URLSearchParams({
                 opt: 5, cnt: cnt, fnd: fnd,
                 cls: '<?= $classname ?>', sec: '<?= $sectionname ?>',
-                adate: '<?= $td ?>', sy: '<?= $current_session ?>'
+                adate: '<?= $td ?>', sy: '<?= $sessionyear ?>'
             })
         })
             .then(res => res.text())
@@ -381,7 +390,8 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
     }
 
     // পিরিয়ড অনুযায়ী ফাংশন কল
-    function grpssx(id, roll, bunk) { if (bunk == 1) return; toggleAtt(id, roll, 1); }
-    function grpssx0(id, roll, bunk) { toggleAtt(id, roll, 1); }
-    function grpssx2(id, roll, bunk) { if (bunk == 1) return; toggleAtt(id, roll, <?= $period ?>); }
+    function grpssx(id, roll, bunk) { console.log(1); toggleAtt(id, roll, 1); }
+    function grpssx0(id, roll, bunk) { console.log(0); toggleAtt(id, roll, 1); }
+    function grpssx2(id, roll, bunk) { console.log(2); if (bunk == 1) return; toggleAtt(id, roll, <?= $period ?>); }
+
 </script>

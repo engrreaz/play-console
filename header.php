@@ -131,7 +131,7 @@
             </div>
 
 
-           <?php include_once 'core/avatar_menu.php'; ?>
+            <?php include_once 'core/avatar_menu.php'; ?>
 
         </header>
 

@@ -9,7 +9,7 @@ $stid = $_GET['stid'] ?? 0;
 // ২. ডাটা ফেচিং (Prepared Statement - Secure)
 // ছাত্রের ব্যক্তিগত তথ্য এবং বর্তমান সেশনের একাডেমিক তথ্য একসাথে আনা হচ্ছে
 $std = [];
-$sql = "SELECT s.*, si.classname, si.sectionname, si.rollno, si.groupname 
+$sql = "SELECT s.*, si.classname, si.sectionname, si.rollno
         FROM students s 
         LEFT JOIN sessioninfo si ON s.stid = si.stid AND si.sessionyear LIKE ?
         WHERE s.stid = ? AND s.sccode = ? LIMIT 1";
@@ -24,7 +24,7 @@ if($row = $res->fetch_assoc()) {
 $stmt->close();
 
 // ভেরিয়েবল সেটআপ
-$photo_path = "https://eimbox.com/students/" . $stid . ".jpg";
+$photo_path = student_profile_image_path($stid );
 $stnameeng = $std['stnameeng'] ?? 'N/A';
 $stnameben = $std['stnameben'] ?? '';
 ?>
@@ -43,8 +43,8 @@ $stnameben = $std['stnameben'] ?? '';
         margin-bottom: 16px;
     }
 
-    .st-name-eng { font-size: 1.3rem; font-weight: 800; color: #1C1B1F; margin-bottom: 2px; }
-    .st-name-ben { font-size: 1rem; font-weight: 500; color: #49454F; margin-bottom: 12px; }
+    .st-name-eng { font-size: 1.3rem; font-weight: 800; color: #cbc4e0; margin-bottom: 2px; }
+    .st-name-ben { font-size: 1rem; font-weight: 500; color: #fafafa; margin-bottom: 12px; }
 
     /* Information Card (8px Radius) */
     .info-card {

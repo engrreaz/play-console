@@ -3,10 +3,6 @@ $page_title = "Marks Entry Wizard";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear']
-    ?? $_COOKIE['query-session']
-    ?? $sy;
-$sy_param = "%" . $current_session . "%";
 
 
 
@@ -14,7 +10,7 @@ $sy_param = "%" . $current_session . "%";
 $exam_options = "";
 $exn_default = 'Annual';
 $stmt_ex = $conn->prepare("SELECT examtitle FROM examlist WHERE sccode = ? AND sessionyear LIKE ? ORDER BY id ASC");
-$stmt_ex->bind_param("ss", $sccode, $sy_param);
+$stmt_ex->bind_param("ss", $sccode, $sessionyear_param);
 $stmt_ex->execute();
 $res_ex = $stmt_ex->get_result();
 while ($row = $res_ex->fetch_assoc()) {
@@ -26,8 +22,8 @@ $stmt_ex->close();
 
 // ৩. ক্লাস লিস্ট ফেচ করা
 $class_options = "";
-$stmt_cl = $conn->prepare("SELECT areaname FROM areas WHERE sessionyear LIKE ? AND user = ? GROUP BY areaname ORDER BY idno ASC");
-$stmt_cl->bind_param("ss", $sy_param, $rootuser);
+$stmt_cl = $conn->prepare("SELECT areaname FROM areas WHERE sessionyear LIKE ? AND user = ? GROUP BY areaname ");
+$stmt_cl->bind_param("ss", $sessionyear_param, $rootuser);
 $stmt_cl->execute();
 $res_cl = $stmt_cl->get_result();
 while ($row = $res_cl->fetch_assoc()) {
@@ -140,7 +136,7 @@ $stmt_cl->close();
 
 
         <?php
-        $chain_param = '-c 4 -t Choose Values -u  -b View List -h exam,subject';
+        $chain_param = '-c 6 -t Choose Parameters -u  -b Get Mark List -h exam,subject';
         include 'component/tree-ui.php';
         ?>
 
@@ -150,7 +146,7 @@ $stmt_cl->close();
         <div class="d-flex align-items-start text-muted opacity-75">
             <i class="bi bi-info-circle me-2 mt-1 fs-6"></i>
             <p style="font-size: 0.7rem; line-height: 1.3;">
-                Ensure all student profiles are up to date for session <?php echo $current_session; ?> before starting
+                Ensure all student profiles are up to date for session <?php echo $sessionyear; ?> before starting
                 mark entry.
             </p>
         </div>

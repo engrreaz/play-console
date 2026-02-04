@@ -1,5 +1,5 @@
 <?php
-include('inc.back.php');
+include('../inc.light.php');
 
 $adate = $_POST['adate'] ?? '';
 $cn = $_POST['cls'] ?? '';
@@ -18,14 +18,13 @@ if ($opt === 2) {
 
     /* ---------- submission lock check ---------- */
     $submit_found = 0;
-    $sy_like = "%$sy%";
 
     $chk = $conn->prepare("
         SELECT 1 FROM stattndsummery
         WHERE date=? AND sccode=? AND sessionyear LIKE ?
         AND classname=? AND sectionname=? LIMIT 1
     ");
-    $chk->bind_param("sssss", $adate, $sccode, $sy_like, $cn, $sn);
+    $chk->bind_param("sssss", $adate, $sccode, $sessionyear_param, $cn, $sn);
     $chk->execute();
     if ($chk->get_result()->num_rows > 0) {
         $submit_found = 1;
@@ -38,7 +37,7 @@ if ($opt === 2) {
         WHERE stid=? AND adate=? AND sccode=?
         AND sessionyear LIKE ? AND classname=? AND sectionname=? LIMIT 1
     ");
-    $chk2->bind_param("ssssss", $stid, $adate, $sccode, $sy_like, $cn, $sn);
+    $chk2->bind_param("ssssss", $stid, $adate, $sccode, $sessionyear_param, $cn, $sn);
     $chk2->execute();
     $exists = ($chk2->get_result()->num_rows > 0);
     $chk2->close();
@@ -46,7 +45,8 @@ if ($opt === 2) {
     /* ---------- CASE 1: attendance NOT exists ---------- */
     if (!$exists) {
 
-        $one = 1; $zero = 0;
+        $one = 1;
+        $zero = 0;
         $stmt = $conn->prepare("
             INSERT INTO stattnd
             (sccode, sessionyear, stid, adate, yn, bunk,
@@ -59,7 +59,7 @@ if ($opt === 2) {
         $stmt->bind_param(
             "isssiiiiiiiiissssi",
             $sccode,
-            $sy,
+            $sessionyear,
             $stid,
             $adate,
             $one,
@@ -91,12 +91,23 @@ if ($opt === 2) {
 
         $stmt = $conn->prepare("
             UPDATE stattnd SET
-            yn=0, bunk=1,
-            period1=0, period2=0, period3=0, period4=0,
-            period5=0, period6=0, period7=0, period8=0,
-            entryby=?
-            WHERE stid=? AND adate=? AND sccode=?
-            AND sessionyear LIKE ? AND classname=? AND sectionname=?
+                bunk = 1 - bunk,
+                period1 = 1 - period1,
+                period2 = 1 - period2,
+                period3 = 1 - period3,
+                period4 = 1 - period4,
+                period5 = 1 - period5,
+                period6 = 1 - period6,
+                period7 = 1 - period7,
+                period8 = 1 - period8,
+                entryby = ?
+            WHERE stid = ?
+            AND adate = ?
+            AND sccode = ?
+            AND sessionyear LIKE ?
+            AND classname = ?
+            AND sectionname = ?
+
         ");
 
         $stmt->bind_param(
@@ -105,14 +116,14 @@ if ($opt === 2) {
             $stid,
             $adate,
             $sccode,
-            $sy_like,
+            $sessionyear_param,
             $cn,
             $sn
         );
         $stmt->execute();
         $stmt->close();
 
-        echo "OK";
+        echo "DUI";
         exit;
     }
 
@@ -125,14 +136,14 @@ if ($opt === 2) {
     // dynamic period zeroing
     $sets = [];
     for ($i = $per; $i <= 8; $i++) {
-        $sets[] = "period$i=0";
+        $sets[] = "period$i=1 - period$i";
     }
     $set_sql = implode(", ", $sets);
 
     $stmt = $conn->prepare("
         UPDATE stattnd SET
-        yn=0,
-        bunk=1,
+        yn=1-yn,
+        bunk=1-bunk,
         $set_sql,
         entryby=?
         WHERE stid=? AND adate=? AND sccode=?
@@ -145,14 +156,14 @@ if ($opt === 2) {
         $stid,
         $adate,
         $sccode,
-        $sy_like,
+        $sessionyear_param,
         $cn,
         $sn
     );
     $stmt->execute();
     $stmt->close();
 
-    echo "OK";
+    echo "TIN";
     exit;
 }
 
@@ -175,7 +186,7 @@ if ($opt === 5) {
     $stmt->bind_param(
         "issssiidss",
         $sccode,
-        $sy,
+        $sessionyear,
         $adate,
         $cn,
         $sn,

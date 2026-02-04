@@ -3,7 +3,6 @@ $page_title = "Management Tools";
 include_once 'inc.php'; 
 
 // সেশন ইয়ার নিশ্চিত করা
-$current_session = $current_session ?? $sy;
 
 /**
  * ২. মডিউল কনফিগারেশন
@@ -68,12 +67,12 @@ $admin_tools = [
 <main>
 
 
-    <div class="widget-grid" style="padding-bottom: 100px;">
+    <div class="widget-grid" style="padding-bottom: 0px;">
         
         <div class="m3-section-title px-3">Class Management</div>
         <?php if (!empty($cteacher_data)): ?>
             <?php foreach ($cteacher_data as $class): 
-                $lnk = "cls=" . urlencode($class['cteachercls']) . "&sec=" . urlencode($class['cteachersec']) . "&year=" . $current_session;
+                $lnk = "cls=" . urlencode($class['cteachercls']) . "&sec=" . urlencode($class['cteachersec']) . "&year=" . $sessionyear;
             ?>
                 <div class="m3-list-item shadow-sm" onclick="go('stattnd.php', '<?php echo $lnk; ?>')">
                     <div class="icon-box c-acad">
@@ -87,7 +86,7 @@ $admin_tools = [
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="m3-list-item shadow-sm" onclick="go('stattnd.php', 'year=<?php echo $current_session; ?>')">
+            <div class="m3-list-item shadow-sm" onclick="go('stattnd.php', 'year=<?php echo $sessionyear; ?>')">
                 <div class="icon-box c-inst">
                     <i class="bi bi-person-check"></i>
                 </div>
@@ -101,7 +100,7 @@ $admin_tools = [
 
         <div class="m3-section-title px-3 mt-3">Academic Excellence</div>
         <?php foreach ($academic_tools as $item): ?>
-            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $current_session; ?>')">
+            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $sessionyear; ?>')">
                 <div class="icon-box <?php echo $item['color']; ?>">
                     <i class="bi <?php echo $item['icon']; ?>"></i>
                 </div>
@@ -115,7 +114,7 @@ $admin_tools = [
 
         <div class="m3-section-title px-3 mt-3">Administration</div>
         <?php foreach ($admin_tools as $item): ?>
-            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $current_session; ?>')">
+            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $sessionyear; ?>')">
                 <div class="icon-box <?php echo $item['color']; ?>">
                     <i class="bi <?php echo $item['icon']; ?>"></i>
                 </div>

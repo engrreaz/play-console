@@ -56,7 +56,7 @@ $box_title = $my_chain_params['title'] ?? 'Choose Values';
 $chain_button_text = $my_chain_params['button'] ?? 'View';
 
 
-$chain_md = 12;
+$chain_md = 6;
 
 
 if ($my_chain_params['url'] == true) {
@@ -528,7 +528,7 @@ if (strpos($chain, 'class') !== false) {
     <div class="m3-body-floating">
         <div class="row">
 
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <div class="col-md-<?= $chain_md ?> ">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Slot / Unit</label>
                     <i class="bi bi-layers m3-field-icon"></i>
@@ -544,7 +544,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <div class="col-md-<?= $chain_md ?> ">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Session</label>
                     <i class="bi bi-calendar-event m3-field-icon"></i>
@@ -560,7 +560,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
             <?php $hide = (strpos($chain, 'exam') === false) ? 'hidden' : ''; ?>
-            <div class="col-md-<?= $chain_md ?> col-12" <?php echo $hide; ?>>
+            <div class="col-md-<?= $chain_md ?> " <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Examination</label>
                     <i class="bi bi-journal-check m3-field-icon"></i>
@@ -570,7 +570,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <div class="col-md-<?= $chain_md ?> ">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Class</label>
                     <i class="bi bi-mortarboard m3-field-icon"></i>
@@ -580,7 +580,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-md-<?= $chain_md ?> col-12">
+            <div class="col-md-<?= $chain_md ?> ">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Section</label>
                     <i class="bi bi-people m3-field-icon"></i>
@@ -592,7 +592,7 @@ if (strpos($chain, 'class') !== false) {
 
             <?php $hide = (strpos($chain, 'subject') === false) ? 'hidden' : ''; ?>
 
-            <div class="col-md-<?= $chain_md ?> col-12" <?php echo $hide; ?>>
+            <div class="col-md-<?= $chain_md ?> " <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Subject</label>
                     <i class="bi bi-book m3-field-icon"></i>
