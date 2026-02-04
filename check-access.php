@@ -111,10 +111,15 @@ if ($is_admin > 3 || $is_chief > 0) {
         if ($module_name == 'Core') {
             $permission = 3;
         }
+        if ($module_name == 'Developement') {
+            $permission = 0;
+        }
     } else {
         // Module is not active, set permission to 0
         $permission = 0;
     }
+
+    
 
 }
 

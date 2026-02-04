@@ -7,7 +7,7 @@ include 'inc.php'; ?>
 function statusColor($s)
 {
     switch ($s) {
-        case 'queue':
+        case 'Queue':
             return '#f31616';
         case 'On Hold':
             return '#f1f526';
@@ -155,7 +155,8 @@ function datalist($field, $value = '')
             <p class="small m-0 opacity-75">Track development & modules</p>
         </div>
 
-        <button id="newTaskBtn" class="btn btn-light btn-sm fw-bold rounded-pill px-3" onclick="openNewTaskModal()"  style="z-index:999;" >
+        <button id="newTaskBtn" class="btn btn-light btn-sm fw-bold rounded-pill px-3" onclick="openNewTaskModal()"
+            style="z-index:999;">
             <i class="bi bi-plus-lg me-1"></i> New Task
         </button>
 
@@ -167,12 +168,11 @@ function datalist($field, $value = '')
     <form class="row g-2" method="post">
         <div class="col-12 col-md-6">
             <div class="m3-floating-group">
-                <label class="m3-floating-label">Search Module</label>
                 <input type="text" name="q" class="form-control form-control-sm rounded-3"
                     placeholder="Search module / topic" value="<?= $_POST['q'] ?? '' ?>">
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-5 ">
             <select name="platform" class="form-select form-select-sm rounded-3">
                 <option value="">All Platform</option>
                 <?php foreach (['play', 'web', 'android', 'console'] as $p): ?>
@@ -182,7 +182,7 @@ function datalist($field, $value = '')
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-5 ">
             <select name="status" class="form-select form-select-sm rounded-3">
                 <option value="">All Status</option>
                 <?php foreach (['Queue', 'Processing', 'Trial', 'Beta', 'RC', 'Stable'] as $s): ?>
@@ -192,8 +192,8 @@ function datalist($field, $value = '')
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="col-12 mt-2">
-            <button class="btn btn-dark w-100 btn-sm fw-bold rounded-3 py-2">Apply Filters</button>
+        <div class="col-2 mt-2">
+            <button class="btn btn-dark w-100 btn-sm fw-bold rounded-3 py-1"><i class="bi bi-funnel"></i> </button>
         </div>
     </form>
 </div>
@@ -232,7 +232,9 @@ function datalist($field, $value = '')
                     style="background: <?= statusColor($row['status']) ?>20; color: <?= statusColor($row['status']) ?>;">
                     <?= $row['status'] ?>
                 </span>
+
             </div>
+            <div class="text-info" style="font-size:0.75rem;"><?= $row['notes'] ?></div>
 
             <?php
             $rq = mysqli_query($conn, "SELECT * FROM task_response WHERE task_id='{$row['id']}' ORDER BY id DESC LIMIT 2");
@@ -294,7 +296,7 @@ function datalist($field, $value = '')
                         <div class="col-6">
                             <label class="small fw-bold text-muted">Panel</label>
                             <select name="panel" class="form-select rounded-3">
-                                <?php foreach (['developement', 'administrator', 'cheif', 'teacher', 'accountant', 'student'] as $pan): ?>
+                                <?php foreach (['Developement', 'Administrator', 'Cheif', 'Teacher', 'Accountant', 'Student', 'Guardian', 'Staff', 'All Users'] as $pan): ?>
                                     <option><?= $pan ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -327,7 +329,7 @@ function datalist($field, $value = '')
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Status</label>
                                 <select name="status" class="form-select rounded-3">
-                                    <?php foreach (['queue', 'On Hold', 'Processing', 'Trial', 'Beta', 'RC', 'Stable'] as $s): ?>
+                                    <?php foreach (['Queue', 'On Hold', 'Processing', 'Trial', 'Beta', 'RC', 'Stable'] as $s): ?>
                                         <option><?= $s ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -396,7 +398,42 @@ function datalist($field, $value = '')
     function openResponseModal(id) { $('#res_task_id').val(id); $('#responseModal').modal('show'); }
     $('#taskForm').submit(function (e) { e.preventDefault(); $.post("task/task-save.php", $(this).serialize(), () => location.reload()); });
     $('#responseForm').submit(function (e) { e.preventDefault(); $.post("task/task-response-save.php", $(this).serialize(), () => location.reload()); });
-    function deleteTask(id) { if (confirm("Delete this task permanently?")) $.post("task/task-delete.php", { id }, () => location.reload()); }
+    function deleteTask(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This task will be deleted permanently!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#B3261E', // M3 Error Color
+            cancelButtonColor: '#79747E',  // M3 Outline Color
+            confirmButtonText: 'Yes, Delete it!',
+            cancelButtonText: 'Cancel',
+            borderRadius: '16px', // M3 Large Corner
+            background: '#FEF7FF'  // M3 Surface Color
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // ডিলিট করার সময় একটি ছোট্ট লোডিং ইফেক্ট
+                Swal.fire({
+                    title: 'Deleting...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                $.post("task/task-delete.php", { id: id }, function (res) {
+                    // সাকসেস মেসেজ দেখিয়ে পেজ রিলোড
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'Task has been removed.',
+                        timer: 1000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                });
+            }
+        });
+    }
     function showHistory(id) { $.get("task/task-history.php", { id }, d => { $("#historyBody").html(d); $('#historyModal').modal('show'); }); }
     function editTask(id) {
         $.get("task/task-edit-fetch.php", { id }, res => {
