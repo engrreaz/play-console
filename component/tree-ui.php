@@ -56,7 +56,7 @@ $box_title = $my_chain_params['title'] ?? 'Choose Values';
 $chain_button_text = $my_chain_params['button'] ?? 'View';
 
 
-$chain_md = 6;
+$chain_md = 3;
 
 
 if ($my_chain_params['url'] == true) {
