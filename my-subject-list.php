@@ -7,15 +7,43 @@ include 'inc.php'; // DB সংযোগ এবং সেশন লোড কর
 
 
 // ২. ডাটা ফেচিং (Secure Prepared Statement)
+// echo $sessionyear_param . '/' . $sccode . '/' . $userid . '/';
+
 $subjects_taught = [];
-$sql = "SELECT DISTINCT subcode, classname, sectionname 
-        FROM clsroutine 
-        WHERE sessionyear LIKE ? AND sccode = ? AND tid = ? 
-        ORDER BY classname, sectionname, subcode";
+
+$sql = "
+    SELECT DISTINCT 
+        r.subcode,
+        r.classname,
+        r.sectionname,
+        s.subject, s.subben, s.sccode
+
+    FROM clsroutine r
+
+    LEFT JOIN subjects s 
+           ON r.subcode = s.subcode
+          AND r.sccode = s.sccode
+          AND s.sccategory = ?
+
+    WHERE r.sessionyear LIKE ?
+      AND r.sccode = ?
+      AND r.tid = ?
+
+    ORDER BY s.sccode DESC, r.classname, r.sectionname, r.subcode
+";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sss", $sessionyear_param, $sccode, $userid);
+
+$stmt->bind_param(
+    "ssss",
+    $sctype,
+    $sessionyear_param,
+    $sccode,
+    $userid
+);
+
 $stmt->execute();
+
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
     $subjects_taught[] = $row;
