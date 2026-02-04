@@ -328,7 +328,7 @@ if ($current_period):
     </div>
 
 <?php else: ?>
-    <div class="text-center py-5 mx-3 mt-4 border rounded-4 bg-white" style="border-style: dashed !important;">
+    <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
         <i class="bi bi-calendar-x display-1 opacity-10"></i>
         <p class="text-muted fw-bold mt-3">No period is currently active.</p>
         <small class="text-muted">Break time or after school hours (<?= date("h:i A") ?>)</small>
