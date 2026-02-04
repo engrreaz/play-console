@@ -85,65 +85,17 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
     }
 
 
-    .avatar-dropdown {
-        background: #fff;
-        border-radius: 14px;
-        padding: 8px 0;
-        min-width: 220px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
-        font-size: 14px;
-    }
-
     /* header */
-    .avatar-dd-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 16px;
-    }
 
-    .dd-label {
-        font-size: 12px;
-        color: #888;
-    }
 
-    .session-pill {
-        background: #6750A4;
-        color: #fff;
-        padding: 3px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-    }
 
     /* items */
-    .dd-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 16px;
-        cursor: pointer;
-        transition: background .18s ease;
-    }
 
-    .dd-item:hover {
-        background: rgba(103, 80, 164, .08);
-    }
 
-    /* divider */
-    .dd-divider {
-        height: 1px;
-        background: #eee;
-        margin: 6px 0;
-    }
 
-    /* danger */
-    .dd-item.danger {
-        color: #d32f2f;
-    }
 
-    .dd-item.danger:hover {
-        background: rgba(211, 47, 47, .08);
-    }
+   
+
 </style>
 
 
@@ -168,48 +120,8 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
                 <img src="<?= $pth ?>" width="100%">
             </div>
 
-            <div id="avatarMenu" class="avatar-dropdown shadow-lg">
+   <?php include_once 'core/avatar_menu.php'; ?>
 
-                <div class="avatar-dd-header">
-                    <div class="dd-label">Session</div>
-                    <div class="session-pill"><?= $sessionyear ?></div>
-                </div>
-
-                <div class="dd-divider"></div>
-
-                <div class="dd-item" onclick="goProfile()">
-                    <i class="bi bi-building"></i>
-                    Institute Profile
-                </div>
-
-                <div class="dd-item" data-action="Menu-PopUp" data-point="5" onclick="goMy()">
-                    <i class="bi bi-person-circle"></i>
-                    My Profile
-                </div>
-
-                <div class="dd-item" onclick="goTicket()">
-                    <i class="bi bi-ticket-perforated"></i>
-                    Submit Ticket
-                </div>
-
-                <div class="dd-item" onclick="goNotify()">
-                    <i class="bi bi-bell"></i>
-                    Notifications
-                </div>
-
-                <div class="dd-divider"></div>
-
-                <div class="dd-item" onclick="toggleTheme()">
-                    <i class="bi bi-moon-stars"></i>
-                    Dark Mode
-                </div>
-
-                <div class="dd-item danger" onclick="doLogout()">
-                    <i class="bi bi-box-arrow-right"></i>
-                    Logout
-                </div>
-
-            </div>
 
 
 

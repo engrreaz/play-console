@@ -178,7 +178,8 @@
     padding: 24px 20px;
     border-radius: 8px;
     /* M3 Large Corner */
-    background: linear-gradient(135deg, #6750A4 0%, #B69DF8 100%);
+    /* background: linear-gradient(135deg, #6750A4 0%, #B69DF8 100%); */
+         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
     position: relative;
     overflow: hidden;
     color: white;
@@ -269,7 +270,7 @@
 
 
 .widget-grid {
-    padding: 12px;
+    /* padding: 12px; */
 }
 
 .avatar-dropdown {

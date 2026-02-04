@@ -62,32 +62,11 @@ $admin_tools = [
     }
     
     /* হিরো কন্টেইনার অ্যাডজাস্টমেন্ট */
-    .hero-management {
-        padding-bottom: 30px;
-        margin-bottom: 20px;
-        border-radius: 0 0 24px 24px;
-    }
+  
 </style>
 
 <main>
-    <div class="hero-container hero-management">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="tonal-icon-btn" style="background: rgba(255,255,255,0.2); color: #fff; border:none;" onclick="location.href='reporthome.php'">
-                    <i class="bi bi-grid-fill"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.5rem; font-weight: 900; line-height: 1.1;">Management</div>
-                    <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Institute Administration Tools</div>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                 <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
-                    YEAR: <?php echo $current_session; ?>
-                </span>
-            </div>
-        </div>
-    </div>
+
 
     <div class="widget-grid" style="padding-bottom: 100px;">
         

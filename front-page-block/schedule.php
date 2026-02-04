@@ -170,7 +170,7 @@ if ($current_period):
             background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
             border-radius: 8px;
             padding: 16px;
-
+margin: 8px;
             color: white;
             box-shadow: 0 12px 30px rgba(103, 80, 164, 0.25);
             display: flex;
@@ -193,6 +193,7 @@ if ($current_period):
 
         .period-info {
             z-index: 1;
+            /* padding:0 8px; */
         }
 
         .period-number {
