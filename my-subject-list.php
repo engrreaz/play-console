@@ -8,10 +8,10 @@ include 'inc.php'; // DB সংযোগ এবং সেশন লোড কর
 
 // ২. ডাটা ফেচিং (Secure Prepared Statement)
 $subjects_taught = [];
-$sql = "SELECT DISTINCT subject, classname, sectionname 
-        FROM subsetup 
+$sql = "SELECT DISTINCT subcode, classname, sectionname 
+        FROM clsroutine 
         WHERE sessionyear LIKE ? AND sccode = ? AND tid = ? 
-        ORDER BY classname, sectionname, subject";
+        ORDER BY classname, sectionname, subcode";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("sss", $sessionyear_param, $sccode, $userid);
@@ -71,11 +71,7 @@ include_once 'datam/datam-subject-list.php';
                     <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 600;">Teaching Assignments</div>
                 </div>
             </div>
-            <div style="text-align: right;">
-                <span class="session-pill" style="background: rgba(255,255,255,0.15); color: #fff; border: none;">
-                    <?php echo $SY; ?>
-                </span>
-            </div>
+            
         </div>
     </div>
 
