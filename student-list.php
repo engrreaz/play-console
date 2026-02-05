@@ -285,15 +285,9 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                     </div>
 
                            <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
-                           
+
                 </div>
-                <script>
-                    // ডাইনামিক কাউন্ট আপডেট
-                    document.getElementById("cnt-<?php echo $h; ?>").innerText = "<?php echo $cnt; ?>";
-                    <?php if ($collection_permission): ?>
-                        document.getElementById("due-<?php echo $h; ?>").innerText = "৳<?php echo number_format($total_due); ?>";
-                    <?php endif; ?>
-                </script>
+           
             <?php endfor; ?>
         </div>
     <?php endif; ?>
