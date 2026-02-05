@@ -194,8 +194,8 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
     .m3-tab-bar-container {
         background: #fff;
         padding: 8px;
-        margin: 12px;
-        border-radius: 8px;
+        margin-bottom: 12px;
+        border-radius: 0 0 8px 8px;
         /* নিচের দিকে হালকা রাউন্ড */
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
@@ -243,15 +243,14 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
     <?php if ($count_class > 0): ?>
         <div class="m3-tab-bar-container">
             <div class="m3-section-title ">Class(es)</div>
-            <ul class="nav nav-pills nav-justified" style="margin:0 12px;" id="classTabs" role="tablist">
+            <ul class="nav nav-pills w-100 nav-justified" style="margin:0 8px;" id="classTabs" role="tablist">
                 <?php for ($i = 0; $i < $count_class; $i++):
                     $c_name = $cteacher_data[$i]['cteachercls'];
                     $s_name = $cteacher_data[$i]['cteachersec'];
                     ?>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link <?php echo ($i == 0) ? 'active' : ''; ?>" id="tab-btn-<?php echo $i; ?>"
-                            onclick="loadStudents(<?= $i ?>,'<?= $c_name ?>','<?= $s_name ?>')" data-bs-toggle="pill"
-                            data-bs-target="#pane-<?php echo $i; ?>" type="button" role="tab">
+                            data-bs-toggle="pill" data-bs-target="#pane-<?php echo $i; ?>" type="button" role="tab">
                             <?php echo "$c_name - $s_name"; ?>
                         </button>
                     </li>
@@ -271,11 +270,6 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                             <span class="stat-lbl">Total Students</span>
                             <span class="stat-val" id="cnt-<?php echo $h; ?>">0</span>
                         </div>
-                        <div class="m3-stat-chip shadow-sm">
-                            <span class="stat-lbl">Attendance</span>
-                            <span class="stat-val" id="attnd-<?php echo $h; ?>">N/A</span>
-                        </div>
-
                         <?php if ($collection_permission): ?>
                             <div class="m3-stat-chip shadow-sm">
                                 <span class="stat-lbl">Pending Dues</span>
@@ -303,12 +297,68 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                         $stmt_s->bind_param("ssss", $sessionyear_param, $sccode, $cls, $sec);
                         $stmt_s->execute();
                         $res_s = $stmt_s->get_result();
-                        ?>
-                        <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
-                        <?php
+
+                        while ($row = $res_s->fetch_assoc()):
+                            $stid = $row["stid"];
+                            $st_idx = array_search($stid, array_column($datam_st_profile, 'stid'));
+                            if ($st_idx === false)
+                                continue;
+
+                            $p = $datam_st_profile[$st_idx];
+                            $due = $dues_map[$stid] ?? 0;
+                            $is_active = ($row["status"] == '1');
+                            if ($is_active) {
+                                $cnt++;
+                                $total_due += $due;
+                            }
+
+                            $atx = get_student_info_by_id($stid);
 
 
+                            ?>
+                            <div class="st-card shadow-sm <?php echo $is_active ? '' : 'opacity-50 grayscale'; ?>"
+                                onclick="this.classList.toggle('expanded')">
+                                <div class="d-flex align-items-center">
+                                    <img src="<?= student_profile_image_path($stid) ?>" class="st-avatar shadow-sm">
+                                    <div class="ms-3 flex-grow-1 overflow-hidden">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.75rem;">
+                                            <?= $atx['stnameeng']; ?>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="badge bg-primary-subtle text-primary rounded-pill px-2"
+                                                style="font-size: 0.65rem;">Roll: <?php echo $row["rollno"]; ?></span>
+                                            <span class="text-muted" style="font-size: 0.65rem;">ID: <?php echo $stid; ?></span>
 
+                                            <?php if ($due > 0): ?>
+                                                <span class="due-badge ms-auto">৳<?php echo number_format($due); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <i class="bi bi-three-dots-vertical text-muted ms-1 opacity-25"></i>
+                                </div>
+
+                                <div class="action-grid">
+                                    <a href="stguarattnd.php?stid=<?php echo $stid; ?>" class="act-item"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-calendar2-check"></i><span>Attend</span>
+                                    </a>
+                                    <?php if ($collection_permission): ?>
+                                        <a href="stfinancedetails.php?id=<?php echo $stid; ?>" class="act-item"
+                                            onclick="event.stopPropagation();">
+                                            <i class="bi bi-wallet2"></i><span>Fees</span>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="stguarresult.php?stid=<?php echo $stid; ?>" class="act-item"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-award"></i><span>Result</span>
+                                    </a>
+                                    <a href="student-my-profile.php?stid=<?php echo $stid; ?>" class="act-item"
+                                        onclick="event.stopPropagation();">
+                                        <i class="bi bi-person-badge"></i><span>Profile</span>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endwhile;
                         $stmt_s->close(); ?>
                     </div>
                 </div>
@@ -327,41 +377,3 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
 
 </div> <?php include 'footer.php'; ?>
-
-
-<script>
-    function loadStudents(tabIndex, cls, sec) {
-
-        let box = document.getElementById("student-list-" + tabIndex);
-
-        if (box.dataset.loaded === "1") return;
-
-        box.innerHTML = `<div class="text-center py-3"><?php include 'core/loading.php'; ?></div>`;
-
-        fetch("ajax/load_students.php", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `cls=${cls}&sec=${sec}`
-        })
-            .then(res => res.json())
-            .then(data => {
-
-                box.innerHTML = data.html;
-
-                document.getElementById("cnt-" + tabIndex).innerText = data.count;
-                let dueBox = document.getElementById("due-" + tabIndex);
-                if (dueBox) {
-                    dueBox.innerText = "৳" + data.due.toLocaleString();
-                }
-
-                box.dataset.loaded = "1";
-            });
-    }
-
-
-
-</script>
-
-<script>
-    loadStudents(0, "<?= $cteacher_data[0]['cteachercls'] ?>", "<?= $cteacher_data[0]['cteachersec'] ?>");
-</script>
