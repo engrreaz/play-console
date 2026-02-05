@@ -360,7 +360,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
         /* ===== 2️⃣ FETCH FROM SERVER ===== */
 
-        box.innerHTML = `<div class="text-center py-3">KKK<?= addslashes($loader_html); ?></div>`;
+box.innerHTML = <?= json_encode('<div class="text-center py-3">'.$loader_html.'</div>'); ?>;
 
         fetch("ajax/load_students.php", {
             method: "POST",
