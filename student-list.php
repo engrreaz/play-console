@@ -221,7 +221,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
         padding: 10px 4px;
         color: #49454F;
         background: transparent;
-        border: 1px solid transparent;
+        border: 1px dashed #e8daf7;
         transition: 0.3s;
         white-space: nowrap;
         overflow: hidden;
