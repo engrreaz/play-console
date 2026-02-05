@@ -35,12 +35,12 @@
     <div class="dd-divider"></div>
     <div class="dd-item" onclick="task_manager()"> <i class="bi bi-list-task me-2"></i>Task Manager</div>
  <div class="dd-divider"></div>
-    <div class=" d-flex justify-content-between align-items-center mx-4">
-        <i class="dd-item bi bi-file-earmark"></i>
+    <div class=" d-flex justify-content-between align-items-center mx-4 py-2">
+        <i class="dd-item bi bi-file-earmark-fill text-info fs-5 p-0"></i>
         <!-- <div class="vr"></div> -->
-        <i class="dd-item bi bi-youtube" onclick="openVideo('<?php echo $video_id; ?>')"></i>
+        <i class="dd-item bi bi-youtube text-danger fs-5 p-0" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
-        <i class="dd-item bi bi-star"></i>
+        <i class="dd-item bi bi-star-fill text-warning fs-5 p-0"></i>
     </div>
      <div class="dd-divider"></div>
     <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>
