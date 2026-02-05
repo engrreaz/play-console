@@ -110,9 +110,11 @@ while ($row = $res_s->fetch_assoc()) {
 
 $html = ob_get_clean();
 
+
 echo json_encode([
     'html' => $html,
     'count' => $cnt,
-    'due' => $total_due
+    'due' => $total_due,
+    'cached' => $data_cached
 ]);
 

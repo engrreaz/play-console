@@ -282,12 +282,18 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                                 <span class="stat-val text-danger" id="due-<?php echo $h; ?>">৳ 0</span>
                             </div>
                         <?php endif; ?>
+
+                        <button type="button" class="btn btn-sm btn-light border rounded-circle  px-4"
+                            title="Reload Student List" onclick="forceReloadStudents(<?= $h ?>,'<?= $cls ?>','<?= $sec ?>')">
+                            <i class="bi bi-database-fill-down fs-2 text-primary"></i>
+                        </button>
+
                     </div>
 
-                           <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
+                    <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
 
                 </div>
-           
+
             <?php endfor; ?>
         </div>
     <?php endif; ?>
@@ -299,11 +305,60 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
 
 <script>
+    function cacheKey(cls, sec) {
+        return "students_" + cls + "_" + sec;
+    }
+
+    function clearStudentCache(cls, sec) {
+        localStorage.removeItem(cacheKey(cls, sec));
+    }
+
+    function forceReloadStudents(tabIndex, cls, sec) {
+
+        // remove cache
+        localStorage.removeItem(cacheKey(cls, sec));
+
+        // mark as not loaded
+        let box = document.getElementById("student-list-" + tabIndex);
+        if (box) {
+            box.dataset.loaded = "0";
+            box.innerHTML = "";
+        }
+
+        // reload fresh from DB
+        loadStudents(tabIndex, cls, sec);
+    }
+
+</script>
+
+<script>
     function loadStudents(tabIndex, cls, sec) {
 
         let box = document.getElementById("student-list-" + tabIndex);
 
-        if (box.dataset.loaded === "1") return;
+        let key = cacheKey(cls, sec);
+
+        /* ===== 1️⃣ CACHE HIT ===== */
+        let cached = localStorage.getItem(key);
+
+        if (cached) {
+
+            let data = JSON.parse(cached);
+
+            box.innerHTML = data.html;
+
+            document.getElementById("cnt-" + tabIndex).innerText = data.count;
+
+            let dueBox = document.getElementById("due-" + tabIndex);
+            if (dueBox) {
+                dueBox.innerText = "৳" + Number(data.due).toLocaleString();
+            }
+
+            box.dataset.loaded = "1";
+            return;
+        }
+
+        /* ===== 2️⃣ FETCH FROM SERVER ===== */
 
         box.innerHTML = `<div class="text-center py-3"><?= addslashes($loader_html); ?></div>`;
 
@@ -312,25 +367,30 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `cls=${cls}&sec=${sec}`
         })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
+
+                // save in localStorage
+                // localStorage.setItem(key, JSON.stringify(data));
+                if (data.cached == 1) {
+                    localStorage.setItem(key, JSON.stringify(data));
+                }
+
 
                 box.innerHTML = data.html;
 
                 document.getElementById("cnt-" + tabIndex).innerText = data.count;
+
                 let dueBox = document.getElementById("due-" + tabIndex);
                 if (dueBox) {
-                    dueBox.innerText = "৳" + data.due.toLocaleString();
+                    dueBox.innerText = "৳" + Number(data.due).toLocaleString();
                 }
 
                 box.dataset.loaded = "1";
             });
-            
     }
-
-
-
 </script>
+
 
 <script>
     loadStudents(0, "<?= $cteacher_data[0]['cteachercls'] ?>", "<?= $cteacher_data[0]['cteachersec'] ?>");

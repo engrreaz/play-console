@@ -243,6 +243,7 @@ if ($sccode > 100) {
             $short = $row0x["short"];
             $servicefinance = $row0x["servicefinance"];
             $sctype = $row0x["sccategory"];
+             $data_cached = 1;
 
             $scaddress = $scadd1 . $scadd2 . $ps . $dist;
             $scaddress2 = $scadd1 . ', ' . $ps . ', ' . $dist . '.';
