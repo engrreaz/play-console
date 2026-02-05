@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 
 include_once '../inc.light.php';
+include_once '../functions.php';
 include_once '../datam/datam-stprofile.php';
 
 
