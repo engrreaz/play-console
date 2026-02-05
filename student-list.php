@@ -268,7 +268,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
                     <div class="summary-chip-row">
                         <div class="m3-stat-chip shadow-sm">
-                            <span class="stat-lbl">Total Students</span>
+                            <span class="stat-lbl">Students</span>
                             <span class="stat-val" id="cnt-<?php echo $h; ?>">0</span>
                         </div>
                         <div class="m3-stat-chip shadow-sm">
@@ -278,7 +278,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
                         <?php if ($collection_permission): ?>
                             <div class="m3-stat-chip shadow-sm">
-                                <span class="stat-lbl">Pending Dues</span>
+                                <span class="stat-lbl">Dues</span>
                                 <span class="stat-val text-danger" id="due-<?php echo $h; ?>">৳ 0</span>
                             </div>
                         <?php endif; ?>
