@@ -328,6 +328,13 @@ if ($result0xrtyv->num_rows > 0) {
 }
 
 
+
+
+ob_start();
+include 'core/loading.php';
+$loader_html = ob_get_clean();
+
+
 $video_id = "dQw4w9WgXcQ"; // YouTube video ID
 
 include_once 'functions.php';

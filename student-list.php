@@ -336,7 +336,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
         if (box.dataset.loaded === "1") return;
 
-        box.innerHTML = `<div class="text-center py-3"><?php include 'core/loading.php'; ?></div>`;
+        box.innerHTML = `<div class="text-center py-3"><?= addslashes($loader_html); ?></div>`;
 
         fetch("ajax/load_students.php", {
             method: "POST",
