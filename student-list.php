@@ -284,33 +284,8 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
                         <?php endif; ?>
                     </div>
 
-                    <div class="student-list px-1">
-                        <?php
-                        $cnt = 0;
-                        $total_due = 0;
-                        $dues_map = [];
-
-                        // অপ্টিমাইজড কুয়েরি (বকেয়া ডাটা)
-                        $stmt_d = $conn->prepare("SELECT stid, SUM(dues) as td FROM stfinance WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? AND month <= ? GROUP BY stid");
-                        $stmt_d->bind_param("sssss", $sessionyear_param, $sccode, $cls, $sec, $month);
-                        $stmt_d->execute();
-                        $res_d = $stmt_d->get_result();
-                        while ($rd = $res_d->fetch_assoc())
-                            $dues_map[$rd['stid']] = $rd['td'];
-
-                        // স্টুডেন্ট সেশন ডাটা
-                        $stmt_s = $conn->prepare("SELECT * FROM sessioninfo WHERE sessionyear LIKE ? AND sccode = ? AND classname = ? AND sectionname = ? ORDER BY rollno ASC");
-                        $stmt_s->bind_param("ssss", $sessionyear_param, $sccode, $cls, $sec);
-                        $stmt_s->execute();
-                        $res_s = $stmt_s->get_result();
-                        ?>
-                        <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
-                        <?php
-
-
-
-                        $stmt_s->close(); ?>
-                    </div>
+                           <div class="student-list px-1" id="student-list-<?= $h ?>"></div>
+                           
                 </div>
                 <script>
                     // ডাইনামিক কাউন্ট আপডেট
