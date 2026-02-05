@@ -197,7 +197,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
             <div class="col-6">
                 <div class="m3-floating-group" style="margin-bottom: 0;">
                     <i class="bi bi-calendar-check m3-field-icon"></i>
-                    <input type="date" class="m3-input-floating" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
+                    <input type="date" class="m3-input-floating" style="padding-right:8px;" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
                     <label class="m3-floating-label">DATE</label>
                 </div>
             </div>
