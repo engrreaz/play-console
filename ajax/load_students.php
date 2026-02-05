@@ -1,7 +1,9 @@
 <?php
+header('Content-Type: application/json');
+error_reporting(0);
 include_once '../inc.light.php';
 include_once '../datam/datam-stprofile.php';
-
+ob_start();
 
 $settings_map = array_column($ins_all_settings, 'settings_value', 'setting_title');
 $collection_permission = (isset($settings_map['Collection']) && strpos($settings_map['Collection'], $userlevel) !== false) ? 1 : 0;
@@ -110,3 +112,8 @@ echo json_encode([
     'count' => $cnt,
     'due' => $total_due
 ]);
+
+
+ob_clean();
+echo json_encode($response);
+exit;
