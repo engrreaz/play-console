@@ -5,7 +5,6 @@ error_reporting(E_ALL);
 
 
 include_once '../inc.light.php';
-include_once '../functions.php';
 include_once '../datam/datam-stprofile.php';
 
 
@@ -109,7 +108,7 @@ while ($row = $res_s->fetch_assoc()) {
 
 <?php }
 
-// $html = ob_get_clean();
+$html = ob_get_clean();
 
 echo json_encode([
     'html' => $html,
