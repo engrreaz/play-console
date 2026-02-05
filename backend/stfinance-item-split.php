@@ -1,10 +1,11 @@
 <?php
 date_default_timezone_set('Asia/Dhaka');
-include('inc.back.php');
+include('../inc.light.php');
 
 $id = $_POST['fid'];
 $amt = $_POST['amt'];
 $tail = $_POST['tail'];
+$month = date('m');
 
 
 if ($tail == 1) {
@@ -86,7 +87,7 @@ if ($tail == 1) {
     // echo 'Tail 3';
 
 
-    $sql5t = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sy%'  and particulareng like '%fine%'   LIMIT 1  ";
+    $sql5t = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sessionyear_param%'  and particulareng like '%fine%'   LIMIT 1  ";
     $result5t = $conn->query($sql5t);
     if ($result5t->num_rows > 0) {
         while ($row5 = $result5t->fetch_assoc()) {
@@ -104,25 +105,26 @@ if ($tail == 1) {
 
 
         }
+        echo 'Pre';
     } else {
         $rowid = 0;
         $itemcode = uniqid();
 
-        $sql5x = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sy%' LIMIT 1 ";
-        // echo $sql5x;
+        $sql5x = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sessionyear%' LIMIT 1 ";
+        echo $sql5x;
         $result5x = $conn->query($sql5x);
         if ($result5x->num_rows > 0) {
             while ($row5 = $result5x->fetch_assoc()) {
                 $rowid = $row5["id"];
 
-                // echo $rowid;
+                echo $rowid;
 
                 $sql = "INSERT INTO stfinance 
-            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, '$itemcode', 'FINE', 'জরিমানা', '$amt', month, idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
+            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, '$itemcode', 'FINE', 'জরিমানা', '$amt', '$month', idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
             FROM stfinance 
             WHERE id = $rowid and sccode='$sccode'";
 
-                // echo $sql;
+                echo $sql;
                 $conn->query($sql);
 
 
@@ -132,7 +134,7 @@ if ($tail == 1) {
         // echo 'no fine record found';
     }
 
-
+echo 'OK';
 
 } else if ($tail == 4){
     echo 'Remove fine called';

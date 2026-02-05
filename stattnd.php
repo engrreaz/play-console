@@ -159,10 +159,10 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
 
     .submit-bar {
         position: fixed;
-        bottom: 64px;
+        bottom: 70px;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.9);
+        background: transparent;
         backdrop-filter: blur(10px);
         padding: 12px 16px;
         border-top: 1px solid #eee;
@@ -229,7 +229,12 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             $att = $datam[$stid] ?? null;
             $is_p = ($att && $att['yn'] == 1);
             $has_bunked = ($att && $att['bunk'] == 1);
-            $prev_period = ($att && $att['period' . $period-1] == 1);
+            if ($period > 1) {
+                $prev_period = ($att && $att['period' . $period - 1] == 1);
+            } else {
+                $prev_period = 0;
+            }
+
 
 
             if ($is_p && !$has_bunked)
@@ -237,12 +242,13 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             if ($has_bunked)
                 $bunks++;
             ?>
-            <div class="att-item-card shadow-sm <?php echo ($is_p && !$has_bunked)  ? 'present' : 'absent'; ?>"
+            <div class="att-item-card shadow-sm <?php echo ($is_p && !$has_bunked) ? 'present' : 'absent'; ?>"
                 id="block_<?php echo $stid; ?>"
                 onclick="<?php echo $fun; ?>('<?php echo $stid; ?>', '<?php echo $roll; ?>', <?php echo (int) $has_bunked; ?>)">
 
                 <div class="m3-checkbox-box" id="box_<?php echo $stid; ?>"></div>
-                <input type="checkbox" id="chk_<?php echo $stid; ?>" <?php echo $is_p || $prev_period ? 'checked' : ''; ?> hidden>
+                <input type="checkbox" id="chk_<?php echo $stid; ?>" <?php echo $is_p || $prev_period ? 'checked' : ''; ?>
+                    hidden>
 
                 <img src="<?php echo student_profile_image_path($stid); ?>" class="st-avatar-tiny"
                     style="width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover;">
@@ -288,6 +294,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
     <?php endif; ?>
 </main>
 
+<div style="height:80px;"></div>
 <?php include 'footer.php'; ?>
 
 <script>

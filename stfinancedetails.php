@@ -50,30 +50,6 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 ?>
 
 <style>
-
-
-    /* M3 Standard App Bar */
-    .m3-app-bar {
-        background: #fff;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        padding: 0 16px;
-        position: sticky;
-        top: 0;
-        z-index: 1050;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border-radius: 0 0 8px 8px;
-    }
-
-    .m3-app-bar .page-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1C1B1F;
-        flex-grow: 1;
-        margin: 0;
-    }
-
     /* M3 Components (8px Radius) */
     .m3-card {
         background: #fff;
@@ -161,10 +137,10 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <div class="session-pill small fw-bold">Session: <?php echo $sessionyear; ?></div>
             </div>
 
-            <div class="text-end">
+            <div class="text-end" style="z-index:1000;">
                 <div class="action-icons">
-                    <i class="bi bi-plus-circle fs-4 me-3" onclick="splitable2();"></i>
-                    <i class="bi bi-pencil-square fs-4" onclick="goedit();"></i>
+                    <i class="bi bi-plus-circle fs-4 me-3" style="cursor: pointer ;" onclick="addFine();"></i>
+                    <i class="bi bi-pencil-square fs-4" style="cursor: pointer ;" onclick="goedit();"></i>
                 </div>
 
                 <div class="small opacity-75">Total Dues</div>
@@ -222,7 +198,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <div class="m3-floating-group" style="margin-bottom: 0;">
                     <i class="bi bi-calendar-check m3-field-icon"></i>
                     <input type="date" class="m3-input-floating" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
-                    <label class="m3-floating-label">PAYMENT DATE</label>
+                    <label class="m3-floating-label">DATE</label>
                 </div>
             </div>
 
@@ -230,14 +206,18 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <div class="m3-floating-group" style="margin-bottom: 0;">
                     <i class="bi bi-cash-stack m3-field-icon" style="color: var(--m3-primary);"></i>
                     <input type="number" class="m3-input-floating amt-highlight" id="amt" value="0" readonly>
-                    <label class="m3-floating-label" style="color: var(--m3-primary); font-weight: 800;">AMOUNT TO
-                        PAY</label>
+                    <label class="m3-floating-label" style="color: var(--m3-primary); font-weight: 800;">AMOUNT</label>
                 </div>
             </div>
 
             <div class="col-6">
-                <button class="btn btn-m3-danger btn-pay-now w-100 shadow-sm" onclick="save();">
-                    <i class="bi bi-shield-lock-fill"></i> PAY NOW
+                <button class="btn btn-m3-danger btn-pay-now w-100 shadow-sm d-flex" onclick="save();">
+                    <i class="bi bi-shield-lock-fill fs-2"></i> 
+                    <div class="ms-2">
+                        <div class="m-0 fs-6">Pay Now</div>
+                        <div class="m-0" style="font-size: 0.5rem;">Cash Collection</div>
+                    </div>
+
                 </button>
             </div>
         </div>
@@ -295,6 +275,9 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 
 <div id="modal_container"><?php include 'component/m3-modals.php'; ?></div>
 
+
+<?php include 'footer.php'; ?>
+
 <script>
     document.getElementById("total_dues_label").innerText = new Intl.NumberFormat().format(<?php echo $total_calc; ?>);
 
@@ -335,4 +318,189 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     }
 </script>
 
-<?php include 'footer.php'; ?>
+
+
+
+
+
+<script>
+    function splitable0(fid, amt) {
+        event.stopPropagation();
+        document.getElementById("spltid").value = fid;
+        document.getElementById("spltamt").value = amt;
+        document.getElementById("spltamtpre").value = amt;
+        var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+            keyboard: false
+        });
+        myModal.show();
+        const input = document.getElementById("spltamt");
+        input.focus();
+        input.select();
+    }
+
+    function splitable2() {
+        event.stopPropagation();
+        // document.getElementById("fine").value = fid;
+        // document.getElementById("spltamt").value = amt;
+        // document.getElementById("spltamtpre").value = amt;
+        var myModal = new bootstrap.Modal(document.getElementById('exampleModal2'), {
+            keyboard: false
+        });
+        myModal.show();
+        const input = document.getElementById("spltamt");
+        input.focus();
+        input.select();
+    }
+
+
+    function addFine() {
+        event.stopPropagation();
+        // document.getElementById("fine").value = fid;
+        // document.getElementById("spltamt").value = amt;
+        // document.getElementById("spltamtpre").value = amt;
+        var myModal = new bootstrap.Modal(document.getElementById('fineModal'), {
+            keyboard: false
+        });
+        myModal.show();
+        const input = document.getElementById("fine_amount");
+        input.focus();
+        input.select();
+    }
+
+</script>
+<script>
+
+    function splitable() {
+
+        var fid = document.getElementById("spltid").value;
+        var amtpre = document.getElementById("spltamtpre").value * 1;
+        var amt = document.getElementById("spltamt").value * 1;
+
+
+        if (amt >= amtpre || amt <= 0 || amt == '') {
+            alert('Invalid Amount');
+            const input = document.getElementById("spltamt");
+            input.focus();
+            input.select();
+            return;
+        }
+
+        var infor = "fid=" + fid + "&amt=" + amt + "&tail=1";
+        // alert(infor);
+
+        $("#history").html("");
+        $.ajax({
+            type: "POST",
+            url: "backend/stfinance-item-split.php",
+            data: infor,
+            cache: false,
+            beforeSend: function () {
+                $("#history").html('<i class="mdi mdi-autorenew"></i>');
+            },
+            success: function (html) {
+                $("#history").html(html);
+                var modalEl = document.getElementById('exampleModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+
+
+                window.location.reload();
+
+            }
+        });
+    }
+
+
+
+
+    function saveFine() {
+        // alert('trigger');
+        var fid = '<?php echo $stid; ?>';
+        var amt = document.getElementById("fine_amount").value * 1;
+
+
+
+        var infor = "fid=" + fid + "&amt=" + amt + "&tail=3";
+        // alert(infor);
+
+        $("#history").html("");
+        $.ajax({
+            type: "POST",
+            url: "backend/stfinance-item-split.php",
+            data: infor,
+            cache: false,
+            beforeSend: function () {
+                $("#history").html('<i class="mdi mdi-autorenew"></i>');
+            },
+            success: function (html) {
+                $("#history").html(html);
+                var modalEl = document.getElementById('fineModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+
+                window.location.reload();
+                // window.location.reload();
+
+            }
+        });
+    }
+</script>
+
+
+<script>
+
+
+    function mergerow(id, amt, tail) {
+        event.stopPropagation();
+        var infor = "fid=" + id + "&amt=" + amt + "&tail=" + tail;
+        // alert(infor);
+
+        $("#history").html("");
+        $.ajax({
+            type: "POST",
+            url: "backend/stfinance-item-split.php",
+            data: infor,
+            cache: false,
+            beforeSend: function () {
+                $("#history").html('<i class="mdi mdi-autorenew"></i>');
+            },
+            success: function (html) {
+                $("#history").html(html);
+
+
+                window.location.reload();
+
+            }
+        });
+    }
+
+
+
+    function rollback(id, taka, tail) {
+        var infor = "id=" + id + "&taka=" + taka + "&tail=" + tail;
+        // alert(infor);
+        $("#bbttnn" + id).html("");
+        $.ajax({
+            type: "POST",
+            url: "backend/roll-back-st-finance-item.php",
+            data: infor,
+            cache: false,
+            beforeSend: function () {
+                $("#bbttnn" + id).html('<i class="mdi mdi-autorenew"></i>');
+            },
+            success: function (html) {
+                $("#bbttnn" + id).html(html);
+            }
+        });
+    }
+</script>
+
+<script>
+    const button = document.getElementById("mybtn");
+    const input = document.getElementById("spltamt");
+    input.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            button.click();
+        }
+    });
+</script>

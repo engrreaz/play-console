@@ -42,6 +42,7 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
+                <div id="history">....</div>
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Back</button>
                 <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="saveFine();" style="border-radius: 8px;">Add to Dues</button>
             </div>

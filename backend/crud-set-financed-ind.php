@@ -4,7 +4,7 @@ include('inc.back.php');
 
 // 0 == Add new (Expenditute), 1 == Edit, 2 == Delete, 3 == Set Memo No., 4 == ........, 5 == Add New (Income)
 
-$id = $_POST['id'];
+$id = $_POST['id'] ?? 0;
 $slot = $_POST['slot'];
 $sy = $_POST['sy'];
 if (strlen($sy) < 4) {
@@ -28,8 +28,8 @@ $indid = $_POST['indid'];
 if ($indid == 0) {
     if ($amt >= 0) {
 
-        $query331 = "INSERT INTO financesetupind (id, sccode, slot, sessionyear, stid, slno, itemcode, classname, sectionname, amount, update_time) 
-    values (NULL, '$sccode',  '$slot',  '$sy', '$stid', '',  '$item',  '$cls',  '$sec',  '$amt',  '$cur');";
+        $query331 = "INSERT INTO financesetupind (id, sccode, slot, sessionyear, stid,  itemcode, classname, sectionname, amount, update_time) 
+    values (NULL, '$sccode',  '$slot',  '$sy', '$stid',   '$item',  '$cls',  '$sec',  '$amt',  '$cur');";
         $conn->query($query331);
     }
 } else {
