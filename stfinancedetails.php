@@ -156,7 +156,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
         .m3-payment-card {
             background: #fff;
             border-radius: 8px;
-            padding: 20px 16px;
+            padding: 8px;
             margin: 12px;
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
