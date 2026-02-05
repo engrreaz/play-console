@@ -105,7 +105,7 @@ while ($row = $res_s->fetch_assoc()) {
 
 <?php }
 
-$html = ob_get_clean();
+// $html = ob_get_clean();
 
 echo json_encode([
     'html' => $html,
