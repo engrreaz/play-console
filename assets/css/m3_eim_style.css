@@ -275,11 +275,11 @@
 
 .avatar-dropdown {
     position: absolute;
-    right: 0;
-    top: 48px;
-    width: 220px;
-    background: #fff;
-    border-radius: 14px;
+    right: 12px;
+    top: 60px;
+    width: 250px;
+    background: #f9f7fa;
+    border-radius: 12px;
     display: none;
     overflow: hidden;
     z-index: 2000;

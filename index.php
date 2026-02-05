@@ -47,15 +47,6 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
     }
 
     /* ড্রপডাউন মেনু যেন স্ক্রিনের বাইরে না যায় */
-    .avatar-dropdown {
-        position: absolute;
-        right: 0;
-        /* ডান দিক থেকে এলাইন হবে */
-        top: 100%;
-        min-width: 200px;
-        z-index: 1100;
-    }
-
     /* পুরো বডির জন্য সেফগার্ড */
     body {
         overflow-x: hidden;

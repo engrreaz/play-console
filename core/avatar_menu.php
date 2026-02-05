@@ -41,6 +41,7 @@
         <i class="dd-item bi bi-youtube text-danger fs-5 p-0" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-star-fill text-warning fs-5 p-0"></i>
+        <i class="dd-item bi bi-info-circle-fill text-primary fs-5 p-0"></i>
     </div>
      <div class="dd-divider"></div>
     <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>
