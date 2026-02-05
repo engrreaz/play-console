@@ -106,6 +106,17 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+
+        .ytclose {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-size: 22px;
+    cursor: pointer;
+    font-size:1rem;
+    color:white;
+}
     </style>
 
     <script src="assets/pre-load.js"></script>
@@ -135,7 +146,21 @@
 
         </header>
 
+
+        <div id="videoModal" class="modal">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content ">
+                    <span class="ytclose" onclick="closeModal()">×</span>
+
+                    <iframe id="ytPlayer" width="100%" height="315" src="" frameborder="0" allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
         <div style="margin-top: 8px;"></div>
+
+
 
         <?php
     }

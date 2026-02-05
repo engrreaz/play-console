@@ -328,6 +328,7 @@ if ($result0xrtyv->num_rows > 0) {
 }
 
 
+$video_id = "dQw4w9WgXcQ"; // YouTube video ID
 
 include_once 'functions.php';
 include 'component/sms-func.php';

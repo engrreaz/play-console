@@ -94,6 +94,16 @@ $sy_param = '%' . $current_session . '%';
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
+    
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm"
+        onclick="settings_admin_fin_setup();">
+        <div class="icon-box c-fina"><i class="bi bi-coin"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Payment setup</div>
+            <div class="st-desc">Configure Financial Items</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
     <div class="m3-cat-label">Access Control</div>
 
@@ -170,6 +180,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_sms_menu() { window.location.href = "sms-manager.php"; }
     function settings_admin_user_manager() { window.location.href = "user-manager.php"; }
     function settings_admin_task_manager() { window.location.href = "task-manager.php"; }
+    function settings_admin_fin_setup() { window.location.href = "st-fin-setup.php"; }
 </script>
 
 <?php include 'footer.php'; ?>

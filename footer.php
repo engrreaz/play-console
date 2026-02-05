@@ -301,7 +301,7 @@ function isActive($targetFile, $currentFile)
     });
 
     function goProfile() { location.href = "institute_profile.php"; }
-    function goMy() {  }
+    function goMy() { }
     function goTicket() { location.href = "support_ticket.php"; }
     function goNotify() { location.href = "notifications.php"; }
     function task_manager() { location.href = "task-manager.php"; }
@@ -431,4 +431,33 @@ function isActive($targetFile, $currentFile)
                 .catch(err => console.error(err));
         });
     });
+</script>
+
+<script>
+    function openVideo(videoId) {
+
+        var modal = document.getElementById("videoModal");
+        var iframe = document.getElementById("ytPlayer");
+
+        iframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+
+        var modal = document.getElementById("videoModal");
+        var iframe = document.getElementById("ytPlayer");
+
+        iframe.src = ""; // stop video
+        modal.style.display = "none";
+    }
+
+    // click outside modal to close
+    window.onclick = function (event) {
+        var modal = document.getElementById("videoModal");
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
 </script>

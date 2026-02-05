@@ -38,7 +38,7 @@
     <div class=" d-flex justify-content-between align-items-center mx-4">
         <i class="dd-item bi bi-file-earmark"></i>
         <!-- <div class="vr"></div> -->
-        <i class="dd-item bi bi-youtube"></i>
+        <i class="dd-item bi bi-youtube" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-star"></i>
     </div>

@@ -11,8 +11,7 @@ $categories = [
         ['onclick' => 'report_menu_cls_routine();', 'icon' => 'bi-calendar3-range', 'title' => 'Routine', 'level' => 'any'],
         ['onclick' => 'report_menu_my_subjects();', 'icon' => 'bi-journal-text', 'title' => 'Subjects', 'level' => 'any'],
         ['onclick' => 'report_menu_honorable_teachers();', 'icon' => 'bi-person-workspace', 'title' => 'Staffs', 'level' => 'any'],
-        ['onclick' => 'report_menu_syllabus();', 'icon' => 'bi-book-half', 'title' => 'Syllabus', 'level' => 'any'],
-        ['onclick' => 'report_menu_lesson_plan();', 'icon' => 'bi-book', 'title' => 'Lesson Plan', 'level' => 'any']
+        ['onclick' => 'report_menu_examination();', 'icon' => 'bi-pencil', 'title' => 'Examination', 'level' => 'any']
     ],
     'Finance' => [
         ['onclick' => 'report_menu_my_collection();', 'icon' => 'bi-wallet2', 'title' => 'My Cash', 'level' => 'any'],
@@ -22,7 +21,9 @@ $categories = [
         ['onclick' => 'report_menu_ebooks_x();', 'icon' => 'bi-book-fill', 'title' => 'E-Library', 'level' => 'any'],
         ['onclick' => 'report_menu_calendar();', 'icon' => 'bi-calendar-event', 'title' => 'Calendar', 'level' => 'any'],
         ['onclick' => 'report_menu_notices();', 'icon' => 'bi-megaphone', 'title' => 'Notices', 'level' => 'any'],
-        ['onclick' => 'report_menu_notification();', 'icon' => 'bi-chat-dots', 'title' => 'Inbox', 'level' => 'any']
+        ['onclick' => 'report_menu_notification();', 'icon' => 'bi-chat-dots', 'title' => 'Inbox', 'level' => 'any'],
+         ['onclick' => 'report_menu_syllabus();', 'icon' => 'bi-book-half', 'title' => 'Syllabus', 'level' => 'any'],
+        ['onclick' => 'report_menu_lesson_plan();', 'icon' => 'bi-book', 'title' => 'Lesson Plan', 'level' => 'any']
     ]
 ];
 
@@ -82,6 +83,8 @@ if (isset($count_class) && $count_class > 0) {
     function report_menu_notification() { window.location.href = "notification.php"; }
     function report_menu_syllabus() { window.location.href = "syllabus.php"; }
     function report_menu_lesson_plan() { window.location.href = "lesson-plan.php"; }
+    function report_menu_examination() { window.location.href = "exam-manager.php"; }
 </script>
 
 <?php include 'footer.php'; ?>
+

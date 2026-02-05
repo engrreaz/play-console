@@ -12,4 +12,5 @@ firebase.php
 *.json
 *.md
 inc.light.php
+.htaccess
 
