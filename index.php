@@ -81,12 +81,6 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
 
 
     /* items */
-
-
-
-
-   
-
 </style>
 
 
@@ -106,12 +100,14 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
         </div>
 
         <div class="d-flex align-items-center gap-2 position-relative avatar-section">
-            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
-                style="width: 34px; height: 34px; cursor:pointer;" onclick="toggleAvatarMenu()">
+            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm <?= $ringClass ?>"
+                style="width:34px;height:34px;cursor:pointer;z-index:25999;" onclick="toggleAvatarMenu()">
+
                 <img src="<?= $pth ?>" width="100%">
+
             </div>
 
-   <?php include_once 'core/avatar_menu.php'; ?>
+            <?php include_once 'core/avatar_menu.php'; ?>
 
 
 

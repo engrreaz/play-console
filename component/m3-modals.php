@@ -36,15 +36,15 @@
                     <input type="number" class="form-control text-danger fw-bold" id="fine_amount" placeholder="Amount" style="border-radius: 8px; font-size: 1.2rem;">
                     <label for="fine_amount">Fine Amount (BDT)</label>
                 </div>
-                <div class="form-floating">
+                <div class="form-floating" hidden>
                     <textarea class="form-control" id="fine_note" placeholder="Note" style="height: 100px; border-radius: 8px;"></textarea>
                     <label for="fine_note">Note (Optional)</label>
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <div id="history">....</div>
+                <div id="history"></div>
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Back</button>
-                <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="saveFine();" style="border-radius: 8px;">Add to Dues</button>
+                <button type="button" class="btn btn-warning fw-bold shadow-sm" onclick="saveFine();" style="border-radius: 8px;">Add Fine</button>
             </div>
         </div>
     </div>

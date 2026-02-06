@@ -136,7 +136,13 @@ if ($is_admin > 3 || $is_chief > 0) {
 // --- get override permission if any web/console
 // --- get app override permission if any
 
+
+if(isset($_GET['perm'])) $permission = $_GET['perm'];
+
+
 if ($permission == 0) {
     include 'no-access.php';
     exit();
 }
+
+

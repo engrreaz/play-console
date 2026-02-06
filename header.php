@@ -109,14 +109,32 @@
 
 
         .ytclose {
-    position: absolute;
-    right: 10px;
-    top: 5px;
-    font-size: 22px;
-    cursor: pointer;
-    font-size:1rem;
-    color:white;
-}
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 22px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: white;
+        }
+
+
+        .avatar-ring-red {
+            margin:2px;
+            box-shadow: 0 0 0 2px #dc3545 !important;
+        }
+
+        .avatar-ring-orange {
+            box-shadow: 0 0 0 2px #fd7e14 !important;
+        }
+
+        .avatar-ring-blue {
+            box-shadow: 0 0 0 2px #0d6efd !important;
+        }
+
+        .avatar-ring-green {
+            box-shadow: 0 0 0 2px #198754 !important;
+        }
     </style>
 
     <script src="assets/pre-load.js"></script>
@@ -125,6 +143,20 @@
 <body>
 
     <?php
+
+
+    $ringClass = '';
+
+    if ($permission == 0) {
+        $ringClass = 'avatar-ring-red';
+    } elseif ($permission == 1) {
+        $ringClass = 'avatar-ring-orange';
+    } elseif ($permission == 2) {
+        $ringClass = 'avatar-ring-blue';
+    } elseif ($permission == 3) {
+        $ringClass = 'avatar-ring-green';
+    }
+
     if (basename($_SERVER['PHP_SELF']) != 'index.php') {
         ?>
 
@@ -136,10 +168,13 @@
                 <?php echo $page_title ?? 'EIMBox'; ?>
             </h1>
 
-            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm"
-                style="width: 34px; height: 34px; cursor:pointer; z-index:25999;" onclick="toggleAvatarMenu()">
+            <div class="rounded-circle overflow-hidden border top-avatar shadow-sm <?= $ringClass ?>"
+                style="width:34px;height:34px;cursor:pointer;z-index:25999;" onclick="toggleAvatarMenu()">
+
                 <img src="<?= $pth ?>" width="100%">
+
             </div>
+
 
 
             <?php include_once 'core/avatar_menu.php'; ?>

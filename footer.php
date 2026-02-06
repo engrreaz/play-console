@@ -460,4 +460,25 @@ function isActive($targetFile, $currentFile)
             closeModal();
         }
     }
+
+    
+</script>
+
+
+
+<script>
+document.querySelectorAll('.dd-item.perm').forEach(function(icon) {
+    icon.addEventListener('click', function() {
+        let permValue = this.dataset.perm;
+
+        // বর্তমান URL
+        let url = new URL(window.location.href);
+
+        // perm প্যারামিটার সেট বা update
+        url.searchParams.set('perm', permValue);
+
+        // redirect to updated URL
+        window.location.href = url.toString();
+    });
+});
 </script>
