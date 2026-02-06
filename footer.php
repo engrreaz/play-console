@@ -470,8 +470,6 @@ function isActive($targetFile, $currentFile)
 document.querySelectorAll('.dd-item.perm').forEach(function(icon) {
     icon.addEventListener('click', function() {
         let permValue = this.dataset.perm;
-
-        // বর্তমান URL
         let url = new URL(window.location.href);
 
         // perm প্যারামিটার সেট বা update
