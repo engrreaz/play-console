@@ -120,21 +120,26 @@
 
 
         .avatar-ring-red {
-            margin:2px;
             box-shadow: 0 0 0 2px #dc3545 !important;
+                        padding:1px;
+
         }
 
         .avatar-ring-orange {
             box-shadow: 0 0 0 2px #fd7e14 !important;
+                        padding:1px;
+
         }
 
         .avatar-ring-blue {
             box-shadow: 0 0 0 2px #0d6efd !important;
+                        padding:1px;
+
         }
 
         .avatar-ring-green {
             box-shadow: 0 0 0 2px #198754 !important;
-            padding:2px;
+            padding:1px;
         }
     </style>
 
