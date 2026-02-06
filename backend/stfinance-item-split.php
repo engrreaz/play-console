@@ -2,142 +2,254 @@
 date_default_timezone_set('Asia/Dhaka');
 include('../inc.light.php');
 
-$id = $_POST['fid'];
-$amt = $_POST['amt'];
-$tail = $_POST['tail'];
+$id = intval($_POST['fid'] ?? 0);
+$amt = floatval($_POST['amt'] ?? 0);
+$tail = intval($_POST['tail'] ?? 0);
+
 $month = date('m');
 
+$conn->begin_transaction();
 
-if ($tail == 1) {
-    // echo $id . '/' . $amt . '/' . $tail;
+try {
 
+    /* =======================
+        TAIL = 1 (SPLIT)
+    ======================== */
+    if ($tail === 1) {
 
-    $sql = "INSERT INTO stfinance 
-            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, itemcode, particulareng, particularben, amount, month, idmon, '$cur', '$usr', payableamt, '$cur', '$usr', paid, paidx, dues, pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
-            FROM stfinance 
-            WHERE id = $id and sccode='$sccode'";
+        // Copy row
+        $sql = "
+        INSERT INTO stfinance (
+            sccode, sessionyear, classname, sectionname,
+            stid, rollno, partid, itemcode,
+            particulareng, particularben,
+            amount, month, idmon,
+            setupdate, setupby,
+            payableamt,
+            pr1date, pr1by,
+            paid, paidx, dues,
+            pr1, pr1no, pr1date, pr1by, cashbook1,
+            pr2, pr2no, pr2date, pr2by, cashbook2,
+            remark, extra, last_update,
+            `validate`, validationtime,
+            deleteby, deletetime,
+            splitid, scan_status
+        )
+        SELECT
+            sccode, sessionyear, classname, sectionname,
+            stid, rollno, partid, itemcode,
+            particulareng, particularben,
+            amount, month, idmon,
+            ?, ?,
+            payableamt,
+            ?, ?,
+            paid, paidx, dues,
+            pr1, pr1no, pr1date, pr1by, cashbook1,
+            pr2, pr2no, pr2date, pr2by, cashbook2,
+            remark, extra, last_update,
+            `validate`, validationtime,
+            deleteby, deletetime,
+            splitid, scan_status
+        FROM stfinance
+        WHERE id = ? AND sccode = ?
+        ";
 
-    // echo $sql;
-    $conn->query($sql);
-    $newId = $conn->insert_id;
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param(
+            "ssssis",
+            $cur,
+            $usr,
+            $cur,
+            $usr,
+            $id,
+            $sccode
+        );
+        $stmt->execute();
 
-    // echo "New copied row ID = " . $newId;
-
-    $query331 = "UPDATE stfinance set payableamt='$amt', dues='$amt', splitid='$newId' where id = '$id' and sccode='$sccode'";
-    $conn->query($query331);
-    $query331 = "UPDATE stfinance set payableamt= payableamt-$amt, dues=dues-$amt, splitid=NULL where id = '$newId' and sccode='$sccode'";
-    $conn->query($query331);
-
-} else if ($tail == 2) {
-    $splitid = $amt;
-    // echo $id . '/' . $splitid . '/' . $tail;
-    $connectid = 0;
-    $sql5 = "SELECT * FROM stfinance where  sccode='$sccode' and id='$splitid'  ";
-    $result5 = $conn->query($sql5);
-    if ($result5->num_rows > 0) {
-        while ($row5 = $result5->fetch_assoc()) {
-            $connectid = $row5["splitid"];
-        }
-    }
-    if ($connectid > 0) {
-        // echo '--' . $connectid;
-
-    } else {
-        // echo '--ready';
-
-
-        // $sqll = "  INSERT INTO stfinance 
-        //         SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, itemcode, particulareng, particularben, amount, month, idmon, '$cur', '$usr', sum(payableamt), '$cur', '$usr', sum(paid), paidx, sum(dues), sum(pr1), pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, NULL, scan_status
-        //         FROM stfinance 
-        //         WHERE id IN ($id, $splitid)
-        //         GROUP BY stid, itemcode;";
-        // $conn->query($sqll);
-
-        // $query3311 = "DELETE FROM stfinance where id = '$id' and sccode='$sccode'";
-        // $conn->query($query3311);
-        // $query3312 = "DELETE FROM stfinance where id = '$splitid' and sccode='$sccode'";
-        // $conn->query($query3312);
-
-        $query331r = "UPDATE stfinance
-                        SET payableamt = (
-                                SELECT SUM(payableamt) 
-                                FROM stfinance 
-                                WHERE id IN ($id, $splitid) AND sccode='$sccode'
-                            ),
-                            dues = (
-                                SELECT SUM(dues) 
-                                FROM stfinance 
-                                WHERE id IN ($id, $splitid) AND sccode='$sccode'
-                            ),
-                            splitid = NULL
-                        WHERE id = $id AND sccode='$sccode';";
-
-        //    echo $query331r;
-
-        $conn->query($query331r);
-        $query331x = "DELETE FROM stfinance  where id = '$splitid' and sccode='$sccode'";
-        $conn->query($query331x);
-
-
-    }
-
-
-
-} else if ($tail == 3) {
-    // echo 'Tail 3';
-
-
-    $sql5t = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sessionyear_param%'  and particulareng like '%fine%'   LIMIT 1  ";
-    $result5t = $conn->query($sql5t);
-    if ($result5t->num_rows > 0) {
-        while ($row5 = $result5t->fetch_assoc()) {
-            $rowid = $row5["id"];
-            // $itemcode = $row5["itemcode"];
-
-            $sql = "INSERT INTO stfinance 
-            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, itemcode, 'FINE', 'জরিমানা', '$amt', '$month', idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
-            FROM stfinance 
-            WHERE id = $rowid and sccode='$sccode'";
-
-            echo $sql;
-            $conn->query($sql);
-            // $newId = $conn->insert_id;
-
-
-        }
-        echo 'Pre';
-    } else {
-        $rowid = 0;
-        $itemcode = uniqid();
-
-        $sql5x = "SELECT * FROM stfinance where  sccode='$sccode' and stid='$id' and sessionyear like '%$sessionyear%' LIMIT 1 ";
-        echo $sql5x;
-        $result5x = $conn->query($sql5x);
-        if ($result5x->num_rows > 0) {
-            while ($row5 = $result5x->fetch_assoc()) {
-                $rowid = $row5["id"];
-
-                echo $rowid;
-
-                $sql = "INSERT INTO stfinance 
-            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, '$itemcode', 'FINE', 'জরিমানা', '$amt', '$month', idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
-            FROM stfinance 
-            WHERE id = $rowid and sccode='$sccode'";
-
-                echo $sql;
-                $conn->query($sql);
-
-
-            }
+        if ($stmt->affected_rows !== 1) {
+            throw new Exception("Split copy failed");
         }
 
-        // echo 'no fine record found';
+        $newId = $conn->insert_id;
+
+        // Update original
+        $stmt = $conn->prepare(
+            "UPDATE stfinance
+             SET payableamt = ?, dues = ?, splitid = ?
+             WHERE id = ? AND sccode = ?"
+        );
+        $stmt->bind_param("ddiis", $amt, $amt, $newId, $id, $sccode);
+        $stmt->execute();
+
+        // Update new
+        $stmt = $conn->prepare(
+            "UPDATE stfinance
+             SET payableamt = payableamt - ?,
+                 dues = dues - ?,
+                 splitid = NULL
+             WHERE id = ? AND sccode = ?"
+        );
+        $stmt->bind_param("ddis", $amt, $amt, $newId, $sccode);
+        $stmt->execute();
     }
 
-echo 'OK';
+    /* =======================
+        TAIL = 2 (MERGE)
+    ======================== */ elseif ($tail === 2) {
 
-} else if ($tail == 4){
-    echo 'Remove fine called';
-    $kk = "DELETE FROM stfinance where  sccode='$sccode' and id='$id' ";
-    $conn->query($kk);
+        $splitid = $amt;
+
+        $stmt = $conn->prepare(
+            "SELECT splitid FROM stfinance
+             WHERE id=? AND sccode=?"
+        );
+        $stmt->bind_param("is", $splitid, $sccode);
+        $stmt->execute();
+        $stmt->bind_result($connectid);
+        $stmt->fetch();
+        $stmt->close();
+
+        if ($connectid == 0) {
+
+            // Sum back
+            $stmt = $conn->prepare("
+                UPDATE stfinance
+                SET payableamt = (
+                        SELECT SUM(payableamt)
+                        FROM stfinance
+                        WHERE id IN (?, ?) AND sccode=?
+                    ),
+                    dues = (
+                        SELECT SUM(dues)
+                        FROM stfinance
+                        WHERE id IN (?, ?) AND sccode=?
+                    ),
+                    splitid = NULL
+                WHERE id=? AND sccode=?
+            ");
+
+            $stmt->bind_param(
+                "isisisis",
+                $id,
+                $splitid,
+                $sccode,
+                $id,
+                $splitid,
+                $sccode,
+                $id,
+                $sccode
+            );
+
+            $stmt->execute();
+
+            // delete split row
+            $stmt = $conn->prepare(
+                "DELETE FROM stfinance WHERE id=? AND sccode=?"
+            );
+            $stmt->bind_param("is", $splitid, $sccode);
+            $stmt->execute();
+        }
+    }
+
+    /* =======================
+        TAIL = 3 (ADD FINE)
+    ======================== */ elseif ($tail === 3) {
+
+        $stmt = $conn->prepare("
+            SELECT id FROM stfinance
+            WHERE sccode=? AND stid=? AND sessionyear LIKE ?
+              AND particulareng LIKE '%fine%'
+            LIMIT 1
+        ");
+
+
+
+        $stmt->bind_param("sis", $sccode, $id, $sessionyear_param);
+        $stmt->execute();
+        $stmt->bind_result($rowid);
+        $stmt->fetch();
+        $stmt->close();
+
+        if (!$rowid) {
+
+            $itemcode = uniqid();
+        }
+
+        
+        $stmt = $conn->prepare("
+            INSERT INTO stfinance (
+            sccode, sessionyear, classname, sectionname,
+            stid, rollno, partid, itemcode,
+            particulareng, particularben,
+            amount, month, idmon,
+            setupdate, setupby,
+            payableamt,
+            paid, paidx, dues,
+            pr1, pr1no, pr1date, pr1by, cashbook1,
+            pr2, pr2no, pr2date, pr2by, cashbook2,
+            remark, extra, last_update,
+            `validate`, validationtime,
+            deleteby, deletetime,
+            splitid, scan_status
+            )
+            SELECT
+            sccode, sessionyear, classname, sectionname,
+            stid, rollno, partid, ?, 
+            'FINE','জরিমানা',
+            ?, ?, idmon,
+            ?, ?,
+            ?, 
+            paid, paidx, ?,
+            pr1, pr1no, pr1date, pr1by, cashbook1,
+            pr2, pr2no, pr2date, pr2by, cashbook2,
+            remark, extra, last_update,
+            `validate`, validationtime,
+            deleteby, deletetime,
+            splitid, scan_status
+            FROM stfinance
+            WHERE id=?
+            ");
+
+        // 8 placeholders → 8 types
+        $stmt->bind_param(
+            "sdissdii",
+            $itemcode,   // s
+            $amt,        // d
+            $month,      // i (or s if varchar)
+            $cur,        // s
+            $usr,        // s
+            $amt,        // d
+            $amt,        // d
+            $rowid       // i
+        );
+
+        $stmt->execute();
+
+        echo "Affected rows = " . $stmt->affected_rows;
+        exit;
+
+
+
+
+    }
+
+    /* =======================
+        TAIL = 4 (DELETE)
+    ======================== */ elseif ($tail === 4) {
+
+        $stmt = $conn->prepare(
+            "DELETE FROM stfinance WHERE id=? AND sccode=?"
+        );
+        $stmt->bind_param("is", $id, $sccode);
+        $stmt->execute();
+    }
+
+    $conn->commit();
+    echo "OK";
+
+} catch (Exception $e) {
+
+    $conn->rollback();
+    http_response_code(500);
+    echo "DB ERROR: " . $e->getMessage();
 }
