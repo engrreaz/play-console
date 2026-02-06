@@ -172,7 +172,7 @@
             <div class="rounded-circle overflow-hidden border top-avatar shadow-sm <?= $ringClass ?>"
                 style="width:34px;height:34px;cursor:pointer;z-index:25999;" onclick="toggleAvatarMenu()">
 
-                <img src="<?= $pth ?>" style="width:100%;" >
+                <img src="<?= $pth ?>" >
 
             </div>
 
