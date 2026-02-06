@@ -175,7 +175,7 @@ try {
             $itemcode = uniqid();
         }
 
-        
+
         $stmt = $conn->prepare("
             INSERT INTO stfinance (
             sccode, sessionyear, classname, sectionname,
@@ -225,8 +225,8 @@ try {
 
         $stmt->execute();
 
-        echo "Affected rows = " . $stmt->affected_rows;
-        exit;
+        // echo "Affected rows = " . $stmt->affected_rows;
+        // exit;
 
 
 
