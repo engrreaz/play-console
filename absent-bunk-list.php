@@ -197,6 +197,7 @@ $count_class = count($cteacher_data);
 
 <div style="height:80px;"></div>
 
+<?php include 'footer.php'; ?>
 <script>
     // ক্লাসভিত্তিক সেকশন এবং হিরো সামারি সুইচ করা
     function myclass(cur, mot) {

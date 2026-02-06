@@ -144,6 +144,19 @@
 
 
 <script>
+    // Navigation Functions
+    // function report_menu_my_class() { window.location.href = "my-class-report.php"; }
+    // function report_menu_student_list() { window.location.href = "student-list.php"; }
+
+    function report_menu_ebooks_x() { window.location.href = "e-books.php"; }
+    function report_menu_syllabus() { window.location.href = "syllabus.php"; }
+    function report_menu_lesson_plan() { window.location.href = "lesson-plan.php"; }
+    function report_menu_examination() { window.location.href = "exam-manager.php"; }
+</script>
+
+
+
+<script>
 
 
 
