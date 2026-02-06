@@ -99,7 +99,7 @@ if ($tail == 1) {
             FROM stfinance 
             WHERE id = $rowid and sccode='$sccode'";
 
-            // echo $sql;
+            echo $sql;
             $conn->query($sql);
             // $newId = $conn->insert_id;
 
