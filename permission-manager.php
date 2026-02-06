@@ -10,14 +10,14 @@ if (isset($_POST['save_custom_perm'])) {
 
     if ($target_type == 'role') {
         $roles_perms = $_POST['perm']; // [role_name => level]
-        
+
         foreach ($roles_perms as $role => $submitted_val) {
             $role = mysqli_real_escape_string($conn, $role);
             $val = intval($submitted_val);
 
             // কাস্টম এবং গ্লোবাল পারমিশন চেক করি
             $check_custom = $conn->query("SELECT id FROM permission_map_app WHERE page_name='$page' AND sccode='$sccode' AND userlevel='$role' AND email IS NULL");
-            
+
             // গ্লোবাল ভ্যালু কত ছিল তা বের করি (sccode=0 থেকে)
             $check_global = $conn->query("SELECT permission FROM permission_map_app WHERE page_name='$page' AND sccode='0' AND userlevel='$role' LIMIT 1");
             $global_val = ($check_global->num_rows > 0) ? intval($check_global->fetch_assoc()['permission']) : 0;
@@ -38,8 +38,8 @@ if (isset($_POST['save_custom_perm'])) {
     } elseif ($target_type == 'user') {
         $user_email = mysqli_real_escape_string($conn, $_POST['user_email']);
         $user_perm = intval($_POST['user_permission']);
-        
-        if(!empty($user_email)){
+
+        if (!empty($user_email)) {
             $check = $conn->query("SELECT id FROM permission_map_app WHERE page_name='$page' AND sccode='$sccode' AND email='$user_email'");
             if ($check->num_rows > 0) {
                 $conn->query("UPDATE permission_map_app SET permission='$user_perm', updatedby='$usr', modifieedate='$cur' 
@@ -158,7 +158,7 @@ while ($gr = $g_res->fetch_assoc()) {
         border-radius: 8px;
         margin-bottom: 24px;
         padding: 16px;
-        padding-right:0;
+        padding-right: 0;
         border: 1px solid #eee;
     }
 
@@ -317,10 +317,30 @@ while ($gr = $g_res->fetch_assoc()) {
     }
 
     /* পারমিশন ভিত্তিক হালকা ব্যাকগ্রাউন্ড কালার */
-    .bg-p0 { background-color: #f3d2d5 !important; border-color: #fc8d87 !important; } /* লাল - No Access */
-    .bg-p1 { background-color: #f1e3b3 !important; border-color: #f0b863 !important; } /* অরেঞ্জ - Read Only */
-    .bg-p2 { background-color: #E3F2FD !important; border-color: #90CAF9 !important; } /* নীল - Partial */
-    .bg-p3 { background-color: #E8F5E9 !important; border-color: #83d486 !important; } /* সবুজ - Full Access */
+    .bg-p0 {
+        background-color: #f3d2d5 !important;
+        border-color: #fc8d87 !important;
+    }
+
+    /* লাল - No Access */
+    .bg-p1 {
+        background-color: #f1e3b3 !important;
+        border-color: #f0b863 !important;
+    }
+
+    /* অরেঞ্জ - Read Only */
+    .bg-p2 {
+        background-color: #E3F2FD !important;
+        border-color: #90CAF9 !important;
+    }
+
+    /* নীল - Partial */
+    .bg-p3 {
+        background-color: #E8F5E9 !important;
+        border-color: #83d486 !important;
+    }
+
+    /* সবুজ - Full Access */
 </style>
 
 <main>
@@ -362,20 +382,28 @@ while ($gr = $g_res->fetch_assoc()) {
                     $overrides = $custom_perms[$page_name] ?? [];
                     $globals = $global_role_perms[$page_name] ?? []; // এই লাইনটি নতুন
                     ?>
-                    <div class="m3-list-item page-card shadow-sm <?php echo !$is_active ? 'disabled' : ''; ?>" style="margin-right:12px;;"
+                    <div class="m3-list-item page-card shadow-sm <?php echo !$is_active ? 'disabled' : ''; ?>"
+                        style="margin-right:12px;;"
                         onclick='openManagerModal("<?php echo $page_name; ?>", <?php echo json_encode($overrides); ?>, <?php echo json_encode($globals); ?>)'>
-                        <div class="d-flex align-items-center gap-3 w-100">
+                        <div class="d-flex align-items-center w-100">
                             <div class="icon-box <?php echo $is_active ? 'c-inst' : 'c-util'; ?>"
                                 style="width:38px; height:38px; font-size:1rem;">
                                 <i class="bi bi-shield-lock"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="fw-bold" style="font-size:0.85rem;"><?php echo $page_name; ?></div>
-                                <div class="d-flex gap-1 mt-1">
+                                <div class="fw-bold text-dark" style="font-size:0.9rem;">
+                                    <?php echo $p_data['global']['page_title']; ?>
+                                </div>
+                             
+                      
+                                     <div class="flex-grow-1 text-muted" style="font-size:0.65rem;"><?php echo $page_name; ?></div>
+                                <div class="d-flex gap-1 mt-1 text-right">
                                     <span class="perm-pill">Root: <?php echo $p_data['global']['root_page']; ?></span>
                                     <?php if (!empty($overrides))
-                                        echo '<span class="perm-pill custom-badge">CUSTOMIZED</span>'; ?>
+                                        echo '<span class="perm-pill custom-badge">customized</span>'; ?>
                                 </div>
+                        
+                               
                             </div>
                             <i class="bi bi-chevron-right opacity-25"></i>
                         </div>
@@ -388,8 +416,8 @@ while ($gr = $g_res->fetch_assoc()) {
 
 
 
-<div class="modal fade" id="managerModal" tabindex="-1" >
-    <div class="modal-dialog modal-dialog-centered m3-modal-dialog"  style="margin:auto; width:92%;">
+<div class="modal fade" id="managerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered m3-modal-dialog" style="margin:auto; width:92%;">
         <div class="modal-content m3-modal-content shadow-lg">
             <div class="modal-header border-0">
                 <h5 class="fw-bold"><i class="bi bi-sliders2-vertical me-2"></i>Access Controller</h5>
@@ -479,7 +507,7 @@ while ($gr = $g_res->fetch_assoc()) {
      * মডাল ওপেন এবং ডাটা পপুলেট ফাংশন
      */
 
-     function updateRowColor(selectEl) {
+    function updateRowColor(selectEl) {
         const val = selectEl.value;
         const rowEl = selectEl.closest('.user-override-item');
         if (!rowEl) return;
@@ -518,7 +546,7 @@ while ($gr = $g_res->fetch_assoc()) {
                 updateRowColor(selectEl);
 
                 // ড্রপডাউন পরিবর্তন করলে সাথে সাথে কালার চেঞ্জ হওয়া
-                selectEl.onchange = function() {
+                selectEl.onchange = function () {
                     updateRowColor(this);
                 };
             }

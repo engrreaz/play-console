@@ -2,9 +2,6 @@
 $page_title = "Advanced Permission Mapper";
 include 'inc.php';
 
-/**
- * ১. রোল এবং মডিউল লিস্ট লোড করা
- */
 $roles_list = [];
 $role_res = $conn->query("SELECT userlevel FROM rolemanager WHERE sccode='0' ORDER BY id ASC");
 while($r = $role_res->fetch_assoc()) $roles_list[] = $r['userlevel'];
@@ -13,13 +10,11 @@ $modules_list = [];
 $mod_res = $conn->query("SELECT module_name FROM modulelist ORDER BY slno ASC");
 while($m = $mod_res->fetch_assoc()) $modules_list[] = $m['module_name'];
 
-/**
- * ২. সেভ/আপডেট লজিক (সব রোলের জন্য একসাথে)
- */
 if (isset($_POST['save_all_permissions'])) {
     $page = mysqli_real_escape_string($conn, $_POST['page_name']);
     $module = mysqli_real_escape_string($conn, $_POST['module']);
     $root = mysqli_real_escape_string($conn, $_POST['root_page']);
+    $title = mysqli_real_escape_string($conn, $_POST['page_title']);
     $permissions_array = $_POST['perm']; // এটি একটি অ্যারে [role => level]
 
     foreach ($permissions_array as $role => $perm_val) {
@@ -29,11 +24,11 @@ if (isset($_POST['save_all_permissions'])) {
         $check = $conn->query("SELECT id FROM permission_map_app WHERE page_name='$page' AND userlevel='$role' AND sccode='0'");
         
         if ($check->num_rows > 0) {
-            $conn->query("UPDATE permission_map_app SET module='$module', root_page='$root', permission='$perm_val', updatedby='$usr', modifieedate='$cur' 
+            $conn->query("UPDATE permission_map_app SET module='$module', root_page='$root', page_title='$title', permission='$perm_val', updatedby='$usr', modifieedate='$cur' 
                           WHERE page_name='$page' AND userlevel='$role' AND sccode='0'");
         } else {
-            $conn->query("INSERT INTO permission_map_app (page_name, module, root_page, sccode, userlevel, permission, updatedby, modifieedate) 
-                          VALUES ('$page', '$module', '$root', '0', '$role', '$perm_val', '$usr', '$cur')");
+            $conn->query("INSERT INTO permission_map_app (page_name, module, root_page, page_title, sccode, userlevel, permission, updatedby, modifieedate) 
+                          VALUES ('$page', '$module', '$root', '$title', '0', '$role', '$perm_val', '$usr', '$cur')");
         }
     }
     // header("Location: permission-mapper.php?target_level=" . $_GET['target_level']); exit();
@@ -120,9 +115,10 @@ foreach ($php_files as $file) {
             foreach($roles_list as $r) { $perm_json[$r] = $file_data[$r]['permission'] ?? 0; }
             $current_module = reset($file_data)['module'] ?? '';
             $current_root = reset($file_data)['root_page'] ?? '';
+            $current_title = reset($file_data)['page_title'] ?? '';
         ?>
             <div class="m3-list-item perm-card shadow-sm <?php echo $is_unassigned ? 'unassigned' : ''; ?>" 
-                 onclick='openPermModal("<?php echo $file; ?>", "<?php echo $current_module; ?>", "<?php echo $current_root; ?>", <?php echo json_encode($perm_json); ?>)'>
+                 onclick='openPermModal("<?php echo $file; ?>", "<?php echo $current_title; ?>",  "<?php echo $current_module; ?>", "<?php echo $current_root; ?>", <?php echo json_encode($perm_json); ?>)'>
                 <div class="d-flex align-items-center gap-3 w-100">
                     <div class="icon-box <?php echo $is_unassigned ? 'c-exit' : 'c-inst'; ?>" style="width:40px; height:40px;"><i class="bi bi-file-code"></i></div>
                     <div class="flex-grow-1">
@@ -156,6 +152,12 @@ foreach ($php_files as $file) {
                         <i class="bi bi-file-earmark m3-field-icon"></i>
                         <input type="text" name="page_name" id="m_page" class="m3-input-floating bg-light" readonly>
                         <label class="m3-floating-label">FILE NAME</label>
+                    </div>
+
+                     <div class="m3-floating-group">
+                        <i class="bi bi-file-earmark m3-field-icon"></i>
+                        <input type="text" name="page_title" id="m_title" class="m3-input-floating" >
+                        <label class="m3-floating-label">TITLE</label>
                     </div>
 
                     <div class="m3-floating-group">
@@ -205,8 +207,9 @@ foreach ($php_files as $file) {
 <script>
     const pModal = new bootstrap.Modal('#permModal');
 
-    function openPermModal(file, module, root, permsJson) {
+    function openPermModal(file, title, module, root, permsJson) {
         document.getElementById('m_page').value = file;
+        document.getElementById('m_title').value = title;
         document.getElementById('m_module').value = module;
         document.getElementById('m_root').value = root || 'index.php';
 
