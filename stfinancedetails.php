@@ -438,7 +438,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 var modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
 
-                window.location.reload();
+               // window.location.reload();
                 // window.location.reload();
 
             }
