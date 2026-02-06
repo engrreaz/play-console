@@ -133,8 +133,8 @@
         }
 
         .avatar-ring-green {
-            box-shadow: 0 0 0 3px #198754 !important;
-            padding:3px;
+            box-shadow: 0 0 0 2px #198754 !important;
+            padding:2px;
         }
     </style>
 
