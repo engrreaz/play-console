@@ -95,7 +95,7 @@ if ($tail == 1) {
             // $itemcode = $row5["itemcode"];
 
             $sql = "INSERT INTO stfinance 
-            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, itemcode, 'FINE', 'জরিমানা', '$amt', month, idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
+            SELECT NULL, sccode, sessionyear, classname, sectionname, stid, rollno, partid, itemcode, 'FINE', 'জরিমানা', '$amt', '$month', idmon, '$cur', '$usr', '$amt', '$cur', '$usr', paid, paidx, '$amt', pr1, pr1no, pr1date, pr1by, cashbook1, pr2, pr2no, pr2date, pr2by, cashbook2, remark, extra, last_update, validate, validationtime,  deleteby, deletetime, splitid, scan_status
             FROM stfinance 
             WHERE id = $rowid and sccode='$sccode'";
 
