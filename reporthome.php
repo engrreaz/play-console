@@ -6,141 +6,68 @@ include_once 'inc.php';
 /* ============================
    MENU CONFIG
 ============================ */
+$categories = [];
 
-$categories = [
+$sql = "
+SELECT 
+    c.id             AS category_id,
+    c.name           AS category_name,
 
-    'Academic' => [
+    m.id             AS module_id,
+    m.title,
+    m.icon,
+    m.onclick,
+    m.active,
 
-        [
-            'onclick' => 'report_menu_student_list();',
-            'icon' => 'bi-people',
-            'title' => 'Students',
-            'level' => 'any',
-            'active' => true
-        ],
+    GROUP_CONCAT(DISTINCT p.role) AS roles
 
-        [
-            'onclick' => 'report_menu_attnd_register();',
-            'icon' => 'bi-fingerprint',
-            'title' => 'Attendance',
-            'level' => 'any',
-            'active' => true
-        ],
+FROM hub_categories c
 
-        [
-            'onclick' => 'report_menu_absent_bunk_list();',
-            'icon' => 'bi-slash-circle',
-            'title' => 'Absent/Bunk',
-            'level' => 'any',
-            'active' => true
-        ],
+JOIN hub_modules m 
+    ON c.id = m.category_id
 
-        [
-            'onclick' => 'report_menu_cls_routine();',
-            'icon' => 'bi-calendar3-range',
-            'title' => 'Routine',
-            'level' => 'any',
-            'active' => true
-        ],
+LEFT JOIN hub_module_permissions p 
+    ON p.module_id = m.id
+   AND (p.sccode = $sccode OR p.sccode = 0)
 
-        [
-            'onclick' => 'report_menu_my_subjects();',
-            'icon' => 'bi-journal-text',
-            'title' => 'Subjects',
-            'level' => 'any',
-            'active' => true
-        ],
+WHERE c.status = 1
 
-        [
-            'onclick' => 'report_menu_honorable_teachers();',
-            'icon' => 'bi-person-workspace',
-            'title' => 'Staffs',
-            'level' => 'any',
-            'active' => true
-        ],
+GROUP BY m.id
 
-        [
-            'onclick' => 'report_menu_examination();',
-            'icon' => 'bi-pencil',
-            'title' => 'Examination',
-            'level' => 'any',
-            'active' => true
-        ]
-    ],
+ORDER BY c.sort_order, m.sort_order
+";
 
+$res = $conn->query($sql);
 
-    'Finance' => [
+while ($row = $res->fetch_assoc()) {
 
-        [
-            'onclick' => 'report_menu_my_collection();',
-            'icon' => 'bi-wallet2',
-            'title' => 'My Cash',
-            'level' => 'any',
-            'active' => true
-        ],
+    $cat = $row['category_name'];
 
-        [
-            'onclick' => 'report_menu_daily_collection();',
-            'icon' => 'bi-bank',
-            'title' => 'Vault',
-            'level' => ['Administrator', 'Super Administrator', 'Accountants'],
-            'active' => true
-        ]
-    ],
+    if (!isset($categories[$cat])) {
+        $categories[$cat] = [];
+    }
 
+    // ---- permission logic ----
+    if (!empty($row['roles'])) {
 
-    'Resources' => [
+        $roles = explode(',', $row['roles']);
 
-        [
-            'onclick' => 'report_menu_ebooks_x();',
-            'icon' => 'bi-book-fill',
-            'title' => 'E-Library',
-            'level' => 'any',
-            'active' => true
-        ],
+        $level = $roles;
 
-        [
-            'onclick' => 'report_menu_calendar();',
-            'icon' => 'bi-calendar-event',
-            'title' => 'Calendar',
-            'level' => 'any',
-            'active' => true
-        ],
+    } else {
 
-        [
-            'onclick' => 'report_menu_notices();',
-            'icon' => 'bi-megaphone',
-            'title' => 'Notices',
-            'level' => 'any',
-            'active' => true
-        ],
+        // no permission row found = everyone
+        $level = 'any';
+    }
 
-        [
-            'onclick' => 'report_menu_notification();',
-            'icon' => 'bi-chat-dots',
-            'title' => 'Inbox',
-            'level' => 'any',
-            'active' => true
-        ],
-
-        [
-            'onclick' => 'report_menu_syllabus();',
-            'icon' => 'bi-book-half',
-            'title' => 'Syllabus',
-            'level' => 'any',
-            'active' => true
-        ],
-
-        [
-            'onclick' => 'report_menu_lesson_plan();',
-            'icon' => 'bi-book',
-            'title' => 'Lesson Plan',
-            'level' => 'any',
-            'active' => true
-        ]
-    ]
-
-];
+    $categories[$cat][] = [
+        'onclick' => $row['onclick'],
+        'icon' => $row['icon'],
+        'title' => $row['title'],
+        'level' => $level,
+        'active' => (bool) $row['active']
+    ];
+}
 
 
 /* ============================
@@ -166,78 +93,89 @@ if ($count_class > 0) {
 ?>
 
 <style>
-.m3-disabled{
-    opacity:.45;
-    filter:grayscale(1);
-    pointer-events:none;
-    background:#f4f4f4!important;
-}
+    .m3-disabled {
+        opacity: .45;
+        filter: grayscale(1);
+        /* pointer-events: none; */
+        background: #f4f4f4 !important;
+    }
 
-.m3-disabled .icon-box{
-    background:#ddd!important;
-    color:#999!important;
-}
+    .m3-disabled .icon-box {
+        background: #ddd !important;
+        color: #999 !important;
+    }
 
-.m3-disabled .report-title{
-    color:#888!important;
-}
+    .m3-disabled .report-title {
+        color: #888 !important;
+    }
 </style>
 
 
 <main class="pb-0">
 
-<?php foreach ($categories as $cat_name => $items): ?>
+    <?php foreach ($categories as $cat_name => $items): ?>
 
-    <?php
-    $visible_count = 0;
+        <?php
+        $visible_count = 0;
 
-    foreach ($items as $item) {
+        foreach ($items as $item) {
 
-        if (
-            $item['level'] === 'any' ||
-            (is_array($item['level']) && in_array($userlevel, $item['level']))
-        ) {
-            $visible_count++;
-        }
-    }
-
-    if ($visible_count === 0) continue;
-    ?>
-
-    <div class="m3-category-lbl"><?= $cat_name ?></div>
-
-    <div class="m3-grid">
-
-        <?php foreach ($items as $item): ?>
-
-            <?php
-            $is_allowed = (
+            if (
                 $item['level'] === 'any' ||
                 (is_array($item['level']) && in_array($userlevel, $item['level']))
-            );
+            ) {
+                $visible_count++;
+            }
+        }
 
-            if (!$is_allowed) continue;
+        if ($visible_count === 0)
+            continue;
+        ?>
 
-            $active = $item['active'] ?? true;
-            ?>
+        <div class="m3-category-lbl"><?= $cat_name ?></div>
 
-            <a href="javascript:void(0);"
-               class="m3-report-card shadow-sm <?= !$active ? 'm3-disabled' : '' ?>"
-               <?= $active ? 'onclick="'.$item['onclick'].'"' : '' ?>>
+        <div class="m3-grid">
 
-                <div class="icon-box" style="margin-right:0;margin-bottom:10px;">
-                    <i class="bi <?= $item['icon'] ?>"></i>
-                </div>
+            <?php foreach ($items as $item): ?>
 
-                <span class="report-title"><?= $item['title'] ?></span>
+                <?php
+                $is_allowed = (
+                    $item['level'] === 'any' ||
+                    (is_array($item['level']) && in_array($userlevel, $item['level']))
+                );
 
-            </a>
+                if (!$is_allowed)
+                    continue;
+                $active = $item['active'] ?? true;
+                ?>
 
-        <?php endforeach; ?>
+                <!-- <a href="javascript:void(0);" class="m3-report-card shadow-sm 
+                <?php
+                //echo  !$active ? 'm3-disabled' : '' 
+                ?>
+                " <?php
+                //  echo $active ? 'onclick="' . $item['onclick'] . '"' : ''
+                ?>
+                          > -->
 
-    </div>
 
-<?php endforeach; ?>
+
+                <a href="javascript:void(0);" class="m3-report-card shadow-sm <?= !$active ? 'm3-disabled' : '' ?>"
+                    onclick="<?= $item['onclick'] ?>">
+
+                    <div class="icon-box" style="margin-right:0;margin-bottom:10px;">
+                        <i class="bi <?= $item['icon'] ?>"></i>
+                    </div>
+
+                    <span class="report-title"><?= $item['title'] ?></span>
+
+                </a>
+
+            <?php endforeach; ?>
+
+        </div>
+
+    <?php endforeach; ?>
 
 </main>
 

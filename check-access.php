@@ -137,7 +137,7 @@ if ($is_admin > 3 || $is_chief > 0) {
 // --- get app override permission if any
 
 
-if(isset($_GET['perm'])) $permission = $_GET['perm'];
+if(isset($_GET['perm']) && $is_admin > 3) $permission = $_GET['perm'];
 
 
 if ($permission == 0) {

@@ -122,8 +122,9 @@ foreach ($php_files as $file) {
                 <div class="d-flex align-items-center gap-3 w-100">
                     <div class="icon-box <?php echo $is_unassigned ? 'c-exit' : 'c-inst'; ?>" style="width:40px; height:40px;"><i class="bi bi-file-code"></i></div>
                     <div class="flex-grow-1">
-                        <div class="fw-bold" style="font-size:0.9rem;"><?php echo $file; ?></div>
-                        <div class="small opacity-75"><?php echo $current_module ?: 'No module assigned'; ?></div>
+                        <div class="fw-bold" style="font-size:0.8rem;"><?php echo $file; ?></div>
+                        <div class="fw-bold" style="font-size:0.7rem;"><?php echo $current_title; ?></div>
+                        <div class=" opacity-75" style="font-size:0.6rem;"><?php echo $current_module ?: 'No module assigned'; ?></div>
                     </div>
                     <?php if(!$is_unassigned): ?>
                         <span class="p-badge">Mapped</span>

@@ -125,6 +125,15 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_data_center();">
+        <div class="icon-box c-user"><i class="bi bi-info-circle"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Data Center</div>
+            <div class="st-desc">Information hub management</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
+
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
         <div class="m3-cat-label">Developer Console</div>
 
@@ -181,6 +190,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_user_manager() { window.location.href = "user-manager.php"; }
     function settings_admin_task_manager() { window.location.href = "task-manager.php"; }
     function settings_admin_fin_setup() { window.location.href = "st-fin-setup.php"; }
+    function settings_admin_data_center() { window.location.href = "hub-admin.php"; }
 </script>
 
 <?php include 'footer.php'; ?>
