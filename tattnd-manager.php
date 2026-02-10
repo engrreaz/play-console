@@ -90,6 +90,7 @@ $res = $q->get_result();
 
     .status-icon-m3.active {
         color: black;
+        border: 1px solid gray;
     }
 
     /* Modal & Accordion Refinement */
@@ -187,7 +188,7 @@ $res = $q->get_result();
                 </div>
             </div>
 
-            <div class="dropdown">
+            <div class="dropdown" style="border-radius:50%;">
                 <button class="btn btn-light rounded-circle shadow-sm" data-bs-toggle="dropdown"
                     style="width: 38px; height: 38px; border-radius:50%;">
                     <i class="bi bi-three-dots-vertical"></i>
