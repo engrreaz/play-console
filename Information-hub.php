@@ -1,6 +1,6 @@
 <?php
 ob_start();
-$page_title = "Hub Manager";
+$page_title = "Information center";
 include_once 'inc.php'; // DB connection & common includes
 
 // ==============================
@@ -256,14 +256,6 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     }
-
-    .cat-header {
-        cursor: grab;
-    }
-
-    .module-tile {
-        cursor: grab;
-    }
 </style>
 
 
@@ -273,50 +265,36 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     <div class="hero-container">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="fw-black m-0">Hub Manager</h4>
+                <h4 class="fw-black m-0">Information Center</h4>
                 <p class="small m-0 opacity-75">Control and categorize modules</p>
             </div>
-            <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 " style="z-index:auto;"
-                onclick="openCategoryModal()">
-                <i class="bi bi-plus-lg me-1"></i> New Category
-            </button>
+
         </div>
     </div>
 
     <?php while ($c = $cats->fetch_assoc()): ?>
-        <div class="cat-container-card shadow-sm sortable-category" data-id="<?= $c['id'] ?>">
+        <div class="cat-container-card shadow-sm">
             <div class="cat-header">
                 <div>
                     <h6 class="cat-title"><?= $c['name'] ?></h6>
+
+                </div>
+                <div class="d-flex gap-1">
                     <span
                         class="badge rounded-pill mt-1 <?= $c['status'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?>"
                         style="font-size: 0.6rem;">
                         <?= $c['status'] ? 'ACTIVE' : 'OFFLINE' ?>
                     </span>
                 </div>
-                <div class="d-flex gap-1">
-                    <button class="m3-icon-btn bg-white text-primary border shadow-sm"
-                        onclick='editCategory(<?= json_encode($c) ?>)'>
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="m3-icon-btn bg-white text-success border shadow-sm"
-                        onclick="openModuleModalWithCat(<?= $c['id'] ?>)">
-                        <i class="bi bi-plus-circle-fill"></i>
-                    </button>
-                    <button class="m3-icon-btn bg-white text-danger border shadow-sm"
-                        onclick="deleteCategory(<?= $c['id'] ?>)">
-                        <i class="bi bi-trash3"></i>
-                    </button>
-                </div>
             </div>
 
-            <div class="module-list sortable-modules" data-category="<?= $c['id'] ?>">
+            <div class="module-list">
                 <?php
                 $mod_query = $conn->query("SELECT * FROM hub_modules WHERE category_id={$c['id']} ORDER BY sort_order");
                 if ($mod_query->num_rows > 0):
                     while ($m = $mod_query->fetch_assoc()):
                         ?>
-                        <div class="module-tile" data-id="<?= $m['id'] ?>">
+                        <div class="module-tile">
                             <div class="mod-icon-box shadow-sm">
                                 <i class="<?= $m['icon'] ?>"></i>
                             </div>
@@ -332,9 +310,6 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                                 </button>
                                 <button class="m3-icon-btn bg-light text-secondary" onclick="openPermModal(<?= $m['id'] ?>)">
                                     <i class="bi bi-shield-lock"></i>
-                                </button>
-                                <button class="m3-icon-btn bg-light text-danger" onclick="deleteModule(<?= $m['id'] ?>)">
-                                    <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </div>
@@ -392,22 +367,22 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                         <div class="col-md-6">
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Module Title</label>
-                                <input type="text" name="title" id="mod_title" class="m3-field">
+                                <input type="text" name="title" id="mod_title" class="m3-field" disabled>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6" hidden>
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Icon Class</label>
                                 <input type="text" name="icon" id="mod_icon" class="m3-field" placeholder="bi bi-*">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6" hidden>
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Onclick JS Action</label>
                                 <input type="text" name="onclick" id="mod_onclick" class="m3-field">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6" hidden>
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Select Category</label>
                                 <select name="category_id" id="mod_cat" class="m3-field form-select">
@@ -473,72 +448,6 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
      FOOTER
 ============================== -->
 <?php include 'footer.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-<script>
-    // ==========================
-    // CATEGORY SORTING
-    // ==========================
-
-    new Sortable(document.querySelector("main"), {
-        animation: 150,
-        handle: ".cat-header",
-        draggable: ".sortable-category",
-        onEnd: function () {
-
-            let order = [];
-
-            document.querySelectorAll(".sortable-category").forEach((el, i) => {
-                order.push({
-                    id: el.dataset.id,
-                    pos: i + 1
-                });
-            });
-
-            fetch("ajax/update-cat-order.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(order)
-            });
-        }
-    });
-
-</script>
-
-<script>
-    // ==========================
-    // MODULE SORTING
-    // ==========================
-
-    document.querySelectorAll(".sortable-modules").forEach(list => {
-
-        new Sortable(list, {
-            animation: 150,
-            draggable: ".module-tile",
-            onEnd: function () {
-
-                let catId = list.dataset.category;
-
-                let order = [];
-
-                list.querySelectorAll(".module-tile").forEach((el, i) => {
-                    order.push({
-                        id: el.dataset.id,
-                        pos: i + 1,
-                        category: catId
-                    });
-                });
-
-                fetch("ajax/update-module-order.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(order)
-                });
-            }
-        });
-
-    });
-
-</script>
 
 
 <script>

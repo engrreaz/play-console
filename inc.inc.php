@@ -13,10 +13,8 @@ $usr = $pass = $token = $pth = '';
 $sccode = $geolat = $geolon = 0;
 $fullname = '';
 $scname = '';
-// $userlevel = 'Guest';
-//********************************************************************
-// echo  $_SESSION["user"];
-// echo $htp;
+
+
 $css = 'default';
 $sql0x = "SELECT * FROM browser where browsername='$htp' LIMIT 1";  //echo $sql0x;
 $result0xrtyv = $conn->query($sql0x);
@@ -355,7 +353,3 @@ include 'header.php';
         z-index: 1000;
     }
 </style>
-
-<div id="sms-send-response-block"></div>
-
-<div id="mbox2"></div>
