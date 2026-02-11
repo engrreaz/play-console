@@ -183,11 +183,14 @@ if ($count_class > 0) {
 <?php include 'footer.php'; ?>
 
 <script>
-   function report_menu_tattnd_month(month, year) {
-    // বর্তমান তারিখ পাওয়ার জন্য Date অবজেক্ট
+function report_menu_tattnd_month(month, year) {
     const now = new Date();
-    const targetMonth = month || (now.getMonth() + 1);
-    const targetYear = year || now.getFullYear();
+    const targetMonth = String(month || (now.getMonth() + 1)).padStart(2, '0'); // 2-digit
+    const targetYear  = year || now.getFullYear();
     window.location.href = `tattnd-month.php?month=${targetMonth}&year=${targetYear}`;
+}
+
+function tattnd_tid(tid){
+        window.location.href = `tattnd-tid.php?tid=${tid}`;
 }
 </script>

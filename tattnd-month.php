@@ -348,7 +348,7 @@ while ($d <= $end) {
                     }
                     ?>
                     <tr>
-                        <td class="sticky-col text-dark teacher-click" data-tname="<?= $t['tname'] ?>" data-p="<?= $p ?>"
+                        <td class="sticky-col text-dark teacher-click" data-tid="<?= $t['tid'] ?>" data-tname="<?= $t['tname'] ?>" data-p="<?= $p ?>"
                             data-a="<?= $a ?>" data-lv="<?= $lv ?>">
                             <?= $t['tname'] ?>
                         </td>
@@ -502,20 +502,30 @@ while ($d <= $end) {
     </div>
 </div>
 
+
+
 <div class="modal fade" id="teacherSummaryModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-m3 border-0 shadow-lg">
+        <div class="modal-content modal-content-m3 border-0 shadow-lg" style="border-radius: 28px;">
             <div class="modal-header border-0 pb-0">
                 <h6 class="fw-bold mb-0">Attendance Summary</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <h5 class="fw-black text-primary mb-3 text-center" id="summaryTName"></h5>
-                <div class="row g-2" id="summaryStats"></div>
+                <div class="row g-2 mb-4" id="summaryStats"></div>
+
+                <div class="text-center mt-2">
+                    <a id="viewFullLogsBtn" href="#" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm"
+                        style="letter-spacing: 1px;">
+                        <i class="bi bi-journal-text me-2"></i> VIEW FULL LOGS
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 
 <?php include 'footer.php'; ?>
@@ -523,6 +533,7 @@ while ($d <= $end) {
 <script>
 
 </script>
+
 
 <script>
     $(document).ready(function () {
@@ -538,17 +549,30 @@ while ($d <= $end) {
 
         // ২. টিচারের নামে ক্লিক করলে পরিসংখ্যান দেখানো
         $('.teacher-click').on('click', function () {
+            // ডাটা রিসিভ করা
+            let tid = $(this).data('tid'); // নিশ্চিত করুন আপনার HTML-এ data-tid আছে
             let name = $(this).data('tname');
             let p = $(this).data('p');
             let a = $(this).data('a');
             let lv = $(this).data('lv');
 
+            // টেক্সট এবং পরিসংখ্যান সেট করা
             $('#summaryTName').text(name);
             $('#summaryStats').html(`
-            <div class="col-4 text-center"><div class="p-2 bg-success-subtle rounded"><b class="d-block">${p}</b><small>Present</small></div></div>
-            <div class="col-4 text-center"><div class="p-2 bg-danger-subtle rounded"><b class="d-block">${a}</b><small>Absent</small></div></div>
-            <div class="col-4 text-center"><div class="p-2 bg-warning-subtle rounded"><b class="d-block">${lv}</b><small>Leave</small></div></div>
-        `);
+                <div class="col-4 text-center">
+                    <div class="p-2 bg-success-subtle rounded-4"><b class="d-block fs-4">${p}</b><span>Present</span></div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="p-2 bg-danger-subtle rounded-4"><b class="d-block fs-4">${a}</b><span>Absent</span></div>
+                </div>
+                <div class="col-4 text-center">
+                    <div class="p-2 bg-warning-subtle rounded-4"><b class="d-block fs-4">${lv}</b><span>Leave</span></div>
+                </div>
+            `);
+
+            // লিংকে ডাইনামিকভাবে TID সেট করা
+            $('#viewFullLogsBtn').attr('href', `tattnd-tid.php?tid=${tid}`);
+
             $('#teacherSummaryModal').modal('show');
         });
     });
