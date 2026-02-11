@@ -14,7 +14,6 @@ $sccode = $geolat = $geolon = 0;
 $fullname = '';
 $scname = '';
 
-
 $css = 'default';
 $sql0x = "SELECT * FROM browser where browsername='$htp' LIMIT 1";  //echo $sql0x;
 $result0xrtyv = $conn->query($sql0x);
