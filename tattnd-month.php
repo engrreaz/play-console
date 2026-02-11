@@ -14,7 +14,7 @@ $end = date("Y-m-t", strtotime($start));
 $weekendDays = [];
 foreach ($ins_all_settings as $row) {
     if ($row['setting_title'] === 'Weekends') {
-        $weekendDays = explode(' ', trim($row['settings_value']));
+        $weekendDays = explode('.', trim($row['settings_value']));
         break;
     }
 }
