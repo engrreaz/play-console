@@ -432,7 +432,7 @@ foreach ($dates as $dt) {
                         $endTime = strtotime($att[$dt]['realout'] ?: '17:30');
                         echo (($endTime - $startTime) / 3600) . ",";
                     } else {
-                        echo "0,";
+                        echo "6,";
                     }
                 } ?>
             ],
@@ -467,7 +467,7 @@ foreach ($dates as $dt) {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Hours' } },
+                y: { beginAtZero: true, title: { display: true, text: 'Attendance' } },
                 x: { title: { display: true, text: 'Day' } }
             }
         }
