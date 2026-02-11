@@ -2,7 +2,9 @@
 require_once "../inc.light.php";
 
 $tid   = $_GET['tid'] ?? 0;
-$month = $_GET['month'] ?? date('m');
+$month = isset($_GET['month']) 
+    ? str_pad((int)$_GET['month'], 2, '0', STR_PAD_LEFT) 
+    : date('m');
 $year  = $_GET['year'] ?? date('Y');
 
 if(!$tid) die('Teacher ID missing');
