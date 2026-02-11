@@ -266,6 +266,16 @@ while ($d <= $end) {
         align-items: center;
         gap: 4px;
     }
+
+    .sticky-col,
+    .att-cell {
+        cursor: pointer;
+    }
+
+    .sticky-col:hover {
+        text-decoration: underline;
+        color: var(--m3-primary);
+    }
 </style>
 
 
@@ -317,9 +327,31 @@ while ($d <= $end) {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($teachers as $t): ?>
+                <?php
+                foreach ($teachers as $t):
+                    // পরিসংখ্যান হিসাব করুন
+                    $p = 0;
+                    $a = 0;
+                    $l = 0;
+                    $lv = 0;
+                    foreach ($dates as $dt) {
+                        $dayName = date('l', strtotime($dt));
+                        if (isset($leave[$t['tid']][$dt]))
+                            $lv++;
+                        elseif (isset($att[$t['tid']][$dt])) {
+                            $stin = $att[$t['tid']][$dt]['statusin'];
+                            if ($stin == 'fast' || $stin == 'late')
+                                $p++; // আপনার লজিক অনুযায়ী
+                            if ($stin == 'ABSENT')
+                                $a++;
+                        }
+                    }
+                    ?>
                     <tr>
-                        <td class="sticky-col  text-dark"><?= $t['tname'] ?></td>
+                        <td class="sticky-col text-dark teacher-click" data-tname="<?= $t['tname'] ?>" data-p="<?= $p ?>"
+                            data-a="<?= $a ?>" data-lv="<?= $lv ?>">
+                            <?= $t['tname'] ?>
+                        </td>
 
 
                         <?php foreach ($dates as $dt):
@@ -402,8 +434,36 @@ while ($d <= $end) {
                                 $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
                             }
 
+
+
+
+
+
+                            // লুপের ভেতর যেখানে কন্ডিশন চেক করছেন সেখানে $detail সেট করুন:
+                            $detail = "";
+                            $header = "Record Detail";
+
+                            if (isset($cal[$dt]) && $cal[$dt]['work'] == 0) {
+                                $header = "Holiday";
+                                $detail = "Event: " . $cal[$dt]['category'];
+                            } elseif (in_array($dayName, $weekendDays)) {
+                                $header = "Weekend";
+                                $detail = "Day: " . $dayName;
+                            } elseif (isset($leave[$t['tid']][$dt])) {
+                                $header = "Leave";
+                                $detail = "Type: " . strtoupper($leave[$t['tid']][$dt]);
+                            } elseif (isset($att[$t['tid']][$dt])) {
+                                $a = $att[$t['tid']][$dt];
+                                $header = date('d M, Y', strtotime($dt));
+                                $detail = "In: " . ($a['detectin'] ?: '--:--') . " (" . $a['statusin'] . ")<br>" .
+                                    "Out: " . ($a['detectout'] ?: '--:--') . " (" . $a['statusout'] . ")";
+                            }
                             ?>
-                            <td class="att-cell <?= $cls ?> text-center"><?= $icon ?></td>
+
+
+                            <td class="att-cell <?= $cls ?> cell-click" data-header="<?= $header ?>" data-info="<?= $detail ?>">
+                                <?= $icon ?>
+                            </td>
                         <?php endforeach; ?>
 
 
@@ -426,10 +486,72 @@ while ($d <= $end) {
     <div class="legend-item weekend">W: Weekend</div>
 </div>
 
+
+
+<div class="modal fade" id="cellDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content modal-content-m3 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0" id="detailHeader">Attendance Detail</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detailContent" class="text-center py-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="teacherSummaryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-m3 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0">Attendance Summary</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="fw-black text-primary mb-3 text-center" id="summaryTName"></h5>
+                <div class="row g-2" id="summaryStats"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <?php include 'footer.php'; ?>
 
 <script>
 
+</script>
+
+<script>
+    $(document).ready(function () {
+        // ১. সেলে ক্লিক করলে বিস্তারিত দেখানো
+        $('.cell-click').on('click', function () {
+            let header = $(this).data('header');
+            let info = $(this).data('info');
+
+            $('#detailHeader').text(header);
+            $('#detailContent').html(info || 'No record found');
+            $('#cellDetailModal').modal('show');
+        });
+
+        // ২. টিচারের নামে ক্লিক করলে পরিসংখ্যান দেখানো
+        $('.teacher-click').on('click', function () {
+            let name = $(this).data('tname');
+            let p = $(this).data('p');
+            let a = $(this).data('a');
+            let lv = $(this).data('lv');
+
+            $('#summaryTName').text(name);
+            $('#summaryStats').html(`
+            <div class="col-4 text-center"><div class="p-2 bg-success-subtle rounded"><b class="d-block">${p}</b><small>Present</small></div></div>
+            <div class="col-4 text-center"><div class="p-2 bg-danger-subtle rounded"><b class="d-block">${a}</b><small>Absent</small></div></div>
+            <div class="col-4 text-center"><div class="p-2 bg-warning-subtle rounded"><b class="d-block">${lv}</b><small>Leave</small></div></div>
+        `);
+            $('#teacherSummaryModal').modal('show');
+        });
+    });
 </script>
 
 </body>
