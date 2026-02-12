@@ -1,30 +1,16 @@
 <?php
 include '../inc.light.php';
+include_once '../functions.php';
 
 $tid = $_POST['tid'];
-$user = $usr;
+$time = $_POST['time'] ?? $cur;
+$detect = 'Manual';
 
-$chk = $conn->prepare("
-    SELECT manual_st FROM tattnd_manager 
-    WHERE tid=? AND sccode=? order by id desc LIMIT 1
-");
-$chk->bind_param("ii",$tid,$sccode);
-$chk->execute();
-$st = $chk->get_result()->fetch_assoc()['manual_st'];
 
-if(!$st){
-    echo "disabled";
-    exit;
+$att = saveTeacherAttendance($tid, $detect, $time);
+if($att){
+    echo 'OK';
+} else {
+    echo 'FALSE';
 }
-
-$today = date('Y-m-d');
-$now = date('H:i:s');
-
-$conn->query("
-INSERT INTO teacherattnd
-(tid,adate,realin,detectin,entryby,sccode,st)
-VALUES
-('$tid','$today','$now','Manual','$user','$sccode','IN')
-");
-
-echo "ok";
+?>

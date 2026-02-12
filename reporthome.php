@@ -193,4 +193,7 @@ function report_menu_tattnd_month(month, year) {
 function tattnd_tid(tid){
         window.location.href = `tattnd-tid.php?tid=${tid}`;
 }
+function tattnd_manager(){
+        window.location.href = `tattnd-manager.php`;
+}
 </script>

@@ -2,16 +2,16 @@
 $page_title = "Teacher Attendance Detail";
 require_once "inc.php";
 
-$tid = $_GET['tid'] ?? 0;
-if (!$tid)
-    die("Teacher ID not specified");
+$tid = isset($_GET['tid']) ? intval($_GET['tid']) : 0;
+
 
 // Month & Year
 $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
+$day = date('d');
 
 $start = "$year-$month-01";
-$end = date("Y-m-t", strtotime($start));
+$end = date("Y-m-$day", strtotime($start));
 
 /* -----------------------
    Weekend Settings
@@ -19,10 +19,105 @@ $end = date("Y-m-t", strtotime($start));
 $weekendDays = [];
 foreach ($ins_all_settings as $row) {
     if ($row['setting_title'] === 'Weekends') {
-        $weekendDays = explode(' ', trim($row['settings_value']));
+        $weekendDays = explode('.', trim($row['settings_value']));
         break;
     }
 }
+
+
+
+/* ============================
+   SHOW TEACHER LIST IF NO TID
+============================ */
+if (!$tid) {
+
+    $tlist = $conn->prepare("
+        SELECT tid, tname
+        FROM teacher
+        WHERE sccode=?
+        ORDER BY tname
+    ");
+    $tlist->bind_param("i", $sccode);
+    $tlist->execute();
+    $res = $tlist->get_result();
+    ?>
+
+    <div class="container py-3">
+        <h5 class="fw-bold mb-3">Select Teacher</h5>
+
+        <div class="row g-3">
+
+            <?php while ($t = $res->fetch_assoc()): ?>
+
+                <div class="col-12">
+
+                    <a href="?tid=<?= $t['tid'] ?>" style="text-decoration:none;">
+
+                        <div class="card shadow-sm border-0 mb-2" style="border-radius:14px;">
+
+                            <div class="card-body d-flex align-items-center">
+
+                                <!-- Avatar -->
+                                <div style="
+                    width:54px;
+                    height:54px;
+                    min-width:54px;
+                    background:#6750A4;
+                    color:white;
+                    border-radius:50%;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-weight:700;
+                    font-size:18px;">
+
+                                    <?= strtoupper(substr($t['tname'], 0, 1)) ?>
+                                </div>
+
+
+                                <!-- Info -->
+                                <div class="ms-3 flex-grow-1">
+
+                                    <div class="fw-bold text-dark" style="font-size:1rem;">
+                                        <?= $t['tname'] ?>
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        ID: <?= $t['tid'] ?>
+                                    </div>
+
+                                    <?php if (!empty($t['designation'])): ?>
+                                        <div class="small text-primary fw-semibold">
+                                            <?= $t['designation'] ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                </div>
+
+                                <!-- Arrow -->
+                                <div class="text-muted">
+                                    <i class="bi bi-chevron-right fs-5"></i>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+            <?php endwhile; ?>
+
+        </div>
+    </div>
+
+    <?php
+    include 'footer.php';
+    exit;   // ⭐⭐⭐ গুরুত্বপূর্ণ
+}
+
+
 
 /* -----------------------
    Teacher Info
@@ -78,7 +173,7 @@ while ($r = $lr->fetch_assoc()) {
 $cq = $conn->prepare("
     SELECT date, dateto, category, work 
     FROM calendar
-    WHERE sccode=? AND (date BETWEEN ? AND ? OR dateto BETWEEN ? AND ?)
+    WHERE (sccode=? OR sccode=0) AND (date BETWEEN ? AND ? OR dateto BETWEEN ? AND ?)
 ");
 $cq->bind_param("issss", $sccode, $start, $end, $start, $end);
 $cq->execute();
@@ -103,6 +198,7 @@ while ($d <= $end) {
     $dates[] = $d;
     $d = date("Y-m-d", strtotime("+1 day", strtotime($d)));
 }
+$dates = array_reverse($dates);
 
 /* -----------------------
    Statistics
@@ -149,25 +245,14 @@ foreach ($dates as $dt) {
         --att-holiday-text: #6750A4;
     }
 
-    body {
-        background: var(--m3-surface);
-        font-family: 'Segoe UI', sans-serif;
-    }
 
-    /* Hero Section */
-    .hero-container {
-        margin: 12px;
-        padding: 28px 20px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
-        color: white;
-        box-shadow: 0 8px 24px rgba(103, 80, 164, 0.2);
-    }
+
+
 
     /* Stats Dashboard */
     .m3-stat-card {
         background: white;
-        border-radius: 16px;
+        border-radius: 8px;
         padding: 12px;
         text-align: center;
         border: 1px solid #F0F0F0;
@@ -278,10 +363,18 @@ foreach ($dates as $dt) {
 
     .m3-chart-card {
         background: white;
-        border-radius: 20px;
+        border-radius: 8px;
         padding: 16px;
         margin: 0 12px 20px;
         border: 1px solid #F0F0F0;
+    }
+
+
+
+    .weekend {
+        background: #F5F5F5;
+        color: #757575;
+        border: 1px dashed #E0E0E0;
     }
 </style>
 
@@ -322,7 +415,7 @@ foreach ($dates as $dt) {
 
 <div class="m3-chart-card shadow-sm">
     <div class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Work Hours Trend</div>
-    <canvas id="attChart" height="120"></canvas>
+    <canvas id="attChart" height="150"></canvas>
 </div>
 
 
@@ -365,7 +458,7 @@ foreach ($dates as $dt) {
                 $icon = 'A';
             }
             ?>
-            <div class="attendance-tile shadow-sm" data-date="<?= $dt ?>">
+            <div class="attendance-tile shadow-sm  " data-date="<?= $dt ?>">
                 <div class="date-box">
                     <div class="day"><?= date('d', strtotime($dt)) ?></div>
                     <div class="month"><?= date('D', strtotime($dt)) ?></div>
@@ -415,65 +508,131 @@ foreach ($dates as $dt) {
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
 <script>
-    const weekendDays = <?= json_encode($weekendDays) ?>; // JS array
 
     const ctx = document.getElementById('attChart').getContext('2d');
-    const chartData = {
-        labels: [<?php foreach ($dates as $dt) {
-            echo "'" . date('d', strtotime($dt)) . "',";
-        } ?>],
-        datasets: [{
-            label: 'Attendance',
-            data: [
-                <?php foreach ($dates as $dt) {
-                    if (isset($att[$dt])) {
-                        $startTime = strtotime($att[$dt]['realin'] ?: '09:30');
-                        $endTime = strtotime($att[$dt]['realout'] ?: '17:30');
-                        echo (($endTime - $startTime) / 3600) . ",";
-                    } else {
-                        echo "6,";
-                    }
-                } ?>
-            ],
-            backgroundColor: [
-                <?php foreach ($dates as $dt) {
-                    $dayName = date('l', strtotime($dt));
-                    if (isset($cal[$dt]) && $cal[$dt]['work'] == 0)
-                        echo "'#ccc',";
-                    elseif (in_array($dayName, $weekendDays))
-                        echo "'#aaa',";
-                    elseif (isset($leave[$dt]))
-                        echo "'#FF8F00',";
-                    elseif (isset($att[$dt])) {
-                        $stin = strtolower($att[$dt]['statusin']);
-                        if ($stin == 'late')
-                            echo "'#FFEB3B',";
-                        elseif ($stin == 'absent')
-                            echo "'#F44336',";
-                        else
-                            echo "'#4CAF50',";
-                    } else
-                        echo "'#F44336',";
-                } ?>
-            ]
-        }]
-    };
+
+    const labels = [];
+    const bottomSeg = [];
+    const middleSeg = [];
+    const topSeg = [];
+    const middleColors = [];
+
+    <?php foreach ($dates as $dt):
+
+        $day = date('d', strtotime($dt));
+
+        // ----- DEFAULT TIMES -----
+        $inHour = 9;
+        $outHour = 15;
+
+        if (isset($att[$dt])) {
+
+            if (!empty($att[$dt]['realin'])) {
+                $ts = strtotime($att[$dt]['realin']);
+                $inHour = date('H', $ts) + (date('i', $ts) / 60);
+            }
+
+            if (!empty($att[$dt]['realout'])) {
+                $ts = strtotime($att[$dt]['realout']);
+                $outHour = date('H', $ts) + (date('i', $ts) / 60);
+            }
+
+        }
+
+
+        // Boundaries
+        $start = 7;
+        $end = 18;
+
+        $bottom = max(0, $inHour - $start + 0.5);
+        $middle = max(0, $outHour - $inHour);
+        $top = max(0, $end - $outHour);
+
+        // ----- COLOR LOGIC -----
+        $dayName = date('l', strtotime($dt));
+
+        if (isset($cal[$dt]) && $cal[$dt]['work'] == 0)
+            $color = '#CCCCCC';
+        elseif (in_array($dayName, $weekendDays))
+            $color = '#AAAAAA';
+        elseif (isset($leave[$dt]))
+            $color = '#FF8F00';
+        elseif (isset($att[$dt])) {
+            $stin = strtolower($att[$dt]['statusin']);
+            if ($stin == 'late')
+                $color = '#FFEB3B';
+            elseif ($stin == 'absent')
+                $color = '#F44336';
+            else
+                $color = '#4CAF50';
+        } else
+            $color = '#F44336';
+        ?>
+
+        labels.push("<?= $day ?>");
+        bottomSeg.push(<?= $bottom ?>);
+        middleSeg.push(<?= $middle ?>);
+        topSeg.push(<?= $top ?>);
+        middleColors.push("<?= $color ?>");
+
+    <?php endforeach; ?>
+
+    // Reverse to show latest first
+    labels.reverse();
+    bottomSeg.reverse();
+    middleSeg.reverse();
+    topSeg.reverse();
+    middleColors.reverse();
 
     new Chart(ctx, {
         type: 'bar',
-        data: chartData,
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    data: bottomSeg,
+                    backgroundColor: '#f5f3f3',
+                    stack: 'timeline'
+                },
+                {
+                    data: middleSeg,
+                    backgroundColor: middleColors,
+                    stack: 'timeline'
+                },
+                {
+                    data: topSeg,
+                    backgroundColor: '#E0E0E0',
+                    stack: 'timeline'
+                }
+            ]
+        },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false }
+            },
             scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Attendance' } },
-                x: { title: { display: true, text: 'Day' } }
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    min: 0,
+                    max: 11,
+                    ticks: {
+                        callback: (v) => (v + 7) + ":00"
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                }
             }
         }
     });
 
 </script>
+
 
 
 

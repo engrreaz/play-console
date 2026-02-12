@@ -1,16 +1,5 @@
 <div id="avatarMenu" class="avatar-dropdown shadow-sm">
-    <?php
-    if (isset($drop_down_menu_1) && $drop_down_menu_1 !== '') {
-        echo '<div id="drop-down-menu-1 " class="dd-item text-primary" onclick="drop_down_menu_1()">' . $drop_down_menu_1 . '</div>';
-    }
-    if (isset($drop_down_menu_2) && $drop_down_menu_2 !== '') {
-        echo '<div id="drop-down-menu-2 " class="dd-item text-primary" onclick="drop_down_menu_2()">' . $drop_down_menu_2 . '</div>';
-    }
-    if (isset($drop_down_menu_3) && $drop_down_menu_3 !== '') {
-        echo '<div id="drop-down-menu-3" class="dd-item  text-primary" onclick="drop_down_menu_3()">' . $drop_down_menu_3 . '</div>';
-    }
 
-    ?>
 
     <div class="dd-divider"></div>
     <div class="dd-item text-muted text-center small pb-2 d-block">
@@ -36,6 +25,27 @@
     <div class="dd-item text-muted small pb-2">Session <span
             class="session-pill py-0 float-end m-0"><?= $sessionyear ?></span></div>
     <div class="dd-divider"></div>
+
+
+    <?php
+    if (isset($drop_down_menu_1) && $drop_down_menu_1 !== '') {
+        echo '<div id="drop-down-menu-1 " class="dd-item text-primary" onclick="drop_down_menu_1()">' . $drop_down_menu_1 . '</div>';
+        echo ' <div class="dd-divider"></div>';
+    }
+    if (isset($drop_down_menu_2) && $drop_down_menu_2 !== '') {
+        echo '<div id="drop-down-menu-2 " class="dd-item text-primary" onclick="drop_down_menu_2()">' . $drop_down_menu_2 . '</div>';
+        echo ' <div class="dd-divider"></div>';
+    }
+    if (isset($drop_down_menu_3) && $drop_down_menu_3 !== '') {
+        echo '<div id="drop-down-menu-3" class="dd-item  text-primary" onclick="drop_down_menu_3()">' . $drop_down_menu_3 . '</div>';
+        echo ' <div class="dd-divider"></div>';
+    }
+
+
+    ?>
+
+
+
 
     <div class="dd-item" onclick="goProfile()"> <i class="bi bi-mortarboard-fill me-2"></i> Institute Profile
     </div>

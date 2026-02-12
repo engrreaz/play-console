@@ -25,9 +25,6 @@ $res = $q->get_result();
 
 
 <style>
-
-
-
     /* Teacher Card Design */
     .m3-teacher-card {
         background: #fff;
@@ -150,8 +147,7 @@ $res = $q->get_result();
     }
 </style>
 
-<div class="hero-container"
-    >
+<div class="hero-container">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="fw-black m-0">Teacher Directory</h4>
@@ -290,7 +286,7 @@ $res = $q->get_result();
                 })
                     .then(r => r.text())
                     .then(t => {
-                        if (t.trim() === 'ok') {
+                        if (t.trim() === 'OK') {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Attendance Submitted',
@@ -299,6 +295,8 @@ $res = $q->get_result();
                             });
                         } else if (t.trim() === 'disabled') {
                             Swal.fire('Disabled', 'Manual attendance is disabled for this teacher.', 'warning');
+                        } else if (t.trim() === 'FALSE') {
+                            Swal.fire('Submitted', 'Attendance Already Submitted for this teacher.', 'warning');
                         }
                     });
 

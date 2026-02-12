@@ -175,6 +175,14 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
         font-weight: 800;
         border: none;
     }
+
+    .teacher-card {
+        cursor: grab;
+    }
+
+    .teacher-card:active {
+        cursor: grabbing;
+    }
 </style>
 
 
@@ -186,7 +194,7 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 
     <div id="teacher-list-data">
         <?php
-        $stmt = $conn->prepare("SELECT * FROM teacher WHERE sccode = ? ORDER BY ranks ASC, tid DESC");
+        $stmt = $conn->prepare("SELECT * FROM teacher WHERE sccode = ? ORDER BY sl, ranks ASC, tid DESC");
         $stmt->bind_param("s", $sccode);
         $stmt->execute();
         $res = $stmt->get_result();
@@ -396,6 +404,38 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
                 }
 
             });
+        });
+
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        let el = document.getElementById("teacher-list-data");
+
+        new Sortable(el, {
+            animation: 150,
+            ghostClass: 'bg-warning',
+            onEnd: function () {
+
+                let order = [];
+                document.querySelectorAll("#teacher-list-data .teacher-card").forEach(function (card, index) {
+                    let tid = card.getAttribute("data-tid");
+                    order.push({ tid: tid, sl: index + 1 });
+                });
+
+                // AJAX send
+                $.ajax({
+                    type: "POST",
+                    url: "settings/update-teacher-order.php",
+                    data: { order: JSON.stringify(order) },
+                    success: function (res) {
+                        console.log(res);
+                    }
+                });
+            }
         });
 
     });
