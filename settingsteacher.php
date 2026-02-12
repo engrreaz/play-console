@@ -215,8 +215,8 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="staff-id-badge">ID: <?php echo $tid; ?></span>
                         <div class="dropdown" onclick="event.stopPropagation();">
-                            <i class="bi bi-three-dots-vertical text-muted px-2" data-bs-toggle="dropdown"
-                                style="cursor:pointer;"></i>
+                            <i class="bi bi-three-dots-vertical text-muted px-2 drag-handle" data-bs-toggle="dropdown"
+                                style="cursor:grab;"></i>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 m3-8px">
                                 <li><a class="dropdown-item fw-bold small" onclick="editTeacher(<?php echo $tid; ?>);"><i
                                             class="bi bi-pencil-square me-2 text-primary"></i> Edit Profile</a></li>
@@ -415,28 +415,32 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 
         let el = document.getElementById("teacher-list-data");
 
-        new Sortable(el, {
+        new Sortable(document.getElementById("teacher-list-data"), {
             animation: 150,
-            ghostClass: 'bg-warning',
+
+            handle: ".drag-handle",   // ⭐ only drag via handle
+            delay: 150,               // ⭐ prevents accidental drag
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
+
             onEnd: function () {
 
                 let order = [];
-                document.querySelectorAll("#teacher-list-data .teacher-card").forEach(function (card, index) {
-                    let tid = card.getAttribute("data-tid");
-                    order.push({ tid: tid, sl: index + 1 });
-                });
 
-                // AJAX send
-                $.ajax({
-                    type: "POST",
-                    url: "settings/update-teacher-order.php",
-                    data: { order: JSON.stringify(order) },
-                    success: function (res) {
-                        console.log(res);
-                    }
+                document.querySelectorAll("#teacher-list-data .teacher-card")
+                    .forEach(function (card, index) {
+                        order.push({
+                            tid: card.dataset.tid,
+                            sl: index + 1
+                        });
+                    });
+
+                $.post("settings/update-teacher-order.php", {
+                    order: JSON.stringify(order)
                 });
             }
         });
+
 
     });
 </script>
