@@ -176,12 +176,76 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
         border: none;
     }
 
+
+    /* Drag visual polish */
     .teacher-card {
+        cursor: default;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    /* When dragging */
+    .sortable-chosen {
+        transform: scale(1.02);
+    }
+
+    /* Floating card while moving */
+    .sortable-drag {
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, .15),
+            0 6px 6px rgba(0, 0, 0, .10);
+        transform: rotate(1deg) scale(1.03);
+        background: #fff;
+    }
+
+    /* Ghost placeholder */
+    .sortable-ghost {
+        opacity: .25;
+        background: #EADDFF !important;
+    }
+
+    /* Handle feel */
+    .drag-handle {
         cursor: grab;
     }
 
-    .teacher-card:active {
+    .drag-handle:active {
         cursor: grabbing;
+    }
+
+
+    /* Drop position line */
+    .drop-indicator {
+        height: 3px;
+        background: #6750A4;
+        margin: 4px 12px;
+        border-radius: 3px;
+        transition: all .12s ease;
+    }
+
+    /* Snackbar */
+    .undo-bar {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        background: #323232;
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        gap: 16px;
+        z-index: 9999;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, .25);
+    }
+
+    .undo-bar button {
+        background: #EADDFF;
+        border: none;
+        color: #21005D;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
     }
 </style>
 
@@ -293,7 +357,12 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
     </div>
 </div>
 
-<div style="height: 75px;"></div>
+<div id="undoBar" class="undo-bar">
+    Order updated
+    <button onclick="undoReorder()">UNDO</button>
+</div>
+
+<div style="height: 175px;"></div>
 
 <?php include 'footer.php'; ?>
 
@@ -411,20 +480,73 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 
 
 <script>
+
+
     document.addEventListener("DOMContentLoaded", function () {
 
-        let el = document.getElementById("teacher-list-data");
+        const container = document.getElementById("teacher-list-data");
 
-        new Sortable(document.getElementById("teacher-list-data"), {
-            animation: 150,
+        let lastOrder = [];
+        let indicator = document.createElement("div");
+        indicator.className = "drop-indicator";
 
-            handle: ".drag-handle",   // ⭐ only drag via handle
-            delay: 150,               // ⭐ prevents accidental drag
+        function captureOrder() {
+            return [...container.children].map(c => c.dataset.tid);
+        }
+
+        lastOrder = captureOrder();
+
+        new Sortable(container, {
+
+            animation: 180,
+            easing: "cubic-bezier(.2,.8,.2,1)",
+
+            handle: ".drag-handle",
+
+            delay: 160,
             delayOnTouchOnly: true,
-            touchStartThreshold: 5,
+            touchStartThreshold: 6,
+
+            ghostClass: "sortable-ghost",
+            chosenClass: "sortable-chosen",
+            dragClass: "sortable-drag",
+
+            fallbackTolerance: 8,
+
+            // ⭐ Drop indicator
+            onMove: function (evt) {
+                let related = evt.related;
+                if (!related) return;
+
+                container.insertBefore(indicator, related);
+
+                // ⭐ Auto scroll
+                let y = evt.originalEvent.clientY;
+                let winH = window.innerHeight;
+
+                if (y > winH - 80)
+                    window.scrollBy(0, 18);
+                else if (y < 80)
+                    window.scrollBy(0, -18);
+            },
+
+            onStart: function () {
+
+                document.body.style.userSelect = "none";
+
+                // ⭐ Haptic feedback
+                if (navigator.vibrate)
+                    navigator.vibrate(30);
+
+                lastOrder = captureOrder();
+            },
 
             onEnd: function () {
 
+                document.body.style.userSelect = "";
+                indicator.remove();
+
+                // Save new order
                 let order = [];
 
                 document.querySelectorAll("#teacher-list-data .teacher-card")
@@ -438,9 +560,50 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
                 $.post("settings/update-teacher-order.php", {
                     order: JSON.stringify(order)
                 });
+
+                showUndo();
             }
         });
 
 
+        /* =========================
+           Undo Snackbar Logic
+        ========================== */
+
+        function showUndo() {
+            let bar = document.getElementById("undoBar");
+            bar.style.display = "flex";
+
+            setTimeout(() => bar.style.display = "none", 4000);
+        }
+
+        window.undoReorder = function () {
+
+            let map = {};
+            [...container.children].forEach(el => map[el.dataset.tid] = el);
+
+            lastOrder.forEach(tid => {
+                container.appendChild(map[tid]);
+            });
+
+            document.getElementById("undoBar").style.display = "none";
+
+            // Save reverted order
+            let order = [];
+            document.querySelectorAll("#teacher-list-data .teacher-card")
+                .forEach(function (card, index) {
+                    order.push({
+                        tid: card.dataset.tid,
+                        sl: index + 1
+                    });
+                });
+
+            $.post("settings/update-teacher-order.php", {
+                order: JSON.stringify(order)
+            });
+        }
+
     });
+
+
 </script>
