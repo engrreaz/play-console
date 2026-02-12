@@ -26,6 +26,15 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
+    <a href="slot-manager.php" class="m3-setting-card shadow-sm">
+    <div class="icon-box c-slot"><i class="bi bi-grid-1x2-fill"></i></div>
+    <div class="setting-info">
+        <div class="st-title">Slot Manager</div>
+        <div class="st-desc">Merit type, report templates, and parent format</div>
+    </div>
+    <i class="bi bi-chevron-right text-muted opacity-25"></i>
+</a>
+
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_add_edit_teacher();">
         <div class="icon-box c-inst"><i class="bi bi-person-workspace"></i></div>
         <div class="setting-info">

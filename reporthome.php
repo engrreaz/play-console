@@ -98,7 +98,11 @@ if ($count_class > 0) {
         filter: grayscale(1);
         /* pointer-events: none; */
         background: #f4f4f4 !important;
+        pointer-events: none;
+        cursor: default;
     }
+
+
 
     .m3-disabled .icon-box {
         background: #ddd !important;
@@ -149,19 +153,11 @@ if ($count_class > 0) {
                 $active = $item['active'] ?? true;
                 ?>
 
-                <!-- <a href="javascript:void(0);" class="m3-report-card shadow-sm 
-                <?php
-                //echo  !$active ? 'm3-disabled' : '' 
-                ?>
-                " <?php
-                //  echo $active ? 'onclick="' . $item['onclick'] . '"' : ''
-                ?>
-                          > -->
 
 
 
-                <a href="javascript:void(0);" class="m3-report-card shadow-sm <?= !$active ? 'm3-disabled' : '' ?>"
-                    onclick="<?= $item['onclick'] ?>">
+                <a href="javascript:void(0);" class="m3-report-card shadow-sm <?= !$active ? 'm3-disabled' : '' ?>" <?= $active ? 'onclick="' . $item['onclick'] . '"' : '' ?>>
+
 
                     <div class="icon-box" style="margin-right:0;margin-bottom:10px;">
                         <i class="bi <?= $item['icon'] ?>"></i>
@@ -183,17 +179,17 @@ if ($count_class > 0) {
 <?php include 'footer.php'; ?>
 
 <script>
-function report_menu_tattnd_month(month, year) {
-    const now = new Date();
-    const targetMonth = String(month || (now.getMonth() + 1)).padStart(2, '0'); // 2-digit
-    const targetYear  = year || now.getFullYear();
-    window.location.href = `tattnd-month.php?month=${targetMonth}&year=${targetYear}`;
-}
+    function report_menu_tattnd_month(month, year) {
+        const now = new Date();
+        const targetMonth = String(month || (now.getMonth() + 1)).padStart(2, '0'); // 2-digit
+        const targetYear = year || now.getFullYear();
+        window.location.href = `tattnd-month.php?month=${targetMonth}&year=${targetYear}`;
+    }
 
-function tattnd_tid(tid){
+    function tattnd_tid(tid) {
         window.location.href = `tattnd-tid.php?tid=${tid}`;
-}
-function tattnd_manager(){
+    }
+    function tattnd_manager() {
         window.location.href = `tattnd-manager.php`;
-}
+    }
 </script>
