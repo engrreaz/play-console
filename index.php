@@ -1,7 +1,7 @@
 <?php
 // Initialization: Sets up session, DB connection, and global vars
 include 'inc.php';
-$app = $_GET['app'];
+$app = $_GET['app']?? 5;
 $sy_param = '%' . $sessionyear . '%';
 
 $page_title = "Dashboard$app";
