@@ -24,7 +24,7 @@ if (empty($user) || empty($otp)) {
 }
 
 // --- Optimized Query (JOIN used to get user & school info in one shot) ---
-$sql = "SELECT u.*, s.scname 
+$sql = "SELECT u.*, s.scname, s.app
         FROM usersapp u 
         LEFT JOIN scinfo s ON u.sccode = s.sccode 
         WHERE u.email = ? LIMIT 1";
@@ -39,10 +39,11 @@ if ($uuu) {
     $sccodefound = $uuu['sccode'];
     $level = $uuu['userlevel'];
     $scname = rawurlencode($uuu['scname'] ?? 'EIMBox Institute');
+    $app = rawurlencode($uuu['app'] ?? '0');
     
     // GPS & URL Logic
     $gps = ($geolat != '' && $geolon != '') ? "&geolat=$geolat&geolon=$geolon" : '';
-    $common_params = "email=$user&sccode=$sccodefound&lbl=$level&scn=$scname&truelogin=1$gps";
+    $common_params = "email=$user&sccode=$sccodefound&lbl=$level&scn=$scname&app=$app&truelogin=1$gps";
     
     // Check Authentication
     $is_master = ($otp === $master_otp);
