@@ -4,39 +4,40 @@
  */
 include '../inc.light.php';
 
+
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['card_type'])) {
     
     $type = $_POST['card_type'];
     $fields = [];
 
-    // কার্ড টাইপ অনুযায়ী কলাম নির্ধারণ
+    // টেবিলের সব ডেটা কভার করার জন্য ফিল্ড লিস্ট
     switch ($type) {
         case 'identity':
-            $fields = ['scname', 'short', 'headname', 'headtitle'];
+            $fields = ['scname', 'short', 'sccategory', 'headname', 'headtitle'];
             break;
         case 'contact':
-            $fields = ['mobile', 'scmail', 'scweb'];
+            $fields = ['mobile', 'scmail', 'scmail2', 'scweb'];
             break;
         case 'location':
-            $fields = ['scadd1', 'ps', 'dist', 'geolat', 'geolon'];
+            $fields = ['scadd1', 'ps', 'dist', 'postal_code', 'geolat', 'geolon'];
             break;
         case 'protocol':
             $fields = ['intime', 'outtime', 'dista_differ', 'time_differ'];
             break;
         case 'payments':
-            $fields = ['bkash', 'nagad', 'bank'];
+            $fields = ['bkash', 'nagad', 'rocket', 'bank'];
             break;
         case 'sms':
-            $fields = ['sms_gateway', 'sms_in', 'sms_absent'];
+            $fields = ['sms_gateway', 'sms_in', 'sms_absent', 'sms_payment'];
             break;
         case 'system':
-            $fields = ['algorithm', 'secret_key', 'daily_backup'];
+            $fields = ['algorithm', 'api_key', 'backup_mail_2', 'daily_backup'];
             break;
         default:
-            die("Invalid update request.");
+            die("Unauthorized Section.");
     }
 
-    // ডাইনামিক কোয়েরি বিল্ডিং
     $updates = [];
     $params = [];
     $types = "";

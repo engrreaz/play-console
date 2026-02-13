@@ -29,7 +29,7 @@ function isActive($targetFile, $currentFile)
             </a>
             <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
                 <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
-                <span>Reports</span>
+                <span>Info Center</span>
             </a>
             <a href="tools.php" class="nav-item <?= isActive('tools.php', $curfile) ?>">
                 <div class="icon-wrapper"><i class="bi bi-grid-fill"></i></div>

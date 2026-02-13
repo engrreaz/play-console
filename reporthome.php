@@ -192,4 +192,10 @@ if ($count_class > 0) {
     function tattnd_manager() {
         window.location.href = `tattnd-manager.php`;
     }
+    function report_menu_gpa() {
+        window.location.href = `gpa.php`;
+    }
+    function report_menu_logbook() {
+        window.location.href = `user-log-book.php`;
+    }
 </script>

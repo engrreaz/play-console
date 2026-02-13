@@ -35,6 +35,15 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
+    <a href="basic-settings.php" class="m3-setting-card shadow-sm">
+        <div class="icon-box c-basic"><i class="bi bi-sliders2-vertical"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Basic Settings</div>
+            <div class="st-desc">Academic session, weekends, and global rules</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
+
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_add_edit_teacher();">
         <div class="icon-box c-inst"><i class="bi bi-person-workspace"></i></div>
         <div class="setting-info">
@@ -94,6 +103,15 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_fin_setup();">
+        <div class="icon-box c-fina"><i class="bi bi-cash-coin"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Payment setup</div>
+            <div class="st-desc">Configure Financial Items</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
+
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm"
         onclick="settings_admin_st_id_payment_indivisula();">
         <div class="icon-box c-fina"><i class="bi bi-coin"></i></div>
@@ -104,14 +122,7 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_fin_setup();">
-        <div class="icon-box c-fina"><i class="bi bi-coin"></i></div>
-        <div class="setting-info">
-            <div class="st-title">Payment setup</div>
-            <div class="st-desc">Configure Financial Items</div>
-        </div>
-        <i class="bi bi-chevron-right text-muted opacity-25"></i>
-    </a>
+
 
     <div class="m3-cat-label">Access Control</div>
 
@@ -157,6 +168,82 @@ $sy_param = '%' . $current_session . '%';
 
 
 
+    <div class="m3-settings-block">
+
+        ```
+        <div class="m3-cat-label">Data Center</div>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_backup_options();">
+            <div class="icon-box c-user"><i class="bi bi-hdd-stack"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Backup Options</div>
+                <div class="st-desc">Configure schedules and auto backup</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_backup_data();">
+            <div class="icon-box c-user"><i class="bi bi-database-down"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Backed-up Data</div>
+                <div class="st-desc">Browse or download backups</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_restore_data();">
+            <div class="icon-box c-user"><i class="bi bi-arrow-counterclockwise"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Restore Data</div>
+                <div class="st-desc">Recover system data</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_data_scanner();">
+            <div class="icon-box c-user"><i class="bi bi-search"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Data Scanner</div>
+                <div class="st-desc">Scan tables for issues</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_data_errors();">
+            <div class="icon-box c-user"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Data Errors</div>
+                <div class="st-desc">View integrity problems</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_storage_usage();">
+            <div class="icon-box c-user"><i class="bi bi-pie-chart"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Storage Usage</div>
+                <div class="st-desc">Database size & stats</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_data_logs();">
+            <div class="icon-box c-user"><i class="bi bi-journal-text"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Data Logs</div>
+                <div class="st-desc">Track changes & activity</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+        
+
+    </div>
+
+
+
+
+
+
 
 
 
@@ -172,8 +259,7 @@ $sy_param = '%' . $current_session . '%';
             <i class="bi bi-chevron-right text-muted opacity-25"></i>
         </a>
 
-        <a href="javascript:void(0);" class="m3-setting-card shadow-sm "
-            onclick="settings_admin_data_center();">
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm " onclick="settings_admin_data_center();">
             <div class="icon-box c-user"><i class="bi bi-info-circle-fill"></i></div>
             <div class="setting-info">
                 <div class="st-title">Data Center</div>
@@ -212,7 +298,7 @@ $sy_param = '%' . $current_session . '%';
             <a href="cashbookview.php" class="btn-dev shadow-sm">Cashbook View</a>
             <a href="cashbook.php" class="btn-dev shadow-sm">Cashbook</a>
 
-        
+
         </div>
     <?php endif; ?>
 
