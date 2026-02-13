@@ -267,7 +267,13 @@
     background: #f5f5f5
 }
 
+.developer-settings {
+    border: 1px dashed red;
+}
 
+.developer-setting.icon-box.i {
+    color: red;
+}
 
 .widget-grid {
     padding: 12px;

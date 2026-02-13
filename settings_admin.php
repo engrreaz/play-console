@@ -27,13 +27,13 @@ $sy_param = '%' . $current_session . '%';
     </a>
 
     <a href="slot-manager.php" class="m3-setting-card shadow-sm">
-    <div class="icon-box c-slot"><i class="bi bi-grid-1x2-fill"></i></div>
-    <div class="setting-info">
-        <div class="st-title">Slot Manager</div>
-        <div class="st-desc">Merit type, report templates, and parent format</div>
-    </div>
-    <i class="bi bi-chevron-right text-muted opacity-25"></i>
-</a>
+        <div class="icon-box c-slot"><i class="bi bi-grid-1x2-fill"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Slot Manager</div>
+            <div class="st-desc">Merit type, report templates, and parent format</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
 
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_add_edit_teacher();">
         <div class="icon-box c-inst"><i class="bi bi-person-workspace"></i></div>
@@ -103,9 +103,8 @@ $sy_param = '%' . $current_session . '%';
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
-    
-    <a href="javascript:void(0);" class="m3-setting-card shadow-sm"
-        onclick="settings_admin_fin_setup();">
+
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_fin_setup();">
         <div class="icon-box c-fina"><i class="bi bi-coin"></i></div>
         <div class="setting-info">
             <div class="st-title">Payment setup</div>
@@ -134,7 +133,9 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_data_center();">
+
+
+    <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_data_center_ins();">
         <div class="icon-box c-user"><i class="bi bi-info-circle"></i></div>
         <div class="setting-info">
             <div class="st-title">Data Center</div>
@@ -143,17 +144,53 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
+
+    <a href="permission-manager.php" class="m3-setting-card shadow-sm">
+        <div class="icon-box c-perm"><i class="bi bi-shield-lock"></i></div>
+        <div class="setting-info">
+            <div class="st-title">Permission Manager</div>
+            <div class="st-desc">Define system-wide access rules and levels</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </a>
+
+
+
+
+
+
+
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
         <div class="m3-cat-label">Developer Console</div>
 
         <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_task_manager();">
-            <div class="icon-box c-user"><i class="bi bi-bug"></i></div>
-            <div class="setting-warning">
+            <div class="icon-box c-user"><i class="bi bi-list-columns-reverse"></i></div>
+            <div class="setting-info">
                 <div class="st-title">Task Manager</div>
-                <div class="st-desc">Manage Task, Developing issues, Track Bug, Fixing Issues</div>
+                <div class="st-desc">Manage Task, Developing issues, Track Bugs</div>
             </div>
             <i class="bi bi-chevron-right text-muted opacity-25"></i>
         </a>
+
+        <a href="javascript:void(0);" class="m3-setting-card shadow-sm "
+            onclick="settings_admin_data_center();">
+            <div class="icon-box c-user"><i class="bi bi-info-circle-fill"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Data Center</div>
+                <div class="st-desc">Information hub management</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
+        <a href="permission-mapper.php" class="m3-setting-card shadow-sm">
+            <div class="icon-box c-map"><i class="bi bi-shield-lock-fill"></i></div>
+            <div class="setting-info">
+                <div class="st-title">Permission Mapper</div>
+                <div class="st-desc">Assign specific access roles to users</div>
+            </div>
+            <i class="bi bi-chevron-right text-muted opacity-25"></i>
+        </a>
+
 
 
 
@@ -175,11 +212,7 @@ $sy_param = '%' . $current_session . '%';
             <a href="cashbookview.php" class="btn-dev shadow-sm">Cashbook View</a>
             <a href="cashbook.php" class="btn-dev shadow-sm">Cashbook</a>
 
-            <hr>
-            <div class="m3-cat-label">Permission</div>
-            <hr>
-            <a href="permission-mapper.php" class="btn-dev shadow-sm">Mapper</a>
-            <a href="permission-manager.php" class="btn-dev shadow-sm">Manager</a>
+        
         </div>
     <?php endif; ?>
 
@@ -200,6 +233,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_task_manager() { window.location.href = "task-manager.php"; }
     function settings_admin_fin_setup() { window.location.href = "st-fin-setup.php"; }
     function settings_admin_data_center() { window.location.href = "hub-admin.php"; }
+    function settings_admin_data_center_ins() { window.location.href = "information-hub.php"; }
 </script>
 
 <?php include 'footer.php'; ?>
