@@ -1,7 +1,7 @@
 <?php
 // Initialization: Sets up session, DB connection, and global vars
 include 'inc.php';
-$app = $_GET['app']?? 5;
+$app = $_GET['app'] ?? 5;
 $sy_param = '%' . $sessionyear . '%';
 
 $page_title = "Dashboard$app";
@@ -103,7 +103,7 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
             <div class="rounded-circle overflow-hidden border top-avatar shadow-sm <?= $ringClass ?>"
                 style="width:34px;height:34px;cursor:pointer;z-index:25999;" onclick="toggleAvatarMenu()">
 
-                <img src="<?= $pth ?>" style="width:100%;border-radius:50%;" >
+                <img src="<?= $pth ?>" style="width:100%;border-radius:50%;">
 
             </div>
 
