@@ -1,10 +1,10 @@
 <?php
 // Initialization: Sets up session, DB connection, and global vars
 include 'inc.php';
-
+$app = $_GET['app'];
 $sy_param = '%' . $sessionyear . '%';
 
-$page_title = "Dashboard";
+$page_title = "Dashboard$app";
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
 $url = $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
