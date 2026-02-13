@@ -136,7 +136,7 @@ if ($count_class > 0) {
             continue;
         ?>
 
-        <div class="m3-category-lbl"><?= $cat_name ?></div>
+        <div class="m3-section-title px-3 mt-4"><?= $cat_name ?></div>
 
         <div class="m3-grid">
 
