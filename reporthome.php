@@ -198,4 +198,16 @@ if ($count_class > 0) {
     function report_menu_logbook() {
         window.location.href = `user-log-book.php`;
     }
+
+    
+    function library_bookshelf() {
+        window.location.href = `library-bookshelf.php`;
+    }
+    function library_book_in_hand() {
+        window.location.href = `library-book-in-hand.php`;
+    }
+    function library_already_read() {
+        window.location.href = `library-already-read.php`;
+    }
+    
 </script>

@@ -276,7 +276,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                 <h4 class="fw-black m-0">Hub Manager</h4>
                 <p class="small m-0 opacity-75">Control and categorize modules</p>
             </div>
-            <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 " style="z-index:auto;"
+            <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 " style="z-index:2000;"
                 onclick="openCategoryModal()">
                 <i class="bi bi-plus-lg me-1"></i> New Category
             </button>
