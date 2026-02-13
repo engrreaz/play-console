@@ -15,7 +15,7 @@ $sy_param = '%' . $current_session . '%';
 
 <main class="pb-5 mt-2">
 
-    <div class="m3-cat-label">Institution Setup</div>
+    <div class="m3-section-title px-3 mt-4">Institution Setup</div>
 
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_ins_info();">
         <div class="icon-box c-inst"><i class="bi bi-bank2"></i></div>
@@ -53,7 +53,7 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <div class="m3-cat-label">Academic Framework</div>
+    <div class="m3-section-title px-3 mt-4">Academic Framework</div>
 
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_cls_sec();">
         <div class="icon-box c-acad"><i class="bi bi-diagram-3-fill"></i></div>
@@ -92,7 +92,7 @@ $sy_param = '%' . $current_session . '%';
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
     </a>
 
-    <div class="m3-cat-label">Student & Finance</div>
+    <div class="m3-section-title px-3 mt-4">Student & Finance</div>
 
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_generate();">
         <div class="icon-box c-fina"><i class="bi bi-person-vcard-fill"></i></div>
@@ -124,7 +124,7 @@ $sy_param = '%' . $current_session . '%';
 
 
 
-    <div class="m3-cat-label">Access Control</div>
+    <div class="m3-section-title px-3 mt-4">Access Control</div>
 
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_sms_menu();">
         <div class="icon-box c-user"><i class="bi bi-chat-right-dots-fill"></i></div>
@@ -149,7 +149,7 @@ $sy_param = '%' . $current_session . '%';
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_data_center_ins();">
         <div class="icon-box c-user"><i class="bi bi-info-circle"></i></div>
         <div class="setting-info">
-            <div class="st-title">Data Center</div>
+            <div class="st-title">Information Center</div>
             <div class="st-desc">Information hub management</div>
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>
@@ -170,8 +170,7 @@ $sy_param = '%' . $current_session . '%';
 
     <div class="m3-settings-block">
 
-        ```
-        <div class="m3-cat-label">Data Center</div>
+        <div class="m3-section-title px-3 mt-4">Data Center</div>
 
         <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_backup_options();">
             <div class="icon-box c-user"><i class="bi bi-hdd-stack"></i></div>
@@ -248,11 +247,11 @@ $sy_param = '%' . $current_session . '%';
 
 
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
-        <div class="m3-cat-label">Developer Console</div>
+        <div class="m3-section-title px-3 mt-4">Developer Console</div>
 
         <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_task_manager();">
             <div class="icon-box c-user"><i class="bi bi-list-columns-reverse"></i></div>
-            <div class="setting-info">
+            <div class="setting-success">
                 <div class="st-title">Task Manager</div>
                 <div class="st-desc">Manage Task, Developing issues, Track Bugs</div>
             </div>
@@ -262,7 +261,7 @@ $sy_param = '%' . $current_session . '%';
         <a href="javascript:void(0);" class="m3-setting-card shadow-sm " onclick="settings_admin_data_center();">
             <div class="icon-box c-user"><i class="bi bi-info-circle-fill"></i></div>
             <div class="setting-info">
-                <div class="st-title">Data Center</div>
+                <div class="st-title">Information Center</div>
                 <div class="st-desc">Information hub management</div>
             </div>
             <i class="bi bi-chevron-right text-muted opacity-25"></i>
