@@ -379,7 +379,7 @@
     // Settings Navigation
   
     function settings_menu_login_method() { window.location.href = "globalsetting.php"; }
-    function settings_menu_logout() { window.location.href = "sout.php"; }
+
 
 
 
