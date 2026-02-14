@@ -44,8 +44,8 @@ if (!empty($students_with_birthday_today)):
     }
 
     .m3-icon-badge {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
         background: #fff;
         border-radius: 8px;
         display: flex;
