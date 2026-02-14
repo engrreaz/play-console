@@ -1,10 +1,11 @@
 <?php
+$page_title = "Payment History";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 include 'datam/datam-stprofile.php';
 
 // ১. প্যারামিটার হ্যান্ডলিং ও ডাটা ফেচিং
 $stid = $_GET['id'] ?? '';
-$page_title = "Payment History";
+
 $total_paid_all = 0;
 
 // ২. স্টুডেন্ট ইনফো ফেচ করা (Prepared Statement)
@@ -150,6 +151,8 @@ $stmt_st->close();
 
 <div style="height: 60px;"></div>
 
+
+<?php include 'footer.php'; ?>
 <script>
     // ৪. ডাইনামিক টোটাল আপডেট
     document.getElementById("total_paid_container").innerHTML = `
@@ -168,4 +171,3 @@ $stmt_st->close();
     }
 </script>
 
-<?php include 'footer.php'; ?>

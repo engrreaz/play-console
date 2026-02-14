@@ -1,9 +1,10 @@
 <?php 
+$page_title = "Receipt Details";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. প্যারামিটার হ্যান্ডলিং ও ডাটা ফেচিং (Prepared Statements)
 $prno = $_GET['prno'] ?? '';
-$page_title = "Receipt Details";
+
 
 if ($prno != '') {
     // রিসিট হেডার ইনফো
