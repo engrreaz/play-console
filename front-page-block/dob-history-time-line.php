@@ -102,14 +102,11 @@ if (!empty($students_with_birthday_today)):
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
-    @keyframes rotate-ring {
-        from { transform: rotate(360deg); }
-        to { transform: rotate(0deg); }
-    }
+  
 
     .m3-student-name {
         font-size: 0.7rem;
-        font-weight: 700;
+        font-weight: 600;
         color: #1C1B1F;
         margin-top: 8px;
         white-space: nowrap;
