@@ -1,5 +1,4 @@
 <?php
-session_start();
 include_once 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)

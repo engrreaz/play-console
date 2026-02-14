@@ -1,7 +1,8 @@
 <?php
-// ১. সেশন শুরু এবং প্রি-চেক
-session_start();
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // ২. ইউজার লগড ইন থাকলে সরাসরি ড্যাশবোর্ডে পাঠানো
 if (isset($_SESSION['user_id']) || isset($_SESSION['usr'])) {
     header("Location: index.php");

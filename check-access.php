@@ -1,5 +1,24 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/* SAFE DEFAULTS */
+// $is_admin = $_SESSION['is_admin'] ?? 0;
+// $is_chief = $_SESSION['is_chief'] ?? 0;
+
+if(!$is_admin) $is_admin = 0;
+if(!$is_chief) $is_chief = 0;
+
+
+
+/* NOT LOGGED IN */
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit;
+}
+
 
 // get package_id, package_name, tier, valid_module, active_module from scinfo table where sccode='{$sccode}'
 $package_id = '';
@@ -119,7 +138,7 @@ if ($is_admin > 3 || $is_chief > 0) {
         $permission = 0;
     }
 
-    
+
 
 }
 
@@ -137,7 +156,8 @@ if ($is_admin > 3 || $is_chief > 0) {
 // --- get app override permission if any
 
 
-if(isset($_GET['perm']) && $is_admin > 3) $permission = $_GET['perm'];
+if (isset($_GET['perm']) && $is_admin > 3)
+    $permission = $_GET['perm'];
 
 
 if ($permission == 0) {
