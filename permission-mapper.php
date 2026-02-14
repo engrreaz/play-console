@@ -378,7 +378,8 @@ foreach ($files as $f)
                 data-desc="<?php echo htmlspecialchars($desc); ?>" data-perm='<?php echo json_encode($perm_json); ?>'
                 onclick="openPermModalFromEl(this)">
 
-                <div class="icon-box-m3 <?php echo $un ? 'c-unassigned' : 'c-mapped'; ?>">
+                <div class="icon-box-m3 <?php echo $un ? 'c-unassigned' : 'c-mapped'; ?>"
+                    onclick="openActualPage(event, '<?php echo $file; ?>')" style="cursor: alias;" title="Open Page">
                     <i class="bi <?php echo $un ? 'bi-file-earmark-x' : 'bi-file-earmark-check'; ?>"></i>
                 </div>
 
@@ -551,4 +552,14 @@ foreach ($files as $f)
             loadBatch();
         }
     });
+
+
+
+    function openActualPage(event, filename) {
+        // এটি কার্ডের ক্লিক ইভেন্ট (মডাল ওপেন হওয়া) থামিয়ে দেবে
+        event.stopPropagation();
+
+        // নতুন ট্যাবে সংশ্লিষ্ট পেজটি ওপেন করবে
+        window.open(filename, '_blank');
+    }
 </script>
