@@ -60,8 +60,8 @@
 
         <div class="mt-3 d-flex gap-2">
             <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm"
-                style="font-size: 0.6rem;">
-                <i class="bi bi-shield-check me-1"></i> System Active
+                style="font-size: 0.9rem;">
+                <i class="bi bi-shield-check me-1"></i>
             </span>
 
             <div class="flex-grow-1"></div>
