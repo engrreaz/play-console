@@ -44,8 +44,8 @@ if (!empty($students_with_birthday_today)):
     }
 
     .m3-icon-badge {
-        width: 30px;
-        height: 30px;
+        width: 40px;
+        height: 40px;
         background: #fff;
         border-radius: 8px;
         display: flex;
@@ -75,8 +75,8 @@ if (!empty($students_with_birthday_today)):
 
     .m3-avatar-wrapper {
         position: relative;
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
         margin: 0 auto;
     }
 
