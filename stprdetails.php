@@ -219,20 +219,26 @@ $stmt_st->close();
 
 
     function epos(prno) {
-        // লোডার দেখানো (ঐচ্ছিক কিন্তু ইউজার এক্সপেরিয়েন্সের জন্য ভালো)
-        Swal.fire({ title: 'Processing Receipt...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+        // লোডিং এনিমেশন (ঐচ্ছিক)
+        console.log("Fetching receipt data for: " + prno);
 
-        // ১. ব্যাকএন্ড থেকে তথ্য আনা
-        $.post('backend/getprinfo.php', { prno: prno }, function (res) {
-            const data = JSON.parse(res);
-
-            if (data.success) {
-                // ২. প্রাপ্ত ডাটা দিয়ে URL প্যারামিটার তৈরি করা
-
-                // ৪. রিসিট পেজে রিডাইরেক্ট
-                window.location.href = data;
-            } else {
-                Swal.fire('Error', 'Receipt not found!', 'error');
+        // ১. AJAX কল করে backend/getprinfo.php থেকে লিংকটি আনা
+        $.ajax({
+            url: 'backend/getprinfo.php', // আপনার ফাইলের সঠিক পাথ নিশ্চিত করুন
+            type: 'POST',
+            data: { prno: prno },
+            success: function (fullUrl) {
+                if (fullUrl && fullUrl.includes('stpr.php')) {
+                    // ২. প্রাপ্ত ফুল ইউআরএল-এ রিডাইরেক্ট করা
+                    console.log("Redirecting to: " + fullUrl);
+                    window.location.href = fullUrl;
+                } else {
+                    alert("Error: Could not generate receipt link. " + fullUrl);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error: " + error);
+                alert("Something went wrong while connecting to the server.");
             }
         });
     }

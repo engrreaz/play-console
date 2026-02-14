@@ -1,15 +1,12 @@
 <?php
-include '../inc.light.php';
+include '../inc.light.php'; // আপনার পাথ অনুযায়ী
 
 $prno = $_POST['prno'] ?? '';
 if ($prno == '') {
     $sql0r = "SELECT * FROM stpr where sccode='$sccode' and entryby='$usr' order by entrytime desc limit 1 ";
 } else {
     $sql0r = "SELECT * FROM stpr where sccode='$sccode' and prno='$prno' order by entrytime desc limit 1 ";
-
 }
-
-// echo $sql0r;
 
 $result0r = $conn->query($sql0r);
 if ($result0r->num_rows > 0) {
@@ -27,70 +24,66 @@ if ($result0r->num_rows > 0) {
 
 $sec = str_replace("Studies", "", $sec);
 
-$sql0r = "SELECT * FROM students where stid='$stid' ";
+// স্টুডেন্ট নাম
+$sql0r = "SELECT stnameeng FROM students where stid='$stid' ";
 $result0b = $conn->query($sql0r);
-if ($result0b->num_rows > 0) {
-    while ($row0r = $result0b->fetch_assoc()) {
-        $stname = $row0r["stnameeng"];
-    }
-}
+$stname = ($result0b->num_rows > 0) ? $result0b->fetch_assoc()["stnameeng"] : 'Unknown';
 
-
-
+// আইটেম কাউন্ট
 $sql0r = "SELECT count(*) as cnt FROM stfinance where (pr1no='$prno' || pr2no='$prno') and sccode='$sccode' and stid='$stid' ";
 $result0bt = $conn->query($sql0r);
-if ($result0bt->num_rows > 0) {
-    while ($row0r = $result0bt->fetch_assoc()) {
-        $cnt = $row0r["cnt"];
-    }
-}
+$cnt = ($result0bt->num_rows > 0) ? $result0bt->fetch_assoc()["cnt"] : 0;
 
-$sql0r = "SELECT * FROM usersapp where email='$eby' ";
+// কালেক্টর নাম
+$sql0r = "SELECT profilename, userid FROM usersapp where email='$eby' ";
 $result0bx = $conn->query($sql0r);
+$collname = '';
 if ($result0bx->num_rows > 0) {
-    while ($row0r = $result0bx->fetch_assoc()) {
-        $collname = $row0r["profilename"];
-        $uid = $row0r["userid"];
-    }
+    $u_data = $result0bx->fetch_assoc();
+    $collname = $u_data["profilename"];
+    $uid = $u_data["userid"];
 }
 
 if ($collname == '') {
-    $sql0r = "SELECT * FROM teacher where tid='$uid' ";
+    $sql0r = "SELECT tname FROM teacher where tid='$uid' ";
     $result0bxg = $conn->query($sql0r);
     if ($result0bxg->num_rows > 0) {
-        while ($row0r = $result0bxg->fetch_assoc()) {
-            $collname = $row0r["tname"];
-        }
+        $collname = $result0bxg->fetch_assoc()["tname"];
     }
 }
 
-
+// আইটেম লুপ তৈরি
 $loop = '';
 $item = 1;
 $sql0r = "SELECT * FROM stfinance where (pr1no='$prno' || pr2no='$prno') and sccode='$sccode' and stid='$stid'";
 $result0bg = $conn->query($sql0r);
 if ($result0bg->num_rows > 0) {
     while ($row0r = $result0bg->fetch_assoc()) {
-        // $item = $item;
-        $partid = $row0r["partid"];
-        $de = $row0r["particulareng"];
-        $de = str_replace("Tution Fee : ", "", $de);
-        $de = str_replace("Exam Fee : ", "", $de);
-        $de = str_replace("/", "-", $de);
+        $de = str_replace(["Tution Fee : ", "Exam Fee : ", "/"], ["", "", "-"], $row0r["particulareng"]);
         $tk = $row0r["paid"];
-        $loop = $loop . '&item' . $item . 'id=' . $partid . '&item' . $item . 'txt=' . $de . '&item' . $item . 'taka=' . $tk;
+        // urlencode ব্যবহার করা হয়েছে যাতে লিংকে এরর না আসে
+        $loop .= '&item' . $item . 'txt=' . urlencode($de) . '&item' . $item . 'taka=' . $tk;
         $item++;
     }
 }
 
+// ফাইনাল লিংক জেনারেশন
+$baseUrl = 'https://playconsole.eimbox.com/stpr.php?';
+$params = [
+    'prno' => $prno,
+    'prdate' => $prdate,
+    'stname' => $stname,
+    'cls' => $cls,
+    'sec' => $sec,
+    'roll' => $roll,
+    'total' => $total,
+    'stid' => $stid,
+    'collname' => $collname,
+    'cnt' => $cnt
+];
 
+$lnk = $baseUrl . http_build_query($params) . $loop;
 
-// echo $loop;
-
-
-$lnk = 'https://playconsole.eimbox.com/stpr.php?prno=' . $prno . '&prdate=' . $prdate . '&stname=' . $stname . '&cls=' . $cls . '&sec=' . $sec . '&roll=' . $roll . '&total=' . $total . '&stid=' . $stid . '&collname=' . $collname . '&cnt=' . $cnt . $loop;
-// $lnk = 'receipt.php?prno='.$prno.'&prdate='.$prdate.'&stname='.$stname.'&cls='.$cls.'&sec='.$sec.'&roll='.$roll.'&total='.$total.'&stid='.$stid.'&collname='.$collname.'&cnt='.$cnt.$loop;
+// শুধুমাত্র লিংকটি আউটপুট হিসেবে পাঠাবে
 echo $lnk;
 ?>
-
-<!-- <meta http-equiv="refresh" content="0; URL=" /> -->
