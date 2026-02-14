@@ -59,9 +59,11 @@
         <div class="small opacity-90"><?php echo date('d M, Y'); ?></div>
 
         <div class="mt-3 d-flex gap-2">
-            <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm"
-                style="font-size: 1rem;">
-                <i class="bi bi-shield-check></i>
+            <span class="badge bg-white text-warning rounded-pill px-3 py-2 border-0 shadow-sm"
+                style="font-size: 1.0rem;">
+                <i class="bi bi-shield-check"></i> 
+                <span class="vr"></span> 
+                <i class="bi bi-shield-fill-check"></i>
             </span>
 
             <div class="flex-grow-1"></div>
