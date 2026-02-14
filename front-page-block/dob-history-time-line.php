@@ -67,7 +67,7 @@ if (!empty($students_with_birthday_today)):
 
     .m3-birthday-item {
         flex: 0 0 auto;
-        width: 55px;
+        width: 60px;
         text-align: center;
         transition: transform 0.2s ease;
     }
