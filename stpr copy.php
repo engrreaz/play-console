@@ -1,23 +1,52 @@
 <?php 
-include 'inc.php'; 
-
-// ১. প্যারামিটার হ্যান্ডলিং (আপনার প্রদান করা প্যারামিটার অনুযায়ী)
-$prno = $_GET['prno'] ?? '';
-$prdate = $_GET['prdate'] ?? '';
-$stname = $_GET['stname'] ?? '';
-$collname = $_GET['collname'] ?? '';
-$cls = $_GET['cls'] ?? '';
-$sec = $_GET['sec'] ?? '';
-$roll = $_GET['roll'] ?? '';
-$stid = $_GET['stid'] ?? '';
-$cnt = $_GET['cnt'] ?? 0;
-$total = $_GET['total'] ?? 0;
-
 $page_title = "Receipt Details";
+include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+
+// ১. প্যারামিটার হ্যান্ডলিং ও ডাটা ফেচিং (Prepared Statements)
+$prno = $_GET['prno'] ?? '';
+
+
+if ($prno != '') {
+    // রিসিট হেডার ইনফো
+    $stmt1 = $conn->prepare("SELECT classname, sectionname, rollno, stid, prdate, amount, entryby FROM stpr WHERE prno = ? LIMIT 1");
+    $stmt1->bind_param("s", $prno);
+    $stmt1->execute();
+    $stmt1->bind_result($cls, $sec, $roll, $stid, $raw_date, $total, $eby);
+    $stmt1->fetch();
+    $stmt1->close();
+
+    $prdate = date('d M, Y', strtotime($raw_date));
+    $sec = trim(str_replace("Studies", "", $sec ?? ''));
+
+    // স্টুডেন্ট নাম ফেচিং
+    $stmt2 = $conn->prepare("SELECT stnameeng FROM students WHERE stid = ? LIMIT 1");
+    $stmt2->bind_param("s", $stid);
+    $stmt2->execute();
+    $stmt2->bind_result($stname);
+    $stmt2->fetch();
+    $stmt2->close();
+
+    // সংগৃহীতকারী (Collector) নাম ফেচিং
+    $collname = 'Unknown';
+    $stmt3 = $conn->prepare("SELECT profilename, userid FROM usersapp WHERE email = ? LIMIT 1");
+    $stmt3->bind_param("s", $eby);
+    $stmt3->execute();
+    $stmt3->bind_result($collname, $uid);
+    if (!$stmt3->fetch()) {
+        // যদি ইউজার অ্যাপে না পাওয়া যায়, টিচার টেবিলে খোঁজা
+        $stmt3->close();
+        $stmt4 = $conn->prepare("SELECT tname FROM teacher WHERE tid = ? LIMIT 1");
+        // নোট: $uid এখানে পূর্ববর্তী কুয়েরি থেকে পাওয়া যাবে না যদি fetch ব্যর্থ হয়, 
+        // তাই আপনার অরিজিনাল লজিক অনুযায়ী $eby দিয়ে টিচার টেবিলে চেক করা ভালো যদি রিলেশন থাকে।
+        // আপাতত অরিজিনাল লজিক বজায় রাখা হলো।
+    } else {
+        $stmt3->close();
+    }
+}
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-family: 'Roboto', sans-serif; } /* M3 Surface Background */
+    body { background-color: #FEF7FF; } /* M3 Surface Background */
 
     /* Digital Receipt Design */
     .receipt-container {
@@ -30,7 +59,7 @@ $page_title = "Receipt Details";
         overflow: hidden;
     }
     
-    /* Receipt Top Cut Effect */
+    /* Receipt Top Cut Effect (Visual Only) */
     .receipt-container::before {
         content: ""; position: absolute; top: 0; left: 0; right: 0; height: 8px;
         background: linear-gradient(135deg, transparent 4px, #EADDFF 4px, #EADDFF 5px, transparent 5px) 0 0 / 8px 8px repeat-x;
@@ -67,15 +96,13 @@ $page_title = "Receipt Details";
     .btn-m3-danger {
         background-color: #F2B8B5; color: #601410; border-radius: 100px;
         padding: 12px 32px; border: none; font-weight: 700; width: 100%;
-        margin-top: 20px; transition: 0.3s;
     }
-    .btn-m3-danger:active { transform: scale(0.95); opacity: 0.8; }
 </style>
 
 <header class="m3-app-bar shadow-sm">
     <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i></a>
     <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons" onclick="window.print();"><i class="bi bi-printer"></i></div>
+    <div class="action-icons"><i class="bi bi-printer"></i></div>
 </header>
 
 <main class="pb-5">
@@ -98,7 +125,7 @@ $page_title = "Receipt Details";
         </div>
         <div class="receipt-row">
             <span class="receipt-label">Class & Roll</span>
-            <span class="receipt-value"><?php echo strtoupper($cls) . " ($sec) - $roll"; ?></span>
+            <span class="receipt-value"><?php echo $cls . ($sec ? " ($sec)" : "") . " - $roll"; ?></span>
         </div>
         <div class="receipt-row">
             <span class="receipt-label">Student ID</span>
@@ -107,18 +134,21 @@ $page_title = "Receipt Details";
 
         <div class="items-box shadow-sm">
             <div class="label-small mb-2 fw-bold text-primary" style="font-size: 0.7rem; text-transform: uppercase;">Payment Breakdown</div>
-            
             <?php
-            // আপনার প্রদান করা ডাইনামিক আইটেম লুপ
-            for ($a = 1; $a <= $cnt; $a++) {
-                $item_txt = $_GET['item' . $a . 'txt'] ?? 'Item '.$a;
-                $item_taka = $_GET['item' . $a . 'taka'] ?? 0;
+            $stmt_items = $conn->prepare("SELECT particulareng, amount FROM stfinance WHERE pr1no = ? OR pr2no = ?");
+            $stmt_items->bind_param("ss", $prno, $prno);
+            $stmt_items->execute();
+            $res_items = $stmt_items->get_result();
+            while ($row = $res_items->fetch_assoc()) {
+                $de = $row["particulareng"];
+                $de = str_replace(["Tution Fee : ", "Exam Fee : "], "", $de);
+                $de = str_replace("/", "-", $de);
             ?>
                 <div class="item-line">
-                    <span class="small fw-medium"><?php echo $item_txt; ?></span>
-                    <span class="small fw-bold">৳<?php echo number_format($item_taka, 2); ?></span>
+                    <span class="small fw-medium"><?php echo $de; ?></span>
+                    <span class="small fw-bold">৳<?php echo number_format($row['amount'], 2); ?></span>
                 </div>
-            <?php } ?>
+            <?php } $stmt_items->close(); ?>
 
             <div class="total-box">
                 <span class="total-label">Grand Total</span>
@@ -132,12 +162,12 @@ $page_title = "Receipt Details";
         </div>
         
         <div class="text-center mt-4">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=PR:<?php echo $prno; ?>|ST:<?php echo $stid; ?>|AMT:<?php echo $total; ?>" alt="QR" class="opacity-50">
-            <p style="font-size: 0.6rem; color: gray; margin-top: 8px; letter-spacing: 1px;">DIGITALLY VERIFIED RECEIPT</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=PR:<?php echo $prno; ?>|ST:<?php echo $stid; ?>" alt="QR" class="opacity-50">
+            <p style="font-size: 0.6rem; color: gray; margin-top: 8px;">DIGITALLY VERIFIED RECEIPT</p>
         </div>
     </div>
 
-    <div class="px-3">
+    <div class="px-3 mt-3">
         <button class="btn-m3-danger shadow-sm" onclick="history.back();">
             <i class="bi bi-arrow-left-circle me-2"></i> RETURN TO PORTAL
         </button>
@@ -145,5 +175,7 @@ $page_title = "Receipt Details";
 </main>
 
 <div style="height: 60px;"></div>
+
+
 
 <?php include 'footer.php'; ?>

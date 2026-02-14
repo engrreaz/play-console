@@ -1,5 +1,5 @@
 <?php
-include 'inc.back.php';
+include '../inc.light.php';
 
 $prno = $_POST['prno'] ?? '';
 if ($prno == '') {
@@ -88,9 +88,9 @@ if ($result0bg->num_rows > 0) {
 // echo $loop;
 
 
-$lnk = 'https://playstore.eimbox.com/receipt.php?prno=' . $prno . '&prdate=' . $prdate . '&stname=' . $stname . '&cls=' . $cls . '&sec=' . $sec . '&roll=' . $roll . '&total=' . $total . '&stid=' . $stid . '&collname=' . $collname . '&cnt=' . $cnt . $loop;
+$lnk = 'https://playconsole.eimbox.com/stpr.php?prno=' . $prno . '&prdate=' . $prdate . '&stname=' . $stname . '&cls=' . $cls . '&sec=' . $sec . '&roll=' . $roll . '&total=' . $total . '&stid=' . $stid . '&collname=' . $collname . '&cnt=' . $cnt . $loop;
 // $lnk = 'receipt.php?prno='.$prno.'&prdate='.$prdate.'&stname='.$stname.'&cls='.$cls.'&sec='.$sec.'&roll='.$roll.'&total='.$total.'&stid='.$stid.'&collname='.$collname.'&cnt='.$cnt.$loop;
-// echo $lnk;
+echo $lnk;
 ?>
 
-<meta http-equiv="refresh" content="0; URL=<?php echo $lnk; ?>" />
+<!-- <meta http-equiv="refresh" content="0; URL=" /> -->
