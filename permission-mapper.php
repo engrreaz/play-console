@@ -156,6 +156,7 @@ include 'inc.php';
                 <div class="flex-grow-1 overflow-hidden">
                     <div class="file-name text-truncate">${item.file}</div>
                     <div class="file-title text-truncate">${item.title || 'Untitled'}</div>
+                    <div class="file-title text-truncate" style="font-size:10px; font-weight:400;">${item.desc || 'Untitled'}</div>
                     <div class="module-label"><i class="bi bi-box-seam me-1"></i>${item.module || 'No Module'}</div>
                 </div>
                 <span class="m3-tonal-pill ${item.unassigned ? 'pill-unassigned' : 'pill-mapped'}">${item.unassigned ? 'New' : 'Mapped'}</span>
