@@ -436,7 +436,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                             <div class="row">
                                 <div class="col-6">
                                     <div class="m3-floating-group">
-                                        <label class="m3-floating-label">Select Category</label>
+                                        <label class="m3-floating-label">Category</label>
                                         <select name="category_id" id="mod_cat" class="m3-field form-select">
                                             <?php
                                             $rc = $conn->query("SELECT * FROM hub_categories ORDER BY sort_order");
@@ -448,7 +448,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                                 </div>
                                 <div class="col-6">
                                     <div class="m3-floating-group">
-                                        <label class="m3-floating-label">Module Status</label>
+                                        <label class="m3-floating-label">Status</label>
                                         <select name="active" id="mod_active" class="m3-field form-select">
                                             <option value="1">Enabled</option>
                                             <option value="0">Disabled</option>
