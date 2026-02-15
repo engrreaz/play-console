@@ -487,29 +487,37 @@ function isActive($targetFile, $currentFile)
 <script>
     <?php if ($readonly): ?>
 
-        // Stop ALL clicks
-        document.addEventListener('click', e => {
-            e.stopPropagation();
-            e.preventDefault();
-        }, true);
+        document.addEventListener("DOMContentLoaded", () => {
 
-        // Stop form submit
-        document.querySelectorAll('form').forEach(f => {
-            f.addEventListener('submit', e => {
+            const mainBlock = document.querySelector("main");
+            if (!mainBlock) return;
+
+            // Stop clicks inside main only
+            mainBlock.addEventListener('click', e => {
+                e.stopPropagation();
                 e.preventDefault();
+            }, true);
+
+            // Stop form submit inside main
+            mainBlock.querySelectorAll('form').forEach(f => {
+                f.addEventListener('submit', e => {
+                    e.preventDefault();
+                });
             });
-        });
 
-        // Disable inputs hard
-        document.querySelectorAll('input,select,textarea,button').forEach(el => {
-            el.disabled = true;
-        });
+            // Disable controls inside main
+            mainBlock.querySelectorAll('input,select,textarea,button').forEach(el => {
+                el.disabled = true;
+            });
 
-        // Kill bootstrap modals
-        document.querySelectorAll('[data-bs-toggle]').forEach(el => {
-            el.removeAttribute('data-bs-toggle');
+            // Remove bootstrap triggers inside main
+            mainBlock.querySelectorAll('[data-bs-toggle]').forEach(el => {
+                el.removeAttribute('data-bs-toggle');
+            });
+
         });
 
     <?php endif; ?>
+
 
 </script>
