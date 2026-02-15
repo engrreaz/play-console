@@ -84,7 +84,7 @@ if (isset($_POST['title'], $_POST['icon'], $_POST['onclick']) && !isset($_POST['
 // ==============================
 $cats = $conn->query("SELECT * FROM hub_categories ORDER BY sort_order");
 
-$roles_list = [];
+$roles_list = []; 
 
 $res = $conn->query("
     SELECT DISTINCT userlevel 
