@@ -4,12 +4,10 @@ include 'inc.php';
 ?>
 
 <style>
-    
-
     /* হিরো সেকশন */
     .hero-container {
         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
-        margin-top:-10px;
+        margin-top: -10px;
         color: white;
         padding: 25px 20px;
         border-radius: 0 0 28px 28px;
@@ -277,32 +275,62 @@ include 'inc.php';
     }
 
     // ২. কার্ড রেন্ডারিং (Memory Efficient)
+
+
     function renderBatch() {
+
         const batch = filteredData.slice(visibleCount, visibleCount + BATCH_SIZE);
         if (batch.length === 0) return;
 
         const fragment = document.createDocumentFragment();
+
         batch.forEach(item => {
+
+            // ⭐ NEW LOGIC
+            const isUnassigned =
+                item.unassigned ||
+                !item.title ||
+                item.title.trim() === "";
+
             const div = document.createElement('div');
-            div.className = `perm-card ${item.unassigned ? 'unassigned' : 'mapped'}`;
+            div.className = `perm-card ${isUnassigned ? 'unassigned' : 'mapped'}`;
+
             div.onclick = () => openEditor(item.file);
+
             div.innerHTML = `
-                <div class="icon-box-m3 ${item.unassigned ? 'c-unassigned' : 'c-mapped'}" onclick="openPage(event, '${item.file}')">
-                    <i class="bi ${item.unassigned ? 'bi-file-plus' : 'bi-file-check-fill'}"></i>
+            <div class="icon-box-m3 ${isUnassigned ? 'c-unassigned' : 'c-mapped'}"
+                 onclick="openPage(event, '${item.file}')">
+
+                <i class="bi ${isUnassigned ? 'bi-file-plus' : 'bi-file-check-fill'}"></i>
+            </div>
+
+            <div class="flex-grow-1 overflow-hidden">
+                <div class="file-name text-truncate">${item.file}</div>
+                <div class="file-title text-truncate">${item.title || ''}</div>
+                <div class="file-title text-truncate"
+                     style="font-size:10px; font-weight:400;">
+                     ${item.desc || 'Untitled'}
                 </div>
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="file-name text-truncate">${item.file}</div>
-                    <div class="file-title text-truncate">${item.title || 'Untitled'}</div>
-                    <div class="file-title text-truncate" style="font-size:10px; font-weight:400;">${item.desc || 'Untitled'}</div>
-                    <div class="module-label"><i class="bi bi-box-seam me-1"></i>${item.module || 'No Module'}</div>
+                <div class="module-label">
+                    <i class="bi bi-box-seam me-1"></i>
+                    ${item.module || 'No Module'}
                 </div>
-                <span class="m3-tonal-pill ${item.unassigned ? 'pill-unassigned' : 'pill-mapped'}">${item.unassigned ? 'New' : 'Mapped'}</span>
-            `;
+            </div>
+
+            <span class="m3-tonal-pill ${isUnassigned ? 'pill-unassigned' : 'pill-mapped'}">
+                ${isUnassigned ? 'New' : 'Mapped'}
+            </span>
+        `;
+
             fragment.appendChild(div);
         });
+
         container.appendChild(fragment);
         visibleCount += BATCH_SIZE;
     }
+
+
+
 
     // ৩. ফিল্টার ও মডাল
     function filterCards(type, btn) {
