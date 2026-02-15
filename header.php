@@ -189,11 +189,11 @@
 
 
         <div id="videoModal" class="modal">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-dialog modal-dialog-centered modal-lg" >
                 <div class="modal-content ">
                     <span class="ytclose" onclick="closeModal()">×</span>
 
-                    <iframe id="ytPlayer" width="90%" height="80%" src="" frameborder="0" allowfullscreen>
+                    <iframe id="ytPlayer" width="90%" height="80vh" src="" frameborder="0" allowfullscreen>
                     </iframe>
                 </div>
             </div>
