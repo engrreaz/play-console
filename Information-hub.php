@@ -104,10 +104,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
         --m3-radius: 8px;
     }
 
-    body {
-        background-color: var(--m3-surface);
-        font-family: 'Segoe UI', Roboto, sans-serif;
-    }
+
 
     /* Hero Mesh Gradient Section */
     .hero-container {
@@ -251,10 +248,37 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     }
 
     .modal-content-m3 {
-        border-radius: 28px !important;
+        border-radius: 12px !important;
         border: none;
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Collapse behaviour */
+    .collapsed-mods {
+        display: none;
+    }
+
+    .offline-toggle {
+        cursor: pointer;
+    }
+
+    /* Offline module look */
+    .offline-mod {
+        padding: 8px 16px;
+    }
+
+    /* Smaller icon */
+    .small-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+        color:gray;
+    }
+
+    .dis-tit{
+        color:gray;
     }
 </style>
 
@@ -265,63 +289,81 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     <div class="hero-container">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="fw-black m-0">Information Center</h4>
+                <h4 class="fw-black m-0">Information Center settings</h4>
                 <p class="small m-0 opacity-75">Control and categorize modules</p>
             </div>
 
         </div>
     </div>
 
-    <?php while ($c = $cats->fetch_assoc()): ?>
+    <?php while ($c = $cats->fetch_assoc()):
+        $isOffline = ($c['status'] == 0);
+        ?>
         <div class="cat-container-card shadow-sm">
-            <div class="cat-header">
+
+            <!-- Header clickable if offline -->
+            <div class="cat-header <?= $isOffline ? 'offline-toggle' : '' ?>" <?= $isOffline ? 'onclick="toggleCat(this)"' : '' ?>>
+
                 <div>
                     <h6 class="cat-title"><?= $c['name'] ?></h6>
-
                 </div>
-                <div class="d-flex gap-1">
-                    <span
-                        class="badge rounded-pill mt-1 <?= $c['status'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?>"
-                        style="font-size: 0.6rem;">
+
+                <div class="d-flex gap-1 align-items-center">
+                    <?php if ($isOffline): ?>
+                        <i class="bi bi-chevron-down small"></i>
+                    <?php endif; ?>
+
+                    <span class="badge rounded-pill mt-1
+                <?= $c['status'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?>"
+                        style="font-size:0.6rem;">
                         <?= $c['status'] ? 'ACTIVE' : 'OFFLINE' ?>
                     </span>
                 </div>
             </div>
 
-            <div class="module-list">
+            <!-- Module List -->
+            <div class="module-list <?= $isOffline ? 'collapsed-mods' : '' ?>">
                 <?php
                 $mod_query = $conn->query("SELECT * FROM hub_modules WHERE category_id={$c['id']} ORDER BY sort_order");
-                if ($mod_query->num_rows > 0):
-                    while ($m = $mod_query->fetch_assoc()):
-                        ?>
-                        <div class="module-tile">
-                            <div class="mod-icon-box shadow-sm">
-                                <i class="<?= $m['icon'] ?>"></i>
-                            </div>
-                            <div class="mod-info">
-                                <span class="mod-name"><?= $m['title'] ?></span>
+                while ($m = $mod_query->fetch_assoc()):
+                    ?>
+
+                    <div class="module-tile <?= $isOffline ? 'offline-mod' : '' ?>">
+
+                        <div class="mod-icon-box shadow-sm <?= $isOffline ? 'small-icon' : '' ?>">
+                            <i class="<?= $m['icon'] ?>"></i>
+                        </div>
+
+                        <div class="mod-info">
+                            <span class="mod-name <?= $isOffline ? 'dis-tit' : '' ?>"><?= $m['title'] ?></span>
+
+                            <?php if (!$isOffline): ?>
                                 <span class="mod-status <?= $m['active'] ? 'text-success' : 'text-muted' ?>">
                                     <?= $m['active'] ? '• Enabled' : '• Disabled' ?>
                                 </span>
-                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if (!$isOffline): ?>
+                            <!-- buttons only for active category -->
                             <div class="d-flex">
                                 <button class="m3-icon-btn bg-light text-info" onclick='editModule(<?= json_encode($m) ?>)'>
                                     <i class="bi bi-pencil"></i>
                                 </button>
+
                                 <button class="m3-icon-btn bg-light text-secondary" onclick="openPermModal(<?= $m['id'] ?>)">
                                     <i class="bi bi-shield-lock"></i>
                                 </button>
                             </div>
-                        </div>
-                    <?php endwhile; else: ?>
-                    <div class="p-4 text-center small text-muted opacity-50">
-                        <i class="bi bi-box-seam display-6 d-block mb-2"></i>
-                        No modules in this category.
+                        <?php endif; ?>
+
                     </div>
-                <?php endif; ?>
+
+                <?php endwhile; ?>
             </div>
         </div>
     <?php endwhile; ?>
+
 </main>
 
 <div class="modal fade" id="categoryModal" tabindex="-1">
@@ -354,7 +396,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
 </div>
 
 <div class="modal fade" id="moduleModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg" >
         <div class="modal-content modal-content-m3 p-2">
             <form method="post" id="moduleForm">
                 <div class="modal-header border-0">
@@ -397,14 +439,14 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                         <div class="col-12">
                             <div class="m3-floating-group">
                                 <label class="m3-floating-label">Module Status</label>
-                                <select name="active" id="mod_active" class="m3-field form-select">
+                                <select name="active" id="mod_active" class="m3-field form-select" disabled>
                                     <option value="1">Enabled</option>
                                     <option value="0">Disabled</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow">SAVE MODULE
+                    <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow" disabled>SAVE MODULE
                         SETTINGS</button>
                 </div>
             </form>
@@ -414,17 +456,17 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
 
 <div class="modal fade" id="permModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-m3 p-2">
+        <div class="modal-content modal-content-m3 p-2"  >
             <form method="post" id="permForm">
                 <div class="modal-header border-0">
-                    <h5 class="fw-bold">Access Control</h5>
+                    <h5 class="fw-bold">Access by Role </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-0">
                     <input type="hidden" name="module_id" id="perm_module_id">
-                    <div class="m3-floating-group">
+                    <div class="m3-floating-group" hidden>
                         <label class="m3-floating-label">Target SCCODE (0 for All)</label>
-                        <input type="number" name="sccode" class="m3-field" value="0">
+                        <input type="hidden" name="sccode" class="m3-field" value="0" >
                     </div>
                     <div class="m3-floating-group">
                         <label class="m3-floating-label">Roles (Multi-select)</label>
@@ -581,6 +623,14 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     }
 
 
+
+    window.toggleCat = function (header) {
+        const list = header.nextElementSibling;
+        list.style.display =
+            list.style.display === "none" || list.style.display === ""
+                ? "block"
+                : "none";
+    }
 
 
 </script>
