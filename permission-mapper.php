@@ -117,7 +117,7 @@ include 'inc.php';
 
     /* মডাল স্টাইল */
     .m3-modal-content {
-        border-radius: 28px !important;
+        border-radius: 12px !important;
         border: none !important;
     }
 
@@ -126,7 +126,7 @@ include 'inc.php';
         background: #F3EDF7;
         border: none;
         border-bottom: 2px solid #79747E;
-        border-radius: 12px 12px 4px 4px;
+        border-radius: 8px 8px 4px 4px;
         padding: 12px;
         margin-bottom: 10px;
         font-weight: 600;
@@ -209,6 +209,14 @@ include 'inc.php';
 
                     <input type="text" name="root_page" id="m_root" class="m3-input-floating"
                         placeholder="Root (e.g. index.php)">
+
+
+                        <input type="text"
+       name="video_id"
+       id="m_video"
+       class="m3-input-floating"
+       placeholder="YouTube Video ID (optional)">
+
 
                     <div style="font-size: 0.75rem; font-weight: 800; color: #6750A4; margin: 15px 5px 10px;">ROLE
                         PERMISSIONS</div>
@@ -317,6 +325,13 @@ include 'inc.php';
                 </div>
             </div>
 
+            ${(!isUnassigned && item.video_id)
+    ? `<i class="bi bi-youtube text-danger me-2"
+           style="font-size:18px;"></i>`
+    : ''
+}
+
+
             <span class="m3-tonal-pill ${isUnassigned ? 'pill-unassigned' : 'pill-mapped'}">
                 ${isUnassigned ? 'New' : 'Mapped'}
             </span>
@@ -354,6 +369,8 @@ include 'inc.php';
         document.getElementById('m_desc').value = item.desc;
         document.getElementById('m_module').value = item.module;
         document.getElementById('m_root').value = item.root;
+        document.getElementById('m_video').value = item.video_id || "";
+
 
         let roleHtml = "";
         roles.forEach(r => {

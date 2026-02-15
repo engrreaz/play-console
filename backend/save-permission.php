@@ -11,6 +11,7 @@ $title = $_POST['page_title'];
 $desc  = $_POST['description'];
 $module= $_POST['module'];
 $root  = $_POST['root_page'];
+$video = $_POST['video_id'] ?? '';
 $perm  = $_POST['perm'];
 
 $sccode = '0';
@@ -27,8 +28,8 @@ $stmt->execute();
 */
 $stmt = $conn->prepare("
 INSERT INTO permission_map_app
-(page_name,userlevel,permission,page_title,module,root_page,description,sccode)
-VALUES (?,?,?,?,?,?,?,?)
+(page_name,userlevel,permission,page_title,module,root_page,description,sccode, video_id)
+VALUES (?,?,?,?,?,?,?,?,?)
 ");
 
 foreach($perm as $role=>$val){
@@ -36,7 +37,7 @@ foreach($perm as $role=>$val){
     $val = intval($val);
 
     $stmt->bind_param(
-        "ssisssss",
+        "ssissssss",
         $page,
         $role,
         $val,
@@ -44,7 +45,7 @@ foreach($perm as $role=>$val){
         $module,
         $root,
         $desc,
-        $sccode
+        $sccode, $video
     );
 
     $stmt->execute();

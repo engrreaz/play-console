@@ -39,6 +39,7 @@ foreach ($files as $f) {
         'module' => reset($data)['module'] ?? '',
         'root' => reset($data)['root_page'] ?? 'index.php',
         'desc' => reset($data)['description'] ?? '',
+        'video_id' => reset($data)['video_id'] ?? '',
         'unassigned' => $is_un,
         'perm' => $perms
     ];

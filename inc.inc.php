@@ -240,7 +240,7 @@ if ($sccode > 100) {
             $short = $row0x["short"];
             $servicefinance = $row0x["servicefinance"];
             $sctype = $row0x["sccategory"];
-             $data_cached = 1;
+            $data_cached = 1;
 
             $scaddress = $scadd1 . $scadd2 . $ps . $dist;
             $scaddress2 = $scadd1 . ', ' . $ps . ', ' . $dist . '.';
@@ -333,7 +333,15 @@ include 'core/loading.php';
 $loader_html = ob_get_clean();
 
 
-$video_id = "dQw4w9WgXcQ"; // YouTube video ID
+$video_id = null;
+$stmt = $conn->prepare("SELECT video_id FROM permission_map_app WHERE page_name=? LIMIT 1");
+$stmt->bind_param("s", $curfile);
+$stmt->execute();
+$res = $stmt->get_result();
+if ($row = $res->fetch_assoc()) {
+    $video_id = $row['video_id'];
+}
+
 
 include_once 'functions.php';
 include 'component/sms-func.php';
