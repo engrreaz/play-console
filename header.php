@@ -193,7 +193,7 @@
                 <div class="modal-content ">
                     <span class="ytclose" onclick="closeModal()">×</span>
 
-                    <iframe id="ytPlayer" width="90%" height="80vh" src="" frameborder="0" allowfullscreen>
+                    <iframe id="ytPlayer" width="100%" height="500px" src="" frameborder="0" allowfullscreen>
                     </iframe>
                 </div>
             </div>
