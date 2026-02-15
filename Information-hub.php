@@ -1,6 +1,6 @@
 <?php
 ob_start();
-$page_title = "Information center";
+$page_title = "Information Hub Manager";
 include_once 'inc.php'; // DB connection & common includes
 
 // ==============================
