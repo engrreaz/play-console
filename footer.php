@@ -463,22 +463,53 @@ function isActive($targetFile, $currentFile)
         }
     }
 
-    
+
 </script>
 
 
 
 <script>
-document.querySelectorAll('.dd-item.perm').forEach(function(icon) {
-    icon.addEventListener('click', function() {
-        let permValue = this.dataset.perm;
-        let url = new URL(window.location.href);
+    document.querySelectorAll('.dd-item.perm').forEach(function (icon) {
+        icon.addEventListener('click', function () {
+            let permValue = this.dataset.perm;
+            let url = new URL(window.location.href);
 
-        // perm প্যারামিটার সেট বা update
-        url.searchParams.set('perm', permValue);
+            // perm প্যারামিটার সেট বা update
+            url.searchParams.set('perm', permValue);
 
-        // redirect to updated URL
-        window.location.href = url.toString();
+            // redirect to updated URL
+            window.location.href = url.toString();
+        });
     });
-});
+</script>
+
+
+<script>
+    <?php if ($readonly): ?>
+
+        // Stop ALL clicks
+        document.addEventListener('click', e => {
+            e.stopPropagation();
+            e.preventDefault();
+        }, true);
+
+        // Stop form submit
+        document.querySelectorAll('form').forEach(f => {
+            f.addEventListener('submit', e => {
+                e.preventDefault();
+            });
+        });
+
+        // Disable inputs hard
+        document.querySelectorAll('input,select,textarea,button').forEach(el => {
+            el.disabled = true;
+        });
+
+        // Kill bootstrap modals
+        document.querySelectorAll('[data-bs-toggle]').forEach(el => {
+            el.removeAttribute('data-bs-toggle');
+        });
+
+    <?php endif; ?>
+
 </script>

@@ -166,3 +166,7 @@ if ($permission == 0) {
 }
 
 
+
+
+
+$readonly = ($permission == 1);
