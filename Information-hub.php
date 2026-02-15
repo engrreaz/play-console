@@ -83,7 +83,20 @@ if (isset($_POST['title'], $_POST['icon'], $_POST['onclick']) && !isset($_POST['
 // FETCH DATA
 // ==============================
 $cats = $conn->query("SELECT * FROM hub_categories ORDER BY sort_order");
-$roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher', 'Staff'];
+
+$roles_list = [];
+
+$res = $conn->query("
+    SELECT DISTINCT userlevel 
+    FROM rolemanager 
+    WHERE sccode = 0 or sccode='$sccode'
+    ORDER BY userlevel
+");
+
+while ($row = $res->fetch_assoc()) {
+    $roles_list[] = $row['userlevel'];
+}
+
 ?>
 
 <!-- ==============================
