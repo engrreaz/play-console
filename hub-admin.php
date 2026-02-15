@@ -251,7 +251,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     }
 
     .modal-content-m3 {
-        border-radius: 28px !important;
+        border-radius: 12px !important;
         border: none;
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
@@ -263,6 +263,23 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
 
     .module-tile {
         cursor: grab;
+    }
+
+
+    .drag-handle-cat,
+    .drag-handle-mod {
+        cursor: grab;
+        padding: 6px;
+        color: #999;
+        font-size: 18px;
+    }
+
+    .module-list {
+        display: none;
+    }
+
+    .cat-container-card.open .module-list {
+        display: block;
     }
 </style>
 
@@ -276,17 +293,20 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                 <h4 class="fw-black m-0">Hub Manager</h4>
                 <p class="small m-0 opacity-75">Control and categorize modules</p>
             </div>
-            <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 " style="z-index:2000;"
+            <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 " style="z-index:500;"
                 onclick="openCategoryModal()">
-                <i class="bi bi-plus-lg me-1"></i> New Category
+                <i class="bi bi-plus-lg me-1"></i> <span class="vr"></span> New Category
             </button>
         </div>
     </div>
 
     <?php while ($c = $cats->fetch_assoc()): ?>
-        <div class="cat-container-card shadow-sm sortable-category" data-id="<?= $c['id'] ?>">
+        <div class=" cat-container-card shadow-sm sortable-category" data-id="<?= $c['id'] ?>">
             <div class="cat-header">
-                <div>
+                <span class="drag-handle-cat me-2">
+                    <i class="bi bi-grip-vertical"></i>
+                </span>
+                <div class="flex-grow-1">
                     <h6 class="cat-title"><?= $c['name'] ?></h6>
                     <span
                         class="badge rounded-pill mt-1 <?= $c['status'] ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' ?>"
@@ -317,6 +337,10 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                     while ($m = $mod_query->fetch_assoc()):
                         ?>
                         <div class="module-tile" data-id="<?= $m['id'] ?>">
+                            <span class="drag-handle-mod me-2">
+                                <i class="bi bi-grip-vertical"></i>
+                            </span>
+
                             <div class="mod-icon-box shadow-sm">
                                 <i class="<?= $m['icon'] ?>"></i>
                             </div>
@@ -407,27 +431,34 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
                                 <input type="text" name="onclick" id="mod_onclick" class="m3-field">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="m3-floating-group">
-                                <label class="m3-floating-label">Select Category</label>
-                                <select name="category_id" id="mod_cat" class="m3-field form-select">
-                                    <?php
-                                    $rc = $conn->query("SELECT * FROM hub_categories ORDER BY sort_order");
-                                    while ($r = $rc->fetch_assoc())
-                                        echo "<option value='{$r['id']}'>{$r['name']}</option>";
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
+
                         <div class="col-12">
-                            <div class="m3-floating-group">
-                                <label class="m3-floating-label">Module Status</label>
-                                <select name="active" id="mod_active" class="m3-field form-select">
-                                    <option value="1">Enabled</option>
-                                    <option value="0">Disabled</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="m3-floating-group">
+                                        <label class="m3-floating-label">Select Category</label>
+                                        <select name="category_id" id="mod_cat" class="m3-field form-select">
+                                            <?php
+                                            $rc = $conn->query("SELECT * FROM hub_categories ORDER BY sort_order");
+                                            while ($r = $rc->fetch_assoc())
+                                                echo "<option value='{$r['id']}'>{$r['name']}</option>";
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="m3-floating-group">
+                                        <label class="m3-floating-label">Module Status</label>
+                                        <select name="active" id="mod_active" class="m3-field form-select">
+                                            <option value="1">Enabled</option>
+                                            <option value="0">Disabled</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
+
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow">SAVE MODULE
                         SETTINGS</button>
@@ -481,17 +512,19 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
 
     new Sortable(document.querySelector("main"), {
         animation: 150,
-        handle: ".cat-header",
+        handle: ".drag-handle-cat",
+
+        delay: 180,
+        delayOnTouchOnly: true,
+        touchStartThreshold: 6,
+        fallbackTolerance: 6,
+
         draggable: ".sortable-category",
+
         onEnd: function () {
-
             let order = [];
-
             document.querySelectorAll(".sortable-category").forEach((el, i) => {
-                order.push({
-                    id: el.dataset.id,
-                    pos: i + 1
-                });
+                order.push({ id: el.dataset.id, pos: i + 1 });
             });
 
             fetch("ajax/update-cat-order.php", {
@@ -501,6 +534,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
             });
         }
     });
+
 
 </script>
 
@@ -513,11 +547,19 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
 
         new Sortable(list, {
             animation: 150,
+
+            handle: ".drag-handle-mod",
+
+            delay: 180,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 6,
+            fallbackTolerance: 6,
+
             draggable: ".module-tile",
+
             onEnd: function () {
 
                 let catId = list.dataset.category;
-
                 let order = [];
 
                 list.querySelectorAll(".module-tile").forEach((el, i) => {
@@ -537,6 +579,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
         });
 
     });
+
 
 </script>
 
@@ -572,6 +615,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
         }
 
         window.editModule = function (d) {
+
             module_id.value = d.id;
             mod_title.value = d.title;
             mod_icon.value = d.icon;
@@ -672,6 +716,15 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     }
 
 
+    document.querySelectorAll('.cat-header').forEach(h => {
+        h.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            if (e.target.closest('.drag-handle-cat')) return;
+
+            this.parentElement.classList.toggle('open');
+        });
+    });
 
 
 </script>

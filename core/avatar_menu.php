@@ -16,7 +16,9 @@
             <i class="dd-item bi bi-shield-slash-fill text-warning fs-5 p-0 perm" data-perm="1"></i>
             <i class="dd-item bi bi-shield-fill-x text-danger fs-5 p-0 perm" data-perm="0"></i>
         </div>
+        <div class="dd-divider"></div>
 
+        <div class="dd-item text-danger fs-tiny" onclick="developer_console()"> <i class="bi bi-terminal me-2"></i> Developer Console</div>
     <?php } ?>
 
 

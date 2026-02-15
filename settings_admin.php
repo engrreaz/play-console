@@ -244,66 +244,9 @@ $sy_param = '%' . $current_session . '%';
 
 
 
-
-
-    <?php if ($usr == 'engrreaz@gmail.com'): ?>
-        <div class="m3-section-title px-3 mt-4">Developer Console</div>
-
-        <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_task_manager();">
-            <div class="icon-box c-user"><i class="bi bi-list-columns-reverse"></i></div>
-            <div class="setting-success">
-                <div class="st-title">Task Manager</div>
-                <div class="st-desc">Manage Task, Developing issues, Track Bugs</div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-
-        <a href="javascript:void(0);" class="m3-setting-card shadow-sm " onclick="settings_admin_data_center();">
-            <div class="icon-box c-user"><i class="bi bi-info-circle-fill"></i></div>
-            <div class="setting-info">
-                <div class="st-title">Information Center</div>
-                <div class="st-desc">Information hub management</div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-
-        <a href="permission-mapper.php" class="m3-setting-card shadow-sm">
-            <div class="icon-box c-map"><i class="bi bi-shield-lock-fill"></i></div>
-            <div class="setting-info">
-                <div class="st-title">Permission Mapper</div>
-                <div class="st-desc">Assign specific access roles to users</div>
-            </div>
-            <i class="bi bi-chevron-right text-muted opacity-25"></i>
-        </a>
-
-
-
-
-        <div class="dev-grid">
-            <a href="promotion.php" class="btn-dev shadow-sm">PROMOTION</a>
-            <a href="studentadmission.php" class="btn-dev shadow-sm">ADMISSION</a>
-            <a href="cashbookview.php" class="btn-dev shadow-sm">CASHBOOK</a>
-            <a href="trackreport.php" class="btn-dev shadow-sm">TRACKING</a>
-            <div class="m3-cat-label">Co-Curricular Activities</div>
-            <hr>
-            <a href="activity_manager.php" class="btn-dev shadow-sm">CCA</a>
-            <a href="student_activity_entry.php" class="btn-dev shadow-sm">Entry</a>
-            <a href="student_activity_list.php" class="btn-dev shadow-sm">Student CCA</a>
-            <a href="all_activities.php" class="btn-dev shadow-sm">All CCA</a>
-
-            <div class="m3-cat-label">Cashbook</div>
-            <hr>
-            <a href="accounts-manager.php" class="btn-dev shadow-sm">Charts of Account</a>
-            <a href="cashbookview.php" class="btn-dev shadow-sm">Cashbook View</a>
-            <a href="cashbook.php" class="btn-dev shadow-sm">Cashbook</a>
-
-
-        </div>
-    <?php endif; ?>
-
 </main>
 
-<div style="height: 75px;"></div>
+<div style="height: 5px;"></div>
 <script>
     function settings_admin_ins_info() { window.location.href = "institute-info.php"; }
     function settings_admin_add_edit_teacher() { window.location.href = "settingsteacher.php"; }
