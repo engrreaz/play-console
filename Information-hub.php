@@ -452,7 +452,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
             </form>
         </div>
     </div>
-</div>
+</div> 
 
 <div class="modal fade" id="permModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
