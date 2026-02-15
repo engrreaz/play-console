@@ -4,21 +4,12 @@ include 'inc.php';
 ?>
 
 <style>
-    :root {
-        --m3-surface: #F7F2FA;
-        --m3-primary: #6750A4;
-        --m3-primary-tonal: #EADDFF;
-    }
-
-    body {
-        background-color: var(--m3-surface);
-        font-family: 'Roboto', sans-serif;
-        margin: 0;
-    }
+    
 
     /* হিরো সেকশন */
     .hero-container {
         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        margin-top:-10px;
         color: white;
         padding: 25px 20px;
         border-radius: 0 0 28px 28px;
