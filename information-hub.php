@@ -364,7 +364,9 @@ while ($row = $res->fetch_assoc()) {
                                     <i class="bi bi-pencil"></i>
                                 </button>
 
-                                <button class="m3-icon-btn bg-light text-secondary" onclick="openPermModal(<?= $m['id'] ?>)">
+                                <button class="m3-icon-btn bg-light text-secondary" onclick="openPermModal(<?= $m['id'] ?>)"
+                                <?= ($permission==2 ? 'disabled style="opacity:.4;cursor:not-allowed"' : '') ?>
+                                >
                                     <i class="bi bi-shield-lock"></i>
                                 </button>
                             </div>
