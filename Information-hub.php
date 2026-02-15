@@ -458,7 +458,7 @@ $roles_list = ['Administrator', 'Super Administrator', 'Accountants', 'Teacher',
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content modal-content-m3 p-2"  >
             <form method="post" id="permForm">
-                <div class="modal-header border-0">
+                <div class="modal-header border-0">  
                     <h5 class="fw-bold">Access by Role </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
