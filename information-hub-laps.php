@@ -13,7 +13,7 @@ if (isset($_POST['delete_cat'])) {
     $conn->query("DELETE FROM hub_categories WHERE id=$id");
     echo "ok";
     exit;
-}
+} 
 
 // ==============================
 // DELETE MODULE AJAX
