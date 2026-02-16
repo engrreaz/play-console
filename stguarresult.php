@@ -1,173 +1,130 @@
 <?php
-$page_title = "Academic Result";
-include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
-
-// ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
-
+$page_title = "Academic Results";
+include 'inc.php'; 
 
 $stid = $_GET['stid'] ?? 0;
+$sy_param = $sessionyear_param;
 
+// ১. স্টুডেন্ট বেসিক ডাটা ফেচ করা
+$stmt_st = $conn->prepare("SELECT s.stnameeng, si.classname, si.rollno FROM students s JOIN sessioninfo si ON s.stid = si.stid WHERE s.stid = ? AND si.sessionyear LIKE ? LIMIT 1");
+$stmt_st->bind_param("ss", $stid, $sy_param);
+$stmt_st->execute();
+$st = $stmt_st->get_result()->fetch_assoc();
 
-// ২. স্টুডেন্ট এবং সেশন ইনফো ফেচ করা (Prepared Statement)
-$std_data = [];
-$stmt = $conn->prepare("SELECT s.*, si.classname, si.sectionname, si.rollno 
-                        FROM students s 
-                        JOIN sessioninfo si ON s.stid = si.stid 
-                        WHERE s.stid = ? AND si.sessionyear LIKE ? LIMIT 1");
-$stmt->bind_param("ss", $stid, $sy_param);
-$stmt->execute();
-$res = $stmt->get_result();
-if($row = $res->fetch_assoc()) {
-    $std_data = $row;
-}
-$stmt->close();
-
-$stnameeng = $std_data['stnameeng'] ?? 'N/A';
-$cls = $std_data['classname'] ?? '';
-$sec = $std_data['sectionname'] ?? '';
-$roll = $std_data['rollno'] ?? '';
-$stdid = $std_data['stid'] ?? $stid;
-
-// প্রোফাইল পিকচার পাথ
-
-$stinfo = get_student_info_by_id($stid);
+// ২. চলমান সেশনের পরীক্ষার তালিকা ফেচ করা
+$exams = [];
+$stmt_ex = $conn->prepare("SELECT * FROM examlist WHERE sccode = ? AND sessionyear LIKE ? AND (classname = ? OR classname IS NULL OR classname = '') ORDER BY datestart DESC");
+$stmt_ex->bind_param("iss", $sccode, $sy_param, $st['classname']);
+$stmt_ex->execute();
+$res_ex = $stmt_ex->get_result();
+while($row = $res_ex->fetch_assoc()) $exams[] = $row;
 ?>
 
 <style>
-    body { background-color: #FEF7FF; font-size: 0.9rem; }
-
-    /* M3 App Bar (Full Width) */
-    .m3-app-bar {
-        width: 100%; height: 56px; background: #fff; display: flex; align-items: center; 
-        padding: 0 16px; position: sticky; top: 0; z-index: 1050; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 0 0 8px 8px;
-    }
-    .m3-app-bar .page-title { font-size: 1.1rem; font-weight: 700; color: #1C1B1F; flex-grow: 1; margin: 0; }
-
-    /* Large Photo Profile Hero */
-    .result-hero {
-        background: #fff; padding: 30px 16px; text-align: center;
-        margin-bottom: 12px; border-radius: 0 0 8px 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    body { background-color: #FEF7FF; }
+    .hero-profile {
+        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        margin: 12px; padding: 24px; border-radius: 28px; color: white;
     }
     
-    .large-student-photo {
-        width: 130px; height: 130px; border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
-        object-fit: cover; border: 4px solid #F3EDF7;
-        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.12);
-        margin-bottom: 16px;
+    /* Exam Card M3 Style */
+    .exam-card {
+        background: #fff; border-radius: 20px; padding: 16px;
+        margin: 0 12px 12px; border: 1px solid #E7E0EC;
+        transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+        display: flex; align-items: center; justify-content: space-between;
     }
-
-    /* M3 Result Card (8px Radius) */
-    .res-card {
-        background: #fff; border-radius: 8px; padding: 12px;
-        margin: 0 12px 10px; border: 1px solid #eee;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-
-    .grade-box {
-        width: 48px; height: 48px; border-radius: 8px; /* ৮ পিক্সেল */
+    .exam-card:active { transform: scale(0.97); background: #F3EDF7; }
+    
+    .exam-icon {
+        width: 48px; height: 48px; border-radius: 12px;
         background: #EADDFF; color: #21005D;
         display: flex; align-items: center; justify-content: center;
-        font-weight: 800; font-size: 1.2rem; margin-right: 12px;
+        font-size: 1.5rem; margin-right: 16px;
     }
-
-    .sub-title { font-weight: 700; color: #1D1B20; font-size: 0.9rem; margin-bottom: 2px; }
-    .mark-info { font-size: 0.7rem; font-weight: 700; color: #6750A4; text-transform: uppercase; }
     
-    .dist-grid {
-        display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
-        margin-top: 10px; padding-top: 10px; border-top: 1px dashed #E7E0EC;
-    }
-    .dist-item { text-align: center; }
-    .dist-label { font-size: 0.55rem; color: #79747E; font-weight: 700; display: block; }
-    .dist-val { font-size: 0.8rem; font-weight: 800; color: #1C1B1F; }
-
-    .session-badge {
-        font-size: 0.65rem; background: #EADDFF; color: #21005D;
-        padding: 2px 10px; border-radius: 4px; font-weight: 800;
+    .status-badge {
+        font-size: 0.65rem; font-weight: 800; padding: 4px 12px;
+        border-radius: 100px; text-transform: uppercase;
     }
 </style>
 
-
 <main class="pb-5">
-    <div class="result-hero shadow-sm">
-        <img src="<?php echo student_profile_image_path($stid); ?>" class="large-student-photo" >
-        <div class="h5 fw-bold text-dark mb-1"><?php echo $stinfo['stnameeng'];; ?></div>
-        <div class="d-flex justify-content-center gap-2 mt-2">
-            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Class <?php echo $cls; ?></span>
-            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Roll <?php echo $roll; ?></span>
+    <div class="hero-profile shadow-sm">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <img src="<?= student_profile_image_path($stid) ?>" style="width: 65px; height: 65px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);">
+            </div>
+            <div>
+                <h5 class="fw-black m-0"><?= $st['stnameeng'] ?></h5>
+                <p class="small m-0 opacity-75">Class: <?= $st['classname'] ?> | Roll: <?= $st['rollno'] ?></p>
+            </div>
         </div>
     </div>
 
-    <div class="res-card bg-primary text-white border-0 shadow-sm d-flex justify-content-between align-items-center">
-        <div>
-            <div class="small opacity-75 fw-bold">Current Assessment</div>
-            <div class="fw-bold">Annual Examination</div>
+    <div class="px-3 mt-4 mb-3">
+        <span class="fw-black text-muted small text-uppercase" style="letter-spacing: 1px;">Available Assessments</span>
+    </div>
+
+    <div id="exam-list-container">
+        <?php foreach($exams as $ex): 
+            $publish_status = ($ex['status'] == 1) ? 'Published' : 'Pending';
+            $status_cls = ($ex['status'] == 1) ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning';
+        ?>
+        <div class="exam-card shadow-sm" onclick="loadResult('<?= $ex['examcode'] ?>', '<?= $stid ?>')">
+            <div class="d-flex align-items-center">
+                <div class="exam-icon"><i class="bi bi-journal-check"></i></div>
+                <div>
+                    <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= $ex['examtitle'] ?></div>
+                    <div class="small text-muted"><?= date('d M, Y', strtotime($ex['datestart'])) ?></div>
+                </div>
+            </div>
+            <div class="text-end">
+                <span class="status-badge <?= $status_cls ?>"><?= $publish_status ?></span>
+                <div class="mt-1"><i class="bi bi-chevron-right text-muted opacity-50"></i></div>
+            </div>
         </div>
-        <div class="badge bg-white text-primary rounded-pill px-3">PUBLISHED</div>
-    </div>
-
-    <div class="px-3 mb-2 mt-3">
-        <span class="fw-bold text-muted small text-uppercase" style="letter-spacing: 1px;">Academic Performance</span>
-    </div>
-
-    <div class="list-container px-1">
-        <?php
-        // ৩. মার্কস ফেচ করা
-        $stmt_m = $conn->prepare("SELECT m.*, s.subject as subname 
-                                  FROM stmark m 
-                                  JOIN subjects s ON m.subject = s.subcode 
-                                  WHERE m.stid = ? AND m.sessionyear LIKE ? AND s.sccategory = ?
-                                  ORDER BY s.subcode ASC");
-        $stmt_m->bind_param("sss", $stid, $sy_param, $sctype);
-        $stmt_m->execute();
-        $res_m = $stmt_m->get_result();
-
-        if($res_m->num_rows > 0):
-            while($m = $res_m->fetch_assoc()):
-        ?>
-            <div class="res-card shadow-sm">
-                <div class="d-flex align-items-center">
-                    <div class="grade-box shadow-sm">
-                        <?php echo $m['gl']; ?>
-                    </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="sub-title text-truncate"><?php echo $m['subname']; ?></div>
-                        <div class="mark-info">
-                            Obtained: <?php echo $m['markobt']; ?> <i class="bi bi-dot"></i> Point: <?php echo $m['gp']; ?>
-                        </div>
-                    </div>
-                    <i class="bi bi-chevron-expand text-muted opacity-25"></i>
-                </div>
-                
-                <div class="dist-grid">
-                    <?php if($m['ca'] > 0): ?>
-                        <div class="dist-item"><span class="dist-label">CA</span><span class="dist-val"><?php echo $m['ca']; ?></span></div>
-                    <?php endif; ?>
-                    <?php if($m['subj'] > 0): ?>
-                        <div class="dist-item"><span class="dist-label">SUB</span><span class="dist-val"><?php echo $m['subj']; ?></span></div>
-                    <?php endif; ?>
-                    <?php if($m['obj'] > 0): ?>
-                        <div class="dist-item"><span class="dist-label">OBJ</span><span class="dist-val"><?php echo $m['obj']; ?></span></div>
-                    <?php endif; ?>
-                    <?php if($m['pra'] > 0): ?>
-                        <div class="dist-item"><span class="dist-label">PRA</span><span class="dist-val"><?php echo $m['pra']; ?></span></div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        <?php 
-            endwhile; 
-        else:
-        ?>
-            <div class="text-center py-5 opacity-25">
-                <i class="bi bi-clipboard-x display-1"></i>
-                <p class="fw-bold mt-2">Result not processed yet.</p>
-            </div>
-        <?php 
-        endif; $stmt_m->close();
-        ?>
+        <?php endforeach; ?>
     </div>
 </main>
 
-<div style="height: 65px;"></div> <?php include 'footer.php'; ?>
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content border-0" style="border-radius: 28px; background: #FEF7FF;">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="fw-black text-primary"><i class="bi bi-trophy me-2"></i>Performance Summary</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="result_body" style="max-height: 70vh; overflow-y: auto;">
+                </div>
+            <div class="modal-footer border-0 p-4">
+                <button type="button" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm" id="fullResultBtn">
+                    VIEW FULL REPORT CARD
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<?php include 'footer.php'; ?>
+<script>
+function loadResult(examcode, stid) {
+    var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+    myModal.show();
+    
+    $("#result_body").html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">Processing scores...</p></div>');
+    
+    $.ajax({
+        url: 'ajax/get-exam-result.php',
+        type: 'POST',
+        data: { examcode: examcode, stid: stid },
+        success: function(res) {
+            $("#result_body").html(res);
+            // পূর্ণ ফলাফল বাটনের লিংক আপডেট
+            $("#fullResultBtn").attr("onclick", `window.location.href='full-report.php?stid=${stid}&exam=${examcode}'`);
+        }
+    });
+}
+</script>
+

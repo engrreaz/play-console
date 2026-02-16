@@ -1,5 +1,10 @@
 <?php
 $page_title = "My Class";
+if (isset($_GET['cls']) && isset($_GET['sec'])) {
+    $classname = $_GET['cls'];
+    $sectionname = $_GET['sec'];
+    $page_title = "Students Data";
+}
 include_once 'inc.php';
 include_once 'datam/datam-stprofile.php';
 
@@ -236,10 +241,90 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
         border: 1px solid var(--m3-tonal-container) !important;
         box-shadow: 0 2px 6px rgba(103, 80, 164, 0.1);
     }
+
+
+    /* Hero Container Specific Style */
+    .m3-hero-card {
+        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        margin: 12px;
+        padding: 24px 20px;
+        border-radius: 16px;
+        color: white;
+        box-shadow: 0 8px 24px rgba(103, 80, 164, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-icon-box {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .hero-badge {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Background decoration */
+    .m3-hero-card::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
 </style>
 
 
 <main class="pb-0">
+
+    <div class="m3-hero-card shadow-sm">
+        <div class="d-flex align-items-center">
+            <div class="hero-icon-box me-3 shadow-sm">
+                <i class="bi bi-microsoft-teams"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h4 class="fw-black m-0" style="letter-spacing: -0.5px;"><?= $page_title ?></h4>
+                <p class="small m-0 opacity-75">Academic Session: <?= $sessionyear ?></p>
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex flex-wrap gap-2">
+            <div class="hero-badge">
+                <i class="bi bi-layers-half me-1"></i> <?= $count_class ?> Assigned Class(es)
+            </div>
+            <div class="hero-badge">
+                <i class="bi bi-shield-check me-1"></i> <?= $userlevel ?>
+            </div>
+            <?php if (isset($classname)): ?>
+                <div class="hero-badge" style="background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4);">
+                    <i class="bi bi-bookmark-star-fill me-1"></i> <?= $classname ?> - <?= $sectionname ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+
+
+
     <?php if ($count_class > 0): ?>
         <div class="m3-tab-bar-container">
             <div class="m3-section-title ">Class(es)</div>
@@ -360,7 +445,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
         /* ===== 2️⃣ FETCH FROM SERVER ===== */
 
-box.innerHTML = <?= json_encode('<div class="text-center py-3">'.$loader_html.'</div>'); ?>;
+        box.innerHTML = <?= json_encode('<div class="text-center py-3">' . $loader_html . '</div>'); ?>;
 
         fetch("ajax/load_students.php", {
             method: "POST",

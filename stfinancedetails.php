@@ -122,7 +122,37 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     }
 </style>
 
+<style>
+    /* মডালের বডিতে স্ক্রলবার লজিক */
+    .m3-scroll-body {
+        max-height: 450px;
+        /* আপনার পছন্দমতো উচ্চতা সেট করুন */
+        overflow-y: auto;
+        /* ডাটা বেশি হলে শুধু লম্বা (Y) স্ক্রলবার আসবে */
+        overflow-x: hidden;
+        /* আড়াআড়ি (X) স্ক্রলবার বন্ধ থাকবে */
+    }
 
+    /* স্ক্রলবারটিকে চিকন এবং সুন্দর করার জন্য (Chrome/Safari) */
+    .m3-scroll-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .m3-scroll-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .m3-scroll-body::-webkit-scrollbar-thumb {
+        background: #EADDFF;
+        /* M3 Tonal Container Color */
+        border-radius: 10px;
+    }
+
+    .m3-scroll-body::-webkit-scrollbar-thumb:hover {
+        background: #6750A4;
+        /* Primary Color on Hover */
+    }
+</style>
 
 <main class="pb-0">
     <div class="hero-container shadow-sm">
@@ -134,17 +164,19 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <div class="small opacity-80"><?php echo $si['classname'] . ' - ' . $si['sectionname']; ?> | Roll:
                     <?php echo $si['rollno']; ?>
                 </div>
-                <div class="session-pill small fw-bold">Session: <?php echo $sessionyear; ?></div>
+                <div class="session-pill small fw-bold mt-2">Session: <?php echo $sessionyear; ?></div>
             </div>
 
             <div class="text-end" style="z-index:1000;">
                 <div class="action-icons">
-                    <i class="bi bi-plus-circle fs-4 me-3" style="cursor: pointer ;" onclick="addFine();"></i>
-                    <i class="bi bi-pencil-square fs-4" style="cursor: pointer ;" onclick="goedit();"></i>
+                    <i class="bi bi-clock-history fs-4 me-3" style="cursor: pointer;" onclick="showHistory();"
+                        title="Payment History"></i>
+                    <i class="bi bi-plus-circle fs-4 me-3" style="cursor: pointer;" onclick="addFine();"></i>
+                    <i class="bi bi-pencil-square fs-4" style="cursor: pointer;" onclick="goedit();"></i>
                 </div>
 
                 <div class="small opacity-75">Total Dues</div>
-                <div class="h4 fw-extrabold mb-0" id="total_dues_label">0.00</div>
+                <div class="h3 text-warning fw-extrabold mb-0" id="total_dues_label">0.00</div>
             </div>
         </div>
     </div>
@@ -197,7 +229,8 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
             <div class="col-6">
                 <div class="m3-floating-group" style="margin-bottom: 0;">
                     <i class="bi bi-calendar-check m3-field-icon"></i>
-                    <input type="date" class="m3-input-floating" style="padding-right:8px;" id="prdate" value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
+                    <input type="date" class="m3-input-floating" style="padding-right:8px;" id="prdate"
+                        value="<?php echo date('Y-m-d'); ?>" <?php echo $can_edit_date; ?>>
                     <label class="m3-floating-label">DATE</label>
                 </div>
             </div>
@@ -212,10 +245,10 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 
             <div class="col-6">
                 <button class="btn btn-m3-danger btn-pay-now w-100 shadow-sm d-flex" onclick="save();">
-                    <i class="bi bi-shield-lock-fill fs-2"></i> 
+                    <i class="bi bi-shield-lock-fill fs-2"></i>
                     <div class="ms-2">
                         <div class="m-0 fs-6">Pay Now</div>
-                        <div class="m-0" style="font-size: 0.5rem;">Cash Collection</div>
+                        <div class="m-0" style="font-size: 0.5rem;">by Cash</div>
                     </div>
 
                 </button>
@@ -276,6 +309,29 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 <div id="modal_container"><?php include 'component/m3-modals.php'; ?></div>
 
 
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="fw-black text-primary"><i class="bi bi-clock-history me-2"></i>Payment History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 m3-scroll-body">
+                <div id="history_content">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 <?php include 'footer.php'; ?>
 
 <script>
@@ -302,20 +358,112 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
         // Hidden input for count if needed
     }
 
+
     function save() {
-        const payAmt = document.getElementById("amt").value;
+        const payAmt = parseFloat(document.getElementById("amt").value);
+        const prdate = document.getElementById("prdate").value;
+        const prno = document.getElementById("prno").value;
+        const stid = '<?php echo $stid; ?>';
+        const sessionyear = '<?php echo $current_session; ?>';
+
+        // ১. ভ্যালিডেশন: অ্যামাউন্ট চেক
         if (payAmt <= 0) {
-            Swal.fire('Selection Required', 'Please select at least one item to pay.', 'warning');
+            Swal.fire({ icon: 'warning', title: 'Selection Required', text: 'Please, select atleast one item.' });
             return;
         }
 
-        // আপনার অরিজিনাল Tail জেনারেশন লজিক এবং AJAX কল এখানে থাকবে...
-        // আমি আপনার সিকিউর backend/save-pr.php কলটি ঠিক রেখেছি।
+        // ২. ডেটা অবজেক্ট তৈরি (পিএইচপি স্ক্রিপ্টের চাহিদা অনুযায়ী)
+        let postData = {
+            stid: stid,
+            prno: prno,
+            prdate: prdate,
+            sessionyear: sessionyear,
+            // মেটাডেটা (রিসিট ও SMS এর জন্য)
+            cls: '<?php echo $si['classname']; ?>',
+            sec: '<?php echo $si['sectionname']; ?>',
+            rollno: '<?php echo $si['rollno']; ?>',
+            nben: '<?php echo $st_profile['stnameben']; ?>',
+            mobileno: '<?php echo $st_profile['guarmobile']; ?>',
+            tail: 1
+        };
+
+        // ৩. নির্বাচিত আইটেমগুলো লুপের মাধ্যমে সংগ্রহ করা
+        let selectedCount = 0;
+        let totalIdx = <?php echo $idx; ?>; // পিএইচপি থেকে আসা লুপ কাউন্ট
+
+        for (let i = 0; i < totalIdx; i++) {
+            const chk = document.getElementById("rex" + i);
+            if (chk && chk.checked) {
+                // আইটেম আইডি এবং অ্যামাউন্ট আলাদা আলাদা কী (Key) হিসেবে সেট করা
+                postData['fid' + selectedCount] = document.getElementById("fid" + i).innerText;
+                postData['amt' + selectedCount] = document.getElementById("amt_val_" + i).innerText.replace(/,/g, '');
+                selectedCount++;
+            }
+        }
+
+        // পিএইচপি-র প্রয়োজনীয় 'count' ভ্যারিয়েবল সেট করা
+        postData['count'] = selectedCount;
+
+        // ৪. কনফার্মেশন ও AJAX সাবমিশন
+        Swal.fire({
+            title: 'Confirm Payment?',
+            html: `Are you sure you want to pay ৳<b>${new Intl.NumberFormat().format(payAmt)}</b> ?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2E7D32',
+            confirmButtonText: 'Yes, Pay Now!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: "backend/save-pr.php",
+                    data: postData, // আমাদের তৈরি করা ডাইনামিক অবজেক্ট
+                    beforeSend: function () {
+                        Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+                    },
+                    success: function (response) {
+                        if (response.trim() === "success") {
+                            Swal.fire({ icon: 'success', title: 'Success!', timer: 1500, showConfirmButton: false })
+                                .then(() => {
+                                    // রিসিট পেজে রিডাইরেক্ট
+                                    window.location.href = `stmoneyreceipt.php?prno=${prno}&stid=${stid}`;
+                                });
+                        } else {
+                            Swal.fire('Error', 'Data saving failed: ' + response, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Disconnected from server', 'error');
+                    }
+                });
+            }
+        });
     }
 
+
+
+
+
+
+
+
+
+
+
+    // function goedit() {
+    //     window.location.href = `st-payment-setup-indivisual.php?stid=<?php echo $stid; ?>&year=<?php echo $current_session; ?>`;
+    // }
+
     function goedit() {
-        window.location.href = `st-payment-setup-indivisual.php?stid=<?php echo $stid; ?>&year=<?php echo $current_session; ?>`;
-    }
+    Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: "You're now alloed to change this value",
+        confirmButtonColor: '#B3261E', 
+        confirmButtonText: 'OK'
+    });
+}
 </script>
 
 
@@ -402,8 +550,6 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 var modalEl = document.getElementById('exampleModal');
                 var modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
-
-
                 window.location.reload();
 
             }
@@ -438,7 +584,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 var modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
 
-               window.location.reload();
+                window.location.reload();
                 // window.location.reload();
 
             }
@@ -453,7 +599,6 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     function mergerow(id, amt, tail) {
         event.stopPropagation();
         var infor = "fid=" + id + "&amt=" + amt + "&tail=" + tail;
-        // alert(infor);
 
         $("#history").html("");
         $.ajax({
@@ -466,10 +611,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
             },
             success: function (html) {
                 $("#history").html(html);
-
-
                 window.location.reload();
-
             }
         });
     }
@@ -503,4 +645,30 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
             button.click();
         }
     });
+</script>
+
+
+<script>
+    function showHistory() {
+        const stid = '<?php echo $stid; ?>';
+        const sccode = '<?php echo $sccode; ?>';
+
+        // মডাল ওপেন করা
+        var historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+        historyModal.show();
+
+        // অ্যাজাক্স কল
+        $.ajax({
+            url: "ajax/get-student-payment-history.php",
+            type: "POST",
+            data: { stid: stid, sccode: sccode },
+            success: function (data) {
+                $("#history_content").html(data);
+                $(".m3-scroll-body").scrollTop(0); // নতুন ডাটা লোড হলে স্ক্রলবার উপরে চলে যাবে
+            },
+            error: function () {
+                $("#history_content").html('<div class="alert alert-danger">Problem Loading Data</div>');
+            }
+        });
+    }
 </script>
