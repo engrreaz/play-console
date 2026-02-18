@@ -430,8 +430,34 @@
 
     //********************************************************************* */
 
+        function epos(prno) {
+        // লোডিং এনিমেশন (ঐচ্ছিক)
+        console.log("Fetching receipt data for: " + prno);
 
-    function epos(prno = '', e) {
+        // ১. AJAX কল করে backend/getprinfo.php থেকে লিংকটি আনা
+        $.ajax({
+            url: 'backend/getprinfo.php', // আপনার ফাইলের সঠিক পাথ নিশ্চিত করুন
+            type: 'POST',
+            data: { prno: prno },
+            success: function (fullUrl) {
+                if (fullUrl && fullUrl.includes('stpr.php')) {
+                    // ২. প্রাপ্ত ফুল ইউআরএল-এ রিডাইরেক্ট করা
+                    console.log("Redirecting to: " + fullUrl);
+                    window.location.href = fullUrl;
+                } else {
+                    alert("Error: Could not generate receipt link. " + fullUrl);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error: " + error);
+                alert("Something went wrong while connecting to the server.");
+            }
+        });
+    }
+
+
+
+    function eposx(prno = '', e) {
         if (e) e.stopPropagation();
         let uri = "backend/getprinfo.php";
         let lastpr = prno || '';

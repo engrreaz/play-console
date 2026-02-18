@@ -19,7 +19,7 @@ function isActive($targetFile, $currentFile)
 }
 ?>
 
-<div class="bottom-nav-container noprint">
+<div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
 
         <?php if (in_array($userlevel, ['Head Teacher', 'Asstt. Head Teacher', 'Administrator', 'Super Administrator'])): ?>

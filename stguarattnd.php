@@ -285,10 +285,12 @@ $display_dates = array_reverse($dates_array);
                     </p>
                 </div>
             </div>
+            <?php if($permission >2){ ?>
             <button class="btn btn-light btn-sm fw-bold rounded-pill px-3 shadow-sm text-primary"
                 onclick="$('#leaveModal').modal('show')">
                 <i class="bi bi-plus-circle-fill"></i> LEAVE
             </button>
+            <?php } ?>
         </div>
     </div>
 
@@ -358,10 +360,12 @@ $display_dates = array_reverse($dates_array);
     </div>
 
     <div class="text-center mt-4 mb-5 px-3">
+        <?php if($permission >1){ ?>
         <button class="btn btn-outline-primary rounded-pill w-100 py-3 fw-bold shadow-sm" id="loadMore"
             data-month="<?= $month ?>" data-year="<?= $year ?>" data-stid="<?= $stid ?>">
             <i class="bi bi-clock-history me-2"></i>LOAD PREVIOUS MONTH
         </button>
+        <?php } ?>
     </div>
 </main>
 

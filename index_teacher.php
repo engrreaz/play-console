@@ -47,7 +47,29 @@
         border-radius: 50%;
         border: 1.5px solid #fff;
     }
+
+
+    
 </style>
+
+<style>
+    /* নম্বরসহ নটিফিকেশন ব্যাজ */
+    .btn-badge-count {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #B3261E; /* M3 Error Color */
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 900;
+        padding: 2px 6px;
+        border-radius: 10px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+</style>
+
+
 
 <main class="pb-0">
 
@@ -69,9 +91,12 @@
             <div class="flex-grow-1"></div>
 
             <div class="hero-action-row text-right">
-                <div class="action-icon-btn" title="What's New">
-                    <i class="bi bi-megaphone"></i>
-                </div>
+                <div class="action-icon-btn position-relative" title="What's New" onclick="navigateTo('changelog.php')">
+    <i class="bi bi-megaphone"></i>
+    <?php if ($new_updates_count > 0): ?>
+        <span class="btn-badge-count"><?= $new_updates_count ?></span>
+    <?php endif; ?>
+</div>
 
                 <div class="action-icon-btn" title="Messages">
                     <i class="bi bi-chat-dots"></i>

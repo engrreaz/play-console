@@ -1,4 +1,5 @@
 <?php 
+$page_title = "Receipt Details";
 include 'inc.php'; 
 
 // ১. প্যারামিটার হ্যান্ডলিং (আপনার প্রদান করা প্যারামিটার অনুযায়ী)
@@ -13,7 +14,7 @@ $stid = $_GET['stid'] ?? '';
 $cnt = $_GET['cnt'] ?? 0;
 $total = $_GET['total'] ?? 0;
 
-$page_title = "Receipt Details";
+
 ?>
 
 <style>
@@ -72,11 +73,6 @@ $page_title = "Receipt Details";
     .btn-m3-danger:active { transform: scale(0.95); opacity: 0.8; }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons" onclick="window.print();"><i class="bi bi-printer"></i></div>
-</header>
 
 <main class="pb-5">
     <div class="receipt-container shadow-sm">
@@ -147,3 +143,8 @@ $page_title = "Receipt Details";
 <div style="height: 60px;"></div>
 
 <?php include 'footer.php'; ?>
+
+
+<script>
+    epos(<?php echo $prno; ?>);
+</script>

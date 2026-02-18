@@ -11,7 +11,7 @@ $stmt->execute();
 $receipts = $stmt->get_result();
 
 if ($receipts->num_rows == 0) {
-    echo '<div class="text-center opacity-50 py-4"><i class="bi bi-info-circle display-4"></i><p>কোন পরিশোধের রেকর্ড পাওয়া যায়নি।</p></div>';
+    echo '<div class="text-center opacity-50 py-4"><i class="bi bi-info-circle display-4"></i><p>No receipts found.</p></div>';
     exit;
 }
 ?>
@@ -29,7 +29,7 @@ if ($receipts->num_rows == 0) {
                 </div>
                 <div class="text-end">
                     <div class="fw-black text-primary h5 mb-0">৳<?= number_format($pr['amount'], 2) ?></div>
-                    <div class="small text-muted" style="font-size: 0.7rem;">Collected by: <?= $pr['entryby'] ?></div>
+                    <div class="small text-muted" style="font-size: 0.7rem;"><?= $pr['entryby'] ?></div>
                 </div>
             </div>
 

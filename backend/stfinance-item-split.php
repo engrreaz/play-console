@@ -1,9 +1,8 @@
 <?php
-date_default_timezone_set('Asia/Dhaka');
 include('../inc.light.php');
 
 $id = intval($_POST['fid'] ?? 0);
-$amt = floatval($_POST['amt'] ?? 0);
+$amt = $fineamt =  floatval($_POST['amt'] ?? 0);
 $tail = intval($_POST['tail'] ?? 0);
 
 $month = date('m');
@@ -155,25 +154,52 @@ try {
         TAIL = 3 (ADD FINE)
     ======================== */ elseif ($tail === 3) {
 
+        $rowid = null;
+        $itemcode = null;
+
+        /* --------- 1️⃣ Try fine row ---------- */
         $stmt = $conn->prepare("
-            SELECT id FROM stfinance
-            WHERE sccode=? AND stid=? AND sessionyear LIKE ?
-              AND particulareng LIKE '%fine%'
-            LIMIT 1
-        ");
-
-
+    SELECT id, itemcode FROM stfinance
+    WHERE sccode=? AND stid=? AND sessionyear LIKE ?
+      AND particulareng LIKE '%fine%'
+    LIMIT 1
+");
 
         $stmt->bind_param("sis", $sccode, $id, $sessionyear_param);
         $stmt->execute();
-        $stmt->bind_result($rowid);
+        $stmt->bind_result($rowid, $itemcode);
         $stmt->fetch();
         $stmt->close();
 
-        if (!$rowid) {
 
-            $itemcode = uniqid();
+        /* --------- 2️⃣ Fallback ---------- */
+        if ($rowid === null) {
+
+            $stmt = $conn->prepare("
+        SELECT id, itemcode FROM stfinance
+        WHERE sccode=? AND stid=? AND sessionyear LIKE ?
+        LIMIT 1
+    ");
+
+            $stmt->bind_param("sis", $sccode, $id, $sessionyear_param);
+            $stmt->execute();
+            $stmt->bind_result($rowid, $itemcode);
+            $stmt->fetch();
+            $stmt->close();
+
         }
+
+
+        /* --------- 3️⃣ Still not found ---------- */
+        if ($rowid === null) {
+            $itemcode = uniqid();
+            $rowid = 0;
+        }
+
+
+        // echo $itemcode . '/' . $rowid;
+
+
 
 
         $stmt = $conn->prepare("
@@ -199,8 +225,8 @@ try {
             ?, ?, idmon,
             ?, ?,
             ?, 
-            paid, paidx, ?,
-            pr1, pr1no, pr1date, pr1by, cashbook1,
+            0, paidx, ?,
+            0, null, null, null, cashbook1,
             pr2, pr2no, pr2date, pr2by, cashbook2,
             remark, extra, last_update,
             `validate`, validationtime,
@@ -212,14 +238,14 @@ try {
 
         // 8 placeholders → 8 types
         $stmt->bind_param(
-            "sdissdii",
+            "sdissddi",
             $itemcode,   // s
-            $amt,        // d
+            $fineamt,        // d
             $month,      // i (or s if varchar)
             $cur,        // s
             $usr,        // s
-            $amt,        // d
-            $amt,        // d
+            $fineamt,        // d
+            $fineamt,        // d
             $rowid       // i
         );
 

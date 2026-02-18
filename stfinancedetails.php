@@ -144,15 +144,51 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 
     .m3-scroll-body::-webkit-scrollbar-thumb {
         background: #EADDFF;
-        /* M3 Tonal Container Color */
         border-radius: 10px;
     }
 
     .m3-scroll-body::-webkit-scrollbar-thumb:hover {
         background: #6750A4;
-        /* Primary Color on Hover */
+    
     }
 </style>
+
+<style>
+    .pos-pill {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+
+    .pos-enabled {
+        background: #6750A4;
+        color: #fff;
+        border: 1px solid indigo;
+        box-shadow: 0 2px 4px rgba(103, 80, 164, 0.3);
+    }
+
+
+    .pos-disabled {
+        background: #E0E0E0;
+        color: #757575;
+        opacity: 0.8;
+    }
+
+    .pos-pill i {
+        font-size: 0.8rem;
+    }
+</style>
+
+
+
+
 
 <main class="pb-0">
     <div class="hero-container shadow-sm">
@@ -164,7 +200,14 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <div class="small opacity-80"><?php echo $si['classname'] . ' - ' . $si['sectionname']; ?> | Roll:
                     <?php echo $si['rollno']; ?>
                 </div>
-                <div class="session-pill small fw-bold mt-2">Session: <?php echo $sessionyear; ?></div>
+
+                <div class="d-flex gap-2 mt-2">
+                    <div class="session-pill small fw-bold">Session: <?php echo $sessionyear; ?></div>
+                    <div id="pos_toggle" class="pos-pill pos-disabled" onclick="togglePOS()">
+                        <i class="bi bi-printer-fill me-1"></i> POS
+                    </div>
+                </div>
+
             </div>
 
             <div class="text-end" style="z-index:1000;">
@@ -269,7 +312,8 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
         $idx = 0;
         $total_calc = 0;
         $month_curr = date('m');
-        $stmt_due = $conn->prepare("SELECT * FROM stfinance WHERE sccode=? AND stid=? AND sessionyear LIKE ? AND month <= ? AND (dues > 0 OR particulareng='Fine' OR particulareng='Misc') ORDER BY id ASC");
+        // $stmt_due = $conn->prepare("SELECT * FROM stfinance WHERE sccode=? AND stid=? AND sessionyear LIKE ? AND month <= ? AND (dues > 0 OR particulareng='Fine' OR particulareng='Misc') ORDER BY id ASC");
+        $stmt_due = $conn->prepare("SELECT * FROM stfinance WHERE sccode=? AND stid=? AND sessionyear LIKE ? AND month <= ? AND (dues > 0 ) ORDER BY id ASC");
         $stmt_due->bind_param("ssss", $sccode, $stid, $sy_like, $month_curr);
         $stmt_due->execute();
         $res_due = $stmt_due->get_result();
@@ -297,7 +341,8 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                     </div>
                     <?php if ($is_fine): ?>
                         <i class="bi bi-trash text-danger"
-                            onclick="event.stopPropagation(); mergerow(<?php echo $row['id']; ?>, 0, 4);"></i>
+                            onclick="event.stopPropagation(); confirmDelete(<?php echo $row['id']; ?>);"></i>
+
                     <?php endif; ?>
                 </div>
             </div>
@@ -427,7 +472,21 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                             Swal.fire({ icon: 'success', title: 'Success!', timer: 1500, showConfirmButton: false })
                                 .then(() => {
                                     // রিসিট পেজে রিডাইরেক্ট
-                                    window.location.href = `stmoneyreceipt.php?prno=${prno}&stid=${stid}`;
+                                    // window.location.href = `stmoneyreceipt.php?prno=${prno}&stid=${stid}`;
+                                    // window.history.back();
+
+                                    const isPOS = document.getElementById('pos_toggle').classList.contains('pos-enabled');
+
+                                    if (isPOS) {
+                                        // POS এনাবল থাকলে সরাসরি POS প্রিন্ট পেজে যাবে
+                                        window.location.href = `stpr.php?prno=${prno}&stid=${stid}`;
+                                    } else {
+                                        // POS ডিজেবল থাকলে আগের স্ক্রিনে (যেমন: স্টুডেন্ট লিস্ট) ফিরে যাবে
+                                        window.history.back();
+                                    }
+
+
+
                                 });
                         } else {
                             Swal.fire('Error', 'Data saving failed: ' + response, 'error');
@@ -456,14 +515,14 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
     // }
 
     function goedit() {
-    Swal.fire({
-        icon: 'error',
-        title: 'Access Denied',
-        text: "You're now alloed to change this value",
-        confirmButtonColor: '#B3261E', 
-        confirmButtonText: 'OK'
-    });
-}
+        Swal.fire({
+            icon: 'error',
+            title: 'Access Denied',
+            text: "You're now restricted to use this feature.",
+            confirmButtonColor: '#B3261E',
+            confirmButtonText: 'OK'
+        });
+    }
 </script>
 
 
@@ -517,6 +576,29 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
 
 </script>
 <script>
+
+
+    function confirmDelete(id) {
+
+        Swal.fire({
+            title: 'Delete Item?',
+            text: "This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#B3261E',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+                mergerow(id, 0, 4);
+            }
+
+        });
+    }
+
 
     function splitable() {
 
@@ -671,4 +753,32 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
             }
         });
     }
+</script>
+
+
+<script>
+    function togglePOS() {
+        const posBtn = document.getElementById('pos_toggle');
+        const isEnabled = posBtn.classList.contains('pos-enabled');
+
+        if (!isEnabled) {
+            posBtn.classList.remove('pos-disabled');
+            posBtn.classList.add('pos-enabled');
+            localStorage.setItem('pos_mode', 'true'); // ব্রাউজারে মুড সেভ করে রাখা
+        } else {
+            posBtn.classList.remove('pos-enabled');
+            posBtn.classList.add('pos-disabled');
+            localStorage.setItem('pos_mode', 'false');
+        }
+    }
+
+    // ২. পেজ লোড হওয়ার সময় আগের স্টেট বজায় রাখা
+    document.addEventListener('DOMContentLoaded', () => {
+        const posState = localStorage.getItem('pos_mode');
+        const posBtn = document.getElementById('pos_toggle');
+        if (posState === 'true') {
+            posBtn.classList.remove('pos-disabled');
+            posBtn.classList.add('pos-enabled');
+        }
+    });
 </script>

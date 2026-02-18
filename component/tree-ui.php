@@ -91,7 +91,7 @@ if (strpos($chain, 'class') !== false) {
 
 ?>
 
-<input id="selectedTree" type="text" value="333">
+<input id="selectedTree" type="hidden" value="">
 
 
 <?php

@@ -309,7 +309,7 @@ $profile_permission = (isset($settings_map['Profile Entry']) && strpos($settings
 
         <div class="mt-3 d-flex flex-wrap gap-2">
             <div class="hero-badge">
-                <i class="bi bi-layers-half me-1"></i> <?= $count_class ?> Assigned Class(es)
+                <i class="bi bi-layers-half me-1"></i> <?= $count_class ?>  Class(es)
             </div>
             <div class="hero-badge">
                 <i class="bi bi-shield-check me-1"></i> <?= $userlevel ?>

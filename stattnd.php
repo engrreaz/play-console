@@ -6,6 +6,8 @@ include 'datam/datam-stprofile.php';
 
 $classname = $_GET['cls'] ?? '';
 $sectionname = $_GET['sec'] ?? '';
+$attnd_date = $_GET['date'] ?? date('Y-m-d');
+
 
 
 
@@ -24,7 +26,7 @@ $stmt_sc->close();
 // ৪. আজকের উপস্থিতির ডাটা লোড করা
 $datam = [];
 $stmt_att = $conn->prepare("SELECT * FROM stattnd WHERE adate = ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_att->bind_param("sssss", $td, $sccode, $sessionyear_param, $classname, $sectionname);
+$stmt_att->bind_param("sssss", $attnd_date, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_att->execute();
 $res_att = $stmt_att->get_result();
 while ($r = $res_att->fetch_assoc()) {
@@ -33,10 +35,10 @@ while ($r = $res_att->fetch_assoc()) {
 $stmt_att->close();
 
 // ৫. গত ৭ দিনের হিস্ট্রি (History Dots)
-$from_date = date("Y-m-d", strtotime("-7 days", strtotime($td)));
+$from_date = date("Y-m-d", strtotime("-7 days", strtotime($attnd_date)));
 $hist_map = [];
 $stmt_h = $conn->prepare("SELECT stid, adate, yn, bunk FROM stattnd WHERE adate BETWEEN ? AND ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_h->bind_param("ssssss", $from_date, $td, $sccode, $sessionyear_param, $classname, $sectionname);
+$stmt_h->bind_param("ssssss", $from_date, $attnd_date, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_h->execute();
 $res_h = $stmt_h->get_result();
 while ($r = $res_h->fetch_assoc()) {
@@ -47,7 +49,7 @@ $stmt_h->close();
 // ৬. সাবমিশন স্ট্যাটাস চেক
 $subm = 0;
 $stmt_sum = $conn->prepare("SELECT attndrate FROM stattndsummery WHERE date = ? AND sccode = ? AND sessionyear LIKE ? AND classname = ? AND sectionname = ?");
-$stmt_sum->bind_param("sssss", $td, $sccode, $sessionyear_param, $classname, $sectionname);
+$stmt_sum->bind_param("sssss", $attnd_date, $sccode, $sessionyear_param, $classname, $sectionname);
 $stmt_sum->execute();
 if ($stmt_sum->get_result()->num_rows > 0) {
     $subm = 1;
@@ -187,7 +189,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             <div style="text-align: right;">
                 <input type="date" id="xp" class="form-control form-control-sm"
                     style="border-radius: 8px; border: none; font-weight: 800; font-size: 0.8rem; width: 135px;"
-                    value="<?php echo $td; ?>" onchange="dtcng();" <?php if ($period > 1)
+                    value="<?php echo $attnd_date; ?>" onchange="dtcng();" <?php if ($period > 1)
                            echo 'disabled'; ?>>
             </div>
         </div>
@@ -264,7 +266,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
                         <div class="dot-box">
                             <?php
                             for ($i = 6; $i >= 0; $i--) {
-                                $cd = date('Y-m-d', strtotime("-$i days", strtotime($td)));
+                                $cd = date('Y-m-d', strtotime("-$i days", strtotime($attnd_date)));
                                 $h = $hist_map[$stid][$cd] ?? null;
                                 $dot_c = 'dot-g';
                                 if ($h)
@@ -341,7 +343,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             body: new URLSearchParams({
                 stid: id, roll: roll, val: chk.checked ? 1 : 0, opt: 2,
                 cls: '<?= $classname ?>', sec: '<?= $sectionname ?>',
-                per: per, adate: '<?= $td ?>'
+                per: per, adate: '<?= $attnd_date ?>'
             })
         })
             .then(res => res.text())
@@ -377,7 +379,7 @@ $fun = ($subm == 1) ? 'grpssx0' : (($period >= 2) ? 'grpssx2' : 'grpssx');
             body: new URLSearchParams({
                 opt: 5, cnt: cnt, fnd: fnd,
                 cls: '<?= $classname ?>', sec: '<?= $sectionname ?>',
-                adate: '<?= $td ?>', sy: '<?= $sessionyear ?>'
+                adate: '<?= $attnd_date ?>', sy: '<?= $sessionyear ?>'
             })
         })
             .then(res => res.text())

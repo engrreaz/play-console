@@ -203,6 +203,36 @@ $result_issue = $stmt_issue->get_result();
 $issue_data = $result_issue->fetch_assoc();
 $ssx = $issue_data['sex'] ?? 0;
 
+
+
+// --- What's New Counter Logic ---
+$new_updates_count = 0;
+
+// ১. ইউজারের লাস্ট দেখা আইডি বের করা
+$stmt_last_seen = $conn->prepare("SELECT last_seen_id FROM user_timeline_seen WHERE userid = ?");
+$stmt_last_seen->bind_param("s", $userid);
+$stmt_last_seen->execute();
+$res_seen = $stmt_last_seen->get_result();
+$last_seen_id = ($row_seen = $res_seen->fetch_assoc()) ? $row_seen['last_seen_id'] : 0;
+$stmt_last_seen->close();
+
+// ২. অ্যান্ড্রয়েড প্ল্যাটফর্মের জন্য নতুন আপডেটের সংখ্যা গণনা করা
+$stmt_new_logs = $conn->prepare("SELECT COUNT(*) as total FROM dev_timeline WHERE platform = 'Android' AND id > ?");
+$stmt_new_logs->bind_param("i", $last_seen_id);
+$stmt_new_logs->execute();
+$new_updates_count = $stmt_new_logs->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_new_logs->close();
+
+
+
+
+
+
+
+
+
+
+
 // --- Notice Settings ---
 $notice_marque = 0;
 $notice_block = 0;

@@ -2,20 +2,20 @@
 include '../inc.light.php';
 require_once dirname(__DIR__) . '/component/sms-func.php';
 
-// ১. ইনপুট রিসিভ করা (স্যানিটাইজেশনসহ)
+
 $stid       = $_POST['stid'] ?? '';
 $prno       = $_POST['prno'] ?? '';
 $prdate     = $_POST['prdate'] ?? date('Y-m-d');
 $mobileno   = $_POST['mobileno'] ?? '';
-$sessionyear = $_POST['sessionyear'] ?? $sy;
+$sessionyear = $_POST['sessionyear'] ?? $sessionyear;
 
-// স্টুডেন্টের বেসিক তথ্য (SMS এর জন্য)
+
 $cls        = $_POST['cls'] ?? '';
 $sec        = $_POST['sec'] ?? '';
 $rollno     = $_POST['rollno'] ?? '';
 $nben       = $_POST['nben'] ?? '';
 
-// লুপ কাউন্ট (কতগুলো আইটেম সিলেক্ট করা হয়েছে)
+
 $count      = intval($_POST['count'] ?? 0);
 
 if (!$stid || !$prno || $count === 0) {
@@ -23,58 +23,58 @@ if (!$stid || !$prno || $count === 0) {
 }
 
 $tamt = 0;
-$conn->begin_transaction(); // ডেটাবেস ট্রানজ্যাকশন শুরু (সব সেভ হবে নাহলে কিছুই হবে না)
+$conn->begin_transaction(); 
 
 try {
-    // ২. ফি আইটেমগুলো আপডেট করা
+
     for ($lp = 0; $lp < $count; $lp++) {
         $fid = $_POST['fid' . $lp] ?? 0;
         $amt = floatval($_POST['amt' . $lp] ?? 0);
 
         if ($fid > 0 && $amt > 0) {
-            // আইটেমটি চেক করা (pr1 নাকি pr2 তে সেভ হবে)
+      
             $check_q = $conn->prepare("SELECT pr1 FROM stfinance WHERE id = ? LIMIT 1");
             $check_q->bind_param("i", $fid);
             $check_q->execute();
             $res = $check_q->get_result()->fetch_assoc();
             
             if ($res['pr1'] > 0) {
-                // pr1 ভর্তি থাকলে pr2 তে যাবে
+  
                 $upd_stmt = $conn->prepare("UPDATE stfinance SET pr2=?, pr2no=?, pr2date=?, pr2by=?, paid=paid+?, dues=dues-? WHERE id=?");
             } else {
-                // pr1 খালি থাকলে সেখানেই যাবে
+ 
                 $upd_stmt = $conn->prepare("UPDATE stfinance SET pr1=?, pr1no=?, pr1date=?, pr1by=?, paid=paid+?, dues=dues-? WHERE id=?");
             }
 
-            $upd_stmt->bind_param("dssiddi", $amt, $prno, $prdate, $usr, $amt, $amt, $fid);
+            $upd_stmt->bind_param("dsssddi", $amt, $prno, $prdate, $usr, $amt, $amt, $fid);
             $upd_stmt->execute();
             $tamt += $amt;
         }
     }
 
-    // ৩. পেমেন্ট রিসিট (stpr) ইনসার্ট করা
+
     $stpr_stmt = $conn->prepare("INSERT INTO stpr (sessionyear, sccode, classname, sectionname, stid, rollno, prno, prdate, amount, entryby, entrytime, mobileno, smsstatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)");
     $stpr_stmt->bind_param("sisssissdsss", $sessionyear, $sccode, $cls, $sec, $stid, $rollno, $prno, $prdate, $tamt, $usr, $cur, $mobileno);
     $stpr_stmt->execute();
 
-    // ৪. সেশন ইনফোতে লাস্ট রিসিট আপডেট
+
     $si_stmt = $conn->prepare("UPDATE sessioninfo SET lastpr=? WHERE stid=? AND sessionyear LIKE ?");
     $sy_like = "%" . $sessionyear . "%";
     $si_stmt->bind_param("sss", $prno, $stid, $sy_like);
     $si_stmt->execute();
 
-    $conn->commit(); // সব কাজ সফল হলে ডেটাবেসে স্থায়ীভাবে সেভ হবে
+    $conn->commit(); 
     echo "success";
 
 } catch (Exception $e) {
-    $conn->rollback(); // কোনো সমস্যা হলে আগের অবস্থায় ফিরে যাবে
+    $conn->rollback(); 
     die("Database Error: " . $e->getMessage());
 }
 
 /* -----------------------
-   ৫. SMS পাঠানোর লজিক
+
 ------------------------ */
-$ins_list = []; // নির্দিষ্ট প্রতিষ্ঠানের লিস্ট
+$ins_list = []; 
 
 if (in_array($sccode, $ins_list) && $mobileno != '' && $tamt > 0) {
     
