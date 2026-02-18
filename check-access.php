@@ -165,8 +165,6 @@ if ($permission == 0) {
     exit();
 }
 
-
-
-
-
 $readonly = ($permission == 1);
+
+

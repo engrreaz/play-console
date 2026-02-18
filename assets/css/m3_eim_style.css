@@ -835,3 +835,42 @@
         background-position-x: -200%;
     }
 }
+
+
+/* ব্যাজ কন্টেইনার পজিশনিং */
+.card-wrapper {
+    position: relative; /* যাতে ব্যাজটি কার্ডের ভেতরে থাকতে পারে */
+}
+
+/* ১. টেক্সট ব্যাজ স্টাইল (NEW লেখা) */
+.m3-badge-new {
+    position: absolute;
+    top: -8px; /* কার্ডের একটু বাইরে ভেসে থাকবে */
+    right: 12px;
+    background: #B3261E; /* M3 Error Red */
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ২. স্টাইলিশ আইকন ইন্ডিকেটর (Sparkle Icon) */
+.m3-sparkle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #0f8663;
+    font-size: 1.5rem;
+    animation: pulse-sparkle 2s infinite;
+}
+
+@keyframes pulse-sparkle {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}

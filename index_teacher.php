@@ -50,13 +50,10 @@
 </style>
 
 <style>
-    /* নম্বরসহ নটিফিকেশন ব্যাজ */
     .btn-badge-count {
         position: absolute;
         top: -5px;
         right: -5px;
-        background: #B3261E;
-        /* M3 Error Color */
         color: white;
         font-size: 0.65rem;
         font-weight: 900;
@@ -65,6 +62,18 @@
         border: 2px solid #fff;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
+
+    .badge-red {
+        background: #B3261E;
+    }
+
+    /* New updates - Alert */
+    .badge-amber {
+        background: #F9A825;
+        color: #000;
+    }
+
+    /* Unexplored - Warning */
 </style>
 
 
@@ -90,10 +99,16 @@
 
             <div class="hero-action-row text-right">
                 <div class="action-icon-btn position-relative" title="What's New" onclick="navigateTo('whatsnew.php')">
-                    <i class="bi bi-megaphone"></i>
-                    <?php if ($new_updates_count > 0): ?>
-                        <span class="btn-badge-count"><?= $new_updates_count ?></span>
-                    <?php endif; ?>
+                    <i class="bi bi-stars"></i>
+                    <?php
+                    if ($new_updates_count > 0):
+                        // অগ্রাধিকার ১: নতুন আপডেট থাকলে লাল ব্যাজ
+                        echo '<span class="btn-badge-count badge-red">' . $new_updates_count . '</span>';
+                    elseif ($unexplored_count > 0):
+                        // অগ্রাধিকার ২: নতুন নেই কিন্তু আন-এক্সপ্লোরড থাকলে হলুদ ব্যাজ
+                        echo '<span class="btn-badge-count badge-amber">' . $unexplored_count . '</span>';
+                    endif;
+                    ?>
                 </div>
 
                 <div class="action-icon-btn" title="Messages">

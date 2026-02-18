@@ -204,26 +204,45 @@ $issue_data = $result_issue->fetch_assoc();
 $ssx = $issue_data['sex'] ?? 0;
 
 
-
-// --- What's New Counter Logic ---
+// --- Enhanced What's New & Unexplored Logic ---
 $new_updates_count = 0;
+$unexplored_count = 0;
 
-// ১. ইউজারের লাস্ট দেখা আইডি বের করা
-$stmt_last_seen = $conn->prepare("SELECT last_seen_id FROM user_timeline_seen WHERE userid = ?");
-$stmt_last_seen->bind_param("s", $userid);
+// ১. ইউজারের লাস্ট দেখা আইডি বের করা (whatsnew.php এর সাথে সামঞ্জস্য রেখে $usr ব্যবহার করা হয়েছে)
+$stmt_last_seen = $conn->prepare("SELECT last_seen_id FROM user_timeline_seen WHERE email = ?");
+$stmt_last_seen->bind_param("s", $usr);
 $stmt_last_seen->execute();
 $res_seen = $stmt_last_seen->get_result();
 $last_seen_id = ($row_seen = $res_seen->fetch_assoc()) ? $row_seen['last_seen_id'] : 0;
 $stmt_last_seen->close();
 
-// ২. অ্যান্ড্রয়েড প্ল্যাটফর্মের জন্য নতুন আপডেটের সংখ্যা গণনা করা
-$stmt_new_logs = $conn->prepare("SELECT COUNT(*) as total FROM dev_timeline WHERE platform = 'Android' AND id > ?");
-$stmt_new_logs->bind_param("i", $last_seen_id);
-$stmt_new_logs->execute();
-$new_updates_count = $stmt_new_logs->get_result()->fetch_assoc()['total'] ?? 0;
-$stmt_new_logs->close();
+// ২. একদম নতুন (NEW) আপডেটের সংখ্যা
+$stmt_new = $conn->prepare("SELECT COUNT(*) as total FROM dev_timeline WHERE platform = 'Android' AND id > ?");
+$stmt_new->bind_param("i", $last_seen_id);
+$stmt_new->execute();
+$new_updates_count = $stmt_new->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_new->close();
 
-
+// ৩. দেখা হয়েছে কিন্তু ভিজিট করা হয়নি (UNEXPLORED) আপডেটের সংখ্যা
+// লজিক: dev_timeline এর সময় > logbook এর লাস্ট এন্ট্রি সময় (শুধুমাত্র দেখা আইটেমগুলোর জন্য)
+$sql_unexplored = "
+    SELECT COUNT(*) as total 
+    FROM dev_timeline t
+    LEFT JOIN (
+        SELECT pagename, MAX(entrytime) as last_v 
+        FROM logbook 
+        WHERE email = ? AND platform='Android' 
+        GROUP BY pagename
+    ) l ON t.page_name = l.pagename
+    WHERE t.platform = 'Android' 
+    AND t.id <= ? 
+    AND (l.last_v IS NULL OR t.created_at > l.last_v)
+";
+$stmt_unexp = $conn->prepare($sql_unexplored);
+$stmt_unexp->bind_param("si", $usr, $last_seen_id);
+$stmt_unexp->execute();
+$unexplored_count = $stmt_unexp->get_result()->fetch_assoc()['total'] ?? 0;
+$stmt_unexp->close();
 
 
 
