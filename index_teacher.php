@@ -134,6 +134,10 @@
 
     <div class="widget-grid">
 
+        <div class="mt-3">
+            <?php include 'front-page-block/holi-ramadan.php'; ?>
+        </div>
+
         <div class="row gx-2">
             <div class="col-12 col-md-6">
                 <div class="block-unit shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
@@ -168,11 +172,7 @@
 
         <div class="block-unit shadow-sm"><?php include 'front-page-block/clsteacherblock.php'; ?></div>
 
-        <div class="mt-3">
-            <div class="block-unit shadow-sm" style="background: #F3EDF7;">
-                <?php include 'front-page-block/holi-ramadan.php'; ?>
-            </div>
-        </div>
+
 
         <div class="m3-section-title">Attendance Insights</div>
         <div class="row gx-2">

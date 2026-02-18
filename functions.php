@@ -27,7 +27,7 @@ function teacher_profile_image_path($teacher_id)
             return $BASE_PATH_URL . 'teacher/' . $teacher_id . '.' . $ext;
         }
     }
-    return $BASE_PATH_URL . 'teacher/no-img.jpg';
+    return $BASE_PATH_URL . '/teacher/no-img.jpg';
 }
 
 
