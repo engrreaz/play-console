@@ -18,7 +18,14 @@
         </div>
         <div class="dd-divider"></div>
 
-        <div class="dd-item text-danger fs-tiny" onclick="developer_console()"> <i class="bi bi-terminal me-2"></i> Developer Console</div>
+        <div class="d-flex">
+            <div class="dd-item text-danger fs-tiny flex-grow-1" onclick="developer_console()"> <i class="bi bi-terminal me-2"></i>
+                Developer Console
+            </div>
+            <i class="dd-item bi bi-terminal-fill fs-1 py-0 <?= $kla ?> " onclick="toggle_developer_mode();" ></i>
+        </div>
+
+
     <?php } ?>
 
 

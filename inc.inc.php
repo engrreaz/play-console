@@ -1,5 +1,37 @@
 <?php
 //*****************************************************************
+$curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+$curfile = basename($_SERVER["SCRIPT_FILENAME"]);
+//*****************************************************************
+
+if (isset($_POST['save_timeline'])) {
+
+    $feature = $conn->real_escape_string($_POST['feature_name']);
+    $platform = $conn->real_escape_string($_POST['platform']);
+    $action = $_POST['action_type'];
+    $status = $_POST['status'];
+    $desc = $conn->real_escape_string($_POST['description']);
+
+    $sql = "
+    INSERT INTO dev_timeline
+    (platform,page_name,feature_name,action_type,status,description,logged_by)
+    VALUES
+    ('$platform','$curfile','$feature','$action','$status','$desc','$usr')
+    ";
+
+    if ($conn->query($sql) === TRUE) {
+        ob_clean(); // আগের সব আউটপুট (স্পেস বা ওয়ার্নিং) মুছে ফেলবে
+        echo "1";
+    } else {
+        echo "0";
+    }
+    exit;
+}
+
+//*****************************************************************
+//*****************************************************************
+//*****************************************************************
+
 $SY = date('Y');
 $sy = date('y');
 
@@ -310,8 +342,7 @@ for ($x = 0; $x < 365; $x++) {
 
 $exam = $curexam;//'Half Yearly';
 
-$curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
-$curfile = basename($_SERVER["SCRIPT_FILENAME"]);
+
 
 $permission = 3;
 
@@ -343,6 +374,84 @@ if ($row = $res->fetch_assoc()) {
 }
 
 
+$is_developer_mode = $_COOKIE['developer_mode'] ?? '0';
+if ($is_developer_mode == '1') {
+    $kla = 'on';
+} else {
+    $kla = 'off';
+}
+
+
+
+
+$devFeatures = [];
+
+$sql = "
+SELECT d.*
+FROM dev_timeline d
+JOIN (
+    SELECT feature_name, MAX(created_at) max_time
+    FROM dev_timeline
+    WHERE platform='Android'
+      AND page_name='$curfile'
+    GROUP BY feature_name
+) x
+ON d.feature_name = x.feature_name
+AND d.created_at = x.max_time
+";
+
+$res = $conn->query($sql);
+
+while ($row = $res->fetch_assoc()) {
+    $devFeatures[$row['feature_name']] = [
+        'action_type' => $row['action_type'],
+        'status' => $row['status']
+    ];
+}
+
+// JS এ পাঠানোর জন্য
+$devFeaturesJSON = json_encode($devFeatures);
+
+
+
+
+
+$feature_types = [
+    'implement' => ['icon' => 'bi-plus-circle'],
+    'update' => ['icon' => 'bi-arrow-repeat'],
+    'bug_fix' => ['icon' => 'bi-bug'],
+    'remove' => ['icon' => 'bi-trash'],
+    'change' => ['icon' => 'bi-sliders'],
+    'refactor' => ['icon' => 'bi-tools'],
+    'optimize' => ['icon' => 'bi-speedometer2'],
+    'security_patch' => ['icon' => 'bi-shield-lock'],
+    'deprecate' => ['icon' => 'bi-exclamation-triangle'],
+    'migrate' => ['icon' => 'bi-arrow-left-right'],
+    'test_case' => ['icon' => 'bi-check2-square'],
+    'rollback' => ['icon' => 'bi-arrow-counterclockwise'],
+    'hotfix' => ['icon' => 'bi-fire']
+];
+
+
+
+$feature_status = [
+    'draft' => ['color' => 'secondary'],
+    'planning' => ['color' => 'info'],
+    'in_progress' => ['color' => 'primary'],
+    'testing' => ['color' => 'warning'],
+    'alpha' => ['color' => 'dark'],
+    'beta' => ['color' => 'teal'],
+    'rc' => ['color' => 'indigo'],
+    'staging' => ['color' => 'cyan'],
+    'stable' => ['color' => 'success'],
+    'lts' => ['color' => 'success'],
+    'deprecated' => ['color' => 'danger'],
+    'archived' => ['color' => 'secondary']
+];
+
+
+
+
 include_once 'functions.php';
 include 'component/sms-func.php';
 include_once 'check-access.php';
@@ -358,5 +467,13 @@ include 'header.php';
         bottom: 25%;
         left: 0px;
         z-index: 1000;
+    }
+
+    .on {
+        color: indigo;
+    }
+
+    .off {
+        color: gray;
     }
 </style>

@@ -196,11 +196,193 @@ function isActive($targetFile, $currentFile)
 
 
 
+
+
+<style>
+    /* Material 3 Modal Enhancements */
+    .modal-m3-redesign {
+        border-radius: 28px !important;
+        border: none;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .modal-m3-redesign .modal-header {
+        background: #fdf7ff;
+        /* Very subtle tonal background */
+        border-bottom: 1px solid #e7e0ec;
+        padding: 24px 32px;
+    }
+
+    .modal-m3-redesign .modal-title {
+        font-weight: 800;
+        color: #1c1b1f;
+        letter-spacing: -0.5px;
+    }
+
+    .modal-m3-redesign .modal-body {
+        padding: 32px;
+    }
+
+    /* Modern Input Styling */
+    .m3-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6750A4;
+        margin-bottom: 8px;
+        margin-left: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .m3-input-field {
+        border: 1.5px solid #79747E;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 500;
+        transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        background-color: #fff;
+    }
+
+    .m3-input-field:focus {
+        border-color: #6750A4;
+        border-width: 2px;
+        box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.1);
+        outline: none;
+    }
+
+    /* Action Button */
+    .m3-btn-save {
+        background-color: #6750A4;
+        color: #fff;
+        border-radius: 100px;
+        /* Pill shape */
+        padding: 12px 32px;
+        font-weight: 700;
+        border: none;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.2);
+        transition: 0.3s;
+    }
+
+    .m3-btn-save:hover {
+        background-color: #4f378b;
+        box-shadow: 0 8px 16px rgba(103, 80, 164, 0.3);
+        transform: translateY(-1px);
+    }
+</style>
+
+<div class="modal fade" id="devFeatureModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-m3-redesign">
+
+            <form id="devFeatureForm">
+
+                <div class="modal-header d-flex align-items-center">
+                    <div class="icon-box me-3 text-primary">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <h5 class="modal-title m-0">Feature Timeline</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="text" name="feature_name" id="df_feature">
+
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="m3-label">Platform</label>
+                            <select name="platform" id="df_platform" class="form-select m3-input-field">
+                                <option>Android</option>
+                                <option>Web</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="m3-label">Action</label>
+                            <select name="action_type" id="df_action" class="form-select m3-input-field">
+                                <?php
+                                foreach ($feature_types as $k => $v)
+                                    echo "<option value='$k'>$k</option>";
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="m3-label">Status</label>
+                            <select name="status" id="df_status" class="form-select m3-input-field">
+                                <?php
+                                foreach ($feature_status as $k => $v)
+                                    echo "<option value='$k'>$k</option>";
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="m3-label">Description / Update Notes</label>
+                            <textarea name="description" id="df_desc" class="form-control m3-input-field" rows="4"
+                                placeholder="Describe the update or feature progress..."></textarea>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-link text-muted fw-bold text-decoration-none me-auto"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="m3-btn-save">
+                        <i class="bi bi-cloud-arrow-up-fill me-2"></i> Save Timeline
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
+<script>
+    const featureTypes = {
+        implement: { icon: 'bi-plus-circle' },
+        update: { icon: 'bi-arrow-repeat' },
+        bug_fix: { icon: 'bi-bug' },
+        remove: { icon: 'bi-trash' },
+        change: { icon: 'bi-sliders' },
+        refactor: { icon: 'bi-tools' },
+        optimize: { icon: 'bi-speedometer2' },
+        security_patch: { icon: 'bi-shield-lock' },
+        deprecate: { icon: 'bi-exclamation-triangle' },
+        migrate: { icon: 'bi-arrow-left-right' },
+        test_case: { icon: 'bi-check2-square' },
+        rollback: { icon: 'bi-arrow-counterclockwise' },
+        hotfix: { icon: 'bi-fire' }
+    };
 
+    const featureStatus = {
+        draft: 'secondary',
+        planning: 'info',
+        in_progress: 'primary',
+        testing: 'warning',
+        alpha: 'dark',
+        beta: 'primary',
+        rc: 'info',
+        staging: 'warning',
+        stable: 'success',
+        lts: 'success',
+        deprecated: 'danger',
+        archived: 'secondary'
+    };
+
+    const devTimeline = <?= $devFeaturesJSON ?>;
+</script>
 
 
 
@@ -214,6 +396,14 @@ function isActive($targetFile, $currentFile)
 
 </script>
 
+
+<script>
+    function toggle_developer_mode() {
+        let mode = 1 - <?= $is_developer_mode ? '1' : '0' ?>;
+        setCookie('developer_mode', mode);
+        location.reload();
+    }
+</script>
 
 
 <script>
@@ -520,4 +710,140 @@ function isActive($targetFile, $currentFile)
     <?php endif; ?>
 
 
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ১. ডেভেলপার মোড চেক
+        let developerMode = <?= (int) ($is_developer_mode ?? 0) ?>;
+        if (developerMode !== 1) return;
+
+        // ২. মডাল অবজেক্ট তৈরি
+        const modalDevEl = document.getElementById('devFeatureModal');
+        if (!modalDevEl) return;
+        const modalDev = new bootstrap.Modal(modalDevEl);
+
+        // ৩. সকল ফিচার এলিমেন্ট প্রসেস করা
+        document.querySelectorAll('[data-feature]').forEach(function (el) {
+            // ক্লাস যোগ করা
+            el.classList.add('card-wrapper');
+            el.style.position = 'relative'; // ব্যাজ পজিশনিং এর জন্য
+
+            const featureName = el.getAttribute('data-feature');
+            const info = (typeof devTimeline !== 'undefined') ? devTimeline[featureName] : null;
+
+            let icon = 'bi-question-circle';
+            let color = 'dark';
+
+            if (info) {
+                if (typeof featureTypes !== 'undefined' && featureTypes[info.action_type]) {
+                    icon = featureTypes[info.action_type].icon;
+                }
+                color = (typeof featureStatus !== 'undefined') ? (featureStatus[info.status] || color) : color;
+            } else {
+                icon = 'bi-exclamation-circle';
+                color = 'danger';
+            }
+
+            // ৪. ব্যাজ তৈরি ও যোগ করা
+            let badge = document.createElement('div');
+            badge.className = 'm3-badge-new';
+            badge.innerHTML = `
+            <span class="badge bg-${color} shadow-sm">
+                <i class="bi ${icon}"></i>
+            </span>
+        `;
+            el.prepend(badge);
+
+            // ৫. কার্ডের ক্লিক ইভেন্ট (লুপের ভেতরেই লিসেনার দেওয়া ভালো)
+            el.addEventListener('click', function (e) {
+
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                // যদি ব্যাজে ক্লিক করা হয়, তবে শুধু মডাল খুলবে কিন্তু অন্য কিছু হবে না
+                // closest ব্যবহার করা হয়েছে যাতে ব্যাজের ভেতরের আইকনে ক্লিক করলেও ধরা যায়
+                if (e.target.closest('.m3-badge-new')) {
+                    // আপনি চাইলে ব্যাজে ক্লিক করলে আলাদা কিছু করতে পারেন
+                }
+
+                // মডাল ফর্ম ফিল্ডে ডাটা সেট করা
+                document.getElementById('df_feature').value = featureName;
+
+                // ফর্ম রিসেট (আগের ডাটা মুছে ফেলার জন্য)
+                const devForm = document.getElementById('devFeatureForm');
+                if (devForm) {
+                    // ডাটা থাকলে সেট করুন, নাহলে ডিফল্ট
+                    if (info) {
+                        document.getElementById('df_action').value = info.action_type;
+                        document.getElementById('df_status').value = info.status;
+                        document.getElementById('df_desc').value = info.description || '';
+                        document.getElementById('df_platform').value = info.platform || 'Android';
+                    } else {
+                        devForm.reset();
+                        document.getElementById('df_feature').value = featureName;
+                    }
+                }
+
+                modalDev.show();
+            });
+        });
+    });
+</script>
+
+<script>
+    document.getElementById('devFeatureForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // ১. সেভ করার সময় লোডিং দেখানো
+        Swal.fire({
+            title: 'সংরক্ষণ করা হচ্ছে...',
+            text: 'দয়া করে কিছুক্ষণ অপেক্ষা করুন',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        let fd = new FormData(this);
+        fd.append('save_timeline', 1);
+
+        fetch('', {
+            method: 'POST',
+            body: fd
+        })
+            .then(r => r.text())
+            .then(t => {
+                if (t.includes("1")) {
+                    // ২. সফল হলে সাকসেস মেসেজ দেখানো
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'সফলভাবে সংরক্ষিত হয়েছে!',
+                        showConfirmButton: false,
+                        timer: 1500 // ১.৫ সেকেন্ড পর অটো বন্ধ হবে
+                    }).then(() => {
+                        if (typeof modalDev !== 'undefined') modalDev.hide();
+                        location.reload();
+                    });
+                } else {
+                    // ৩. ব্যর্থ হলে এরর মেসেজ
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ব্যর্থ হয়েছে',
+                        text: 'উফ! তথ্য সেভ করা সম্ভব হয়নি। আবার চেষ্টা করুন।',
+                        confirmButtonColor: '#6750A4'
+                    });
+                }
+            })
+            .catch(err => {
+                // ৪. নেটওয়ার্ক এরর হলে
+                Swal.fire({
+                    icon: 'error',
+                    title: 'সংযোগ বিচ্ছিন্ন',
+                    text: 'সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না।',
+                });
+            });
+    });
 </script>
