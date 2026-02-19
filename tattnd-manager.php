@@ -23,6 +23,10 @@ $q->execute();
 $res = $q->get_result();
 ?>
 
+<script>
+    const userPermission = <?= (int) $permission ?>;
+</script>
+
 
 <style>
     /* Teacher Card Design */
@@ -147,56 +151,93 @@ $res = $q->get_result();
     }
 </style>
 
-<div class="hero-container">
+
+<style>
+    /* Hero Enhancement */
+    .hero-container-m3 {
+        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        color: white;
+        padding: 35px 25px;
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 10px 20px rgba(103, 80, 164, 0.15);
+    }
+
+    /* Card Photo Enhancement */
+    .teacher-avatar-img {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        object-fit: cover;
+        border: 2px solid white;
+        background: #EADDFF;
+    }
+
+    /* Permission Denied Style */
+    .permission-overlay {
+        cursor: not-allowed !important;
+    }
+</style>
+
+
+
+<div class="hero-container-m3 mb-4">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="fw-black m-0">Teacher Directory</h4>
-            <p class="small m-0 opacity-75">Manage access & permissions</p>
+            <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge bg-white text-primary rounded-pill px-2">
+                    <i class="bi bi-people-fill me-1"></i> Total: <?= $res->num_rows ?>
+                </span>
+            </div>
         </div>
-        <i class="bi bi-people-fill display-5 opacity-25"></i>
+        <i class="bi bi-shield-lock-fill display-6 opacity-25"></i>
     </div>
 </div>
 
 <div class="container-fluid pb-5">
-    <?php while ($r = $res->fetch_assoc()): ?>
-        <div class="m3-teacher-card <?= !$r['manual_st'] ? 'disabled' : '' ?>" data-tid="<?= $r['tid'] ?>">
-            <div class="teacher-avatar shadow-sm">
-                <?= substr($r['tname'], 0, 1) ?>
-            </div>
+    <?php while ($r = $res->fetch_assoc()):
+        $tid = $r['tid'];
+        $photo = teacher_profile_image_path($tid); // আগের আলোচনা অনুযায়ী ফাংশনটি ব্যবহার করা হয়েছে
+        ?>
+        <div class="m3-teacher-card <?= (!$r['manual_st'] ? 'disabled' : '') ?>" data-tid="<?= $tid ?>">
+
+            <img src="<?= $photo ?>" class="teacher-avatar-img shadow-sm" onerror="this.src='iimg/default_teacher.png'">
 
             <div class="flex-grow-1">
                 <div class="fw-bold text-dark" style="font-size: 1rem;"><?= $r['tname'] ?></div>
-                <div class="text-muted" style="font-size: 0.75rem; font-weight: 600;">ID: <?= $r['tid'] ?></div>
+                <div class="text-muted" style="font-size: 0.75rem; font-weight: 700; opacity: 0.7;">ID: <?= $tid ?></div>
 
                 <div class="status-pill-box">
                     <?php
                     $modes = [
                         ['key' => $r['gps_st'], 'icon' => 'geo-alt-fill', 'title' => 'GPS', 'clr' => 'success'],
-                        ['key' => $r['bio_st'], 'icon' => 'fingerprint', 'title' => 'Biometric', 'clr' => 'info'],
+                        ['key' => $r['bio_st'], 'icon' => 'fingerprint', 'title' => 'Bio', 'clr' => 'info'],
                         ['key' => $r['card_st'], 'icon' => 'credit-card', 'title' => 'Card', 'clr' => 'warning'],
                         ['key' => $r['manual_st'], 'icon' => 'hand-index-thumb', 'title' => 'Manual', 'clr' => 'danger']
                     ];
                     foreach ($modes as $m): ?>
-                        <div class="status-icon-m3 <?= $m['key'] ? 'active shadow-sm' : '' ?>" title="<?= $m['title'] ?>">
+                        <div class="status-icon-m3 <?= $m['key'] ? 'active shadow-sm' : 'opacity-25' ?>"
+                            style="background: <?= $m['key'] ? 'var(--m3-surface-container)' : 'transparent' ?>;">
                             <i class="bi bi-<?= $m['icon'] ?> text-<?= $m['clr'] ?>"></i>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
 
-            <div class="dropdown" style="border-radius:50%;">
-                <button class="btn btn-light rounded-circle shadow-sm" data-bs-toggle="dropdown"
-                    style="width: 38px; height: 38px; border-radius:50%;">
-                    <i class="bi bi-three-dots-vertical"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="border-radius: 8px;">
-                    <li>
-                        <a class="dropdown-item py-2 permBtn fw-bold text-primary" data-tid="<?= $r['tid'] ?>" href="#">
-                            <i class="bi bi-shield-lock-fill me-2"></i> Permissions
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <?php if ($permission == 3): ?>
+                <div class="dropdown stop-prop"> <button class="btn btn-light rounded-circle shadow-sm"
+                        data-bs-toggle="dropdown" style="width: 38px; height: 38px; border-radius:50%;">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="border-radius: 8px;">
+                        <li>
+                            <a class="dropdown-item py-2 permBtn fw-bold text-primary" data-tid="<?= $tid ?>" href="#">
+                                <i class="bi bi-shield-lock-fill me-2"></i> Permissions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endwhile; ?>
 </div>
@@ -258,9 +299,28 @@ $res = $q->get_result();
 
 <script>
 
+    document.querySelectorAll('.stop-prop').forEach(elem => {
+        elem.addEventListener('click', function (e) {
+            e.stopPropagation(); // ক্লিকটি এখানেই থেমে যাবে, কার্ড পর্যন্ত যাবে না
+        });
+    });
+
+
+
     document.querySelectorAll('.m3-teacher-card').forEach(card => {
 
         card.addEventListener('click', function () {
+
+            if (userPermission < 2) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'You do not have permission for manual attendance.',
+                    confirmButtonColor: '#6750A4'
+                });
+                return;
+            }
+
 
             if (card.classList.contains('disabled')) return;
 
@@ -305,17 +365,60 @@ $res = $q->get_result();
         });
 
         // ❌ STOP BUBBLING FROM DROPDOWN BUTTON + ITEMS
-        document.querySelectorAll('.m3-teacher-card .dropdown').forEach(dd => {
 
-            dd.addEventListener('click', function (e) {
-                e.stopPropagation();
+        document.querySelectorAll('.m3-teacher-card').forEach(card => {
+            card.addEventListener('click', function () {
+
+                // সমাধান ২: $permission >= 2 চেক
+                if (userPermission < 2) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Access Denied',
+                        text: 'You do not have permission to record attendance.',
+                        confirmButtonColor: '#6750A4'
+                    });
+                    return;
+                }
+
+                if (card.classList.contains('disabled')) return;
+
+                let tid = card.dataset.tid;
+
+                Swal.fire({
+                    title: 'Manual Attendance?',
+                    text: `Confirm manual attendance for ID: ${tid}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Submit Attendance',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#198754'
+                }).then(result => {
+                    if (!result.isConfirmed) return;
+
+                    fetch('ajax/manual-attendance.php', {
+                        method: 'POST',
+                        body: new URLSearchParams({ tid: tid })
+                    })
+                        .then(r => r.text())
+                        .then(t => {
+                            if (t.trim() === 'OK') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Attendance Submitted',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                // ডাইনামিক ওয়ার্নিং মেসেজ হ্যান্ডলিং
+                                let msg = (t.trim() === 'disabled') ? 'Manual attendance is disabled for this user.' : 'Attendance already submitted today.';
+                                Swal.fire('Notice', msg, 'warning');
+                            }
+                        });
+                });
             });
-
         });
 
     });
-
-
 
 
 

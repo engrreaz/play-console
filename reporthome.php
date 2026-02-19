@@ -199,6 +199,10 @@ if ($count_class > 0) {
         window.location.href = `user-log-book.php`;
     }
 
+    function report_menu_proxy(){
+        window.location.href = `proxy-manager.php`;
+    }
+
     
     function library_bookshelf() {
         window.location.href = `library-bookshelf.php`;

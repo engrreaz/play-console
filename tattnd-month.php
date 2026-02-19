@@ -4,7 +4,7 @@ require_once "inc.php";
 
 $month = $_GET['month'] ?? date('m');
 $year = $_GET['year'] ?? date('Y');
-
+$today = date('Y-m-d');
 $start = "$year-$month-01";
 $end = date("Y-m-t", strtotime($start));
 
@@ -22,12 +22,7 @@ foreach ($ins_all_settings as $row) {
 /* -----------------------
    Teachers
 ------------------------ */
-$tq = $conn->prepare("
-    SELECT tid, tname 
-    FROM teacher 
-    WHERE sccode=? 
-    ORDER BY tid DESC
-");
+$tq = $conn->prepare("SELECT tid, tname, position FROM teacher WHERE sccode=? ORDER BY sl");
 $tq->bind_param("i", $sccode);
 $tq->execute();
 $teachers = $tq->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -196,6 +191,16 @@ while ($d <= $end) {
         padding-left: 15px !important;
     }
 
+    .sticky-col:hover {
+        text-decoration: none !important;
+        background-color: var(--m3-surface-container) !important;
+        color: var(--m3-primary);
+        border-left: 4px solid var(--m3-primary) !important;
+        padding-left: 11px !important;
+        /* ৪px বর্ডার অ্যাডজাস্ট করার জন্য */
+        transition: all 0.2s ease;
+    }
+
     thead th.sticky-col {
         background: var(--m3-surface-container);
         z-index: 40;
@@ -276,16 +281,48 @@ while ($d <= $end) {
         text-decoration: underline;
         color: var(--m3-primary);
     }
+
+    /* ভবিষ্যতের তারিখের সেলের স্টাইল */
+    .future-cell {
+        background-color: #d3d1d3 !important;
+        /* একদম হালকা ধসর */
+        opacity: 0.3;
+        /* ঝাপসা দেখাবে */
+        cursor: not-allowed !important;
+        /* মাউস নিলে ক্রস চিহ্ন দেখাবে */
+        pointer-events: none;
+        /* ক্লিক করা যাবে না */
+        filter: grayscale(100%);
+        /* কোনো কালার থাকলে তা মুছে যাবে */
+    }
+
+    /* ভবিষ্যতের তারিখের হেডার (তারিখের সংখ্যা) */
+    th.future-head {
+        color: #ccc !important;
+        font-weight: 400 !important;
+    }
 </style>
 
 
-<div class="hero-container">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="hero-container shadow-sm"
+    style="background: linear-gradient(135deg, #6750A4 0%, #4527A0 100%); color: white; padding: 40px 20px; border-radius: 0 0 24px 24px; position: relative; overflow: hidden;">
+    <div style="position: absolute; right: -20px; top: -20px; opacity: 0.1; font-size: 8rem;"><i
+            class="bi bi-calendar-check"></i></div>
+    <div class="d-flex justify-content-between align-items-center position-relative">
         <div>
-            <h5 class="fw-black m-0">Teacher Attendance</h5>
-            <p class="small m-0 opacity-75"><?= date("F Y", strtotime($start)) ?></p>
+            <h4 class="fw-black m-0" style="letter-spacing: -0.5px;">Attendance Dashboard</h4>
+            <div class="d-flex align-items-center gap-2 mt-2">
+                <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm"
+                    style="font-size: 0.8rem;">
+                    <i class="bi bi-calendar3 me-1"></i> <?= date("F Y", strtotime($start)) ?>
+                </span>
+            </div>
         </div>
-        <i class="bi bi-person-check fs-1 opacity-25"></i>
+        <div class="text-end">
+            <div class="small opacity-75 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Total
+                Staff</div>
+            <div class="h2 fw-black m-0"><?= count($teachers) ?></div>
+        </div>
     </div>
 </div>
 
@@ -321,147 +358,187 @@ while ($d <= $end) {
             <thead>
                 <tr>
                     <th class="sticky-col">Teacher Name</th>
-                    <?php foreach ($dates as $dt): ?>
-                        <th><?= date('d', strtotime($dt)) ?></th>
+                    <?php foreach ($dates as $dt):
+                        $head_cls = ($dt > $today) ? 'future-head' : '';
+                        ?>
+                        <th class="<?= $head_cls ?>"><?= date('d', strtotime($dt)) ?></th>
                     <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 foreach ($teachers as $t):
-                    // পরিসংখ্যান হিসাব করুন
                     $p = 0;
                     $a = 0;
-                    $l = 0;
+                    $late = 0;
                     $lv = 0;
+                    // আজকের তারিখ
                     foreach ($dates as $dt) {
+                        $is_future = ($dt > $today); // চেক: তারিখটি কি আজকের পরের?
+                
+                        $cls = '';
+                        $icon = '';
                         $dayName = date('l', strtotime($dt));
-                        if (isset($leave[$t['tid']][$dt]))
-                            $lv++;
-                        elseif (isset($att[$t['tid']][$dt])) {
-                            $stin = $att[$t['tid']][$dt]['statusin'];
-                            if ($stin == 'fast' || $stin == 'late')
-                                $p++; // আপনার লজিক অনুযায়ী
-                            if ($stin == 'ABSENT')
-                                $a++;
-                        }
-                    }
-                    ?>
-                    <tr>
-                        <td class="sticky-col text-dark teacher-click" data-tid="<?= $t['tid'] ?>" data-tname="<?= $t['tname'] ?>" data-p="<?= $p ?>"
-                            data-a="<?= $a ?>" data-lv="<?= $lv ?>">
-                            <?= $t['tname'] ?>
-                        </td>
 
-
-                        <?php foreach ($dates as $dt):
-
-                            $cls = '';
-                            $icon = '';
-
-                            $dayName = date('l', strtotime($dt));
-
-                            /* -----------------------
-                               Holiday
-                            ------------------------ */
+                        if ($is_future) {
+                            $cls = 'future-cell';
+                            $icon = '-'; // ফিউচারে আইকন না দেখিয়ে শুধু ড্যাশ বা খালি রাখা ভালো
+                        } else {
                             if (isset($cal[$dt]) && $cal[$dt]['work'] == 0) {
                                 $cls = 'holiday';
                                 $icon = '<i class="bi bi-calendar-x"></i>';
-                            }
-
-                            /* -----------------------
-                               Weekend
-                            ------------------------ */ elseif (in_array($dayName, $weekendDays)) {
+                            } elseif (in_array($dayName, $weekendDays)) {
                                 $cls = 'weekend';
                                 $icon = '<i class="bi bi-calendar2-week"></i>';
                             }
 
-                            /* -----------------------
-                               Leave (priority after holiday/weekend)
-                            ------------------------ */
                             if (isset($leave[$t['tid']][$dt])) {
-
-                                $lv = strtolower($leave[$t['tid']][$dt]);
-
-                                if (str_contains($lv, 'medical')) {
-                                    $cls = 'leave';
-                                    $icon = '<i class="bi bi-heart-pulse text-danger"></i>';
-                                } else {
-                                    $cls = 'leave';
-                                    $icon = '<i class="bi bi-person-dash text-warning"></i>';
-                                }
-                            }
-
-                            /* -----------------------
-                               Attendance (DO NOT override leave)
-                            ------------------------ */
-                            if (!isset($leave[$t['tid']][$dt]) && isset($att[$t['tid']][$dt])) {
-
-                                $a = $att[$t['tid']][$dt];
-
-                                $stin = strtoupper($a['statusin']);
-                                $stout = strtoupper($a['statusout']);
+                                $lv++;
+                            } elseif (isset($att[$t['tid']][$dt])) {
+                                $stin = strtoupper($att[$t['tid']][$dt]['statusin']);
+                                $stout = strtoupper($att[$t['tid']][$dt]['statusout']);
 
                                 if ($stin == 'ABSENT') {
-                                    $cls = 'absent';
-                                    $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
+                                    $a++;
+                                } elseif ($stin == 'LATE' || $stout == 'FAST') {
+                                    $late++;
+                                    $p++; // লেট হলেও সে উপস্থিত
+                                } else {
+                                    $p++;
+                                }
+                            } elseif (!in_array($dayName, $weekendDays) && !isset($cal[$dt])) {
+                                $a++; // উইকেন্ড বা হলিডে না হলে এবং হাজিরা না থাকলে অনুপস্থিত
+                            }
+                        }
+                    }
+                    ?>
+                    <tr>
+                        <td class="sticky-col text-dark teacher-click" data-tid="<?= $t['tid'] ?>"
+                            data-tname="<?= $t['tname'] ?>" data-pos="<?= $t['position'] ?>" data-p="<?= $p ?>"
+                            data-a="<?= $a ?>" data-late="<?= $late ?>" data-lv="<?= $lv ?>">
+                            <div class="fw-bold"><?= $t['tname'] ?></div>
+                            <div style="font-size: 0.6rem; opacity: 0.6;"><?= $t['position'] ?></div>
+                        </td>
 
-                                } elseif ($stin == 'LATE') {
-                                    $cls = 'late';
-                                    $icon = '<i class="bi bi-exclamation-triangle text-warning"></i>';
 
-                                } elseif ($stin == 'FAST') {
-                                    $cls = 'present';
-                                    $icon = '<i class="bi bi-check-circle text-success"></i>';
+
+                        <?php $today = date('Y-m-d'); // আজকের তারিখ
+                            foreach ($dates as $dt):
+                                $is_future = ($dt > $today); // চেক: তারিখটি কি আজকের পরের?
+                                $cls = '';
+                                $icon = '';
+
+                                $dayName = date('l', strtotime($dt));
+
+
+                                if ($is_future) {
+                                    $cls = 'future-cell';
+                                    $icon = '-'; // ফিউচারে আইকন না দেখিয়ে শুধু ড্যাশ বা খালি রাখা ভালো
+                                } else {
+                                    /* -----------------------
+                                                                   Holiday
+                                                                ------------------------ */
+                                    if (isset($cal[$dt]) && $cal[$dt]['work'] == 0) {
+                                        $cls = 'holiday';
+                                        $icon = '<i class="bi bi-calendar-x"></i>';
+                                    }
+
+                                    /* -----------------------
+                                       Weekend
+                                    ------------------------ */ elseif (in_array($dayName, $weekendDays)) {
+                                        $cls = 'weekend';
+                                        $icon = '<i class="bi bi-calendar2-week"></i>';
+                                    }
+
+                                    /* -----------------------
+                                       Leave (priority after holiday/weekend)
+                                    ------------------------ */
+                                    if (isset($leave[$t['tid']][$dt])) {
+
+                                        $lv = strtolower($leave[$t['tid']][$dt]);
+
+                                        if (str_contains($lv, 'medical')) {
+                                            $cls = 'leave';
+                                            $icon = '<i class="bi bi-heart-pulse text-danger"></i>';
+                                        } else {
+                                            $cls = 'leave';
+                                            $icon = '<i class="bi bi-person-dash text-warning"></i>';
+                                        }
+                                    }
+
+                                    /* -----------------------
+                                       Attendance (DO NOT override leave)
+                                    ------------------------ */
+                                    if (!isset($leave[$t['tid']][$dt]) && isset($att[$t['tid']][$dt])) {
+
+                                        $a = $att[$t['tid']][$dt];
+
+                                        $stin = strtoupper($a['statusin']);
+                                        $stout = strtoupper($a['statusout']);
+
+                                        if ($stin == 'ABSENT') {
+                                            $cls = 'absent';
+                                            $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
+
+                                        } elseif ($stin == 'LATE') {
+                                            $cls = 'late';
+                                            $icon = '<i class="bi bi-exclamation-triangle text-warning"></i>';
+
+                                        } elseif ($stin == 'FAST') {
+                                            $cls = 'present';
+                                            $icon = '<i class="bi bi-check-circle text-success"></i>';
+                                        }
+
+                                        if ($stout == 'FAST') {
+                                            $cls = 'late';
+                                            $icon = '<i class="bi bi-exclamation-triangle text-warning"></i>';
+                                        }
+
+                                        if ($stout == 'LATE') {
+                                            $cls = 'present';
+                                            $icon = '<i class="bi bi-check-circle text-success"></i>';
+                                        }
+                                    }
+
+                                    /* -----------------------
+                                       Absent fallback
+                                    ------------------------ */
+                                    if ($icon == '' && !in_array($dayName, $weekendDays)) {
+                                        $cls = 'absent';
+                                        $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
+                                    }
+
+
+
+
+
+
+                                    // লুপের ভেতর যেখানে কন্ডিশন চেক করছেন সেখানে $detail সেট করুন:
+                                    $detail = "";
+                                    $header = "Record Detail";
+
+                                    if (isset($cal[$dt]) && $cal[$dt]['work'] == 0) {
+                                        $header = "Holiday";
+                                        $detail = "Event: " . $cal[$dt]['category'];
+                                    } elseif (in_array($dayName, $weekendDays)) {
+                                        $header = "Weekend";
+                                        $detail = "Day: " . $dayName;
+                                    } elseif (isset($leave[$t['tid']][$dt])) {
+                                        $header = "Leave";
+                                        $detail = "Type: " . strtoupper($leave[$t['tid']][$dt]);
+                                    } elseif (isset($att[$t['tid']][$dt])) {
+                                        $a = $att[$t['tid']][$dt];
+                                        $header = date('d M, Y', strtotime($dt));
+                                        $detail = "In: " . ($a['detectin'] ?: '--:--') . " (" . $a['statusin'] . ")<br>" .
+                                            "Out: " . ($a['detectout'] ?: '--:--') . " (" . $a['statusout'] . ")";
+                                    }
                                 }
 
-                                if ($stout == 'FAST') {
-                                    $cls = 'late';
-                                    $icon = '<i class="bi bi-exclamation-triangle text-warning"></i>';
-                                }
-
-                                if ($stout == 'LATE') {
-                                    $cls = 'present';
-                                    $icon = '<i class="bi bi-check-circle text-success"></i>';
-                                }
-                            }
-
-                            /* -----------------------
-                               Absent fallback
-                            ------------------------ */
-                            if ($icon == '' && !in_array($dayName, $weekendDays)) {
-                                $cls = 'absent';
-                                $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
-                            }
+                                ?>
 
 
-
-
-
-
-                            // লুপের ভেতর যেখানে কন্ডিশন চেক করছেন সেখানে $detail সেট করুন:
-                            $detail = "";
-                            $header = "Record Detail";
-
-                            if (isset($cal[$dt]) && $cal[$dt]['work'] == 0) {
-                                $header = "Holiday";
-                                $detail = "Event: " . $cal[$dt]['category'];
-                            } elseif (in_array($dayName, $weekendDays)) {
-                                $header = "Weekend";
-                                $detail = "Day: " . $dayName;
-                            } elseif (isset($leave[$t['tid']][$dt])) {
-                                $header = "Leave";
-                                $detail = "Type: " . strtoupper($leave[$t['tid']][$dt]);
-                            } elseif (isset($att[$t['tid']][$dt])) {
-                                $a = $att[$t['tid']][$dt];
-                                $header = date('d M, Y', strtotime($dt));
-                                $detail = "In: " . ($a['detectin'] ?: '--:--') . " (" . $a['statusin'] . ")<br>" .
-                                    "Out: " . ($a['detectout'] ?: '--:--') . " (" . $a['statusout'] . ")";
-                            }
-                            ?>
-
-
-                            <td class="att-cell <?= $cls ?> cell-click" data-header="<?= $header ?>" data-info="<?= $detail ?>">
+                            <td class="att-cell <?= $cls ?> <?= (!$is_future) ? 'cell-click' : '' ?>"
+                                data-header="<?= $header ?>" data-info="<?= $detail ?>">
                                 <?= $icon ?>
                             </td>
                         <?php endforeach; ?>
@@ -549,30 +626,31 @@ while ($d <= $end) {
 
         // ২. টিচারের নামে ক্লিক করলে পরিসংখ্যান দেখানো
         $('.teacher-click').on('click', function () {
-            // ডাটা রিসিভ করা
-            let tid = $(this).data('tid'); // নিশ্চিত করুন আপনার HTML-এ data-tid আছে
+            let tid = $(this).data('tid');
             let name = $(this).data('tname');
+            let pos = $(this).data('pos'); // পদবী যোগ
             let p = $(this).data('p');
             let a = $(this).data('a');
+            let late = $(this).data('late');
             let lv = $(this).data('lv');
 
-            // টেক্সট এবং পরিসংখ্যান সেট করা
-            $('#summaryTName').text(name);
+            $('#summaryTName').html(`${name} <br><small class="text-muted" style="font-size:0.8rem; font-weight:600;">${pos}</small>`);
             $('#summaryStats').html(`
-                <div class="col-4 text-center">
-                    <div class="p-2 bg-success-subtle rounded-4"><b class="d-block fs-4">${p}</b><span>Present</span></div>
-                </div>
-                <div class="col-4 text-center">
-                    <div class="p-2 bg-danger-subtle rounded-4"><b class="d-block fs-4">${a}</b><span>Absent</span></div>
-                </div>
-                <div class="col-4 text-center">
-                    <div class="p-2 bg-warning-subtle rounded-4"><b class="d-block fs-4">${lv}</b><span>Leave</span></div>
-                </div>
-            `);
+        <div class="col-3 text-center">
+            <div class="p-2 bg-success-subtle rounded-4 text-success"><b class="d-block fs-4">${p}</b><span style="font-size:0.6rem; font-weight:800; text-transform:uppercase;">Present</span></div>
+        </div>
+        <div class="col-3 text-center">
+            <div class="p-2 bg-danger-subtle rounded-4 text-danger"><b class="d-block fs-4">${a}</b><span style="font-size:0.6rem; font-weight:800; text-transform:uppercase;">Absent</span></div>
+        </div>
+        <div class="col-3 text-center">
+            <div class="p-2 bg-info-subtle rounded-4 text-info"><b class="d-block fs-4">${late}</b><span style="font-size:0.6rem; font-weight:800; text-transform:uppercase;">Late</span></div>
+        </div>
+        <div class="col-3 text-center">
+            <div class="p-2 bg-warning-subtle rounded-4 text-warning"><b class="d-block fs-4">${lv}</b><span style="font-size:0.6rem; font-weight:800; text-transform:uppercase;">Leave</span></div>
+        </div>
+    `);
 
-            // লিংকে ডাইনামিকভাবে TID সেট করা
             $('#viewFullLogsBtn').attr('href', `tattnd-tid.php?tid=${tid}`);
-
             $('#teacherSummaryModal').modal('show');
         });
     });

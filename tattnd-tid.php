@@ -29,92 +29,231 @@ foreach ($ins_all_settings as $row) {
 /* ============================
    SHOW TEACHER LIST IF NO TID
 ============================ */
+/* ============================
+   SHOW TEACHER LIST IF NO TID
+============================ */
 if (!$tid) {
+    // ১. পুরো বছরের সময়সীমা নির্ধারণ
+    $year_start = date('Y-01-01');
+    $today = date('Y-m-d');
 
-    $tlist = $conn->prepare("
-        SELECT tid, tname
-        FROM teacher
-        WHERE sccode=?
-        ORDER BY tname
-    ");
+    // ২. টিচারদের তালিকা সংগ্রহ
+    $tlist = $conn->prepare("SELECT tid, tname, position FROM teacher WHERE sccode=? ORDER BY sl");
     $tlist->bind_param("i", $sccode);
     $tlist->execute();
-    $res = $tlist->get_result();
+    $teachers = $tlist->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    // ৩. পুরো বছরের হাজিরা ডাটা সংগ্রহ (একবারে)
+    $aq_year = $conn->prepare("SELECT tid, adate, statusin FROM teacherattnd WHERE sccode=? AND adate BETWEEN ? AND ?");
+    $aq_year->bind_param("iss", $sccode, $year_start, $today);
+    $aq_year->execute();
+    $ar_year = $aq_year->get_result();
+    $year_att = [];
+    while ($r = $ar_year->fetch_assoc()) {
+        $year_att[$r['tid']][$r['adate']] = strtolower($r['statusin']);
+    }
+
+    // ৪. পুরো বছরের লিভ ডাটা সংগ্রহ
+    $lq_year = $conn->prepare("SELECT tid, date_from, date_to FROM teacher_leave_app WHERE sccode=? AND status=1 AND date_from <= ? AND date_to >= ?");
+    $lq_year->bind_param("iss", $sccode, $today, $year_start);
+    $lq_year->execute();
+    $lr_year = $lq_year->get_result();
+    $year_leave = [];
+    while ($r = $lr_year->fetch_assoc()) {
+        $cur = $r['date_from'];
+        while ($cur <= $r['date_to']) {
+            if ($cur >= $year_start && $cur <= $today) {
+                $year_leave[$r['tid']][$cur] = true;
+            }
+            $cur = date("Y-m-d", strtotime("+1 day", strtotime($cur)));
+        }
+    }
+
+    // ৫. ক্যালেন্ডার ও হলিডে ডাটা
+    $cq_year = $conn->prepare("SELECT date, dateto, work FROM calendar WHERE (sccode=? OR sccode=0) AND (date BETWEEN ? AND ? OR dateto BETWEEN ? AND ?)");
+    $cq_year->bind_param("issss", $sccode, $year_start, $today, $year_start, $today);
+    $cq_year->execute();
+    $cr_year = $cq_year->get_result();
+    $year_cal = [];
+    while ($r = $cr_year->fetch_assoc()) {
+        $to = $r['dateto'] ?: $r['date'];
+        $cur = $r['date'];
+        while ($cur <= $to) {
+            if ($cur >= $year_start && $cur <= $today)
+                $year_cal[$cur] = $r['work'];
+            $cur = date("Y-m-d", strtotime("+1 day", strtotime($cur)));
+        }
+    }
+
+    // ৬. তারিখের তালিকা তৈরি (Stats গণনার জন্য)
+    $all_dates = [];
+    $tmp_d = $year_start;
+    while ($tmp_d <= $today) {
+        $all_dates[] = $tmp_d;
+        $tmp_d = date("Y-m-d", strtotime("+1 day", strtotime($tmp_d)));
+    }
     ?>
 
-    <div class="container py-3">
-        <h5 class="fw-bold mb-3">Select Teacher</h5>
+    <style>
+        :root {
+            --m3-primary: #6750A4;
+            --m3-surface: #FEF7FF;
+            --m3-on-tonal: #21005D;
+        }
 
-        <div class="row g-3">
+        body {
+            background: var(--m3-surface);
+        }
 
-            <?php while ($t = $res->fetch_assoc()): ?>
+        /* Modern Hero */
+        .hero-list {
+            background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+            color: white;
+            padding: 40px 20px 60px;
+            border-radius: 0 0 32px 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(103, 80, 164, 0.2);
+        }
 
+        .hero-list::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        /* Teacher Card Redesign */
+        .teacher-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #E7E0EC;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none !important;
+            display: block;
+        }
+
+        .teacher-card:active {
+            transform: scale(0.97);
+            background: #F3EDF7;
+        }
+
+        .avatar-box {
+            width: 54px;
+            height: 54px;
+            background: #EADDFF;
+            color: var(--m3-on-tonal);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .stat-pill {
+            flex: 1;
+            padding: 6px 2px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .sp-p {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .sp-a {
+            background: #F9DEDC;
+            color: #B3261E;
+        }
+
+        .sp-h {
+            background: #F3EDF7;
+            color: #6750A4;
+        }
+
+        .sp-l {
+            background: #FFF8E1;
+            color: #FF8F00;
+        }
+    </style>
+
+    <div class="hero-list">
+        <h3 class="fw-black m-0" style="letter-spacing: -1px;">Staff Directory</h3>
+        <p class="small m-0 opacity-75 fw-bold">Yearly Attendance Overview (<?= date('Y') ?>)</p>
+        <div class="mt-3 d-flex gap-2">
+            <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm" style="font-size: 0.75rem;">
+                <i class="bi bi-people-fill me-1"></i> <?= count($teachers) ?> Members
+            </span>
+        </div>
+    </div>
+
+    <div class="container py-3" style="margin-top: -30px;">
+        <div class="row g-2">
+            <?php foreach ($teachers as $t):
+                // পরিসংখ্যান গণনা (Yearly)
+                $p = 0;
+                $a = 0;
+                $h = 0;
+                $lv = 0;
+                foreach ($all_dates as $dt) {
+                    $dayName = date('l', strtotime($dt));
+                    if (isset($year_cal[$dt]) && $year_cal[$dt] == 0) {
+                        $h++;
+                    } elseif (in_array($dayName, $weekendDays)) {
+                        $h++;
+                    } elseif (isset($year_leave[$t['tid']][$dt])) {
+                        $lv++;
+                    } elseif (isset($year_att[$t['tid']][$dt])) {
+                        if ($year_att[$t['tid']][$dt] == 'absent')
+                            $a++;
+                        else
+                            $p++;
+                    } else {
+                        $a++;
+                    }
+                }
+                ?>
                 <div class="col-12">
-
-                    <a href="?tid=<?= $t['tid'] ?>" style="text-decoration:none;">
-
-                        <div class="card shadow-sm border-0 mb-2" style="border-radius:14px;">
-
-                            <div class="card-body d-flex align-items-center">
-
-                                <!-- Avatar -->
-                                <div style="
-                    width:54px;
-                    height:54px;
-                    min-width:54px;
-                    background:#6750A4;
-                    color:white;
-                    border-radius:50%;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-weight:700;
-                    font-size:18px;">
-
-                                    <?= strtoupper(substr($t['tname'], 0, 1)) ?>
+                    <a href="?tid=<?= $t['tid'] ?>" class="teacher-card shadow-sm">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-box"><?= strtoupper(substr($t['tname'], 0, 1)) ?></div>
+                            <div class="ms-3 flex-grow-1">
+                                <div class="fw-black text-dark" style="font-size: 1.05rem; line-height: 1.2;"><?= $t['tname'] ?>
                                 </div>
-
-
-                                <!-- Info -->
-                                <div class="ms-3 flex-grow-1">
-
-                                    <div class="fw-bold text-dark" style="font-size:1rem;">
-                                        <?= $t['tname'] ?>
-                                    </div>
-
-                                    <div class="small text-muted">
-                                        ID: <?= $t['tid'] ?>
-                                    </div>
-
-                                    <?php if (!empty($t['designation'])): ?>
-                                        <div class="small text-primary fw-semibold">
-                                            <?= $t['designation'] ?>
-                                        </div>
-                                    <?php endif; ?>
-
+                                <div class="small text-muted fw-bold"><?= $t['position'] ?> <span class="mx-1">•</span> ID:
+                                    <?= $t['tid'] ?>
                                 </div>
-
-                                <!-- Arrow -->
-                                <div class="text-muted">
-                                    <i class="bi bi-chevron-right fs-5"></i>
-                                </div>
-
                             </div>
+                            <i class="bi bi-chevron-right text-muted opacity-50"></i>
                         </div>
 
+                        <div class="d-flex gap-2">
+                            <div class="stat-pill sp-p"><b><?= $p ?></b><br>Present</div>
+                            <div class="stat-pill sp-a"><b><?= $a ?></b><br>Absent</div>
+                            <div class="stat-pill sp-h"><b><?= $h ?></b><br>Holiday</div>
+                            <div class="stat-pill sp-l"><b><?= $lv ?></b><br>Leave</div>
+                        </div>
                     </a>
-
                 </div>
-
-
-            <?php endwhile; ?>
-
+            <?php endforeach; ?>
         </div>
     </div>
 
     <?php
     include 'footer.php';
-    exit;   // ⭐⭐⭐ গুরুত্বপূর্ণ
+    exit;
 }
 
 
@@ -122,7 +261,7 @@ if (!$tid) {
 /* -----------------------
    Teacher Info
 ------------------------ */
-$tq = $conn->prepare("SELECT tid, tname FROM teacher WHERE tid=? AND sccode=?");
+$tq = $conn->prepare("SELECT tid, tname, position FROM teacher WHERE tid=? AND sccode=?");
 $tq->bind_param("ii", $tid, $sccode);
 $tq->execute();
 $teacher = $tq->get_result()->fetch_assoc();
@@ -378,40 +517,166 @@ foreach ($dates as $dt) {
     }
 </style>
 
-<div class="hero-container">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h5 class="fw-black m-0"><?= $teacher['tname'] ?></h5>
-            <p class="small m-0 opacity-75"><?= date("F Y", strtotime($start)) ?></p>
+
+<style>
+    /* ডিটেইল ভিউয়ের জন্য বিশেষ স্টাইল */
+    .hero-profile {
+        background: linear-gradient(135deg, #6750A4 0%, #4527A0 100%);
+        color: white;
+        padding: 40px 20px 80px;
+        border-radius: 0 0 40px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-info {
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .avatar-large {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 3px solid rgba(255, 255, 255, 0.4);
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* স্ট্যাটাস কন্টেইনার যা হিরোর ওপর ভাসবে */
+    .stats-overlay {
+        margin-top: -50px;
+        padding: 0 16px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .m3-stat-card-group {
+        background: white;
+        border-radius: 28px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(103, 80, 164, 0.1);
+        border: 1px solid #E7E0EC;
+        display: flex;
+        gap: 10px;
+    }
+
+    .stat-unit {
+        flex: 1;
+        text-align: center;
+        padding: 12px 5px;
+        border-radius: 20px;
+        transition: 0.3s;
+    }
+
+    .stat-unit b {
+        font-size: 1.4rem;
+        display: block;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .stat-unit span {
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        opacity: 0.8;
+    }
+
+    /* টোনাল কালার স্কিম */
+    .bg-p {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    .bg-a {
+        background: #F9DEDC;
+        color: #B3261E;
+    }
+
+    .bg-l {
+        background: #FFF9C4;
+        color: #F57F17;
+    }
+
+    .bg-lv {
+        background: #F3EDF7;
+        color: #6750A4;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        backdrop-filter: blur(5px);
+        text-decoration: none;
+    }
+</style>
+
+<div class="hero-profile shadow">
+
+
+    <div class="profile-info">
+        <div class="avatar-large"><?= strtoupper(substr($teacher['tname'], 0, 1)) ?></div>
+        <div class="ms-3 flex-grow-1">
+            <h3 class="fw-black m-0" style="letter-spacing: -0.5px;"><?= $teacher['tname'] ?></h3>
+            <div class="d-flex align-items-center opacity-90 mt-1">
+                <i class="bi bi-person-workspace me-2"></i>
+                <span
+                    class="small fw-bold text-uppercase flex-grow-1"><?= $teacher['position'] ?? 'Staff Member' ?></span>
+
+            </div>
+            <div class="d-flex">
+                <div class="small opacity-75 mt-1 flex-grow-1">
+                    <i class="bi bi-calendar3 me-1"></i> <?= date("F Y", strtotime($start)) ?>
+                </div>
+                <div class="badge bg-white text-primary rounded-pill px-3 py-2 fw-bold">
+                    ID: <?= $tid ?>
+                </div>
+            </div>
+
         </div>
-        <div class="text-end">
-            <span class="badge rounded-pill bg-white text-primary fw-bold px-3">ID: <?= $tid ?></span>
+
+    </div>
+</div>
+
+<div class="stats-overlay">
+    <div class="m3-stat-card-group shadow-sm">
+        <div class="stat-unit bg-p">
+            <b><?= $stats['present'] ?></b>
+            <span>Present</span>
+        </div>
+        <div class="stat-unit bg-a">
+            <b><?= $stats['absent'] ?></b>
+            <span>Absent</span>
+        </div>
+        <div class="stat-unit bg-l">
+            <b><?= $stats['late'] ?></b>
+            <span>Late</span>
+        </div>
+        <div class="stat-unit bg-lv">
+            <b><?= $stats['leave'] ?></b>
+            <span>Leave</span>
         </div>
     </div>
 </div>
 
+<div class="mt-4"></div>
 
+<!-- ********************************************************************************* -->
 
 <!-- Attendance Bar Chart -->
-
-
-
-<div class="container-fluid px-3 mb-4">
-    <div class="row g-2">
-        <div class="col-3">
-            <div class="m3-stat-card"><b><?= $stats['present'] ?></b><span>Present</span></div>
-        </div>
-        <div class="col-3">
-            <div class="m3-stat-card"><b><?= $stats['absent'] ?></b><span>Absent</span></div>
-        </div>
-        <div class="col-3">
-            <div class="m3-stat-card"><b><?= $stats['late'] ?></b><span>Late</span></div>
-        </div>
-        <div class="col-3">
-            <div class="m3-stat-card"><b><?= $stats['leave'] ?></b><span>Leave</span></div>
-        </div>
-    </div>
-</div>
 
 <div class="m3-chart-card shadow-sm">
     <div class="small fw-bold text-muted mb-2 text-uppercase" style="letter-spacing: 1px;">Work Hours Trend</div>
