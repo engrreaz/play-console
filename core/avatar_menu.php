@@ -19,10 +19,11 @@
         <div class="dd-divider"></div>
 
         <div class="d-flex">
-            <div class="dd-item text-danger fs-tiny flex-grow-1" onclick="developer_console()"> <i class="bi bi-terminal me-2"></i>
+            <div class="dd-item text-danger fs-tiny flex-grow-1" onclick="developer_console()"> <i
+                    class="bi bi-terminal me-2"></i>
                 Developer Console
             </div>
-            <i class="dd-item bi bi-terminal-fill fs-1 py-0 <?= $kla ?> " onclick="toggle_developer_mode();" ></i>
+            <i class="dd-item bi bi-terminal-fill fs-1 py-0 <?= $kla ?> " onclick="toggle_developer_mode();"></i>
         </div>
 
 
@@ -70,7 +71,7 @@
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-youtube text-danger fs-5 p-0" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
-        <i class="dd-item bi bi-star-fill text-warning fs-5 p-0"></i>
+        <i class="dd-item bi bi-star-fill text-warning fs-5 p-0" onclick="openFeatureSelector();"></i>
         <i class="dd-item bi bi-info-circle-fill text-primary fs-5 p-0"></i>
     </div>
     <div class="dd-divider"></div>

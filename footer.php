@@ -201,7 +201,7 @@ function isActive($targetFile, $currentFile)
 <style>
     /* Material 3 Modal Enhancements */
     .modal-m3-redesign {
-        border-radius: 28px !important;
+        border-radius: 16px !important;
         border: none;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         overflow: hidden;
@@ -211,7 +211,7 @@ function isActive($targetFile, $currentFile)
         background: #fdf7ff;
         /* Very subtle tonal background */
         border-bottom: 1px solid #e7e0ec;
-        padding: 24px 32px;
+        padding: 24px;
     }
 
     .modal-m3-redesign .modal-title {
@@ -221,7 +221,7 @@ function isActive($targetFile, $currentFile)
     }
 
     .modal-m3-redesign .modal-body {
-        padding: 32px;
+        padding: 24px;
     }
 
     /* Modern Input Styling */
@@ -269,6 +269,179 @@ function isActive($targetFile, $currentFile)
         box-shadow: 0 8px 16px rgba(103, 80, 164, 0.3);
         transform: translateY(-1px);
     }
+
+    .feature-selector-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Make modal content flex column */
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: 100vh;
+        /* safeguard for very tall modals */
+    }
+
+    /* modal-body scrollable */
+    .modal-body {
+        overflow-y: auto;
+    }
+</style>
+
+
+
+<div class="modal fade" id="featureSelectorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content feature-selector-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Select Feature</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-0 overflow-auto" id="featureSelectorBody">
+                <ul class="list-group list-group-flush" id="featureListContainer"></ul>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<style>
+    /* মডাল কন্টেইনার */
+    .modal-m3-redesign {
+        border-radius: 16px !important;
+        /* M3 Standard */
+        border: none;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        background-color: #FEF7FF;
+        /* M3 Surface color */
+        display: flex;
+        flex-direction: column;
+        max-height: 100vh;
+        /* safeguard */
+    }
+
+    /* হেডার সেকশন */
+    .modal-m3-redesign .modal-header {
+        border-bottom: none;
+        padding: 24px 32px 8px;
+    }
+
+    .modal-m3-redesign .modal-title {
+        font-weight: 800;
+        color: #1D1B20;
+        letter-spacing: -0.5px;
+    }
+
+    .modal-m3-redesign .modal-body {
+        overflow-y: auto;
+    }
+
+    .icon-box-m3 {
+        width: 48px;
+        height: 48px;
+        background: #EADDFF;
+        /* Tonal Primary */
+        color: #21005D;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ইনপুট লেবেল ও ফিল্ড */
+    .m3-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #6750A4;
+        margin-bottom: 8px;
+        margin-left: 4px;
+        display: block;
+    }
+
+    .m3-input-field {
+        border: 1.5px solid #79747E;
+        /* Outlined style */
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-weight: 500;
+        color: #1D1B20;
+        background-color: transparent;
+        transition: all 0.2s;
+    }
+
+    .m3-input-field:focus {
+        border-color: #6750A4;
+        border-width: 2px;
+        background-color: #fff;
+        box-shadow: none;
+        outline: none;
+    }
+
+    /* ফিচারের নাম (Read-only বা Locked লুক) */
+    .m3-feature-name-display {
+        background: #F3EDF7;
+        border: 1px dashed #6750A4;
+        color: #6750A4;
+        font-weight: 800;
+        text-align: left;
+        padding-left: 50px;
+        letter-spacing: 1px;
+    }
+
+    /* ফুটার ও বাটন */
+    .modal-m3-redesign .modal-footer {
+        border-top: none;
+        padding: 16px 32px 32px;
+    }
+
+    .m3-btn-save {
+        background-color: #6750A4;
+        color: white;
+        border-radius: 100px;
+        /* Pill shape */
+        padding: 12px 28px;
+        font-weight: 700;
+        border: none;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.2);
+    }
+
+    .m3-btn-save:hover {
+        background-color: #4F378B;
+        box-shadow: 0 8px 24px rgba(103, 80, 164, 0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel-m3 {
+        color: #6750A4;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .m3-floating-group {
+        margin-bottom: 0;
+    }
+
+    .m3-field-icon2 {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--m3-primary);
+    font-size: 1.5rem;
+    z-index: 10;
+    pointer-events: none;
+}
 </style>
 
 <div class="modal fade" id="devFeatureModal" tabindex="-1">
@@ -277,71 +450,94 @@ function isActive($targetFile, $currentFile)
 
             <form id="devFeatureForm">
 
+                <!-- Modal Header -->
                 <div class="modal-header d-flex align-items-center">
-                    <div class="icon-box me-3 text-primary">
+                    <div class="icon-box-m3 me-3">
                         <i class="bi bi-clock-history fs-4"></i>
                     </div>
                     <h5 class="modal-title m-0">Feature Timeline</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
-                    <input type="text" name="feature_name" id="df_feature">
+                <!-- Modal Body -->
+                <div class="modal-body px-4 py-2">
+
+
+
+                
+                    <!-- Target Feature -->
+                    <div class="m3-floating-group mb-4">
+                        <i class="bi bi-card-text m3-field-icon"></i>
+                        <input type="text" name="feature_name" id="df_feature"
+                            class="form-control m3-input-field m3-feature-name-display shadow-sm" disabled>
+                            <i class="bi bi-android2 m3-field-icon2"></i>
+                    </div>
 
                     <div class="row g-4">
-                        <div class="col-md-4">
-                            <label class="m3-label">Platform</label>
-                            <select name="platform" id="df_platform" class="form-select m3-input-field">
-                                <option>Android</option>
-                                <option>Web</option>
-                            </select>
+
+                        <!-- Platform -->
+                        <div class="col-md-4 col-12" hidden>
+                            <div class="m3-floating-group">
+                                <label class="m3-floating-label">Platform</label>
+                                <i class="bi bi-phone m3-field-icon"></i>
+                                <select name="platform" id="df_platform" class="form-select m3-select-floating">
+                                    <option>Android</option>
+                                    <option>Web</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="m3-label">Action</label>
-                            <select name="action_type" id="df_action" class="form-select m3-input-field">
-                                <?php
-                                foreach ($feature_types as $k => $v)
-                                    echo "<option value='$k'>$k</option>";
-                                ?>
-                            </select>
+                        <!-- Action Type -->
+                        <div class=" col-6">
+                            <div class="m3-floating-group">
+                                <label class="m3-floating-label">Action Type</label>
+                                <i class="bi bi-lightning-charge m3-field-icon"></i>
+                                <select name="action_type" id="df_action" class="form-select m3-select-floating">
+                                    <?php foreach ($feature_types as $k => $v)
+                                        echo "<option value='$k'>$k</option>"; ?>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="m3-label">Status</label>
-                            <select name="status" id="df_status" class="form-select m3-input-field">
-                                <?php
-                                foreach ($feature_status as $k => $v)
-                                    echo "<option value='$k'>$k</option>";
-                                ?>
-                            </select>
+                        <!-- Current Status -->
+                        <div class="col-6">
+                            <div class="m3-floating-group">
+                                <label class="m3-floating-label">Current Status</label>
+                                <i class="bi bi-info-circle m3-field-icon"></i>
+                                <select name="status" id="df_status" class="form-select m3-select-floating">
+                                    <?php foreach ($feature_status as $k => $v)
+                                        echo "<option value='$k'>$k</option>"; ?>
+                                </select>
+                            </div>
                         </div>
 
+                        <!-- Description / Update Notes -->
                         <div class="col-12">
-                            <label class="m3-label">Description / Update Notes</label>
-                            <textarea name="description" id="df_desc" class="form-control m3-input-field" rows="4"
-                                placeholder="Describe the update or feature progress..."></textarea>
+                            <div class="m3-floating-group">
+                                <label class="m3-floating-label">Progress Description / Update Notes</label>
+                                <i class="bi bi-pencil-square m3-field-icon"></i>
+                                <textarea name="description" id="df_desc" class="form-control m3-input-floating"
+                                    style="height:100px; padding-top:20px;" rows="4" placeholder="What's new in this update?"></textarea>
+                            </div>
                         </div>
 
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 px-4 pb-4">
-                    <button type="button" class="btn btn-link text-muted fw-bold text-decoration-none me-auto"
-                        data-bs-dismiss="modal">Cancel</button>
+                <!-- Modal Footer -->
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-link btn-cancel-m3 text-decoration-none"
+                        data-bs-dismiss="modal">Dismiss</button>
                     <button type="submit" class="m3-btn-save">
-                        <i class="bi bi-cloud-arrow-up-fill me-2"></i> Save Timeline
+                        <i class="bi bi-cloud-arrow-up-fill me-2"></i> Update Timeline
                     </button>
                 </div>
 
             </form>
+
         </div>
     </div>
 </div>
-
-
-
-
 
 
 
@@ -712,23 +908,127 @@ function isActive($targetFile, $currentFile)
 
 </script>
 
+<script>
+    function openFeatureSelector() {
+
+        const listEl = document.getElementById('featureListContainer');
+        if (!listEl) return;
+
+        listEl.innerHTML = '';
+
+        // Collect unique features + reference to parent card
+        const featureMap = {};
+        document.querySelectorAll('[data-feature]').forEach(el => {
+            const name = el.getAttribute('data-feature');
+            if (!featureMap[name]) {
+                featureMap[name] = el;
+            }
+        });
+
+        // Render list
+        Object.keys(featureMap).forEach(featureName => {
+
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.textContent = featureName;
+
+            li.addEventListener('click', function () {
+
+                // Close selector modal
+                const selModalEl = document.getElementById('featureSelectorModal');
+                const selModal = bootstrap.Modal.getInstance(selModalEl);
+                if (selModal) selModal.hide();
+
+                // dev mode check
+                const developerMode = <?= (int) ($is_developer_mode ?? 0) ?>;
+
+                const card = featureMap[featureName];
+                const info = (typeof devTimeline !== 'undefined') ? devTimeline[featureName] : null;
+
+                if (developerMode === 1) {
+                    // Full devFeatureModal behavior
+                    const badge = card.querySelector('.m3-badge-new');
+                    if (badge) {
+                        badge.click(); // reuse existing logic
+                    } else {
+                        card.click();
+                    }
+                } else {
+                    // dev mode off → open modal manually but hide/disable platform input
+                    const modalEl = document.getElementById('devFeatureModal');
+                    if (!modalEl) return;
+
+                    // Fill modal fields
+                    document.getElementById('df_feature').value = featureName;
+                    document.getElementById('df_action').value = info?.action_type || '';
+                    document.getElementById('df_status').value = info?.status || '';
+                    document.getElementById('df_desc').value = info?.description || '';
+
+                    const platformEl = document.getElementById('df_platform');
+                    if (platformEl) {
+                        platformEl.value = info?.platform || 'Android';
+                        platformEl.disabled = true; // hide / make readonly
+                    }
+
+                    // Show modal
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            });
+
+            listEl.appendChild(li);
+        });
+
+        // Show selector modal
+        const selectorModal = new bootstrap.Modal(
+            document.getElementById('featureSelectorModal')
+        );
+        selectorModal.show();
+    }
+</script>
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function () {
-        // ১. ডেভেলপার মোড চেক
-        let developerMode = <?= (int) ($is_developer_mode ?? 0) ?>;
+
+        // ✅ Developer mode check
+        const developerMode = <?= (int) ($is_developer_mode ?? 0) ?>;
         if (developerMode !== 1) return;
 
-        // ২. মডাল অবজেক্ট তৈরি
-        const modalDevEl = document.getElementById('devFeatureModal');
-        if (!modalDevEl) return;
-        const modalDev = new bootstrap.Modal(modalDevEl);
+        // ✅ Modal init
+        const modalEl = document.getElementById('devFeatureModal');
+        if (!modalEl) return;
+        const modalDev = new bootstrap.Modal(modalEl);
 
-        // ৩. সকল ফিচার এলিমেন্ট প্রসেস করা
+        // ---------- Helper: form fill ----------
+        function fillDevForm(featureName, info) {
+
+            const form = document.getElementById('devFeatureForm');
+            if (!form) return;
+
+            document.getElementById('df_feature').value = featureName;
+
+            if (info) {
+                document.getElementById('df_action').value = info.action_type;
+                document.getElementById('df_status').value = info.status;
+                document.getElementById('df_desc').value = info.description || '';
+                document.getElementById('df_platform').value = info.platform || 'Android';
+            } else {
+                form.reset();
+                document.getElementById('df_feature').value = featureName;
+            }
+        }
+
+        function openModal(featureName, info) {
+            fillDevForm(featureName, info);
+            modalDev.show();
+        }
+
+        // ✅ Process features
         document.querySelectorAll('[data-feature]').forEach(function (el) {
-            // ক্লাস যোগ করা
+
             el.classList.add('card-wrapper');
-            el.style.position = 'relative'; // ব্যাজ পজিশনিং এর জন্য
+            el.style.position = 'relative';
 
             const featureName = el.getAttribute('data-feature');
             const info = (typeof devTimeline !== 'undefined') ? devTimeline[featureName] : null;
@@ -740,14 +1040,16 @@ function isActive($targetFile, $currentFile)
                 if (typeof featureTypes !== 'undefined' && featureTypes[info.action_type]) {
                     icon = featureTypes[info.action_type].icon;
                 }
-                color = (typeof featureStatus !== 'undefined') ? (featureStatus[info.status] || color) : color;
+                if (typeof featureStatus !== 'undefined') {
+                    color = featureStatus[info.status] || color;
+                }
             } else {
                 icon = 'bi-exclamation-circle';
                 color = 'danger';
             }
 
-            // ৪. ব্যাজ তৈরি ও যোগ করা
-            let badge = document.createElement('div');
+            // ---------- Badge create ----------
+            const badge = document.createElement('div');
             badge.className = 'm3-badge-new';
             badge.innerHTML = `
             <span class="badge bg-${color} shadow-sm">
@@ -756,41 +1058,26 @@ function isActive($targetFile, $currentFile)
         `;
             el.prepend(badge);
 
-            // ৫. কার্ডের ক্লিক ইভেন্ট (লুপের ভেতরেই লিসেনার দেওয়া ভালো)
-            el.addEventListener('click', function (e) {
-
+            // ⭐ Badge click (parent trigger হবে না)
+            badge.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                e.stopImmediatePropagation();
+                openModal(featureName, info);
+            });
 
-                // যদি ব্যাজে ক্লিক করা হয়, তবে শুধু মডাল খুলবে কিন্তু অন্য কিছু হবে না
-                // closest ব্যবহার করা হয়েছে যাতে ব্যাজের ভেতরের আইকনে ক্লিক করলেও ধরা যায়
-                if (e.target.closest('.m3-badge-new')) {
-                    // আপনি চাইলে ব্যাজে ক্লিক করলে আলাদা কিছু করতে পারেন
-                }
+            // ---------- Card click ----------
+            el.addEventListener('click', function (e) {
 
-                // মডাল ফর্ম ফিল্ডে ডাটা সেট করা
-                document.getElementById('df_feature').value = featureName;
+                // button/link/input click ignore
+                if (e.target.closest('a,button,input,select,textarea')) return;
 
-                // ফর্ম রিসেট (আগের ডাটা মুছে ফেলার জন্য)
-                const devForm = document.getElementById('devFeatureForm');
-                if (devForm) {
-                    // ডাটা থাকলে সেট করুন, নাহলে ডিফল্ট
-                    if (info) {
-                        document.getElementById('df_action').value = info.action_type;
-                        document.getElementById('df_status').value = info.status;
-                        document.getElementById('df_desc').value = info.description || '';
-                        document.getElementById('df_platform').value = info.platform || 'Android';
-                    } else {
-                        devForm.reset();
-                        document.getElementById('df_feature').value = featureName;
-                    }
-                }
-
-                modalDev.show();
+                e.preventDefault();
+                openModal(featureName, info);
             });
         });
     });
+
+
 </script>
 
 <script>
@@ -846,4 +1133,55 @@ function isActive($targetFile, $currentFile)
                 });
             });
     });
+</script>
+
+
+
+<script>
+    (function () {
+
+        function adjustModalBodyHeight(modalEl) {
+            if (!modalEl) return;
+
+            const modalContent = modalEl.querySelector('.modal-content');
+            const modalBody = modalEl.querySelector('.modal-body');
+            if (!modalContent || !modalBody) return;
+
+            const header = modalEl.querySelector('.modal-header');
+            const footer = modalEl.querySelector('.modal-footer');
+
+            const headerH = header ? header.offsetHeight : 0;
+            const footerH = footer ? footer.offsetHeight : 0;
+
+            // Page fixed bars
+            const pageHeader = document.getElementById('avatarMenu');
+            const pageFooter = document.getElementById('bottom-nav-bar');
+
+            const topOffset = pageHeader ? pageHeader.offsetHeight : 0;
+            const bottomOffset = pageFooter ? pageFooter.offsetHeight : 0;
+
+            const viewportH = window.innerHeight;
+
+            // available height for modal body
+            const available = viewportH - topOffset - bottomOffset - headerH - footerH - 50;
+
+            modalBody.style.maxHeight = available + 'px';
+            modalBody.style.overflowY = 'auto';
+            modalContent.style.maxHeight = (viewportH - topOffset - bottomOffset - 50) + 'px';
+
+        }
+
+        // Whenever any modal opens
+        document.addEventListener('shown.bs.modal', function (e) {
+            adjustModalBodyHeight(e.target);
+        });
+
+        // On window resize, adjust open modals
+        window.addEventListener('resize', function () {
+            document.querySelectorAll('.modal.show').forEach(function (modal) {
+                adjustModalBodyHeight(modal);
+            });
+        });
+
+    })();
 </script>
