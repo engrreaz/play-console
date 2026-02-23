@@ -115,7 +115,7 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
     function profile_menu_leave_application() { window.location.href = "my-leave-application.php"; }
     function profile_menu_offline_manager() { window.location.href = "offline-manager.php"; }
     function settings_menu_login_method() { window.location.href = "security-settings.php"; }
-    function profile_menu_notifications() { window.location.href = "notifications.php"; }
+    function profile_menu_notifications() { window.location.href = "notification.php"; }
     function profile_menu_my_logs() { window.location.href = "my-logs.php"; }
     function profile_menu_permissions() { window.location.href = "my-permissions.php"; }
 

@@ -1,117 +1,267 @@
 <?php
-$page_title = "My Activity Log | Footprint Insights";
-include 'inc.php'; 
+$page_title = "Footprint Insights | Usage Analytics";
+include 'inc.php';
 
-// ১. ইনসাইট ক্যালকুলেশন (Summary Stats)
-$stats_sql = "SELECT 
-                COUNT(id) as total_visits, 
-                SUM(bandwidth) as total_bw, 
-                SUM(duration) as total_time,
-                COUNT(DISTINCT pagename) as unique_pages
-              FROM logbook 
-              WHERE email = '$usr' AND sccode = '$sccode'";
-$stats = $conn->query($stats_sql)->fetch_assoc();
+// ১. গ্লোবাল পয়েন্ট সংগ্রহ (Optimized)
+$pt_sql = "SELECT SUM(points) as total_pts FROM user_actions WHERE email = '$usr' AND sccode = '$sccode'";
+$pt_row = $conn->query($pt_sql)->fetch_assoc();
+$total_pts = (int) ($pt_row['total_pts'] ?? 0);
 
-// ২. প্ল্যাটফর্ম ডিস্ট্রিবিউশন
-$platform_sql = "SELECT platform, COUNT(id) as count FROM logbook 
-                 WHERE email = '$usr' GROUP BY platform";
-$platforms = $conn->query($platform_sql);
+// ২. পেজ অনুযায়ী পয়েন্ট সংগ্রহ (PHP Array Mapping)
+$page_points = [];
+$ua_sql = "SELECT page, SUM(points) as pts FROM user_actions WHERE email = '$usr' GROUP BY page";
+$ua_res = $conn->query($ua_sql);
+while ($u = $ua_res->fetch_assoc()) {
+    $page_points[$u['page']] = (int) $u['pts'];
+}
 
-// ৩. সাম্প্রতিক লগ লিস্ট
-$logs_sql = "SELECT * FROM logbook 
-             WHERE email = '$usr' AND sccode = '$sccode' 
-             ORDER BY entrytime DESC LIMIT 20";
-$logs_res = $conn->query($logs_sql);
+// ৩. লগবুক ডাটা সংগ্রহ (JOIN ছাড়া - High Performance)
+$log_sql = "SELECT l.*, p.module, p.page_title 
+            FROM logbook l 
+            LEFT JOIN (
+                SELECT page_name, MAX(page_title) as page_title, MAX(module) as module 
+                FROM permission_map_app 
+                GROUP BY page_name
+            ) p ON l.pagename = p.page_name 
+            WHERE l.email = '$usr' AND l.sccode = '$sccode'";
+$log_res = $conn->query($log_sql);
 
-// ব্যান্ডউইথ ফরম্যাটিং ফাংশন
-function formatBytes($bytes, $precision = 2) {
-    $units = array('B', 'KB', 'MB', 'GB');
-    $bytes = max($bytes, 0);
+$module_summary = [];
+$page_summary = [];
+$global_stats = ['visits' => 0, 'bw' => 0, 'duration' => 0];
+
+while ($l = $log_res->fetch_assoc()) {
+    $m = $l['module'] ?: 'System/General';
+    $p = $l['pagename'];
+    $p_title = (!empty($l['page_title'])) ? $l['page_title'] : $l['pagename'];
+    $pts = $page_points[$p] ?? 0;
+
+    // গ্লোবাল সামারি
+    $global_stats['visits']++;
+    $global_stats['bw'] += $l['bandwidth'];
+    $global_stats['duration'] += $l['duration'];
+
+    // মডিউল সামারি
+    if (!isset($module_summary[$m])) {
+        $module_summary[$m] = ['visits' => 0, 'bw' => 0, 'duration' => 0, 'pts' => 0];
+    }
+    $module_summary[$m]['visits']++;
+    $module_summary[$m]['bw'] += $l['bandwidth'];
+    $module_summary[$m]['duration'] += $l['duration'];
+
+    // পেজ সামারি (র‍্যাংকিং এর জন্য)
+    if (!isset($page_summary[$p])) {
+        $page_summary[$p] = [
+            'title' => $p_title,
+            'visits' => 0,
+            'bw' => 0,
+            'duration' => 0,
+            'pts' => $pts,
+            'module' => $m
+        ];
+    }
+
+    $page_summary[$p]['pagename'] = $p . '-';
+    $page_summary[$p]['visits']++;
+    $page_summary[$p]['bw'] += $l['bandwidth'];
+    $page_summary[$p]['duration'] += $l['duration'];
+
+}
+
+// ৪. র‍্যাংকিং ক্যালকুলেশন (PHP-তে সর্টিং)
+$top_hits = $page_summary;
+uasort($top_hits, fn($a, $b) => $b['visits'] <=> $a['visits']);
+$top_hits = array_slice($top_hits, 0, 3); // Top 3 Hits
+
+$top_stay = $page_summary;
+uasort($top_stay, fn($a, $b) => $b['duration'] <=> $a['duration']);
+$top_stay = array_slice($top_stay, 0, 3); // Top 3 Stay
+
+// ৫. মডিউলে পয়েন্ট আপডেট
+foreach ($page_summary as $p) {
+    $module_summary[$p['module']]['pts'] += $p['pts'];
+}
+
+// ফরম্যাটিং ফাংশন
+function formatDuration($seconds)
+{
+    if ($seconds < 60)
+        return $seconds . "s";
+    $h = floor($seconds / 3600);
+    $m = floor(($seconds % 3600) / 60);
+    return ($h > 0 ? $h . "h " : "") . $m . "m";
+}
+function formatBytes($bytes)
+{
+    $units = ['B', 'KB', 'MB', 'GB'];
     $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-    $pow = min($pow, count($units) - 1);
-    $bytes /= pow(1024, $pow);
-    return round($bytes, $precision) . ' ' . $units[$pow];
+    return round($bytes / pow(1024, $pow), 1) . ' ' . $units[$pow];
 }
 ?>
 
-
 <style>
-    :root { --m3-primary: #6750A4; --m3-surface: #FDF7FF; }
-    body { background: var(--m3-surface); font-family: 'Inter', sans-serif; }
-
-    /* Hero Section */
+    /* Hero & Rankings Styles */
     .insight-hero {
-        background: linear-gradient(135deg, #6750A4 0%, #4527A0 100%);
-        color: white; padding: 35px 24px 70px;
-        border-radius: 0 0 32px 32px; margin-bottom: -40px;
+        background: linear-gradient(135deg, #6750A4 0%, #311B92 100%);
+        color: white;
+        padding: 40px 24px 80px;
+        border-radius: 0 0 40px 40px;
+        text-align: center;
     }
 
-    /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; position: relative; z-index: 5; }
-    .stat-card {
-        background: white; border-radius: 24px; padding: 16px;
-        border: 1px solid #E7E0EC; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    .hero-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: -50px 16px 20px;
+        position: relative;
+        z-index: 10;
     }
-    .stat-val { font-size: 1.2rem; font-weight: 900; color: #1C1B1F; display: block; }
-    .stat-label { font-size: 0.7rem; color: #49454F; font-weight: 700; text-transform: uppercase; }
 
-    /* Log List */
-    .log-item {
-        background: white; border-radius: 16px; padding: 12px 16px;
-        margin-bottom: 8px; border: 1px solid #E7E0EC;
-        display: flex; align-items: center; gap: 12px;
+    .m3-stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid #E7E0EC;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
-    .platform-icon {
-        width: 40px; height: 40px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+
+    .ranking-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 0 16px;
+        margin-top: 10px;
     }
-    .bg-web { background: #E3F2FD; color: #1565C0; }
-    .bg-android { background: #E8F5E9; color: #2E7D32; }
+
+    .rank-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 12px;
+        border: 1px solid #EADDFF;
+    }
+
+    .rank-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 4px;
+    }
+
+    .rank-title {
+        font-weight: 800;
+        color: #1C1B1F;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70px;
+    }
+
+    .module-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #E7E0EC;
+        margin: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .module-header {
+        background: #F3EDF7;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chip {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 8px;
+        background: #F3EDF7;
+        color: #6750A4;
+    }
 </style>
 
-<main>
-    <div class="insight-hero text-center">
-        <h4 class="fw-black mb-1">Activity Insights</h4>
-        <p class="small opacity-75 fw-bold"><?= $usr ?></p>
+<main class="pb-5">
+    <div class="insight-hero">
+        <span class="hero-label">User Achievement Score</span>
+        <h1 class="display-4 fw-black mb-0 text-white"><?= number_format($total_pts) ?></h1>
+        <div class="hero-user opacity-75 small">Leveling Up: <?= $usr ?></div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card shadow-sm">
-            <span class="stat-label">Data Consumed</span>
-            <span class="stat-val text-primary"><?= formatBytes($stats['total_bw']) ?></span>
+    <div class="hero-stat-grid">
+        <div class="m3-stat-card text-center">
+            <i class="bi bi-clock-history text-primary fs-4"></i>
+            <div class="fw-black mt-1"><?= formatDuration($global_stats['duration']) ?></div>
+            <div class="small text-muted fw-bold">Active Time</div>
         </div>
-        <div class="stat-card shadow-sm">
-            <span class="stat-label">Total Visits</span>
-            <span class="stat-val"><?= $stats['total_visits'] ?> <small style="font-size: 0.6rem;">Sessions</small></span>
+        <div class="m3-stat-card text-center">
+            <i class="bi bi-star-fill text-warning fs-4"></i>
+            <div class="fw-black mt-1 text-warning"><?= $total_pts ?></div>
+            <div class="small text-muted fw-bold">Total Points</div>
         </div>
     </div>
 
-    <div class="px-3 mt-5">
-        <h6 class="fw-bold mb-3 px-1">Recent Activity Log</h6>
-        
-        <?php while($log = $logs_res->fetch_assoc()): 
-            $is_web = ($log['platform'] == 'WEB');
-            $p_icon = $is_web ? 'bi-globe' : 'bi-android2';
-            $p_class = $is_web ? 'bg-web' : 'bg-android';
-        ?>
-        <div class="log-item">
-            <div class="platform-icon <?= $p_class ?>">
-                <i class="bi <?= $p_icon ?>"></i>
-            </div>
-            <div class="flex-grow-1 overflow-hidden">
-                <div class="fw-bold text-truncate" style="font-size: 0.85rem;"><?= $log['pagename'] ?></div>
-                <div class="small text-muted" style="font-size: 0.7rem;">
-                    <?= date('d M, h:i A', strtotime($log['entrytime'])) ?> • <?= formatBytes($log['bandwidth']) ?>
+    <div class="m3-section-title">TOP PERFORMANCE RANKINGS</div>
+    <div class="ranking-section">
+        <div class="rank-card shadow-sm">
+            <h6 class="small fw-black text-primary mb-2"><i class="bi bi-fire"></i> Most Visited</h6>
+            <?php foreach ($top_hits as $h): ?>
+                <div class="rank-item">
+                    <span class="rank-title"><?= $h['title'] ?></span>
+                    <span class="fw-bold text-primary"><?= $h['visits'] ?></span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <div class="rank-card shadow-sm">
+            <h6 class="small fw-black text-success mb-2"><i class="bi bi-clock-fill"></i> Longest Stay</h6>
+            <?php foreach ($top_stay as $s): ?>
+                <div class="rank-item">
+                    <span class="rank-title"><?= $s['title'] ?></span>
+                    <span class="fw-bold text-success"><?= formatDuration($s['duration']) ?></span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <div class="m3-section-title">MODULE WISE BREAKDOWN</div>
+    <?php foreach ($module_summary as $mName => $m): ?>
+        <div class="module-card shadow-sm">
+            <div class="module-header">
+                <div>
+                    <h6 class="module-name fw-black mb-0"><?= $mName ?></h6>
+                    <span class="small fw-bold text-muted"><?= $m['visits'] ?> Sessions</span>
+                </div>
+                <div class="text-end">
+                    <div class="fw-black text-primary"><?= formatDuration($m['duration']) ?></div>
+                    <div class="small fw-bold text-warning">+ <?= $m['pts'] ?> Pts</div>
                 </div>
             </div>
-            <div class="text-end">
-                <span class="badge rounded-pill bg-light text-dark border fw-bold" style="font-size: 0.6rem;">
-                    <?= $log['platform'] ?>
-                </span>
+            <div class="module-body p-2 pb-0">
+                <?php foreach ($page_summary as $pName => $pData):
+                    if ($pData['module'] == $mName): ?>
+                        <div class="page-row d-flex justify-content-between align-items-center p-3 border-bottom">
+                            <div>
+                                <div class="fw-bold small"><?= $pData['title'] ?></div>
+                                <div class=" small" style="font-size:10px;"><?= $pName?></div>
+                                <div class="d-flex gap-2 mt-1">
+                                    <span class="chip"><i class="bi bi-hourglass"></i>
+                                        <?= formatDuration($pData['duration']) ?></span>
+                                    <span class="chip" style="background: #FFF8E1; color: #FF8F00;"><i class="bi bi-star"></i>
+                                        <?= $pData['pts'] ?> Pts</span>
+                                </div>
+                            </div>
+                            <div class="badge bg-primary rounded-pill"><?= $pData['visits'] ?></div>
+                        </div>
+                    <?php endif; endforeach; ?>
             </div>
         </div>
-        <?php endwhile; ?>
-    </div>
+    <?php endforeach; ?>
 </main>
 
 <?php include 'footer.php'; ?>
