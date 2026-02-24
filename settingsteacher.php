@@ -597,7 +597,7 @@ if ($desig_res->num_rows > 0) {
     function deleteTeacher(id) {
         $.ajax({
             type: "POST",
-            url: "addeditteacher.php",
+            url: "settings/addeditteacher.php",
             data: { rootuser: '<?php echo $sccode; ?>', tid: id, action: 0 },
             success: function (res) {
                 if (res === "DELETED") {

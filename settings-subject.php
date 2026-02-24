@@ -191,7 +191,7 @@ $sy_param = '%' . $current_session . '%';
     </div>
 </div>
 
-<div style="height: 75px;"></div>
+
 
 <?php include 'footer.php'; ?>
 
@@ -204,7 +204,7 @@ $sy_param = '%' . $current_session . '%';
         const clsf = document.getElementById("class-main").value;
         const secf = document.getElementById("section-main").value;
 
-        alert(clsf + " | " + secf);
+        // alert(clsf + " | " + secf);
         if (!secf || !clsf) {
             $('#fab-add-sub').fadeOut();
             return;
@@ -216,7 +216,7 @@ $sy_param = '%' . $current_session . '%';
         $.ajax({
             type: "POST",
             url: "backend/add-edit-subject.php",
-            data: { rootuser: '<?php echo $rootuser; ?>',slot, session, clsf, secf, sccode: '<?php echo $sccode; ?>', tail: 2 },
+            data: { rootuser: '<?php echo $rootuser; ?>', slot, session, clsf, secf, sccode: '<?php echo $sccode; ?>', tail: 2 },
             beforeSend: function () {
                 $('#subject-list-block').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><br><small class="fw-bold mt-2 d-block">Configuring Modules...</small></div>');
             },
@@ -285,8 +285,8 @@ $sy_param = '%' . $current_session . '%';
         });
     }
 
-    
-    function btn_chain_function(){
+
+    function btn_chain_function() {
         loadAssignedSubjects();
     }
 </script>

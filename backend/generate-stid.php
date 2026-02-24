@@ -1,58 +1,71 @@
 <?php
-include('inc.back.php');
+include('../inc.light.php');
 
-$sccode = $_POST['sccode'];
+// ১. ইনপুট স্যানিটাইজেশন
+$sccode = (int)$_POST['sccode'];
 $rootuser = $_POST['rootuser'];
-$id = $_POST['id'];
-$from = $_POST['from'];
-$to = $_POST['to'];
+$id = (int)$_POST['id'];
+$from = (int)$_POST['from'];
+$to = (int)$_POST['to'];
 
-$sql00xgr = "SELECT * FROM areas where id='$id'";
-$result00xgr = $conn->query($sql00xgr);
-if ($result00xgr->num_rows > 0) {
-    while ($row00xgr = $result00xgr->fetch_assoc()) {
-        $cls = $row00xgr["areaname"];
-        $sec = $row00xgr["subarea"];
-        $sy = $row00xgr["sessionyear"];
-    }
-}
+// ২. এরিয়া তথ্য সংগ্রহ
+$stmt = $conn->prepare("SELECT areaname, subarea, sessionyear FROM areas WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$area = $stmt->get_result()->fetch_assoc();
 
-$query3r = "update areas set rollfrom='$from' , rollto='$to' where id='$id'";
-$conn->query($query3r);
+if (!$area) die("Invalid Area ID");
 
-$sql00xgrf = "SELECT * FROM sessioninfo where sccode='$sccode' order by stid desc LIMIT 1";
-$result00xgrf = $conn->query($sql00xgrf);
-if ($result00xgrf->num_rows > 0) {
-    while ($row00xgrf = $result00xgrf->fetch_assoc()) {
-        $lastid = $row00xgrf["stid"];
-    }
-} else {
-    $lastid = $sccode * 10000;
-}
-$lastid = $lastid + 1;
+$cls = $area["areaname"];
+$sec = $area["subarea"];
+$sy  = $area["sessionyear"];
 
+// ৩. এরিয়া টেবিল আপডেট
+$stmt_upd = $conn->prepare("UPDATE areas SET rollfrom=?, rollto=? WHERE id=?");
+$stmt_upd->bind_param("iii", $from, $to, $id);
+$stmt_upd->execute();
+
+// ৪. লাস্ট আইডি জেনারেশন (ব্রুট ফোর্স এড়াতে)
+$res_last = $conn->query("SELECT MAX(stid) as maxid FROM sessioninfo WHERE sccode='$sccode'");
+$row_last = $res_last->fetch_assoc();
+$lastid = ($row_last['maxid'] > 0) ? $row_last['maxid'] + 1 : ($sccode * 10000) + 1;
+
+$generated_count = 0;
+
+// ৫. আইডি লুপ (ID Generation)
 for ($x = $from; $x <= $to; $x++) {
+    // আগে থেকেই আছে কি না চেক
+    $stmt_check = $conn->prepare("SELECT stid FROM sessioninfo WHERE sessionyear=? AND classname=? AND sectionname=? AND rollno=? AND sccode=?");
+    $stmt_check->bind_param("sssii", $sy, $cls, $sec, $x, $sccode);
+    $stmt_check->execute();
+    $existing = $stmt_check->get_result()->fetch_assoc();
 
-    $sql242 = "SELECT * FROM sessioninfo where sessionyear LIKE '%$sy%' and classname='$cls' and sectionname = '$sec' and rollno = '$x' and sccode='$sccode'";
-    $result242 = $conn->query($sql242);
-    if ($result242->num_rows > 0) {
-        while ($row242 = $result242->fetch_assoc()) {
-            $stid = $row242['stid'];
+    if (!$existing) {
+        // নতুন এন্ট্রি (Transaction style safe insert)
+        $conn->begin_transaction();
+        try {
+            $stmt_info = $conn->prepare("INSERT INTO sessioninfo (stid, sessionyear, classname, sectionname, rollno, sccode, religion) VALUES (?,?,?,?,?,?, 'Islam')");
+            $stmt_info->bind_param("isssii", $lastid, $sy, $cls, $sec, $x, $sccode);
+            $stmt_info->execute();
+
+            $stmt_std = $conn->prepare("INSERT INTO students (stid, sccode, religion) VALUES (?,?, 'Islam')");
+            $stmt_std->bind_param("ii", $lastid, $sccode);
+            $stmt_std->execute();
+
+            $conn->commit();
+            $lastid++;
+            $generated_count++;
+        } catch (Exception $e) {
+            $conn->rollback();
         }
-    } else {
-        $query3 = "insert into sessioninfo (id, stid, sessionyear, classname, sectionname, rollno, sccode, religion) values 	(NULL, '$lastid','$sy','$cls','$sec','$x','$sccode', 'Islam')";
-        $conn->query($query3);
-
-        $query33 = "insert into students (id, stid, sccode, religion) values (NULL, '$lastid','$sccode', 'Islam')";
-        $conn->query($query33);
-        $lastid = $lastid + 1;
     }
 }
-
-//////////////////////////////////////
-
 ?>
 
-<div class="text-success pt-3" style="">
-    <i class="bi bi-check2-circle"></i> ID has been generated.
+<div class="alert alert-success rounded-4 border-0 d-flex align-items-center gap-3">
+    <i class="bi bi-check-circle-fill fs-4"></i>
+    <div>
+        <div class="fw-black small">PROCESS COMPLETE</div>
+        <div class="small opacity-75"><?= $generated_count ?> IDs generated/verified for Roll <?= $from ?> - <?= $to ?>.</div>
+    </div>
 </div>

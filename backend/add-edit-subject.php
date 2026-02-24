@@ -55,14 +55,14 @@ if ($result_sub->num_rows > 0) {
                       "SUB: <b>{$row['subj']}</b> | OBJ: <b>{$row['obj']}</b> | PRA: <b>{$row['pra']}</b> | TOTAL: <b>{$row['fullmarks']}</b>";
         ?>
 
-        <div class="m3-item-card shadow-sm animated-fade-in mb-2">
+        <div class="m3-item-card shadow-sm animated-fade-in mb-2 mx-2">
             <div class="d-flex align-items-start">
                 <div class="m3-icon-box tone-primary shadow-sm">
                     <i class="bi bi-journal-text"></i>
                 </div>
 
                 <div class="flex-grow-1 overflow-hidden">
-                    <div class="fw-black text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;">
+                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;">
                         <?php echo $subname; ?>
                     </div>
                     <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>

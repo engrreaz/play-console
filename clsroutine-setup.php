@@ -8,8 +8,6 @@ $sec2 = $_COOKIE['chain-section'] ?? '';
 ?>
 
 <style>
-
-
     /* M3 Surface Background */
 
 
@@ -21,7 +19,95 @@ $sec2 = $_COOKIE['chain-section'] ?? '';
     }
 </style>
 
-<main class="pb-5">
+
+<style>
+    /* Material 3 Modal Design */
+    .m3-modal-container {
+        border-radius: 28px !important;
+        background-color: #FEF7FF !important;
+        border: none;
+    }
+
+    .m3-icon-circle-tonal {
+        width: 48px;
+        height: 48px;
+        background-color: #EADDFF;
+        color: #21005D;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Input Card Style */
+    .m3-input-card {
+        background: #F3EDF7;
+        border-radius: 12px;
+        padding: 10px 16px;
+        border: 1px solid #E7E0EC;
+    }
+
+    .m3-input-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #6750A4;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .m3-minimal-select {
+        border: none;
+        background: transparent;
+        width: 100%;
+        font-weight: 700;
+        color: #1C1B1F;
+        outline: none;
+        padding: 4px 0;
+        cursor: pointer;
+    }
+
+    /* M3 Day Chips Styling */
+    .m3-day-chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .m3-day-input {
+        display: none;
+    }
+
+    .m3-day-label {
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #F3EDF7;
+        color: #49454F;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid #CAC4D0;
+        cursor: pointer;
+        transition: 0.2s all;
+    }
+
+    .m3-day-input:checked+.m3-day-label {
+        background: #6750A4;
+        color: white;
+        border-color: #6750A4;
+        box-shadow: 0 2px 4px rgba(103, 80, 164, 0.2);
+    }
+
+    /* Primary Button */
+    .btn-m3-primary {
+        background-color: #6750A4 !important;
+        color: white !important;
+        border-radius: 100px !important;
+        font-weight: 700 !important;
+        border: none !important;
+    }
+</style>
+
+<main class="">
 
 
     <?php if ($userlevel == 'Administrator' || $userlevel == 'Head Teacher'): ?>
@@ -32,7 +118,7 @@ $sec2 = $_COOKIE['chain-section'] ?? '';
         include 'component/tree-ui.php';
         ?>
 
-        <div class="section-label">Active Timetable</div>
+        <div class="m3-section-title">Active Timetable</div>
         <div id="block" class="px-2">
             <div class="text-center py-5 opacity-25">
                 <i class="bi bi-clock-history display-1"></i>
@@ -49,64 +135,81 @@ $sec2 = $_COOKIE['chain-section'] ?? '';
 
 </main>
 
-<div style="height: 70px;"></div>
-
 
 <div class="modal fade" id="routineModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="modal-title fw-black" id="modalHeaderTitle">Edit Routine</h6>
+        <div class="modal-content m3-modal-container shadow-lg">
+
+            <div class="modal-header border-0 px-4 pt-4 pb-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="m3-icon-circle-tonal">
+                        <i class="bi bi-calendar-event fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-black m-0 text-dark" id="modalHeaderTitle">Edit Routine</h6>
+                        <p class="small text-muted mb-0">Modify period assignment</p>
+                    </div>
+                </div>
                 <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+
+            <div class="modal-body px-4 py-4">
                 <input type="hidden" id="edit_id">
                 <input type="hidden" id="edit_period">
                 <input type="hidden" id="edit_wday">
 
-                <div class="m3-floating-group">
-                    <label class="m3-floating-label">Subject</label>
-                    <select id="edit_subcode" class="m3-select-floating">
-                        <option value="0">Select Subject</option>
-                        <?php
-                        $sql_s = "SELECT subcode, subject FROM subjects WHERE sccategory='$sctype' ORDER BY subject";
-                        $sql_s = "SELECT subject from subsetup where sccode='$sccode' and sessionyear like '$sessionyear_param' and classname='$cls2' and sectionname='$sec2'  ";
-                        $res_s = $conn->query($sql_s);
-                        while ($s = $res_s->fetch_assoc())
-                            echo "<option value='{$s['subject']}'>{$s['subject']}</option>";
-                        ?>
-                    </select>
-                </div>
+                <div class="m3-input-card mb-3">
+                    <label class="m3-input-label">ACADEMIC SUBJECT</label>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-book text-primary me-2"></i>
+                        <select id="edit_subcode" class="m3-minimal-select">
+                            <option value="0">Choose Subject</option>
+                            <?php
+                            // subjects টেবিল থেকে নির্দিষ্ট ক্যাটাগরি অনুযায়ী ডাটা ফেচ করা হচ্ছে
+                            $sql_s = "SELECT subcode, subject FROM subjects WHERE sccategory = '$sctype' ORDER BY subject ASC";
+                            $res_s = $conn->query($sql_s);
 
-                <div class="m3-floating-group">
-                    <label class="m3-floating-label">Assigned Teacher</label>
-                    <select id="edit_tid" class="m3-select-floating">
-                        <option value="0">Select Teacher</option>
-                        <?php
-                        $sql_t = "SELECT tid, tname FROM teacher WHERE sccode='$sccode' ORDER BY ranks, tname";
-                        $res_t = $conn->query($sql_t);
-                        while ($t = $res_t->fetch_assoc())
-                            echo "<option value='{$t['tid']}'>{$t['tname']}</option>";
-                        ?>
-                    </select>
-                </div>
-
-
-                <div class="form-group">
-                    <label>কবে কবে এই আপডেট হবে?</label><br>
-                    <div class="day-selector">
-                        <label><input type="checkbox" name="days[]" value="1"> Sun</label>
-                        <label><input type="checkbox" name="days[]" value="2"> Mon</label>
-                        <label><input type="checkbox" name="days[]" value="3"> Tue</label>
-                        <label><input type="checkbox" name="days[]" value="4"> Wed</label>
-                        <label><input type="checkbox" name="days[]" value="5"> Thu</label>
-                        <label><input type="checkbox" name="days[]" value="6"> Fri</label>
-                        <label><input type="checkbox" name="days[]" value="7"> Sat</label>
+                            if ($res_s && $res_s->num_rows > 0) {
+                                while ($s = $res_s->fetch_assoc()) {
+                                    // subcode-কে ভ্যালু হিসেবে রাখা হয়েছে
+                                    echo "<option value='{$s['subcode']}'>{$s['subcode']} &mdash; {$s['subject']}</option>";
+                                }
+                            }
+                            ?>
+                        </select>
                     </div>
                 </div>
 
-                <button class="btn btn-primary w-100 py-3 m3-8px fw-bold shadow-sm" onclick="saveRoutine();">
-                    <i class="bi bi-cloud-check-fill me-2"></i> UPDATE ROUTINE
+                <div class="m3-input-card mb-4">
+                    <label class="m3-input-label">ASSIGNED TEACHER</label>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-badge text-primary me-2"></i>
+                        <select id="edit_tid" class="m3-minimal-select">
+                            <option value="0">Choose Teacher</option>
+                            <?php
+                            $res_t = $conn->query("SELECT tid, tname FROM teacher WHERE sccode='$sccode' ORDER BY ranks, tname");
+                            while ($t = $res_t->fetch_assoc())
+                                echo "<option value='{$t['tid']}'>{$t['tname']}</option>";
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="m3-input-label mb-2 px-1">APPLY FOR DAYS</label>
+                    <div class="m3-day-chip-grid">
+                        <?php
+                        $dayNames = [1 => 'Sun', 2 => 'Mon', 3 => 'Tue', 4 => 'Wed', 5 => 'Thu', 6 => 'Fri', 7 => 'Sat'];
+                        foreach ($dayNames as $val => $name): ?>
+                            <input type="checkbox" name="days[]" value="<?= $val ?>" id="day_<?= $val ?>"
+                                class="m3-day-input">
+                            <label for="day_<?= $val ?>" class="m3-day-label"><?= $name ?></label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <button class="btn btn-m3-primary w-100 py-3 shadow-sm" onclick="saveRoutine();">
+                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> UPDATE TIMETABLE
                 </button>
             </div>
         </div>
@@ -182,11 +285,11 @@ $sec2 = $_COOKIE['chain-section'] ?? '';
 
         $('#modalHeaderTitle').text(`Period ${period} | ${dayName}`);
 
-           $('input[name="days[]"]').prop('checked', false);
+        $('input[name="days[]"]').prop('checked', false);
 
-    // 🟢 current day auto check
-    $('input[name="days[]"][value="' + wday + '"]').prop('checked', true);
-    
+        // 🟢 current day auto check
+        $('input[name="days[]"][value="' + wday + '"]').prop('checked', true);
+
         routineModal.show();
     }
 

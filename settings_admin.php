@@ -102,7 +102,7 @@ $sy_param = '%' . $current_session . '%';
     <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_st_id_generate();">
         <div class="icon-box c-fina"><i class="bi bi-person-vcard-fill"></i></div>
         <div class="setting-info">
-            <div class="st-title">Student ID Wizard</div>
+            <div class="st-title">Student ID Generator</div>
             <div class="st-desc">Auto-generate IDs for new admissions</div>
         </div>
         <i class="bi bi-chevron-right text-muted opacity-25"></i>

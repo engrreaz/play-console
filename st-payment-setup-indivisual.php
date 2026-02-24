@@ -3,7 +3,7 @@ $page_title = "Individual Payment Setup";
 include 'inc.php';
 
 // ১. প্যারামিটার এবং সেশন হ্যান্ডলিং
-$sessionyear = $_GET['sessionyear'] ?? $_GET['year'] ?? $sy;
+$sessionyear = $_GET['sessionyear'] ?? $_GET['year'] ?? $sessionyear;
 $stid = trim($_GET['stid'] ?? '');
 $cls2 = $_GET['cls'] ?? '';
 $sec2 = $_GET['sec'] ?? '';

@@ -6,12 +6,18 @@
 include('../inc.light.php');
 
 // ১. ইনপুট ডাটা সংগ্রহ
-$sccode = $_POST['rootuser'];
+
 $tid = $_POST['tid'];
-$tname = $_POST['tname'];
-$pos = $_POST['pos'];
-$mno = $_POST['mno'];
 $action = $_POST['action'];
+if ($action != 0) {
+    $tname = $_POST['tname'];
+    $pos = $_POST['pos'];
+    $mno = $_POST['mno'];
+}
+
+
+
+
 
 // ২. র‍্যাঙ্ক নির্ধারণ (Designation wise sorting)
 $ranks_map = [

@@ -203,6 +203,102 @@ if (strpos($chain, 'class') !== false) {
     }
 </style>
 
+
+<style>
+    /* ১. সাবজেক্ট সেটআপ স্পেশাল হিরো */
+    .subject-hero {
+        background: linear-gradient(135deg, #1A237E 0%, #6750A4 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 0 0 40px 40px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(103, 80, 164, 0.2);
+    }
+
+    /* ব্যাকগ্রাউন্ড ডেকোরেশন */
+    .subject-hero::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        left: -30px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        transform: rotate(20deg);
+    }
+
+    /* আইকন বক্স (Glassmorphism) */
+    .subject-icon-box {
+        width: 68px;
+        height: 68px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 2.2rem;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .subject-hero h1 {
+        font-weight: 900;
+        font-size: 2.2rem;
+        letter-spacing: -1px;
+        margin-bottom: 6px;
+    }
+
+    .subject-hero p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        max-width: 320px;
+        margin: 0 auto;
+        font-weight: 500;
+    }
+
+    /* কুইক স্ট্যাটাস চিপস */
+    .hero-meta-grid {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    .meta-tag {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+    }
+
+    .meta-tag i {
+        color: #D0BCFF;
+    }
+</style>
+
+<div class="subject-hero shadow-lg">
+    <div class="container">
+        <div class="subject-icon-box shadow-sm">
+            <i class="bi bi-book-half"></i>
+        </div>
+
+        <h1>Subject Setup</h1>
+        <p>Manage academic curriculum, mark distributions, and evaluation protocols.</p>
+
+        
+    </div>
+</div>
+
 <div class="modal fade" id="nodeTreeModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
         <div class="modal-content shadow">
@@ -526,9 +622,9 @@ if (strpos($chain, 'class') !== false) {
     </div>
 
     <div class="m3-body-floating">
-        <div class="row">
+        <div class="row ">
 
-            <div class="col-<?= $chain_md ?> ">
+            <div class="col-<?= $chain_md ?> mb-3">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Slot / Unit</label>
                     <i class="bi bi-layers m3-field-icon"></i>
@@ -544,7 +640,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-<?= $chain_md ?> ">
+            <div class="col-<?= $chain_md ?> mb-3">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Session</label>
                     <i class="bi bi-calendar-event m3-field-icon"></i>
@@ -560,7 +656,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
             <?php $hide = (strpos($chain, 'exam') === false) ? 'hidden' : ''; ?>
-            <div class="col-<?= $chain_md ?> " <?php echo $hide; ?>>
+            <div class="col-<?= $chain_md ?> mb-3" <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Examination</label>
                     <i class="bi bi-journal-check m3-field-icon"></i>
@@ -570,7 +666,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-<?= $chain_md ?> ">
+            <div class="col-<?= $chain_md ?> mb-3">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Class</label>
                     <i class="bi bi-mortarboard m3-field-icon"></i>
@@ -580,7 +676,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-<?= $chain_md ?> ">
+            <div class="col-<?= $chain_md ?> mb-3">
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Section</label>
                     <i class="bi bi-people m3-field-icon"></i>
@@ -592,7 +688,7 @@ if (strpos($chain, 'class') !== false) {
 
             <?php $hide = (strpos($chain, 'subject') === false) ? 'hidden' : ''; ?>
 
-            <div class="col-<?= $chain_md ?> " <?php echo $hide; ?>>
+            <div class="col-<?= $chain_md ?> mb-3 " <?php echo $hide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Subject</label>
                     <i class="bi bi-book m3-field-icon"></i>
