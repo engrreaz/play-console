@@ -43,7 +43,8 @@ if ($action == 1) { // SAVE or UPDATE
         $stmt_id->close();
 
         // ইনসার্ট কোয়েরি
-        $stmt_ins = $conn->prepare("INSERT INTO teacher (tid, tname, position, mobile, sccode, ranks, status) VALUES (?, ?, ?, ?, ?, ?, 1)");
+        $sal = 0;
+        $stmt_ins = $conn->prepare("INSERT INTO teacher (tid, tname, position, mobile, sccode, ranks, status, salary) VALUES (?, ?, ?, ?, ?, ?, 1, 0)");
         $stmt_ins->bind_param("issssi", $new_tid, $tname, $pos, $mno, $sccode, $rank);
         $stmt_ins->execute();
         $target_tid = $new_tid;
@@ -107,9 +108,11 @@ function renderSingleTeacherCard($conn, $sccode, $tid)
                     </div>
                 </div>
                 <div class="fw-bold text-dark text-truncate mt-1" id="tname<?php echo $tid; ?>">
-                    <?php echo htmlspecialchars($row["tname"]); ?></div>
+                    <?php echo htmlspecialchars($row["tname"]); ?>
+                </div>
                 <div class="text-muted small fw-bold" id="pos<?php echo $tid; ?>">
-                    <?php echo htmlspecialchars($row["position"]); ?></div>
+                    <?php echo htmlspecialchars($row["position"]); ?>
+                </div>
                 <div class="text-primary small fw-bold mt-1" id="mno<?php echo $tid; ?>">
                     <i class="bi bi-telephone-outbound me-1"></i><?php echo htmlspecialchars($row["mobile"]); ?>
                 </div>

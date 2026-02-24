@@ -31,24 +31,37 @@ $sql = "SELECT page_name, page_title, module, permission,
 
 $result = $conn->query($sql);
 
+
+
+
+
+$module_groups = []; // নতুন গ্রুপড অ্যারে
+
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $p_name = $row['page_name'];
+        $mod_name = $row['module'] ?: 'General/System'; // মডিউল নাম না থাকলে ডিফল্ট
 
-        // যদি এই পেজের পারমিশন আগে সেট না হয়ে থাকে (অর্থাৎ টপ প্রায়োরিটি আগে আসবে)
         if (!isset($my_permissions[$p_name])) {
-            $my_permissions[$p_name] = [
+            $permission_data = [
                 'title' => $row['page_title'] ?? $row['page_name'],
-                'module' => $row['module'],
+                'module' => $mod_name,
                 'value' => (int) $row['permission']
             ];
+
+            // ১. ফ্ল্যাট অ্যারে রাখা (has_permission ফাংশনের জন্য)
+            $my_permissions[$p_name] = $permission_data;
+
+            // ২. মডিউল অনুযায়ী গ্রুপিং করা (ডিসপ্লের জন্য)
+            $module_groups[$mod_name][] = $permission_data;
+
             if ((int) $row['permission'] > 0) {
                 $total_access++;
             }
         }
     }
 }
-
+ksort($module_groups); // মডিউল নাম অনুযায়ী অ্যালফাবেটিকাল সর্ট
 // Fallback: যদি কোন নির্দিষ্ট পেজ ম্যাপে না থাকে, তার পারমিশন ০ হবে।
 ?>
 
@@ -174,6 +187,32 @@ if ($result->num_rows > 0) {
 </style>
 
 
+<style>
+    .m3-section-title {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #6750A4;
+        margin: 25px 0 12px 4px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .m3-section-title::after {
+        content: "";
+        flex-grow: 1;
+        height: 1px;
+        background: #EADDFF;
+    }
+
+    .module-container {
+        margin-bottom: 20px;
+    }
+</style>
+
+
 <div class="perm-hero">
     <div class="perm-hero-content">
         <div class="hero-avatar shadow-sm">
@@ -204,37 +243,52 @@ if ($result->num_rows > 0) {
 </div>
 
 
-<main class="container py-4">
 
-
-    <div class="row">
-        <?php foreach ($my_permissions as $page => $data):
-            $p_val = $data['value'];
-            $status_text = "No Access";
-            $status_class = "bg-none";
-
-            if ($p_val == 1) {
-                $status_text = "View Only";
-                $status_class = "bg-view";
-            } elseif ($p_val == 2) {
-                $status_text = "Edit Access";
-                $status_class = "bg-edit";
-            } elseif ($p_val >= 3) {
-                $status_text = "Full Control";
-                $status_class = "bg-full";
-            }
-            ?>
-            <div class="col-md-6 col-lg-4">
-                <div class="perm-card shadow-sm d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="fw-bold text-dark"><?= htmlspecialchars($data['title']) ?></div>
-                        <div class="text-muted" style="font-size: 0.7rem;">Module: <?= $data['module'] ?></div>
-                    </div>
-                    <span class="perm-badge <?= $status_class ?>"><?= $status_text ?></span>
-                </div>
+<main class="container py-2 pb-5">
+    <?php foreach ($module_groups as $module => $permissions): ?>
+        <div class="module-container">
+            <div class="m3-section-title">
+                <i class="bi bi-collection"></i>
+                <?= htmlspecialchars($module) ?>
+                <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.6rem;">
+                    <?= count($permissions) ?> Items
+                </span>
             </div>
-        <?php endforeach; ?>
-    </div>
+
+            <div class="row g-2">
+                <?php foreach ($permissions as $data):
+                    $p_val = $data['value'];
+                    $status_text = "No Access";
+                    $status_class = "bg-none";
+
+                    if ($p_val == 1) {
+                        $status_text = "View Only";
+                        $status_class = "bg-view";
+                    } elseif ($p_val == 2) {
+                        $status_text = "Edit Access";
+                        $status_class = "bg-edit";
+                    } elseif ($p_val >= 3) {
+                        $status_text = "Full Control";
+                        $status_class = "bg-full";
+                    }
+                    ?>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="perm-card shadow-sm d-flex justify-content-between align-items-center mb-0 h-100">
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                    <?= htmlspecialchars($data['title']) ?>
+                                </div>
+                                <div class="text-muted" style="font-size: 0.65rem;">
+                                    Perm Level: <?= $p_val ?>
+                                </div>
+                            </div>
+                            <span class="perm-badge <?= $status_class ?>"><?= $status_text ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endforeach; ?>
 </main>
 
 <?php

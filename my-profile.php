@@ -72,7 +72,7 @@ $photo_path = (empty($user['photourl']) || strlen($user['photourl']) < 10)
 
     .btn-fab {
         position: fixed; bottom: 85px; right: 20px;
-        width: 56px; height: 56px; border-radius: 16px;
+        width: 56px; height: 56px; border-radius: 50%;
         background: #6750A4; color: #fff; display: flex;
         align-items: center; justify-content: center;
         box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3); z-index: 1000; border: none;
@@ -125,7 +125,7 @@ $photo_path = (empty($user['photourl']) || strlen($user['photourl']) < 10)
         </div>
     </div>
 
-    <button class="btn-fab" onclick="openEditModal();">
+    <button class="btn-fab" onclick="openEditModal();" disabled>
         <i class="bi bi-pencil-fill fs-4"></i>
     </button>
 </main>

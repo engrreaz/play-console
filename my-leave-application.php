@@ -1,249 +1,258 @@
 <?php
 /**
- * My Leave Application - M3-EIM-Floating Style
- * Standards: 8px Radius | Tonal Containers | Floating Labels | FAB UI
+ * My Leave Application - M3 Modern Design
+ * Hero | Modal Form | AJAX Sync
  */
 $page_title = "My Leave Records";
-include 'inc.php'; 
+include 'inc.php';
 
+// ১. এডিট ডাটা ফেচিং (মডালে অটো-পপুলেট করার জন্য)
 $appid = $_GET['appid'] ?? 0;
-$type = $reason = $date1 = $date2 = "";
-$show_form = isset($_GET['appid']) ? "" : "display:none;";
-
-// ১. নির্দিষ্ট আবেদন ফেচ করা (এডিটের জন্য)
+$edit_data = ['type' => '', 'reason' => '', 'date1' => '', 'date2' => ''];
 if ($appid > 0) {
     $stmt = $conn->prepare("SELECT * FROM teacher_leave_app WHERE sccode = ? AND id = ? LIMIT 1");
     $stmt->bind_param("si", $sccode, $appid);
     $stmt->execute();
     if ($row = $stmt->get_result()->fetch_assoc()) {
-        $type = $row["leave_type"];
-        $reason = $row["leave_reason"];
-        $date1 = $row["date_from"];
-        $date2 = $row["date_to"];
+        $edit_data = [
+            'type' => $row["leave_type"],
+            'reason' => $row["leave_reason"],
+            'date1' => $row["date_from"],
+            'date2' => $row["date_to"]
+        ];
     }
-    $stmt->close();
 }
 
-// ২. ইউজারের সব আবেদন ফেচ করা
+// ২. স্ট্যাটাস সামারি ও রেকর্ডস ফেচিং
 $my_app_datam = [];
+$c1 = $c2 = $c3 = 0;
 $stmt_all = $conn->prepare("SELECT * FROM teacher_leave_app WHERE sccode = ? AND tid = ? ORDER BY apply_date DESC, id DESC");
 $stmt_all->bind_param("ss", $sccode, $userid);
 $stmt_all->execute();
 $res_all = $stmt_all->get_result();
 while ($row = $res_all->fetch_assoc()) {
     $my_app_datam[] = $row;
-}
-$stmt_all->close();
-
-// স্ট্যাটাস ভিত্তিক কাউন্টিং লজিক
-$c1 = $c2 = $c3 = 0;
-foreach($my_app_datam as $a) {
-    if($a['status'] == 1) $c1++;
-    else if($a['status'] == 2) $c2++;
+    if ($row['status'] == 1) $c1++;
+    else if ($row['status'] == 2) $c2++;
     else $c3++;
 }
 ?>
 
 <style>
-    body { background-color: #FEF7FF; margin: 0; padding: 0; }
+    :root { --m3-primary: #6750A4; --m3-surface: #FEF7FF; --m3-tonal: #F3EDF7; }
+    body { background-color: var(--m3-surface); font-family: 'Inter', sans-serif; }
 
-    /* Stats Board (Strict 8px) */
-    .m3-stats-board {
-        background-color: #F3EDF7;
-        border-radius: 8px !important;
-        padding: 16px; margin: 16px;
-        box-shadow: 0 1px 3px rgba(103, 80, 164, 0.05);
+    /* New Modern Hero */
+    .leave-hero {
+        background: linear-gradient(135deg, #6750A4 0%, #311B92 100%);
+        color: white; padding: 40px 24px 80px;
+        border-radius: 0 0 40px 40px; text-align: center;
+        position: relative;
     }
-    
-    .m3-stat-chip {
-        background: #fff; border-radius: 8px; 
-        text-align: center; padding: 12px 4px;
-        border: 1px solid #EADDFF;
+    .hero-avatar-box {
+        width: 70px; height: 70px; background: rgba(255,255,255,0.2);
+        border-radius: 20px; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 15px; border: 1px solid rgba(255,255,255,0.3);
+        font-size: 2rem;
     }
-    .m3-stat-val { font-size: 1.1rem; font-weight: 900; line-height: 1; color: #21005D; }
-    .m3-stat-lbl { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; color: #6750A4; }
 
-    /* Leave Form Card */
-    .m3-leave-form-card {
-        background: #fff; border-radius: 8px; padding: 20px;
-        margin: 0 16px 20px; border: 1px solid #EADDFF;
+    /* Floating Stats (Overlapping Hero) */
+    .m3-stats-overlay {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+        padding: 0 16px; margin-top: -50px; position: relative; z-index: 10;
+    }
+    .stat-chip {
+        background: white; border-radius: 16px; padding: 12px 4px;
+        text-align: center; border: 1px solid #EADDFF;
         box-shadow: 0 4px 12px rgba(103, 80, 164, 0.08);
     }
+    .stat-val { font-size: 1.1rem; font-weight: 900; color: #21005D; line-height: 1; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; color: #6750A4; }
 
-    /* History Card (M3-EIM-Floating Style) */
+    /* History Cards */
     .m3-history-card {
-        background: #fff; border-radius: 8px; padding: 12px 16px;
+        background: #fff; border-radius: 12px; padding: 14px;
         margin: 0 16px 10px; display: flex; align-items: center;
-        border: 1px solid #f0f0f0; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        transition: 0.2s cubic-bezier(0, 0, 0.2, 1);
+        border: 1px solid #f0f0f0; transition: 0.2s;
     }
-    .m3-history-card:active { background-color: #F7F2FA; transform: scale(0.98); }
-
-    .m3-status-icon-box {
-        width: 44px; height: 44px; border-radius: 8px; /* Strict 8px */
+    .status-icon-box {
+        width: 48px; height: 48px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         margin-right: 14px; flex-shrink: 0;
     }
+    
+    /* M3 Modal Customization */
+    .modal-content { border-radius: 28px; border: none; }
+    .m3-input-group { background: #F7F2FA; border-radius: 12px; padding: 10px 15px; margin-bottom: 12px; }
+    .m3-input-group label { font-size: 0.7rem; font-weight: 800; color: var(--m3-primary); display: block; margin-bottom: 2px; }
+    .m3-input-group input, .m3-input-group select { border: none; background: transparent; width: 100%; font-weight: 600; outline: none; }
 
-    .m3-content-box { flex-grow: 1; overflow: hidden; }
-    .m3-leave-title { font-weight: 800; color: #1C1B1F; font-size: 0.85rem; }
-    .m3-leave-meta { font-size: 0.7rem; color: #79747E; font-weight: 600; margin-top: 2px; }
-
-    /* FAB M3 Style */
-    .m3-fab-plus {
+    .btn-m3-fab {
         position: fixed; bottom: 85px; right: 20px;
         width: 56px; height: 56px; border-radius: 16px;
-        background-color: #6750A4; color: white;
+        background: var(--m3-primary); color: white;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
-        z-index: 1000; border: none; transition: 0.2s;
+        box-shadow: 0 4px 15px rgba(103, 80, 164, 0.4); z-index: 1000; border: none;
     }
 
-    /* Status Tonal Colors */
-    .tone-approved { background-color: #E8F5E9; color: #2E7D32; }
-    .tone-rejected { background-color: #FFEBEE; color: #B3261E; }
-    .tone-review   { background-color: #FFF3E0; color: #E65100; }
+    /* Tonal Accents */
+    .tone-green { background: #E8F5E9; color: #2E7D32; }
+    .tone-red { background: #FFEBEE; color: #B3261E; }
+    .tone-orange { background: #FFF3E0; color: #E65100; }
 </style>
 
 <main class="pb-5">
-    <div class="m3-stats-board shadow-sm">
-        <div class="row g-2">
-            <div class="col-3"><div class="m3-stat-chip text-success"><div class="m3-stat-val"><?php echo $c1; ?></div><div class="m3-stat-lbl">Approved</div></div></div>
-            <div class="col-3"><div class="m3-stat-chip text-danger"><div class="m3-stat-val"><?php echo $c2; ?></div><div class="m3-stat-lbl">Rejected</div></div></div>
-            <div class="col-3"><div class="m3-stat-chip text-warning"><div class="m3-stat-val"><?php echo $c3; ?></div><div class="m3-stat-lbl">Review</div></div></div>
-            <div class="col-3"><div class="m3-stat-chip bg-primary text-white" style="border:none;"><div class="m3-stat-val text-white"><?php echo count($my_app_datam); ?></div><div class="m3-stat-lbl text-white opacity-75">Total</div></div></div>
+    <div class="leave-hero">
+        <div class="hero-avatar-box shadow-sm">
+            <i class="bi bi-calendar-check"></i>
+        </div>
+        <h4 class="fw-black mb-1">Leave Management</h4>
+        <p class="small opacity-75 fw-bold mb-0">Record of: <?php echo $fullname; ?></p>
+    </div>
+
+    <div class="m3-stats-overlay">
+        <div class="stat-chip">
+            <div class="stat-val"><?php echo $c1; ?></div>
+            <div class="stat-lbl">Approved</div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-val"><?php echo $c2; ?></div>
+            <div class="stat-lbl">Rejected</div>
+        </div>
+        <div class="stat-chip">
+            <div class="stat-val"><?php echo $c3; ?></div>
+            <div class="stat-lbl">Review</div>
+        </div>
+        <div class="stat-chip bg-primary text-white border-0">
+            <div class="stat-val text-white"><?php echo count($my_app_datam); ?></div>
+            <div class="stat-lbl text-white opacity-75">History</div>
         </div>
     </div>
 
-    <div class="m3-leave-form-card" id="leaveFormBlock" style="<?php echo $show_form; ?>">
-        <h6 class="fw-bold mb-4 text-primary d-flex align-items-center">
-            <i class="bi bi-pencil-square me-2 fs-5"></i> Application Form
-        </h6>
-        
-        <input type="hidden" id="tid" value="<?php echo $userid; ?>">
-        
-        <div class="m3-floating-group">
-            <label class="m3-floating-label">Leave Category</label>
-            <i class="bi bi-tag m3-field-icon"></i>
-            <select class="m3-select-floating" id="types">
-                <option value="">Select Type</option>
-                <option value="Casual" <?php if($type=='Casual') echo 'selected';?>>Casual Leave</option>
-                <option value="Medical" <?php if($type=='Medical') echo 'selected';?>>Medical Leave</option>
-                <option value="Others" <?php if($type=='Others') echo 'selected';?>>Others</option>
-            </select>
-        </div>
+    <div class="px-2 mt-5">
+        <h6 class="ms-3 mb-3 text-secondary fw-black small text-uppercase" style="letter-spacing: 1px;">Application Log</h6>
 
-        <div class="m3-floating-group">
-            <label class="m3-floating-label">Reason for Leave</label>
-            <i class="bi bi-chat-left-text m3-field-icon"></i>
-            <input type="text" id="reason" class="m3-input-floating" placeholder="Brief reason" value="<?php echo $reason; ?>">
-        </div>
-
-        <div class="row g-2 mb-4">
-            <div class="col-6">
-                <div class="m3-floating-group mb-0">
-                    <label class="m3-floating-label">Date From</label>
-                    <i class="bi bi-calendar-event m3-field-icon"></i>
-                    <input type="date" id="date1" class="m3-input-floating" value="<?php echo $date1; ?>">
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="m3-floating-group mb-0">
-                    <label class="m3-floating-label">Date To</label>
-                    <i class="bi bi-calendar-check m3-field-icon"></i>
-                    <input type="date" id="date2" class="m3-input-floating" value="<?php echo $date2; ?>">
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-m3-submit shadow" onclick="save_leave_application(<?php echo $appid; ?>, 0);">
-            <span>SUBMIT APPLICATION</span>
-            <i class="bi bi-send-fill"></i>
-        </button>
-        <div id="px" class="text-center mt-3 small fw-bold text-primary"></div>
-    </div>
-
-    <div class="px-1 mt-4">
-        <h6 class="ms-4 mb-3 text-secondary fw-bold small text-uppercase" style="letter-spacing: 1px;">Application History</h6>
-        
         <?php foreach ($my_app_datam as $appl): 
             $status = $appl['status'];
-            $st_class = "tone-review"; $st_icon = "bi-hourglass-split"; $st_text = "Pending";
-            
-            if($status == 1) { $st_class = "tone-approved"; $st_icon = "bi-check-circle-fill"; }
-            else if($status == 2) { $st_class = "tone-rejected"; $st_icon = "bi-x-circle-fill"; }
-            else if($status == 3) { $st_class = "tone-review"; $st_icon = "bi-eye-fill"; }
+            $st_class = ($status == 1) ? "tone-green" : (($status == 2) ? "tone-red" : "tone-orange");
+            $st_icon = ($status == 1) ? "bi-check-circle-fill" : (($status == 2) ? "bi-x-circle-fill" : "bi-hourglass-split");
         ?>
             <div class="m3-history-card shadow-sm">
-                <div class="m3-status-icon-box <?php echo $st_class; ?>">
+                <div class="status-icon-box <?php echo $st_class; ?>">
                     <i class="bi <?php echo $st_icon; ?> fs-4"></i>
                 </div>
-                <div class="m3-content-box">
-                    <div class="m3-leave-title"><?php echo $appl['leave_type']; ?> Leave</div>
-                    <div class="m3-leave-meta text-truncate"><?php echo $appl['leave_reason']; ?></div>
-                    <div class="m3-leave-meta mt-1" style="font-size: 0.65rem;">
-                        <i class="bi bi-calendar-range me-1"></i> 
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="fw-black" style="font-size: 0.85rem;"><?php echo $appl['leave_type']; ?> Leave</div>
+                    <div class="text-truncate small text-muted fw-bold"><?php echo $appl['leave_reason']; ?></div>
+                    <div class="small fw-black text-primary mt-1">
+                        <i class="bi bi-calendar-range me-1"></i>
                         <?php echo date('d M', strtotime($appl['date_from'])); ?> — <?php echo date('d M', strtotime($appl['date_to'])); ?> 
-                        <span class="text-primary ms-1 fw-bold">(<?php echo $appl['days']; ?> Days)</span>
+                        <span class="ms-1">(<?php echo $appl['days']; ?>d)</span>
                     </div>
                 </div>
-                <div class="ms-2">
-                    <?php if($status == 0 || $status >= 3): ?>
-                        <button class="btn btn-sm btn-outline-primary border-0 rounded-circle" onclick="leave_app_edit(<?php echo $appl['id']; ?>)">
-                            <i class="bi bi-pencil-square fs-5"></i>
-                        </button>
-                    <?php endif; ?>
-                </div>
+                <?php if ($status == 0 || $status >= 3): ?>
+                    <button class="btn btn-light rounded-pill btn-sm ms-2" onclick="editApp(<?php echo $appl['id']; ?>)">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     </div>
 
-    <button class="m3-fab-plus shadow" onclick="toggleForm();">
+    <button class="btn-m3-fab shadow" data-bs-toggle="modal" data-bs-target="#leaveModal">
         <i class="bi bi-plus-lg fs-3"></i>
     </button>
 </main>
 
+<div class="modal fade" id="leaveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-black m-0 text-primary">Leave Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="appid" value="<?php echo $appid; ?>">
+                
+                <div class="m3-input-group">
+                    <label>Category</label>
+                    <select id="types">
+                        <option value="Casual" <?php if($edit_data['type']=='Casual') echo 'selected'; ?>>Casual Leave</option>
+                        <option value="Medical" <?php if($edit_data['type']=='Medical') echo 'selected'; ?>>Medical Leave</option>
+                        <option value="Others" <?php if($edit_data['type']=='Others') echo 'selected'; ?>>Others</option>
+                    </select>
+                </div>
+
+                <div class="m3-input-group">
+                    <label>Reason</label>
+                    <input type="text" id="reason" value="<?php echo $edit_data['reason']; ?>" placeholder="Brief explanation">
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="m3-input-group mb-0">
+                            <label>Start Date</label>
+                            <input type="date" id="date1" value="<?php echo $edit_data['date1']; ?>">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="m3-input-group mb-0">
+                            <label>End Date</label>
+                            <input type="date" id="date2" value="<?php echo $edit_data['date2']; ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-100 rounded-pill py-3 mt-4 fw-black shadow-sm" onclick="submitApplication()">
+                    <i class="bi bi-send-fill me-2"></i> SUBMIT TO OFFICE
+                </button>
+                <div id="status_msg" class="text-center mt-3 small fw-bold text-primary"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div style="height: 60px;"></div>
 
-<?php 
-// আপনার নির্দেশ অনুযায়ী JS স্ক্রিপ্ট শুরু করার আগে footer.php ইনক্লুড করা হলো
-include 'footer.php'; 
-?>
+<?php include 'footer.php'; ?>
 
 <script>
     /**
-     * Form Toggle Logic
+     * এডিট মুডে পেজ লোড হলে অটোমেটিক মডাল ওপেন করা
      */
-    function toggleForm() {
-        const block = document.getElementById("leaveFormBlock");
-        if(block.style.display === "none") {
-            $(block).fadeIn(300);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            $(block).fadeOut(200);
+    $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('appid')) {
+            const myModal = new bootstrap.Modal(document.getElementById('leaveModal'));
+            myModal.show();
         }
-    }
+    });
 
-    function leave_app_edit(id) {
+    /**
+     * এডিট বাটন লজিক
+     */
+    function editApp(id) {
         window.location.href = "my-leave-application.php?appid=" + id;
     }
 
     /**
-     * AJAX Submission
+     * লিভ অ্যাপ্লিকেশন সাবমিশন লজিক
      */
-    function save_leave_application(id, tail) {
+    function submitApplication() {
+        const btn = event.target;
         const formData = {
-            tid: document.getElementById("tid").value,
+            tid: '<?php echo $userid; ?>',
             types: document.getElementById("types").value,
             reason: document.getElementById("reason").value,
             date1: document.getElementById("date1").value,
             date2: document.getElementById("date2").value,
-            id: id,
-            tail: tail
+            id: document.getElementById("appid").value,
+            tail: 0
         };
 
-        if(!formData.types || !formData.date1) {
-            Swal.fire('Incomplete!', 'Please select leave type and dates.', 'warning');
+        // ভ্যালিডেশন
+        if (!formData.reason || !formData.date1 || !formData.date2) {
+            Swal.fire('Incomplete!', 'Please fill all required fields.', 'warning');
             return;
         }
 
@@ -251,18 +260,24 @@ include 'footer.php';
             type: "POST",
             url: "backend/save-leave-application.php",
             data: formData,
-            beforeSend: function () { 
-                $('#px').html('<div class="spinner-border spinner-border-sm text-primary me-2"></div> SYNCING...'); 
+            beforeSend: function () {
+                $('#status_msg').html('<div class="spinner-border spinner-border-sm"></div> SYNCING WITH SERVER...');
+                $(btn).prop('disabled', true);
             },
-            success: function (html) {
-                Swal.fire({ 
-                    title: 'Submitted!', 
-                    text: 'Your application is on its way.', 
-                    icon: 'success', 
-                    confirmButtonColor: '#6750A4' 
-                }).then(() => { 
-                    window.location.href = 'my-leave-application.php'; 
+            success: function (response) {
+                Swal.fire({
+                    title: 'Application Sent!',
+                    text: 'Your request has been filed successfully.',
+                    icon: 'success',
+                    confirmButtonColor: '#6750A4',
+                    border_radius: '28px'
+                }).then(() => {
+                    window.location.href = 'my-leave-application.php';
                 });
+            },
+            error: function() {
+                Swal.fire('Error!', 'Something went wrong on the server.', 'error');
+                $(btn).prop('disabled', false);
             }
         });
     }

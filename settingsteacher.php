@@ -16,6 +16,19 @@ $current_session = $_GET['year'] ?? $_GET['y'] ?? $_COOKIE['query-session'] ?? $
 // আপনার ওয়েব সার্ভারের পাথ অনুযায়ী এটি সমন্বয় করে নিন (যেমন: /photos/staff/)
 $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 
+
+
+// ডেজিগনেশন টেবিল থেকে ডাটা আনা (র‍্যাংক অনুযায়ী সাজানো)
+$desig_sql = "SELECT title FROM designation ORDER BY ranks ASC";
+$desig_res = $conn->query($desig_sql);
+$designations = [];
+if ($desig_res->num_rows > 0) {
+    while ($row = $desig_res->fetch_assoc()) {
+        $designations[] = $row['title'];
+    }
+}
+
+
 ?>
 
 <style>
@@ -250,9 +263,126 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 </style>
 
 
+<style>
+    /* M3 Modal Customization */
+    .m3-dialog-content {
+        border-radius: 28px !important;
+        background-color: #FEF7FF !important;
+        border: none;
+    }
+
+    .m3-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg-primary-container {
+        background-color: #EADDFF;
+        color: #21005D;
+    }
+
+    /* Clean Input Box */
+    .m3-input-box {
+        background: #F3EDF7;
+        border-radius: 12px;
+        padding: 10px 16px;
+        border: 1px solid #E7E0EC;
+        transition: 0.3s ease;
+    }
+
+    .m3-input-box:focus-within {
+        border-color: #6750A4;
+        background: #fff;
+        box-shadow: 0 0 0 1px #6750A4;
+    }
+
+    .m3-label-sm {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #6750A4;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .m3-clean-input {
+        border: none;
+        background: transparent;
+        width: 100%;
+        font-weight: 700;
+        color: #1C1B1F;
+        outline: none;
+        padding: 4px 0;
+    }
+
+    /* M3 Buttons */
+    .btn-m3-primary {
+        background-color: #6750A4;
+        color: white;
+        border-radius: 100px;
+        font-weight: 700;
+        padding: 10px 24px;
+        border: none;
+    }
+
+    .btn-m3-tonal {
+        background-color: #EADDFF;
+        color: #21005D;
+        border-radius: 100px;
+        font-weight: 700;
+        border: none;
+    }
+</style>
+
 
 
 <main class="pb-5 mt-3">
+
+    <div class="m3-hero-tonal py-4 px-3 mb-3" style="background: #F3EDF7; border-radius: 0 0 24px 24px;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="m3-icon-circle bg-white text-primary shadow-sm" style="width: 56px; height: 56px;">
+                <i class="bi bi-people-fill fs-3"></i>
+            </div>
+            <div>
+                <h4 class="fw-black m-0 text-dark">Staff Directory</h4>
+            </div>
+        </div>
+    </div>
+
+    <button class="m3-fab-main shadow-lg" onclick="drop_down_menu_1();">
+        <i class="bi bi-plus-lg fs-3"></i>
+    </button>
+
+    <style>
+        .m3-fab-main {
+            position: fixed;
+            bottom: 90px;
+            right: 25px;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            /* M3 Squircle */
+            background: #6750A4;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: 0.3s cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        .m3-fab-main:hover {
+            transform: scale(1.1);
+            background: #4F378B;
+        }
+    </style>
+
+
     <div class="px-3 mb-3 small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Honourable Staff Members
     </div>
 
@@ -270,6 +400,7 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
             $photo_path_alt = $photo_dir . "no-img.png";
 
             $display_photo = (file_exists($photo_path)) ? $photo_path : $photo_path_alt;
+            $display_photo = teacher_profile_image_path($tid); // ফাংশন কল করে সঠিক পাথ পাওয়া যাবে
             ?>
             <div class="teacher-card shadow-sm showDetails" data-tid="<?php echo $tid; ?>" id="card-<?php echo $tid; ?>">
                 <div class="staff-img-box shadow-sm">
@@ -305,52 +436,67 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
 </main>
 
 <div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header border-0">
-                <h6 class="modal-title fw-bold" id="modalTitle">Register New Staff</h6>
-                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
-                    style="font-size: 0.7rem;"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content m3-dialog-content shadow-lg">
+
+            <div class="modal-header border-0 px-4 pt-4 pb-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="m3-icon-circle bg-primary-container text-primary">
+                        <i class="bi bi-person-plus-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-black m-0 text-dark" id="modalTitle">Staff Registry</h5>
+                        <p class="small text-muted mb-0">Update institutional personnel records</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+
+            <div class="modal-body px-4 py-4">
                 <input type="hidden" id="tid" value="">
 
-                <div class="m3-floating-group">
-                    <label class="m3-floating-label">Full Legal Name</label>
-                    <i class="bi bi-person-badge m3-field-icon"></i>
-                    <input type="text" id="tname" class="m3-input-floating" placeholder="Enter Name">
+                <div class="m3-input-box mb-3">
+                    <label class="m3-label-sm">FULL LEGAL NAME</label>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-vcard text-primary me-3 fs-5"></i>
+                        <input type="text" id="tname" class="m3-clean-input" placeholder="e.g. Abdullah Al Mamun">
+                    </div>
                 </div>
 
-                <div class="m3-floating-group">
-                    <label class="m3-floating-label">Position / Rank</label>
-                    <i class="bi bi-briefcase m3-field-icon"></i>
-                    <select id="pos" class="m3-input-floating">
-                        <option value="">Select Position</option>
-                        <option value="Head Teacher">Head Teacher</option>
-                        <option value="Asstt. Head Teacher">Asstt. Head Teacher</option>
-                        <option value="Senior Teacher">Senior Teacher</option>
-                        <option value="Lecturer">Lecturer</option>
-                        <option value="Asstt. Teacher">Asstt. Teacher</option>
-                        <option value="Office Assistant">Office Assistant</option>
-                    </select>
+                <div class="m3-input-box mb-3">
+                    <label class="m3-label-sm">OFFICIAL DESIGNATION</label>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-briefcase text-primary me-3 fs-5"></i>
+                        <select id="pos" class="m3-clean-input border-0 bg-transparent">
+                            <option value="">Choose Position</option>
+                            <?php foreach ($designations as $title): ?>
+                                <option value="<?= $title ?>"><?= $title ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="m3-floating-group">
-                    <label class="m3-floating-label">Mobile Number</label>
-                    <i class="bi bi-phone m3-field-icon"></i>
-                    <input type="tel" id="mno" class="m3-input-floating" placeholder="017xx-xxxxxx">
+                <div class="m3-input-box mb-4">
+                    <label class="m3-label-sm">CONTACT NUMBER</label>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-phone text-primary me-3 fs-5"></i>
+                        <input type="tel" id="mno" class="m3-clean-input" placeholder="01XXX-XXXXXX">
+                    </div>
                 </div>
 
-                <div class="small text-muted mb-4 px-2" style="font-size: 0.65rem; line-height: 1.3;">
-                    <i class="bi bi-info-circle me-1"></i> Ensure all information is accurate as per official service
-                    records.
+                <div class="p-3 rounded-4 bg-light d-flex gap-3 align-items-start border">
+                    <i class="bi bi-info-circle-fill text-primary"></i>
+                    <p class="small fw-bold text-muted mb-0" style="font-size: 11px;">
+                        Ensure the mobile number is unique. This will be used for system login and official SMS
+                        notifications.
+                    </p>
                 </div>
             </div>
-            <div class="modal-footer border-0 p-3">
-                <button type="button" class="btn btn-light fw-bold px-4 m3-8px text-muted"
-                    data-bs-dismiss="modal">CANCEL</button>
-                <button type="button" class="btn btn-m3-primary px-4 py-2 shadow-sm" onclick="saveTeacherProfile();">
-                    <i class="bi bi-cloud-check-fill me-2"></i>SAVE CHANGES
+
+            <div class="modal-footer border-0 px-4 pb-4">
+                <button type="button" class="btn btn-m3-tonal px-4" data-bs-dismiss="modal">DISCARD</button>
+                <button type="button" class="btn btn-m3-primary px-4 shadow" onclick="saveTeacherProfile();">
+                    <i class="bi bi-cloud-arrow-up-fill me-2"></i>CONFIRM & SAVE
                 </button>
             </div>
         </div>
@@ -362,7 +508,10 @@ $photo_dir = $BASE_PATH_URL_FILE . 'teacher/';
     <button onclick="undoReorder()">UNDO</button>
 </div>
 
-<div style="height: 175px;"></div>
+
+
+
+
 
 <?php include 'footer.php'; ?>
 

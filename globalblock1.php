@@ -1,5 +1,5 @@
 <!-- Teacher  -->
-<div class="setup-card shadow-sm" onclick="window.location.href='my-profile-setup.php';">
+<div class="setup-card shadow-sm" style="cursor:pointer;" onclick="window.location.href='#';">
     <div class="m3-icon-box" style="background: #F3EDF7; color: #6750A4;"><i class="bi bi-person-badge"></i></div>
     <div class="flex-grow-1">
         <div class="fw-black" style="font-size: 0.9rem;">Teacher's Profile</div>

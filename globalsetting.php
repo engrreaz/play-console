@@ -97,7 +97,7 @@ if (isset($_GET['token'])) {
     /* Block Styles */
     .setup-card {
         background: #fff;
-        border-radius: 20px;
+        border-radius: 12px;
         padding: 16px;
         margin: 12px 16px;
         border: 1px solid #E0E0E0;
@@ -240,7 +240,7 @@ if (isset($_GET['token'])) {
 
     <div class="m3-section-title px-4 mt-4 mb-2">Device Security</div>
     
-    <div class="m3-card-list shadow-sm mx-3 mt-5">
+    <div class="m3-card-list shadow-sm mx-3 mt-1">
         <div class="p-3">
             <div class="d-flex align-items-center gap-3 mb-3">
                 <div class="m3-icon-box" style="background: #F1F3F4; color: #4285F4;"><i class="bi bi-google"></i></div>
@@ -285,7 +285,7 @@ if (isset($_GET['token'])) {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">হালনাগাদ করতে আপনার বর্তমান এবং নতুন পাসওয়ার্ড দিন।</p>
+                <p class="text-muted small">To update your securit setting enter old & new password</p>
                 <form id="passForm">
                     <div class="m3-input-group d-flex align-items-center">
                         <i class="bi bi-shield-lock"></i>
@@ -302,6 +302,10 @@ if (isset($_GET['token'])) {
         </div>
     </div>
 </div>
+
+
+<?php include 'footer.php'; ?>
+
 
 <script>
     document.getElementById('passForm').addEventListener('submit', function (e) {
@@ -321,4 +325,3 @@ if (isset($_GET['token'])) {
     });
 </script>
 
-<?php include 'footer.php'; ?>
