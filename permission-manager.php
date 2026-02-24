@@ -34,6 +34,8 @@ if (isset($_POST['save_custom_perm'])) {
                                   FROM permission_map_app WHERE page_name='$page' AND sccode='0' AND userlevel='$role' LIMIT 1");
                 }
             }
+
+            $conn->query("UPDATE page_docs set title='$title' where pagename='$page'");
         }
     } elseif ($target_type == 'user') {
         $user_email = mysqli_real_escape_string($conn, $_POST['user_email']);

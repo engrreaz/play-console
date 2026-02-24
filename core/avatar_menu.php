@@ -59,7 +59,7 @@
 
     <div class="dd-item" onclick="goProfile()"> <i class="bi bi-mortarboard-fill me-2"></i> Institute Profile
     </div>
-    <div class="dd-item" onclick="goMy()"> <i class="bi bi-person-circle me-2"></i> My Profile</div>
+    <div class="dd-item" onclick="settings_menu_my_profile()"> <i class="bi bi-person-circle me-2"></i> My Profile</div>
     <div class="dd-item" onclick="goTicket()"> <i class="bi bi-ticket-perforated me-2"></i>Submit a Ticket</div>
     <div class="dd-item" onclick="goNotify()"> <i class="bi bi-bell me-2"></i>Notifications</div>
 
@@ -67,12 +67,16 @@
     <div class="dd-item" onclick="task_manager()"> <i class="bi bi-list-task me-2"></i>Task Manager</div>
     <div class="dd-divider"></div>
     <div class=" d-flex justify-content-between align-items-center mx-4 py-2">
-        <i class="dd-item bi bi-file-earmark-fill text-info fs-5 p-0"></i>
+        <i class="dd-item bi bi-file-earmark-fill text-info fs-5 p-0" style="cursor:pointer;" 
+   data-bs-toggle="modal" 
+   data-bs-target="#pageDocModal"></i>
+      
+</i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-youtube text-danger fs-5 p-0" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-star-fill text-warning fs-5 p-0" onclick="openFeatureSelector();"></i>
-        <i class="dd-item bi bi-info-circle-fill text-primary fs-5 p-0"></i>
+        <i class="dd-item bi bi-trophy text-primary fs-5 p-0" data-bs-toggle="modal" data-bs-target="#userStatsModal"></i>
     </div>
     <div class="dd-divider"></div>
     <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>

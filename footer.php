@@ -17,7 +17,135 @@ function isActive($targetFile, $currentFile)
 {
     return ($targetFile === $currentFile) ? 'active' : '';
 }
+
+
+
+function showPageDocs($conn, $curfile)
+{
+    // ডাটাবেস থেকে তথ্য আনা
+    $stmt = $conn->prepare("SELECT * FROM page_docs WHERE pagename = ? LIMIT 1");
+    $stmt->bind_param("s", $curfile);
+    $stmt->execute();
+    $doc = $stmt->get_result()->fetch_assoc();
+
+    $title = $doc['title'] ?? 'No Title Set';
+    $desc = $doc['description'] ?? '<p class="text-muted">এই পেজের জন্য কোনো বর্ণনা এখনো লেখা হয়নি।</p>';
+    $tips = $doc['tips'] ?? '';
+    $notes = $doc['notes'] ?? '';
+
+    // হেল্প বাটন (Floating Button) এবং মডাল HTML
+    echo '
+
+    <div class="modal fade" id="pageDocModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow" style="border-radius:16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="fw-black text-primary m-0"><i class="bi bi-info-circle me-2"></i> Page Guide</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h4 class="fw-black mb-3">' . $title . '</h4>
+                    <div class="doc-body mb-4" style="font-size: 0.95rem; line-height: 1.6;">' . $desc . '</div>
+                    
+                    ' . (!empty($tips) ? '<div class="alert alert-success border-0 rounded-4 mb-3"><h6 class="fw-bold"><i class="bi bi-lightbulb"></i> Tips</h6><small>' . nl2br($tips) . '</small></div>' : '') . '
+                    ' . (!empty($notes) ? '<div class="alert alert-warning border-0 rounded-4"><h6 class="fw-bold"><i class="bi bi-exclamation-triangle"></i> Note</h6><small>' . nl2br($notes) . '</small></div>' : '') . '
+                </div>
+                <div class="modal-footer border-0">
+                    <a href="edit-docs.php?page=' . $curfile . '" class="btn btn-light rounded-pill px-4 fw-bold">
+                        <i class="bi bi-pencil-square me-2"></i> Edit Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
+
+
+function showUserStats($conn, $usr, $sccode) {
+    // ১. লগবুক থেকে ভিজিট এবং সময় বের করা
+    $stats_sql = "SELECT COUNT(id) as total_hits, SUM(duration) as total_time FROM logbook WHERE email = '$usr' AND sccode = '$sccode'";
+    $stats = $conn->query($stats_sql)->fetch_assoc();
+    
+    // ২. ইউজার একশন থেকে মোট পয়েন্ট বের করা
+    $pts_sql = "SELECT SUM(points) as total_pts FROM user_actions WHERE email = '$usr' AND sccode = '$sccode'";
+    $pts_res = $conn->query($pts_sql)->fetch_assoc();
+    $total_pts = (int)($pts_res['total_pts'] ?? 0);
+
+    $total_hits = $stats['total_hits'] ?? 0;
+    $total_time = $stats['total_time'] ?? 0; // সেকেন্ডে
+
+    // ৩. র‍্যাংক এবং টাইটেল লজিক
+    $title = "Newbie";
+    $rank_color = "#9E9E9E"; // Grey
+    if ($total_pts > 500) { $title = "Regular Explorer"; $rank_color = "#4CAF50"; }
+    if ($total_pts > 2000) { $title = "System Veteran"; $rank_color = "#2196F3"; }
+    if ($total_pts > 5000) { $title = "Master Contributor"; $rank_color = "#FFD700"; }
+
+    // ৪. সময় ফরম্যাট (Hours and Minutes)
+    $hours = floor($total_time / 3600);
+    $mins = floor(($total_time % 3600) / 60);
+
+    echo '
+    <div class="modal fade" id="userStatsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius:32px; overflow:hidden;">
+                <div class="modal-header border-0 text-white p-4" style="background: linear-gradient(135deg, #6750A4 0%, #311B92 100%);">
+                    <div class="text-center w-100">
+                        <div class="mb-2" style="font-size: 3rem;"><i class="bi bi-patch-check-fill"></i></div>
+                        <h4 class="fw-black mb-1">Achievement Board</h4>
+                        <span class="badge rounded-pill px-3" style="background:rgba(255,255,255,0.2);">'. $usr .'</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position:absolute; top:20px; right:20px;"></button>
+                </div>
+
+                <div class="modal-body p-4 bg-light">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-black m-0" style="color:'. $rank_color .';">'. $title .'</h2>
+                        <div class="small fw-bold text-muted text-uppercase">Current Title</div>
+                        <div class="mt-3 display-6 fw-black text-dark">'. number_format($total_pts) .' <small class="fs-6 opacity-50">PTS</small></div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 bg-white rounded-4 border text-center">
+                                <i class="bi bi-clock-history text-primary fs-3"></i>
+                                <div class="fw-black fs-5 mt-1">'. $hours .'h '. $mins .'m</div>
+                                <div class="small text-muted fw-bold">Active Time</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-white rounded-4 border text-center">
+                                <i class="bi bi-lightning-fill text-warning fs-3"></i>
+                                <div class="fw-black fs-5 mt-1">'. $total_hits .'</div>
+                                <div class="small text-muted fw-bold">Total Hits</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-black mt-4 mb-3 text-muted">EARNED BADGES</h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        '. ($total_hits > 100 ? '<span class="badge bg-info p-2 rounded-3"><i class="bi bi-award-fill me-1"></i> Fast Learner</span>' : '') .'
+                        '. ($hours > 10 ? '<span class="badge bg-success p-2 rounded-3"><i class="bi bi-clock-fill me-1"></i> Dedicated</span>' : '') .'
+                        '. ($total_pts > 1000 ? '<span class="badge bg-warning text-dark p-2 rounded-3"><i class="bi bi-star-fill me-1"></i> Star Performer</span>' : '') .'
+                        <span class="badge bg-secondary p-2 rounded-3">Verified User</span>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 bg-light justify-content-center pb-4">
+                    <button type="button" class="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold" data-bs-dismiss="modal">Keep Exploring</button>
+                </div>
+            </div>
+        </div>
+    </div>';
+}
+
+
+showPageDocs($conn, $curfile);
+showUserStats($conn, $usr, $sccode);
 ?>
+
+
+
 
 <div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
@@ -433,15 +561,15 @@ function isActive($targetFile, $currentFile)
     }
 
     .m3-field-icon2 {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--m3-primary);
-    font-size: 1.5rem;
-    z-index: 10;
-    pointer-events: none;
-}
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--m3-primary);
+        font-size: 1.5rem;
+        z-index: 10;
+        pointer-events: none;
+    }
 </style>
 
 <div class="modal fade" id="devFeatureModal" tabindex="-1">
@@ -464,13 +592,13 @@ function isActive($targetFile, $currentFile)
 
 
 
-                
+
                     <!-- Target Feature -->
                     <div class="m3-floating-group mb-4">
                         <i class="bi bi-card-text m3-field-icon"></i>
                         <input type="text" name="feature_name" id="df_feature"
                             class="form-control m3-input-field m3-feature-name-display shadow-sm" disabled>
-                            <i class="bi bi-android2 m3-field-icon2"></i>
+                        <i class="bi bi-android2 m3-field-icon2"></i>
                     </div>
 
                     <div class="row g-4">
@@ -517,7 +645,8 @@ function isActive($targetFile, $currentFile)
                                 <label class="m3-floating-label">Progress Description / Update Notes</label>
                                 <i class="bi bi-pencil-square m3-field-icon"></i>
                                 <textarea name="description" id="df_desc" class="form-control m3-input-floating"
-                                    style="height:100px; padding-top:20px;" rows="4" placeholder="What's new in this update?"></textarea>
+                                    style="height:100px; padding-top:20px;" rows="4"
+                                    placeholder="What's new in this update?"></textarea>
                             </div>
                         </div>
 
@@ -691,7 +820,7 @@ function isActive($targetFile, $currentFile)
     function goProfile() { location.href = "institute_profile.php"; }
     function goMy() { }
     function goTicket() { location.href = "support_ticket.php"; }
-    function goNotify() { location.href = "notifications.php"; }
+    function goNotify() { location.href = "notification.php"; }
     function task_manager() { location.href = "task-manager.php"; }
 
     function doLogout() {
@@ -1163,11 +1292,12 @@ function isActive($targetFile, $currentFile)
             const viewportH = window.innerHeight;
 
             // available height for modal body
-            const available = viewportH - topOffset - bottomOffset - headerH - footerH - 50;
+            const available = viewportH - topOffset - bottomOffset - headerH - footerH - 20;
 
             modalBody.style.maxHeight = available + 'px';
             modalBody.style.overflowY = 'auto';
-            modalContent.style.maxHeight = (viewportH - topOffset - bottomOffset - 50) + 'px';
+            modalContent.style.maxHeight = (viewportH - topOffset - bottomOffset - 70) + 'px';
+            modalContent.style.top = topOffset - 10 + 'px';
 
         }
 
