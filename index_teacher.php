@@ -134,15 +134,20 @@
 
     <div class="widget-grid">
 
-        <?php
-        foreach ($blocks as $id => $info):
-            ?>
-            <div class="block-unit shadow-sm">
-                <?php include 'front-page-block/' . $info['link']; ?>
-            </div>
+        <div id="blocksContainer">
             <?php
-        endforeach;
-        ?>
+            foreach ($blocks as $id => $info):
+                ?>
+                <div class="block-unit shadow-sm" id="block-<?php echo $id; ?>" data-id="<?php echo $id; ?>">
+                    <?php
+                    // ফাইলটি লোড করার আগে চেক করে নিন সেটি সঠিক কি না
+                    include 'front-page-block/' . $info['link'];
+                    ?>
+                </div>
+                <?php
+            endforeach;
+            ?>
+        </div>
 
 
     </div>
@@ -168,4 +173,44 @@
     function goclsatt(cls, sec) {
         window.location.href = `stattnd.php?cls=${cls}&sec=${sec}&year=<?php echo $current_session; ?>`;
     }
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ১. লোকাল স্টোরেজ থেকে ডেটা আনা
+        const dashboardConfig = JSON.parse(localStorage.getItem('eimbox_dashboard_v1'));
+
+        if (dashboardConfig) {
+            const container = document.getElementById('blocksContainer');
+
+            // ২. ভিজিবিলিটি চেক এবং মার্ক করা (Visibility == false হলে হাইড করা)
+            if (dashboardConfig.visibility) {
+                dashboardConfig.visibility.forEach(item => {
+                    const blockElement = document.getElementById('block-' + item.id);
+                    if (blockElement) {
+                        if (item.visible === false) {
+                            // যদি হাইড করতে চান:
+                            blockElement.style.display = 'none';
+
+                            // অথবা যদি মার্ক (Gray out) করতে চান:
+                            // blockElement.style.opacity = '0.3';
+                            // blockElement.style.pointerEvents = 'none';
+                        }
+                    }
+                });
+            }
+
+            // ৩. অর্ডার অনুযায়ী সাজানো (Re-arrange)
+            if (dashboardConfig.order) {
+                dashboardConfig.order.forEach(id => {
+                    const blockElement = document.getElementById('block-' + id);
+                    if (blockElement) {
+                        // appendChild করলে আগের এলিমেন্টটি অটোমেটিক নতুন সিরিয়ালে চলে যায়
+                        container.appendChild(blockElement);
+                    }
+                });
+            }
+        }
+    });
 </script>
