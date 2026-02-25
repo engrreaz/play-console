@@ -141,7 +141,6 @@
                 <?php include 'front-page-block/' . $info['link']; ?>
             </div>
             <?php
-
         endforeach;
         ?>
 

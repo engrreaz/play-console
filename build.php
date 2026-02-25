@@ -14,7 +14,8 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
         <div>
             <div class="fw-bold text-dark" style="font-size: 1rem;"><?php echo $fullname ?? 'Staff Member'; ?></div>
             <div class="small text-muted" style="font-weight: 500;"><?php echo $userlevel; ?> | ID:
-                <?php echo $userid; ?></div>
+                <?php echo $userid; ?>
+            </div>
         </div>
     </div>
 
@@ -69,6 +70,16 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
 
     <div class="section-lbl">Activity & Insights</div>
 
+    <div class="m3-list-item shadow-sm" onclick="front_page_manager();" data-bs-toggle="offcanvas"
+        data-bs-target="#managerDrawer" style="cursor: pointer; margin-bottom: 12px;">
+        <div class="icon-box c-ms"><i class="bi bi-layout-text-window-reverse"></i></div>
+        <div class="item-info">
+            <div class="st-title">Front Page Manager</div>
+            <div class="st-desc">Personalize your dashboard layout and visibility</div>
+        </div>
+        <i class="bi bi-gear-fill text-primary opacity-50"></i>
+    </div>
+
     <div class="m3-list-item shadow-sm" onclick="profile_menu_my_logs();">
         <div class="icon-box c-comm"><i class="bi bi-clock-history"></i></div>
         <div class="item-info">
@@ -118,6 +129,7 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
     function profile_menu_notifications() { window.location.href = "notification.php"; }
     function profile_menu_my_logs() { window.location.href = "my-logs.php"; }
     function profile_menu_permissions() { window.location.href = "my-permissions.php"; }
+    function front_page_manager() { window.location.href = "front-page-manager.php"; }
 
     function settings_menu_logout() {
         Swal.fire({
