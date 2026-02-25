@@ -134,24 +134,66 @@
 
     <div class="widget-grid">
 
-        <?php
-        foreach ($blocks as $id => $info):
-            ?>
-            <div class="block-unit shadow-sm">
-                <?php include 'front-page-block/' . $info['link']; ?>
+        <div class="mt-3">
+            <?php include 'front-page-block/holi-ramadan.php'; ?>
+        </div>
+
+        <div class="row gx-2">
+            <div class="col-12 col-md-6">
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/dob-history-time-line.php'; ?></div>
             </div>
-            <?php
+        </div>
 
-        endforeach;
-        ?>
+        <div class="m3-section-title">Schedule & Routine</div>
+        <div class="row gx-2">
+            <div class="col-12 col-md-6">
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/schedule.php'; ?></div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/task-teacher.php'; ?></div>
+            </div>
+        </div>
 
+        <?php if ($notice_block == 1): ?>
+            <div class="mt-2">
+                <div class="block-unit border-start border-4 border-primary bg-white shadow-sm">
+                    <?php include 'front-page-block/notice.php'; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="m3-section-title">Finance & Stats</div>
+        <div class="block-unit shadow-sm"><?php include 'front-page-block/cashmanager.php'; ?></div>
+
+
+
+        <div class="block-unit shadow-sm"><?php include 'front-page-block/st-payment-block.php'; ?></div>
+
+
+        <div class="block-unit shadow-sm"><?php include 'front-page-block/clsteacherblock.php'; ?></div>
+
+
+
+        <div class="m3-section-title">Attendance Insights</div>
+        <div class="row gx-2">
+            <div class="col-12 col-md-6">
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/admin-st-attnd.php'; ?></div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="block-unit shadow-sm"><?php include 'front-page-block/admin-teacher-attnd.php'; ?></div>
+            </div>
+        </div>
 
     </div>
 
 
 
 
-
+    <?php
+    foreach ($blocks as $id => $info):
+        include 'front-page-block/' . $info['link'] ;
+    endforeach;
+    ?>
 </main>
 
 

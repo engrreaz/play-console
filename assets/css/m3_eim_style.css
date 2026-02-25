@@ -220,10 +220,10 @@
 /* Block Units (Strict 8px Radius) */
 .block-unit {
     background: #fff;
-    border-radius: 8px !important;
+    border-radius: 16px !important;
     border: 1px solid #f0f0f0 !important;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     transition: transform 0.2s;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
@@ -244,6 +244,16 @@
     cursor: hand;
 }
 
+.session-pill-2 {
+    font-size: 0.6rem;
+    background: #f7d4ee;
+    color: #750c70;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-weight: 900;
+    border: 1px solid rgba(103, 80, 164, 0.2);
+    cursor: hand;
+}
 
 .session-pill {
     background: #f1f1f1;

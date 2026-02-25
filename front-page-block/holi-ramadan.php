@@ -168,7 +168,7 @@ if ($today_data) {
     }
 </style>
 
-<div class="m3-ramadan-card shadow-sm mx-2 mt-3">
+<div class="m3-ramadan-card shadow-sm">
     <div class="m3-ramadan-header d-flex justify-content-between align-items-center">
         <div>
             <div class="fw-bold fs-5">Ramadan Kareem</div>

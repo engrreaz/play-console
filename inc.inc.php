@@ -450,6 +450,19 @@ $feature_status = [
 ];
 
 
+$blocks = [
+    'ramadan' => ['title' => 'Ramadan Timing', 'icon' => 'bi-moon-stars-fill', 'link' => 'holi-ramadan.php'],
+    'birthday' => ['title' => 'Birthday Greetings', 'icon' => 'bi-balloon-heart-fill', 'link' => 'dob-history-time-line.php'],
+    'events' => ['title' => 'Events Calendar', 'icon' => 'bi-calendar-event-fill', 'link' => 'events-calendar.php'],
+    'schedule' => ['title' => 'Class Routine', 'icon' => 'bi-calendar3', 'link' => 'schedule.php'],
+    'notice' => ['title' => 'Notice Board', 'icon' => 'bi-megaphone-fill', 'link' => 'notice.php'],
+    'task-teacher' => ['title' => 'Academic Tasks', 'icon' => 'bi-check2-square', 'link' => 'task-teacher.php'],
+    'cashmanager' => ['title' => 'Cash Manager', 'icon' => 'bi-wallet2', 'link' => 'cashmanager.php'],
+    'st-payment-block' => ['title' => 'Accounts & Fees', 'icon' => 'bi-cash-coin', 'link' => 'st-payment-block.php'],
+    'class-teacher-block' => ['title' => 'Class Teacher', 'icon' => 'bi-coin', 'link' => 'clsteacherblock.php'],
+    'admin-st-attnd' => ['title' => 'Student Attendance', 'icon' => 'bi-people-fill', 'link' => 'admin-st-attnd.php'],
+    'admin-teacher-attnd' => ['title' => 'Staff Attendance', 'icon' => 'bi-person-check-fill', 'link' => 'admin-teacher-attnd.php']
+];
 
 
 include_once 'functions.php';
