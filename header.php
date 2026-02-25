@@ -121,25 +121,25 @@
 
         .avatar-ring-red {
             box-shadow: 0 0 0 2px #dc3545 !important;
-                        padding:1px;
+            padding: 1px;
 
         }
 
         .avatar-ring-orange {
             box-shadow: 0 0 0 2px #fd7e14 !important;
-                        padding:1px;
+            padding: 1px;
 
         }
 
         .avatar-ring-blue {
             box-shadow: 0 0 0 2px #0d6efd !important;
-                        padding:1px;
+            padding: 1px;
 
         }
 
         .avatar-ring-green {
             box-shadow: 0 0 0 2px #198754 !important;
-            padding:1px;
+            padding: 1px;
         }
     </style>
 
@@ -170,14 +170,14 @@
             <a href="javascript:history.back()" class="back-btn">
                 <i class="bi bi-arrow-left fs-4"></i>
             </a>
-            <h1 class="page-title">
+            <h1 class="page-title" data-feature="<?= $page_title ?? 'EIMBox' ?>">
                 <?php echo $page_title ?? 'EIMBox'; ?>
             </h1>
 
             <div class="rounded-circle overflow-hidden border top-avatar shadow-sm <?= $ringClass ?>"
                 style="width:34px;height:34px;cursor:pointer;z-index:25999;" onclick="toggleAvatarMenu()">
 
-                <img src="<?= $pth ?>" style="width:100%;border-radius:50%;" >
+                <img src="<?= $pth ?>" style="width:100%;border-radius:50%;">
 
             </div>
 
@@ -189,7 +189,7 @@
 
 
         <div id="videoModal" class="modal">
-            <div class="modal-dialog modal-dialog-centered modal-lg" >
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content ">
                     <span class="ytclose" onclick="closeModal()">×</span>
 

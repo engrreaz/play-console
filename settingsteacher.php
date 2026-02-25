@@ -603,6 +603,7 @@ if ($desig_res->num_rows > 0) {
                 if (res === "DELETED") {
                     $("#card-" + id).fadeOut(300, function () { $(this).remove(); });
                     Swal.fire('Removed', 'Staff member deleted.', 'success');
+                    window.location.href = "settingsteacher.php"; // পেজ রিফ্রেশ করে ডাটা আপডেট দেখানোর জন্য
                 }
             }
         });

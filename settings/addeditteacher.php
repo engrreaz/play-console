@@ -13,6 +13,9 @@ if ($action != 0) {
     $tname = $_POST['tname'];
     $pos = $_POST['pos'];
     $mno = $_POST['mno'];
+
+    $rank = $ranks_map[$pos] ?? 9;
+
 }
 
 
@@ -30,7 +33,7 @@ $ranks_map = [
     'Accountant' => 7,
     'Office Assistant' => 8
 ];
-$rank = $ranks_map[$pos] ?? 9;
+
 
 // ৩. ডাটাবেজ অপারেশন
 if ($action == 1) { // SAVE or UPDATE
@@ -50,8 +53,8 @@ if ($action == 1) { // SAVE or UPDATE
 
         // ইনসার্ট কোয়েরি
         $sal = 0;
-        $stmt_ins = $conn->prepare("INSERT INTO teacher (tid, tname, position, mobile, sccode, ranks, status, salary) VALUES (?, ?, ?, ?, ?, ?, 1, 0)");
-        $stmt_ins->bind_param("issssi", $new_tid, $tname, $pos, $mno, $sccode, $rank);
+        $stmt_ins = $conn->prepare("INSERT INTO teacher (tid, tname, position, mobile, sccode, ranks, status, salery, fjdate) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)");
+        $stmt_ins->bind_param("issssiis", $new_tid, $tname, $pos, $mno, $sccode, $rank, $sal, $td);
         $stmt_ins->execute();
         $target_tid = $new_tid;
         $stmt_ins->close();
