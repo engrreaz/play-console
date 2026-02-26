@@ -341,7 +341,7 @@ $stmt_m->close();
     .m3-tonal-input:focus {
         background-color: #6750A4 !important;
         /* M3 Primary Color */
-        color: #FFFFFF !important;
+        color: #0c0c0c !important;
         /* White Text */
         border-color: #6750A4;
         box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
