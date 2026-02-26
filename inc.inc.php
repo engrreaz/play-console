@@ -453,7 +453,8 @@ $feature_status = [
 $blocks = [
     'ramadan' => ['title' => 'Ramadan Timing', 'icon' => 'bi-moon-stars-fill', 'link' => 'holi-ramadan.php'],
     'birthday' => ['title' => 'Birthday Greetings', 'icon' => 'bi-balloon-heart-fill', 'link' => 'dob-history-time-line.php'],
-    'events' => ['title' => 'Events Calendar', 'icon' => 'bi-calendar-event-fill', 'link' => 'events-calendar.php'],
+    'Calendar' => ['title' => 'Events Calendar', 'icon' => 'bi-calendar-event-fill', 'link' => 'events-calendar.php'],
+    'events' => ['title' => 'History', 'icon' => 'bi-calendar-event-fill', 'link' => 'events-block.php'],
     'schedule' => ['title' => 'Class Routine', 'icon' => 'bi-calendar3', 'link' => 'schedule.php'],
     'notice' => ['title' => 'Notice Board', 'icon' => 'bi-megaphone-fill', 'link' => 'notice.php'],
     'task-teacher' => ['title' => 'Academic Tasks', 'icon' => 'bi-check2-square', 'link' => 'task-teacher.php'],

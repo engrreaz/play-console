@@ -67,7 +67,7 @@ if (!empty($class_attendance_data)):
 ?>
 
 <style>
-    .m3-att-block { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #eee; margin-bottom: 15px; }
+    .m3-att-block { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #eee;  }
     .att-card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid #f0f0f0; position: relative; }
     
     /* সিঙ্ক মার্কিং */
