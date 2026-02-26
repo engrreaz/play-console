@@ -365,8 +365,7 @@ $stmt_m->close();
 
 <main class="pb-5">
     <div class="mark-hero shadow">
-        <a href="markentryselect.php" class="back-fab"><i class="bi bi-arrow-left"></i></a>
-        <h4 class="fw-black m-0"><?php echo $sname; ?></h4>
+        <h4 class="fw-bold m-0"><?php echo $sname; ?></h4>
         <p class="small opacity-75 fw-bold mb-0">
             <?php echo "$classname ($sectionname) • $exam"; ?>
         </p>
