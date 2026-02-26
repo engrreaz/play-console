@@ -326,6 +326,43 @@ $stmt_m->close();
 </style>
 
 
+<style>
+    /* সাধারণ অবস্থা */
+    .m3-tonal-input {
+        background: #F3EDF7;
+        color: #1C1B1F;
+        border: 2px solid transparent;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        caret-color: #6750A4;
+        /* কার্সার কালার */
+    }
+
+    /* ফোকাস অবস্থা (Inverted) */
+    .m3-tonal-input:focus {
+        background-color: #6750A4 !important;
+        /* M3 Primary Color */
+        color: #FFFFFF !important;
+        /* White Text */
+        border-color: #6750A4;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+        outline: none;
+        transform: scale(1.05);
+        /* সামান্য বড় হবে ফোকাস করলে */
+        z-index: 10;
+        caret-color: white;
+        /* ফোকাস থাকা অবস্থায় কার্সার সাদা হবে */
+    }
+
+    /* নম্বর ইনপুটের স্পিনার বা তীর চিহ্ন লুকানোর জন্য */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
+
+
+
 <main class="pb-5">
     <div class="mark-hero shadow">
         <a href="markentryselect.php" class="back-fab"><i class="bi bi-arrow-left"></i></a>
@@ -376,7 +413,7 @@ $stmt_m->close();
 
 
 
-            <div class="m3-mark-card shadow-sm <?php echo (!$is_eligible || $lock == 1) ? 'locked' : ''; ?>">
+            <div class="m3-mark-card shadow-sm <?php echo (!$is_eligible || $lock == 1) ? 'lockedd' : ''; ?>">
                 <div class="student-header">
                     <div class="d-flex align-items-center gap-2">
                         <span class="roll-pill"><?php echo $row['rollno']; ?></span>
@@ -394,7 +431,7 @@ $stmt_m->close();
                     <?php if ($ca_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="ca-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['ca'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'ca')">
+                                value="<?php echo $m['ca'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'ca')">
                             <div class="m3-tiny-label">CA</div>
                         </div>
                     <?php endif; ?>
@@ -402,7 +439,7 @@ $stmt_m->close();
                     <?php if ($subj_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="sub-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['subj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'sub')">
+                                value="<?php echo $m['subj'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'sub')">
                             <div class="m3-tiny-label">Sub</div>
                         </div>
                     <?php endif; ?>
@@ -410,7 +447,7 @@ $stmt_m->close();
                     <?php if ($obj_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="obj-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['obj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'obj')">
+                                value="<?php echo $m['obj'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'obj')">
                             <div class="m3-tiny-label">Obj</div>
                         </div>
                     <?php endif; ?>
@@ -418,7 +455,7 @@ $stmt_m->close();
                     <?php if ($pra_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="pra-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['pra'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'pra')">
+                                value="<?php echo $m['pra'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'pra')">
                             <div class="m3-tiny-label">Pra</div>
                         </div>
                     <?php endif; ?>
@@ -443,6 +480,8 @@ $stmt_m->close();
 
 
 <?php include 'footer.php'; ?>
+
+
 <script>
     // জাভাস্ক্রিপ্ট লজিক অপরিবর্তিত রাখা হয়েছে
     const limits = { ca: <?php echo $ca_full; ?>, sub: <?php echo $subj_full; ?>, obj: <?php echo $obj_full; ?>, pra: <?php echo $pra_full; ?> };
