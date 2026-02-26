@@ -8,7 +8,7 @@
 
     </div>
 
-    <?php if ($is_admin > 3) { ?>
+    <?php  if ($is_admin > 3) {  ?>
         <div class="dd-divider"></div>
         <div class=" d-flex justify-content-between align-items-center mx-4 py-2">
             <i class="dd-item bi bi-shield-fill-check text-success fs-5 p-0 perm" data-perm="3"></i>

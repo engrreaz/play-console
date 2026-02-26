@@ -12,6 +12,7 @@ if (empty($usr) || $userlevel == 'Guest') {
 
 include_once('logbook.php');
 
+
 // বর্তমানে কোন ফাইলে আছে তা চেক করার ফাংশন (Inline Active Check)
 function isActive($targetFile, $currentFile)
 {
@@ -22,6 +23,7 @@ function isActive($targetFile, $currentFile)
 
 function showPageDocs($conn, $curfile)
 {
+    global $is_admin;
     // ডাটাবেস থেকে তথ্য আনা
     $stmt = $conn->prepare("SELECT * FROM page_docs WHERE pagename = ? LIMIT 1");
     $stmt->bind_param("s", $curfile);
@@ -29,9 +31,17 @@ function showPageDocs($conn, $curfile)
     $doc = $stmt->get_result()->fetch_assoc();
 
     $title = $doc['title'] ?? 'No Title Set';
-    $desc = $doc['description'] ?? '<p class="text-muted">এই পেজের জন্য কোনো বর্ণনা এখনো লেখা হয়নি।</p>';
+    $desc = $doc['description'] ?? '<p class="text-muted">No documentation found for this page.</p>';
     $tips = $doc['tips'] ?? '';
     $notes = $doc['notes'] ?? '';
+
+
+    if ($is_admin > 3) {
+        $disp = '';
+    } else {
+        $disp = 'hidden';
+    }
+
 
     // হেল্প বাটন (Floating Button) এবং মডাল HTML
     echo '
@@ -50,7 +60,7 @@ function showPageDocs($conn, $curfile)
                     ' . (!empty($tips) ? '<div class="alert alert-success border-0 rounded-4 mb-3"><h6 class="fw-bold"><i class="bi bi-lightbulb"></i> Tips</h6><small>' . nl2br($tips) . '</small></div>' : '') . '
                     ' . (!empty($notes) ? '<div class="alert alert-warning border-0 rounded-4"><h6 class="fw-bold"><i class="bi bi-exclamation-triangle"></i> Note</h6><small>' . nl2br($notes) . '</small></div>' : '') . '
                 </div>
-                <div class="modal-footer border-0">
+                <div class="modal-footer border-0"' . $disp . '>
                     <a href="edit-docs.php?page=' . $curfile . '" class="btn btn-light rounded-pill px-4 fw-bold">
                         <i class="bi bi-pencil-square me-2"></i> Edit Documentation
                     </a>
@@ -61,15 +71,16 @@ function showPageDocs($conn, $curfile)
 }
 
 
-function showUserStats($conn, $usr, $sccode) {
+function showUserStats($conn, $usr, $sccode)
+{
     // ১. লগবুক থেকে ভিজিট এবং সময় বের করা
     $stats_sql = "SELECT COUNT(id) as total_hits, SUM(duration) as total_time FROM logbook WHERE email = '$usr' AND sccode = '$sccode'";
     $stats = $conn->query($stats_sql)->fetch_assoc();
-    
+
     // ২. ইউজার একশন থেকে মোট পয়েন্ট বের করা
     $pts_sql = "SELECT SUM(points) as total_pts FROM user_actions WHERE email = '$usr' AND sccode = '$sccode'";
     $pts_res = $conn->query($pts_sql)->fetch_assoc();
-    $total_pts = (int)($pts_res['total_pts'] ?? 0);
+    $total_pts = (int) ($pts_res['total_pts'] ?? 0);
 
     $total_hits = $stats['total_hits'] ?? 0;
     $total_time = $stats['total_time'] ?? 0; // সেকেন্ডে
@@ -77,9 +88,18 @@ function showUserStats($conn, $usr, $sccode) {
     // ৩. র‍্যাংক এবং টাইটেল লজিক
     $title = "Newbie";
     $rank_color = "#9E9E9E"; // Grey
-    if ($total_pts > 500) { $title = "Regular Explorer"; $rank_color = "#4CAF50"; }
-    if ($total_pts > 2000) { $title = "System Veteran"; $rank_color = "#2196F3"; }
-    if ($total_pts > 5000) { $title = "Master Contributor"; $rank_color = "#FFD700"; }
+    if ($total_pts > 500) {
+        $title = "Regular Explorer";
+        $rank_color = "#4CAF50";
+    }
+    if ($total_pts > 2000) {
+        $title = "System Veteran";
+        $rank_color = "#2196F3";
+    }
+    if ($total_pts > 5000) {
+        $title = "Master Contributor";
+        $rank_color = "#FFD700";
+    }
 
     // ৪. সময় ফরম্যাট (Hours and Minutes)
     $hours = floor($total_time / 3600);
@@ -93,30 +113,30 @@ function showUserStats($conn, $usr, $sccode) {
                     <div class="text-center w-100">
                         <div class="mb-2" style="font-size: 3rem;"><i class="bi bi-patch-check-fill"></i></div>
                         <h4 class="fw-black mb-1">Achievement Board</h4>
-                        <span class="badge rounded-pill px-3" style="background:rgba(255,255,255,0.2);">'. $usr .'</span>
+                        <span class="badge rounded-pill px-3" style="background:rgba(255,255,255,0.2);">' . $usr . '</span>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position:absolute; top:20px; right:20px;"></button>
                 </div>
 
                 <div class="modal-body p-4 bg-light">
                     <div class="text-center mb-4">
-                        <h2 class="fw-black m-0" style="color:'. $rank_color .';">'. $title .'</h2>
+                        <h2 class="fw-black m-0" style="color:' . $rank_color . ';">' . $title . '</h2>
                         <div class="small fw-bold text-muted text-uppercase">Current Title</div>
-                        <div class="mt-3 display-6 fw-black text-dark">'. number_format($total_pts) .' <small class="fs-6 opacity-50">PTS</small></div>
+                        <div class="mt-3 display-6 fw-black text-dark">' . number_format($total_pts) . ' <small class="fs-6 opacity-50">PTS</small></div>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-6">
                             <div class="p-3 bg-white rounded-4 border text-center">
                                 <i class="bi bi-clock-history text-primary fs-3"></i>
-                                <div class="fw-black fs-5 mt-1">'. $hours .'h '. $mins .'m</div>
+                                <div class="fw-black fs-5 mt-1">' . $hours . 'h ' . $mins . 'm</div>
                                 <div class="small text-muted fw-bold">Active Time</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-3 bg-white rounded-4 border text-center">
                                 <i class="bi bi-lightning-fill text-warning fs-3"></i>
-                                <div class="fw-black fs-5 mt-1">'. $total_hits .'</div>
+                                <div class="fw-black fs-5 mt-1">' . $total_hits . '</div>
                                 <div class="small text-muted fw-bold">Total Hits</div>
                             </div>
                         </div>
@@ -124,9 +144,9 @@ function showUserStats($conn, $usr, $sccode) {
 
                     <h6 class="fw-black mt-4 mb-3 text-muted">EARNED BADGES</h6>
                     <div class="d-flex gap-2 flex-wrap">
-                        '. ($total_hits > 100 ? '<span class="badge bg-info p-2 rounded-3"><i class="bi bi-award-fill me-1"></i> Fast Learner</span>' : '') .'
-                        '. ($hours > 10 ? '<span class="badge bg-success p-2 rounded-3"><i class="bi bi-clock-fill me-1"></i> Dedicated</span>' : '') .'
-                        '. ($total_pts > 1000 ? '<span class="badge bg-warning text-dark p-2 rounded-3"><i class="bi bi-star-fill me-1"></i> Star Performer</span>' : '') .'
+                        ' . ($total_hits > 100 ? '<span class="badge bg-info p-2 rounded-3"><i class="bi bi-award-fill me-1"></i> Fast Learner</span>' : '') . '
+                        ' . ($hours > 10 ? '<span class="badge bg-success p-2 rounded-3"><i class="bi bi-clock-fill me-1"></i> Dedicated</span>' : '') . '
+                        ' . ($total_pts > 1000 ? '<span class="badge bg-warning text-dark p-2 rounded-3"><i class="bi bi-star-fill me-1"></i> Star Performer</span>' : '') . '
                         <span class="badge bg-secondary p-2 rounded-3">Verified User</span>
                     </div>
                 </div>

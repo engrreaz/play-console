@@ -54,7 +54,7 @@ if (!empty($class_teacher_payment_data)):
     /* Main Container (8px Radius) */
     .m3-coll-block { 
         background: #fff; border-radius: 8px; padding: 12px; 
-        border: 1px solid #f0f0f0; margin-bottom: 12px;
+        border: 1px solid #f0f0f0; 
     }
     
     /* Condensed Item (Tonal Container) */
