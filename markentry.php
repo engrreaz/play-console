@@ -25,7 +25,9 @@ $sname = "";
 $stmt_sub = $conn->prepare("SELECT subject FROM subjects WHERE subcode = ? AND sccategory = ? LIMIT 1");
 $stmt_sub->bind_param("ss", $subj, $sctype);
 $stmt_sub->execute();
-if ($row = $stmt_sub->get_result()->fetch_assoc()) { $sname = $row["subject"]; }
+if ($row = $stmt_sub->get_result()->fetch_assoc()) {
+    $sname = $row["subject"];
+}
 $stmt_sub->close();
 
 $fullmark = $subj_full = $obj_full = $pra_full = $ca_full = 0;
@@ -34,11 +36,11 @@ $stmt_setup->bind_param("ssss", $classname, $sectionname, $subj, $sccode);
 $stmt_setup->execute();
 $res_setup = $stmt_setup->get_result();
 if ($row = $res_setup->fetch_assoc()) {
-    $fullmark  = $row["fullmarks"];
+    $fullmark = $row["fullmarks"];
     $subj_full = $row["subj"];
-    $obj_full  = $row["obj"];
-    $pra_full  = $row["pra"];
-    $ca_full   = $row["ca"];
+    $obj_full = $row["obj"];
+    $pra_full = $row["pra"];
+    $ca_full = $row["ca"];
 }
 $stmt_setup->close();
 
@@ -48,7 +50,9 @@ $stmt_m = $conn->prepare("SELECT * FROM stmark WHERE sccode = ? AND exam = ? AND
 $stmt_m->bind_param("ssssss", $sccode, $exam, $classname, $sectionname, $sessionyear_param, $subj);
 $stmt_m->execute();
 $res_m = $stmt_m->get_result();
-while($row = $res_m->fetch_assoc()) { $existing_marks[$row['stid']] = $row; }
+while ($row = $res_m->fetch_assoc()) {
+    $existing_marks[$row['stid']] = $row;
+}
 $stmt_m->close();
 ?>
 
@@ -61,77 +65,266 @@ $stmt_m->close();
         --m3-error: #B3261E;
     }
 
-    body { background-color: var(--m3-surface); font-family: 'Inter', sans-serif; }
+    body {
+        background-color: var(--m3-surface);
+        font-family: 'Inter', sans-serif;
+    }
 
     /* M3 Hero Header */
     .mark-hero {
         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
-        color: white; padding: 40px 20px 80px;
-        border-radius: 0 0 32px 32px; text-align: center;
+        color: white;
+        padding: 40px 20px 80px;
+        border-radius: 0 0 32px 32px;
+        text-align: center;
         position: relative;
     }
-    
+
     .back-fab {
-        position: absolute; left: 16px; top: 16px;
-        width: 40px; height: 40px; border-radius: 12px;
-        background: rgba(255,255,255,0.2); color: white;
-        display: flex; align-items: center; justify-content: center;
-        text-decoration: none; backdrop-filter: blur(4px);
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        backdrop-filter: blur(4px);
     }
 
     /* Distribution Bar as Tonal Chips */
     .dist-chips {
-        display: flex; justify-content: center; gap: 8px;
-        margin-top: -50px; padding: 0 16px; position: relative; z-index: 10;
-        overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: -50px;
+        padding: 0 16px;
+        position: relative;
+        z-index: 10;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
     }
+
     .m3-chip {
-        background: white; border: 1px solid #E7E0EC;
-        padding: 6px 14px; border-radius: 12px;
-        font-size: 0.7rem; font-weight: 800; color: #49454F;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        background: white;
+        border: 1px solid #E7E0EC;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #49454F;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     /* Student Mark Card */
     .mark-card {
-        background: #fff; border-radius: 20px; padding: 16px;
-        margin: 12px 12px; border: 1px solid #E7E0EC;
+        background: #fff;
+        border-radius: 20px;
+        padding: 16px;
+        margin: 12px 12px;
+        border: 1px solid #E7E0EC;
         transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
     }
-    .mark-card:focus-within { border-color: var(--m3-primary); box-shadow: 0 8px 16px rgba(103, 80, 164, 0.08); }
-    .mark-card.locked { opacity: 0.6; pointer-events: none; background: #f1f1f1; border-style: dashed; }
+
+    .mark-card:focus-within {
+        border-color: var(--m3-primary);
+        box-shadow: 0 8px 16px rgba(103, 80, 164, 0.08);
+    }
+
+    .mark-card.locked {
+        opacity: 0.6;
+        pointer-events: none;
+        background: #f1f1f1;
+        border-style: dashed;
+    }
 
     /* Roll Circle */
     .roll-avatar {
-        width: 36px; height: 36px; border-radius: 50%;
-        background: var(--m3-primary-container); color: #21005D;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 900; font-size: 0.8rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--m3-primary-container);
+        color: #21005D;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.8rem;
     }
 
     /* M3 Clean Inputs */
     .input-box-tonal {
         background: var(--m3-secondary-container);
-        border-radius: 12px; padding: 6px; text-align: center;
-        border: 1px solid transparent; transition: 0.2s;
+        border-radius: 12px;
+        padding: 6px;
+        text-align: center;
+        border: 1px solid transparent;
+        transition: 0.2s;
     }
-    .input-box-tonal:focus-within { background: #fff; border-color: var(--m3-primary); }
-    
+
+    .input-box-tonal:focus-within {
+        background: #fff;
+        border-color: var(--m3-primary);
+    }
+
     .m3-input-clean {
-        border: none; background: transparent; width: 100%;
-        text-align: center; font-weight: 900; font-size: 1.1rem;
-        color: #1C1B1F; outline: none;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: center;
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: #1C1B1F;
+        outline: none;
     }
-    .m3-input-label { font-size: 0.6rem; font-weight: 800; color: var(--m3-primary); text-transform: uppercase; margin-top: 2px; }
+
+    .m3-input-label {
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: var(--m3-primary);
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
 
     /* Obtained Score Box */
     .obt-container {
-        background: var(--m3-primary); color: white;
-        border-radius: 12px; min-width: 50px; height: 50px;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: var(--m3-primary);
+        color: white;
+        border-radius: 12px;
+        min-width: 50px;
+        height: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         box-shadow: 0 4px 10px rgba(103, 80, 164, 0.2);
     }
 </style>
+
+
+
+<style>
+    /* ১. মডার্ন কার্ড কন্টেইনার */
+    .m3-mark-card {
+        background: #fff;
+        border-radius: 24px;
+        /* M3 Large Shape */
+        padding: 16px;
+        margin: 0 12px 14px;
+        border: 1px solid #E7E0EC;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .m3-mark-card:hover {
+        border-color: #6750A4;
+        box-shadow: 0 4px 12px rgba(103, 80, 164, 0.08);
+    }
+
+    /* ২. স্টুডেন্ট প্রোফাইল হেডার */
+    .student-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .roll-pill {
+        background: #6750A4;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 8px;
+        font-weight: 900;
+        font-size: 0.75rem;
+    }
+
+    /* ৩. স্মার্ট ইনপুট গ্রিড */
+    .mark-entry-grid {
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .input-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* ৪. ইনপুট বক্স ডিজাইন */
+    .m3-tonal-input {
+        background: #F3EDF7;
+        border: 1.5px solid transparent;
+        border-radius: 12px;
+        padding: 8px 4px;
+        text-align: center;
+        font-weight: 900;
+        font-size: 1.1rem;
+        color: #1C1B1F;
+        width: 100%;
+        transition: 0.2s;
+    }
+
+    .m3-tonal-input:focus {
+        background: #fff;
+        border-color: #6750A4;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+    }
+
+    .m3-tiny-label {
+        font-size: 0.55rem;
+        font-weight: 800;
+        color: #6750A4;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ৫. ক্যালকুলেটেড রেজাল্ট বক্স (OBT) */
+    .obt-summary-box {
+        background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
+        color: white;
+        border-radius: 16px;
+        min-width: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        box-shadow: 0 4px 8px rgba(103, 80, 164, 0.2);
+    }
+
+    .obt-score {
+        font-size: 1.2rem;
+        font-weight: 900;
+        line-height: 1;
+        margin: 4px 0;
+    }
+
+    .grade-chip {
+        font-size: 0.55rem;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* লকড স্টেট */
+    .locked {
+        opacity: 0.5;
+        pointer-events: none;
+        filter: grayscale(1);
+        border-style: dashed;
+    }
+</style>
+
 
 <main class="pb-5">
     <div class="mark-hero shadow">
@@ -140,16 +333,20 @@ $stmt_m->close();
         <p class="small opacity-75 fw-bold mb-0">
             <?php echo "$classname ($sectionname) • $exam"; ?>
         </p>
-        <?php if($lock == 1): ?>
+        <?php if ($lock == 1): ?>
             <div class="badge bg-danger rounded-pill px-3 mt-2"><i class="bi bi-lock-fill me-1"></i> ENTRY LOCKED</div>
         <?php endif; ?>
     </div>
 
     <div class="dist-chips">
-        <?php if($ca_full > 0): ?><div class="m3-chip">CA: <?php echo $ca_full; ?>%</div><?php endif; ?>
-        <?php if($subj_full > 0): ?><div class="m3-chip">SUB: <?php echo $subj_full; ?></div><?php endif; ?>
-        <?php if($obj_full > 0): ?><div class="m3-chip">OBJ: <?php echo $obj_full; ?></div><?php endif; ?>
-        <?php if($pra_full > 0): ?><div class="m3-chip">PRA: <?php echo $pra_full; ?></div><?php endif; ?>
+        <?php if ($ca_full > 0): ?>
+            <div class="m3-chip">CA: <?php echo $ca_full; ?>%</div><?php endif; ?>
+        <?php if ($subj_full > 0): ?>
+            <div class="m3-chip">SUB: <?php echo $subj_full; ?></div><?php endif; ?>
+        <?php if ($obj_full > 0): ?>
+            <div class="m3-chip">OBJ: <?php echo $obj_full; ?></div><?php endif; ?>
+        <?php if ($pra_full > 0): ?>
+            <div class="m3-chip">PRA: <?php echo $pra_full; ?></div><?php endif; ?>
         <div class="m3-chip border-primary text-primary">FULL: <?php echo $fullmark; ?></div>
     </div>
 
@@ -167,17 +364,23 @@ $stmt_m->close();
         while ($row = $res_st->fetch_assoc()):
             $stid = $row['stid'];
             $is_eligible = true;
-            if($row['religion'] == 'Islam' && $subj == 112) $is_eligible = false;
-            if($row['religion'] == 'Hindu' && $subj == 111) $is_eligible = false;
+            if ($row['religion'] == 'Islam' && $subj == 112)
+                $is_eligible = false;
+            if ($row['religion'] == 'Hindu' && $subj == 111)
+                $is_eligible = false;
 
             $m = $existing_marks[$stid] ?? null;
             $obt_val = $m['markobt'] ?? '0';
-        ?>
-            <div class="mark-card shadow-sm <?php echo (!$is_eligible || $lock == 1) ? 'lockedd' : ''; ?>">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="roll-avatar shadow-sm"><?php echo $row['rollno']; ?></div>
-                        <div class="fw-black text-dark text-truncate small" style="max-width: 180px; letter-spacing: -0.2px;">
+            ?>
+
+
+
+
+            <div class="m3-mark-card shadow-sm <?php echo (!$is_eligible || $lock == 1) ? 'locked' : ''; ?>">
+                <div class="student-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="roll-pill"><?php echo $row['rollno']; ?></span>
+                        <div class="fw-black text-dark text-truncate small" style="max-width: 160px;">
                             <?php echo strtoupper($row['stnameeng']); ?>
                         </div>
                     </div>
@@ -186,52 +389,55 @@ $stmt_m->close();
                     </div>
                 </div>
 
-                <div class="row gx-2 align-items-end">
-                    <?php if($ca_full > 0): ?>
-                    <div class="col">
-                        <div class="input-box-tonal">
-                            <input type="number" id="ca-<?php echo $stid; ?>" class="m3-input-clean" value="<?php echo $m['ca'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'ca')">
-                            <div class="m3-input-label">CA</div>
+                <div class="mark-entry-grid">
+
+                    <?php if ($ca_full > 0): ?>
+                        <div class="input-column">
+                            <input type="number" id="ca-<?php echo $stid; ?>" class="m3-tonal-input"
+                                value="<?php echo $m['ca'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'ca')">
+                            <div class="m3-tiny-label">CA</div>
                         </div>
-                    </div>
                     <?php endif; ?>
 
-                    <?php if($subj_full > 0): ?>
-                    <div class="col">
-                        <div class="input-box-tonal">
-                            <input type="number" id="sub-<?php echo $stid; ?>" class="m3-input-clean" value="<?php echo $m['subj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'sub')">
-                            <div class="m3-input-label">Sub</div>
+                    <?php if ($subj_full > 0): ?>
+                        <div class="input-column">
+                            <input type="number" id="sub-<?php echo $stid; ?>" class="m3-tonal-input"
+                                value="<?php echo $m['subj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'sub')">
+                            <div class="m3-tiny-label">Sub</div>
                         </div>
-                    </div>
                     <?php endif; ?>
 
-                    <?php if($obj_full > 0): ?>
-                    <div class="col">
-                        <div class="input-box-tonal">
-                            <input type="number" id="obj-<?php echo $stid; ?>" class="m3-input-clean" value="<?php echo $m['obj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'obj')">
-                            <div class="m3-input-label">Obj</div>
+                    <?php if ($obj_full > 0): ?>
+                        <div class="input-column">
+                            <input type="number" id="obj-<?php echo $stid; ?>" class="m3-tonal-input"
+                                value="<?php echo $m['obj'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'obj')">
+                            <div class="m3-tiny-label">Obj</div>
                         </div>
-                    </div>
                     <?php endif; ?>
 
-                    <?php if($pra_full > 0): ?>
-                    <div class="col">
-                        <div class="input-box-tonal">
-                            <input type="number" id="pra-<?php echo $stid; ?>" class="m3-input-clean" value="<?php echo $m['pra'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'pra')">
-                            <div class="m3-input-label">Pra</div>
+                    <?php if ($pra_full > 0): ?>
+                        <div class="input-column">
+                            <input type="number" id="pra-<?php echo $stid; ?>" class="m3-tonal-input"
+                                value="<?php echo $m['pra'] ?? ''; ?>" onblur="saveMark('<?php echo $stid; ?>', 'pra')">
+                            <div class="m3-tiny-label">Pra</div>
                         </div>
-                    </div>
                     <?php endif; ?>
 
                     <div class="col-auto">
-                        <div class="obt-container shadow">
-                            <span style="font-size: 0.5rem; font-weight: 800; opacity: 0.8;">OBT</span>
-                            <span class="h5 fw-black m-0" id="obt-<?php echo $stid; ?>"><?php echo $obt_val; ?></span>
+                        <div class="obt-summary-box">
+                            <span style="font-size: 0.5rem; font-weight: 800; opacity: 0.8;">OBTAINED</span>
+                            <span class="obt-score" id="obt-<?php echo $stid; ?>"><?php echo $obt_val; ?></span>
+                            <div class="grade-chip">
+                                <?php echo ($m['gp'] ?? '0.00') . ' | ' . ($m['gl'] ?? 'F'); ?>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
-        <?php endwhile; $stmt_st->close(); ?>
+
+        <?php endwhile;
+        $stmt_st->close(); ?>
     </div>
 </main>
 
@@ -244,7 +450,7 @@ $stmt_m->close();
 
     function saveMark(stid, field) {
         const val = parseFloat(document.getElementById(field + '-' + stid).value) || 0;
-        
+
         // ভ্যালিডেশন
         if (val > (field === 'ca' ? 100 : limits[field])) {
             Swal.fire({
@@ -279,13 +485,12 @@ $stmt_m->close();
                 exam: '<?php echo $exam; ?>', sub: '<?php echo $subj; ?>', stid: stid, session: '<?php echo $sessionyear; ?>',
                 ca: ca, subj: sub, obj: obj, pra: pra, total: total
             },
-            success: function() { 
-                sync.innerHTML = '<i class="bi bi-cloud-check-fill text-success fs-5"></i>'; 
+            success: function () {
+                sync.innerHTML = '<i class="bi bi-cloud-check-fill text-success fs-5"></i>';
             },
-            error: function() {
+            error: function () {
                 sync.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>';
             }
         });
     }
 </script>
-
