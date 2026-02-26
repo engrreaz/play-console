@@ -1,5 +1,5 @@
 <?php
-// ১. আপনার দেওয়া টেবিল অনুযায়ী সঠিক ডাটাবেস (১৯ ফেব্রুয়ারি = ১ম রোজা)
+// ১. আপনার দেওয়া লজিক এবং ডাটাবেস অপরিবর্তিত রাখা হলো
 $ramadan_schedule = [
     "2026-02-19" => ["day" => 1, "sehar" => "05:13:00", "iftar" => "17:56:00", "dhuhr" => "12:12 PM", "asr" => "03:29 PM", "isha" => "07:12 PM"],
     "2026-02-20" => ["day" => 2, "sehar" => "05:12:00", "iftar" => "17:57:00", "dhuhr" => "12:12 PM", "asr" => "03:29 PM", "isha" => "07:12 PM"],
@@ -45,7 +45,6 @@ if ($today_data) {
     $i_time = strtotime($today_key . ' ' . $today_data['iftar']);
     $now = time();
 
-    // ফেজ ডিটেকশন
     if ($now < $s_time) {
         $next_name = "Sehri";
         $next_time = date('Y-m-d H:i:s', $s_time);
@@ -62,142 +61,197 @@ if ($today_data) {
 }
 ?>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
 <style>
     :root {
-        --rd-primary: #1B5E20;
-        --rd-light: #E8F5E9;
-        --m3-tonal: #EADDFF;
+        --rd-primary-dark: #064E3B; /* Deep Emerald */
+        --rd-accent: #10B981; /* Bright Emerald */
+        --rd-bg-soft: #F0FDF4; /* Very Light Green */
+        --rd-text-main: #1F2937;
+        --rd-card-bg: #FFFFFF;
     }
 
     .m3-ramadan-card {
-        background: white;
-        border-radius: 16px;
-        border: 1px solid #E0E0E0;
+        background: var(--rd-card-bg);
+        border-radius: 16px; /* Tonal standard large radius */
+        border: 1px solid rgba(0,0,0,0.05);
         overflow: hidden;
         font-family: 'Inter', sans-serif;
+        max-width: 400px;
+        margin: auto;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
     .m3-ramadan-header {
-        background: linear-gradient(135deg, #839b85 0%, #2E7D32 100%);
-        color: white;
-        padding: 18px 22px;
+        background: var(--rd-primary-dark);
+        color: #ECFDF5;
+        padding: 24px;
+        position: relative;
+    }
+
+    .m3-ramadan-header::after {
+        content: "";
+        position: absolute;
+        bottom: -10px; left: 0; right: 0;
+        height: 20px;
+        background: var(--rd-card-bg);
+        border-radius: 50% 50% 0 0;
     }
 
     .countdown-box {
-        padding: 22px;
-    }
-
-    .countdown-val {
-        font-size: 2.4rem;
-        font-weight: 900;
-        color: var(--rd-primary);
-        line-height: 1;
-        letter-spacing: -1px;
+        padding: 24px;
+        padding-top: 10px;
     }
 
     .status-chip {
-        background: var(--rd-light);
-        color: var(--rd-primary);
-        padding: 4px 12px;
-        border-radius: 100px;
-        font-size: 0.7rem;
-        font-weight: 800;
+        background: #D1FAE5;
+        color: #065F46;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
         text-transform: uppercase;
-        display: inline-block;
-        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .countdown-val {
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--rd-primary-dark);
+        line-height: 1;
+        letter-spacing: -2px;
+        margin: 8px 0;
+    }
+
+    .target-time {
+        font-size: 0.85rem;
+        color: #6B7280;
     }
 
     .day-indicator {
-        width: 65px;
-        height: 65px;
-        border-radius: 50%;
-        background: conic-gradient(#43A047
-                <?= ($ram_day / 30) * 360 ?>
-                deg, #F1F0F4 0deg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .day-indicator-inner {
-        width: 54px;
-        height: 54px;
-        background: white;
-        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        border-radius: 22px; /* Squircle style indicator */
+        background: var(--rd-bg-soft);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        border: 2px solid #D1FAE5;
     }
 
-    .m3-progress {
-        height: 8px;
-        background: #F1F0F4;
-        border-radius: 10px;
-        margin: 15px 0;
+    .day-indicator b {
+        font-size: 1.5rem;
+        color: var(--rd-primary-dark);
+        line-height: 1;
+    }
+
+    .day-indicator span {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: var(--rd-accent);
+    }
+
+    /* Modern Progress Bar */
+    .m3-progress-container {
+        margin: 20px 0;
+    }
+
+    .m3-progress-bg {
+        height: 10px;
+        background: #F3F4F6;
+        border-radius: 20px;
         overflow: hidden;
     }
 
     #waiting-line {
         height: 100%;
-        background: #43A047;
+        background: linear-gradient(90deg, var(--rd-accent), #34D399);
         width: 0%;
-        transition: width 1s linear;
+        border-radius: 20px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Prayer Grid - Tonal Minimalist */
     .prayer-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 6px;
-        margin-top: 10px;
+        gap: 8px;
+        margin-top: 15px;
     }
 
     .prayer-item {
-        background: #F9F9F9;
-        padding: 8px 2px;
-        border-radius: 14px;
+        background: #F9FAFB;
+        padding: 12px 4px;
+        border-radius: 18px;
         text-align: center;
-        border: 1px solid #F0F0F0;
+        transition: all 0.3s ease;
     }
 
     .prayer-active {
-        background: var(--rd-primary) !important;
-        color: white !important;
-        border: none;
-        box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
+        background: var(--rd-primary-dark);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .p-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        display: block;
+        opacity: 0.7;
+    }
+
+    .prayer-active .p-label { opacity: 1; color: #A7F3D0; }
+
+    .p-time {
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: block;
     }
 </style>
 
-<div class="m3-ramadan-card shadow-sm">
-    <div class="m3-ramadan-header d-flex justify-content-between align-items-center">
-        <div>
-            <div class="fw-bold fs-5">Ramadan Kareem</div>
-        </div>
-        <div class="text-end">
-            <div class="small fw-bold"><?= date('l') ?></div>
-            <div class="small opacity-75"><?= date('d M, Y') ?></div>
+<div class="m3-ramadan-card">
+    <div class="m3-ramadan-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 600; opacity: 0.9;">Ramadan 1447 AH</div>
+                <div style="font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px;">Ramadan Tracker</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.85rem; font-weight: 800;"><?= date('l') ?></div>
+                <div style="font-size: 0.75rem; opacity: 0.8;"><?= date('d M, Y') ?></div>
+            </div>
         </div>
     </div>
 
     <div class="countdown-box">
-        <div class="d-flex align-items-center justify-content-between">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
             <div>
-                <span class="status-chip">Time left for <b class="ms-1"><?= $next_name ?></b></span>
-                <div id="wait-time" class="countdown-val">00:00:00</div>
-                <div class="text-muted small mt-1">Target: <b
-                        class="text-dark"><?= date('h:i A', strtotime($next_time)) ?></b></div>
-            </div>
-            <div class="day-indicator shadow-sm">
-                <div class="day-indicator-inner">
-                    <span class="fw-black text-success"
-                        style="font-size: 1.1rem; line-height: 1;"><?= $ram_day ?></span>
-                    <span class="fw-bold text-muted" style="font-size: 0.5rem; text-transform: uppercase;">Day</span>
+                <div class="status-chip">
+                    <span style="display:inline-block; width:6px; height:6px; background:#059669; border-radius:50%; margin-right:8px;"></span>
+                    Time until <?= $next_name ?>
                 </div>
+                <div id="wait-time" class="countdown-val">00:00:00</div>
+                <div class="target-time">Starts at <b><?= date('h:i A', strtotime($next_time)) ?></b></div>
+            </div>
+            
+            <div class="day-indicator">
+                <b><?= $ram_day ?></b>
+                <span>Day</span>
             </div>
         </div>
 
-        <div class="m3-progress">
-            <div id="waiting-line"></div>
+        <div class="m3-progress-container">
+            <div class="m3-progress-bg">
+                <div id="waiting-line"></div>
+            </div>
         </div>
 
         <div class="prayer-grid">
@@ -213,9 +267,8 @@ if ($today_data) {
                 $is_target = ($n == $next_name);
                 ?>
                 <div class="prayer-item <?= $is_target ? 'prayer-active' : '' ?>">
-                    <div style="font-size: 0.55rem; font-weight: 800; text-transform: uppercase; opacity: 0.8;"><?= $n ?>
-                    </div>
-                    <div style="font-size: 0.7rem; font-weight: 800;"><?= date('h:i', strtotime($t)) ?></div>
+                    <span class="p-label"><?= $n ?></span>
+                    <span class="p-time"><?= date('h:i', strtotime($t)) ?></span>
                 </div>
             <?php endforeach; ?>
         </div>
