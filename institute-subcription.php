@@ -32,7 +32,6 @@ $panels_static = ['Administrator', 'Chief', 'Teacher', 'Accountant', 'Librarian'
 ?>
 
 <style>
-    .m3-hero-sub { background: linear-gradient(180deg, #7B1FA2 0%, #4A148C 100%); padding: 50px 24px 80px; color: #fff; border-radius: 0 0 40px 40px; text-align: center; }
     .sub-container { margin-top: -60px; padding: 0 16px 50px; position: relative; z-index: 10; }
     .m3-sub-card { background: #fff; border-radius: 28px; padding: 24px; border: 1px solid #E7E0EC; margin-bottom: 16px; }
     .module-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 12px; margin-bottom: 6px; border: 1px solid transparent; transition: 0.2s; }
@@ -41,11 +40,51 @@ $panels_static = ['Administrator', 'Chief', 'Teacher', 'Accountant', 'Librarian'
     .billing-pill { background: #EADDFF; color: #21005D; padding: 4px 12px; border-radius: 100px; font-size: 0.7rem; font-weight: 800; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 </style>
 
+
+<style>
+/* M3 Global Framework consistent styles */
+.m3-hero-sub-tonal {
+    /* Using tonal surface instead of harsh gradients */
+    background-color: var(--m3-primary-container); 
+    color: var(--m3-on-primary-container);
+    /* M3 uses larger radius for bottom sheets/headers */
+    border-radius: 0 0 var(--m3-radius-lg) var(--m3-radius-lg); 
+    border-bottom: 1px solid var(--m3-surface-variant);
+    position: relative;
+}
+
+.m3-tier-badge {
+    background: var(--m3-primary);
+    color: var(--m3-on-primary);
+    padding: 6px 16px;
+    border-radius: var(--m3-radius-pill);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* শ্যাডো এবং টেক্সট অপটিমাইজেশন */
+.fw-bold { letter-spacing: -0.02em; }
+</style>
 <main>
-    <div class="m3-hero-sub shadow">
-        <h3 class="fw-black mb-1">Service & Licensing</h3>
-        <p class="small opacity-75 fw-bold mb-0">Subscription ID: #<?= $row['package_id'] ?> | Tier <?= $row['tier'] ?></p>
+    <div class="m3-hero-sub-tonal shadow-sm p-4 p-md-5 mb-4">
+    <div class="d-flex flex-column align-items-center text-center">
+        <div class="m3-tier-badge mb-3">
+            <i class="bi bi-patch-check-fill me-1"></i> Tier <?= $row['tier'] ?>
+        </div>
+        
+        <h3 class="fw-bold mb-2" style="color: var(--m3-on-primary-container);">Service & Licensing</h3>
+        
+        <div class="d-flex align-items-center justify-content-center gap-2 opacity-75">
+            <span class="badge rounded-pill px-3 py-2" style="background: rgba(0,0,0,0.05); color: var(--m3-on-primary-container); font-weight: 600;">
+                <i class="bi bi-hash me-1"></i>Subscription ID: <?= $row['package_id'] ?>
+            </span>
+        </div>
     </div>
+</div>
+
 
     <div class="sub-container">
         <div class="row g-3 mb-3">
@@ -79,7 +118,7 @@ $panels_static = ['Administrator', 'Chief', 'Teacher', 'Accountant', 'Librarian'
                     <span class="billing-pill">Amount: <?= $billing[4] ?></span>
                 <?php endif; ?>
             </div>
-            <button class="btn btn-m3-tonal w-100 mt-3 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#billingModal">Update Billing Info</button>
+            <button class="btn btn-m3-tonal w-100 mt-3 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#billingModal" disabled>Update Billing Info</button>
         </div>
 
         <div class="m3-section-title px-2">Software Modules</div>

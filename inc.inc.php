@@ -6,10 +6,12 @@ $curfile = basename($_SERVER["SCRIPT_FILENAME"]);
 
 if (isset($_POST['save_timeline'])) {
 
-    $feature = $conn->real_escape_string($_POST['feature_name']);
-    $platform = $conn->real_escape_string($_POST['platform']);
-    $action = $_POST['action_type'];
-    $status = $_POST['status'];
+    $usr = $_SESSION["user"] ?? 'Admin';
+
+    $feature = $conn->real_escape_string($_POST['feature_name'] ?? 'Whole Script');
+    $platform = $conn->real_escape_string($_POST['platform'] ?? 'Android');
+    $action = $_POST['action_type'] ?? 'bug_fix';
+    $status = $_POST['status'] ?? 'in_progress';
     $desc = $conn->real_escape_string($_POST['description']);
 
     $sql = "
@@ -365,7 +367,7 @@ $loader_html = ob_get_clean();
 
 
 $video_id = null;
-$stmt = $conn->prepare("SELECT video_id FROM permission_map_app WHERE page_name=? LIMIT 1");
+$stmt = $conn->prepare("SELECT video_id FROM page_docs WHERE pagename=? LIMIT 1");
 $stmt->bind_param("s", $curfile);
 $stmt->execute();
 $res = $stmt->get_result();

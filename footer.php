@@ -1256,7 +1256,7 @@ showUserStats($conn, $usr, $sccode);
                     // ২. সফল হলে সাকসেস মেসেজ দেখানো
                     Swal.fire({
                         icon: 'success',
-                        title: 'সফলভাবে সংরক্ষিত হয়েছে!',
+                        title: 'Saved successfully',
                         showConfirmButton: false,
                         timer: 1500 // ১.৫ সেকেন্ড পর অটো বন্ধ হবে
                     }).then(() => {
@@ -1267,8 +1267,8 @@ showUserStats($conn, $usr, $sccode);
                     // ৩. ব্যর্থ হলে এরর মেসেজ
                     Swal.fire({
                         icon: 'error',
-                        title: 'ব্যর্থ হয়েছে',
-                        text: 'উফ! তথ্য সেভ করা সম্ভব হয়নি। আবার চেষ্টা করুন।',
+                        title: 'Failed to save',
+                        text: 'Opps! Failed to save data. Please try again. ',
                         confirmButtonColor: '#6750A4'
                     });
                 }
@@ -1277,8 +1277,8 @@ showUserStats($conn, $usr, $sccode);
                 // ৪. নেটওয়ার্ক এরর হলে
                 Swal.fire({
                     icon: 'error',
-                    title: 'সংযোগ বিচ্ছিন্ন',
-                    text: 'সার্ভারের সাথে যোগাযোগ করা যাচ্ছে না।',
+                    title: 'Connection Lost',
+                    text: 'Cannot connect to the server.',
                 });
             });
     });

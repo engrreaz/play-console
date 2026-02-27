@@ -544,37 +544,7 @@ if (strpos($chain, 'class') !== false) {
     }
 
     /* Floating Label Container */
-    .m3-floating-group {
-        position: relative;
-        margin-bottom: 20px;
-    }
-
-    /* আইকন প্যাডিং ফিক্স - বর্ডার থেকে দূরত্ব বাড়ানো হয়েছে */
-    .m3-field-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6750A4;
-        font-size: 1.2rem;
-        z-index: 10;
-        pointer-events: none;
-        transition: color 0.2s;
-    }
-
-    /* Floating Label Styling */
-
-
-    /* সিলেক্ট বক্স - আইকনের জন্য বামে পর্যাপ্ত জায়গা (Padding) */
-
-
-    .m3-select-floating:focus {
-        border-color: #6750A4;
-        box-shadow: 0 0 0 1px #6750A4;
-        outline: none;
-    }
-
-    /* বাটন ডিজাইন - Gradient & Elevation */
+  
     .btn-m3-submit {
         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
         color: #fff;
