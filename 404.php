@@ -41,7 +41,7 @@
             font-size: 8rem;
             font-weight: 900;
             background: var(--m3-primary-gradient);
-            -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1;
             margin-bottom: 10px;
@@ -150,21 +150,22 @@
         <div class="error-code">404</div>
         <h1 class="error-title">Oops! Page not found</h1>
         <p class="error-desc">
-            অপেক্ষা করুন! আপনি যে পৃষ্ঠাটি খুঁজছেন সেটি হয়তো স্থানান্তরিত হয়েছে অথবা এটি আর বিদ্যমান নেই।
+        Please wait! The page you are looking for might have been moved or it no longer exists.    
         </p>
 
         <div class="m3-floating-group">
             <i class="bi bi-search m3-field-icon"></i>
-            <input type="text" class="m3-input-floating" placeholder="কি খুঁজছেন? এখানে লিখুন...">
+            <input type="text" class="m3-input-floating" placeholder="What are you looking for? Type here...">
         </div>
 
         <div class="d-flex flex-column gap-2">
             <a href="index.php" class="btn-m3-home">
                 <i class="bi bi-house-door-fill"></i>
-                মূল পাতায় ফিরে যান
+               
+                Go back to Home Page
             </a>
             <button class="btn btn-link text-decoration-none text-muted fw-bold mt-2" onclick="history.back()">
-                <i class="bi bi-arrow-left"></i> পূর্ববর্তী পাতায় যান
+                <i class="bi bi-arrow-left"></i> Go back to previous page
             </button>
         </div>
     </div>

@@ -24,10 +24,10 @@ function teacher_profile_image_path($teacher_id)
     foreach ($possible_extensions as $ext) {
         $file_path = dirname(__DIR__) . '/teacher/' . $teacher_id . '.' . $ext;
         if (file_exists($file_path)) {
-            return $BASE_PATH_URL . 'teacher/' . $teacher_id . '.' . $ext;
+            return $BASE_PATH_URL_FILE . 'teacher/' . $teacher_id . '.' . $ext;
         }
     }
-    return $BASE_PATH_URL . '/teacher/no-img.jpg';
+    return $BASE_PATH_URL_FILE . '/teacher/no-img.jpg';
 }
 
 

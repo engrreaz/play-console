@@ -410,7 +410,7 @@ if ($desig_res->num_rows > 0) {
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="staff-id-badge">ID: <?php echo $tid; ?></span>
                         <div class="dropdown" onclick="event.stopPropagation();">
-                            <i class="bi bi-three-dots-vertical text-muted px-2 drag-handle" data-bs-toggle="dropdown"
+                            <i class="bi bi-grip-vertical text-muted px-2 drag-handle" data-bs-toggle="dropdown"
                                 style="cursor:grab;"></i>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 m3-8px">
                                 <li><a class="dropdown-item fw-bold small" onclick="editTeacher(<?php echo $tid; ?>);"><i

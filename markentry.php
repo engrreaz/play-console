@@ -431,7 +431,8 @@ $stmt_m->close();
                     <?php if ($ca_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="ca-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['ca'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'ca')">
+                                value="<?php echo $m['ca'] ?? ''; ?>" onfocus="this.select()"
+                                onblur="saveMark('<?php echo $stid; ?>', 'ca')">
                             <div class="m3-tiny-label">CA</div>
                         </div>
                     <?php endif; ?>
@@ -439,7 +440,8 @@ $stmt_m->close();
                     <?php if ($subj_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="sub-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['subj'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'sub')">
+                                value="<?php echo $m['subj'] ?? ''; ?>" onfocus="this.select()"
+                                onblur="saveMark('<?php echo $stid; ?>', 'sub')">
                             <div class="m3-tiny-label">Sub</div>
                         </div>
                     <?php endif; ?>
@@ -447,7 +449,8 @@ $stmt_m->close();
                     <?php if ($obj_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="obj-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['obj'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'obj')">
+                                value="<?php echo $m['obj'] ?? ''; ?>" onfocus="this.select()"
+                                onblur="saveMark('<?php echo $stid; ?>', 'obj')">
                             <div class="m3-tiny-label">Obj</div>
                         </div>
                     <?php endif; ?>
@@ -455,7 +458,8 @@ $stmt_m->close();
                     <?php if ($pra_full > 0): ?>
                         <div class="input-column">
                             <input type="number" id="pra-<?php echo $stid; ?>" class="m3-tonal-input"
-                                value="<?php echo $m['pra'] ?? ''; ?>" onfocus="this.select()" onblur="saveMark('<?php echo $stid; ?>', 'pra')">
+                                value="<?php echo $m['pra'] ?? ''; ?>" onfocus="this.select()"
+                                onblur="saveMark('<?php echo $stid; ?>', 'pra')">
                             <div class="m3-tiny-label">Pra</div>
                         </div>
                     <?php endif; ?>
