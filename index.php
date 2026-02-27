@@ -94,7 +94,7 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
             style="width: 38px; height: 38px; background: #6750A4 !important;">
             <img src="iimg/logo.png" width="100%">
         </div>
-        <div class="flex-grow-1 text-container" style="min-width: 0;">
+        <div class="flex-grow-1 text-container" style="min-width: 0;" data-feature="Home Page">
             <div class="app-bar-title my-0">EIM<span style="color: #6750A4;">Box</span></div>
             <div class="text-small my-0 scname"><?= $scname ?></div>
         </div>
