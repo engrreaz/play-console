@@ -90,10 +90,10 @@ if (!empty($notices)) {
                                 <i class="bi bi-dot"></i> By <?php echo htmlspecialchars($author); ?>
                             </div>
                         </div>
-                        <i class="bi bi-chevron-down text-muted small ms-2"></i>
+                        <i class="bi bi-chevron-down text-muted small ms-2" hidden></i>
                     </div>
 
-                    <div class="collapse" id="<?php echo $n_id; ?>">
+                    <div class="collapse" id="<?php echo $n_id; ?>" hidden>
                         <div class="notice-desc-box">
                             <?php echo nl2br(htmlspecialchars($notice['descrip'])); ?>
                         </div>
