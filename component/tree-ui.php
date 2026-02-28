@@ -286,7 +286,7 @@ if (strpos($chain, 'class') !== false) {
     }
 </style>
 
-<div class="subject-hero shadow-lg">
+<!-- <div class="subject-hero shadow-lg">
     <div class="container">
         <div class="subject-icon-box shadow-sm">
             <i class="bi bi-book-half"></i>
@@ -297,7 +297,7 @@ if (strpos($chain, 'class') !== false) {
 
         
     </div>
-</div>
+</div> -->
 
 <div class="modal fade" id="nodeTreeModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -544,7 +544,7 @@ if (strpos($chain, 'class') !== false) {
     }
 
     /* Floating Label Container */
-  
+
     .btn-m3-submit {
         background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
         color: #fff;
@@ -636,7 +636,8 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-<?= $chain_md ?> mb-3">
+            <?php $clssechide = (strpos($chain, 'class') === false) ? '' : 'hidden'; ?>
+            <div class="col-<?= $chain_md ?> mb-3" <?php echo $clssechide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Class</label>
                     <i class="bi bi-mortarboard m3-field-icon"></i>
@@ -646,7 +647,7 @@ if (strpos($chain, 'class') !== false) {
                 </div>
             </div>
 
-            <div class="col-<?= $chain_md ?> mb-3">
+            <div class="col-<?= $chain_md ?> mb-3" <?php echo $clssechide; ?>>
                 <div class="m3-floating-group">
                     <label class="m3-floating-label">Section</label>
                     <i class="bi bi-people m3-field-icon"></i>
@@ -669,7 +670,7 @@ if (strpos($chain, 'class') !== false) {
             </div>
 
             <div class="col-12">
-                <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain">
+                <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain" onclick="btn_chain();">
 
                     <i class="bi bi-arrow-right-circle-fill"></i>
                     <span><?= htmlspecialchars($chain_button_text) ?></span>

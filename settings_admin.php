@@ -264,7 +264,7 @@ $sy_param = '%' . $current_session . '%';
     function settings_sms_menu() { window.location.href = "sms-manager.php"; }
     function settings_admin_user_manager() { window.location.href = "user-manager.php"; }
     function settings_admin_task_manager() { window.location.href = "task-manager.php"; }
-    function settings_admin_fin_setup() { window.location.href = "st-fin-setup.php"; }
+    function settings_admin_fin_setup() { window.location.href = "payment-setup.php"; }
     function settings_admin_data_center() { window.location.href = "hub-admin.php"; }
     function settings_admin_data_center_ins() { window.location.href = "information-hub.php"; }
 </script>
