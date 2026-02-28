@@ -385,7 +385,7 @@ include 'inc.php';
 
 
 
-<div class="modal fade" id="permModal" tabindex="-1" aria-hidden="true" style="padding-left:5%;">
+<div class="modal fade" id="permModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" >
         <div class="modal-content m3-modal-main shadow-lg border-0">
 
