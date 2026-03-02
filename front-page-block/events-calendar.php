@@ -64,13 +64,15 @@ $res_history = $conn->query($sql_history);
                 margin-bottom: 2px;
                 display: inline-block;
         }
+            .history-lbl-header { font-size: 0.65rem; font-weight: 800; color: #146C32; text-transform: uppercase; letter-spacing: 0.5px; }
+
 </style>
 
 <div class="history-block-container">
         <div class="d-flex justify-content-between align-items-center mb-1">
-                <div class="fw-black text-primary small"><i class="bi bi-calendar-event-fill me-1"></i> TODAY'S HISTORY
+                <div class="history-lbl-header"><i class="bi bi-calendar-event-fill me-1"></i> History of the day
                 </div>
-                <a href="history-manager.php" class="btn btn-sm p-0 text-muted"><i
+                <a href="history-manager.php" class="btn btn-sm p-0 text-muted fs-6"><i
                                 class="bi bi-arrow-right-circle"></i></a>
         </div>
 

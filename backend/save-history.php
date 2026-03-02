@@ -2,12 +2,15 @@
 include '../inc.light.php'; // আপনার DB কানেকশন এবং $sccode এখানে আছে
 header('Content-Type: application/json');
 
+if ($is_admin > 3) {
+    $sccode = 0;
+}
 // ১. ডিলিট অপারেশন (যদি delete_id পাঠানো হয়)
 if (isset($_POST['delete_id'])) {
     $id = intval($_POST['delete_id']);
     $stmt = $conn->prepare("DELETE FROM history WHERE id = ? AND sccode = ?");
     $stmt->bind_param("ii", $id, $sccode);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Event deleted']);
     } else {
@@ -17,14 +20,14 @@ if (isset($_POST['delete_id'])) {
 }
 
 // ২. সেভ/আপডেট অপারেশন
-$id       = intval($_POST['id']);
-$date     = $_POST['date'];
-$day      = date('d', strtotime($date));
-$month    = date('m', strtotime($date));
+$id = intval($_POST['id']);
+$date = $_POST['date'];
+$day = date('d', strtotime($date));
+$month = date('m', strtotime($date));
 $category = $_POST['category'];
-$type     = $_POST['type'];
-$zone     = $_POST['zone'];
-$details  = $_POST['details'];
+$type = $_POST['type'];
+$zone = $_POST['zone'];
+$details = $_POST['details'];
 $priority = intval($_POST['priority']);
 
 if ($id == 0) {

@@ -23,10 +23,15 @@ $month = date('m', strtotime($target_date));
 
     /* Tonal Hero Area */
     .history-hero {
-        background-color: var(--m3-secondary-container);
-        padding: 30px 20px 60px;
-        border-radius: 0 0 32px 32px;
+        background-color: var(--m3-primary);
+        padding: 40px 20px 60px;
+        /* নিচের দিকে প্যাডিং বাড়িয়ে দেওয়া হয়েছে */
+        border-radius: 0 0 40px 40px;
         text-align: center;
+        position: relative;
+        /* পজিশন নিশ্চিত করা */
+        z-index: 1;
+        color: wheat;
     }
 
     .date-pill {
@@ -42,30 +47,14 @@ $month = date('m', strtotime($target_date));
     }
 
     /* Event Cards */
-    .event-card {
-        background: white;
-        border-radius: 24px;
-        padding: 16px;
-        margin-bottom: 12px;
-        border: 1px solid #E7E0EC;
-        transition: 0.3s;
-        position: relative;
-    }
+
 
     .event-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 16px rgba(103, 80, 164, 0.08);
     }
 
-    .cat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-    }
+
 
     /* Type-based Colors */
     .type-Birth {
@@ -185,10 +174,70 @@ $month = date('m', strtotime($target_date));
     }
 </style>
 
+<style>
+    /* আইকন এবং কার্ডের সৌন্দর্য বর্ধন */
+    .cat-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .event-card {
+        background: #FFFFFF;
+        border: 1px solid rgba(103, 80, 164, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        /* একটু বেশি শ্যাডো যাতে হিরো থেকে আলাদা দেখায় */
+        border-radius: 16px;
+        padding: 12px;
+    }
+
+    /* ড্রপডাউন অ্যারো লুকানো */
+    .dropdown-toggle::after {
+        display: none !important;
+    }
+
+    /* গ্রিপ আইকন হোভার ইফেক্ট */
+    .drag-handle:hover {
+        background-color: rgba(103, 80, 164, 0.05);
+        border-radius: 8px;
+    }
+</style>
+
+<style>
+    .m3-drag-placeholder {
+        background-color: var(--m3-secondary-container);
+        border: 2px dashed var(--m3-primary);
+        border-radius: 24px;
+        height: 80px;
+        margin-bottom: 12px;
+        visibility: visible !important;
+    }
+
+    /* ড্র্যাগ করার সময় কার্সার চেঞ্জ */
+    .drag-handle:active {
+        cursor: grabbing !important;
+    }
+
+    #eventContainer {
+        position: relative;
+        z-index: 10;
+        /* হিরোর চেয়ে বেশি জেনুইন ইনডেক্স */
+        margin-top: -40px;
+        /* হিরোর ভেতর যতটুকু ঢোকাতে চান */
+        padding-top: 10px;
+        /* প্রথম কার্ডটি যেন একদম লেগে না যায় */
+    }
+</style>
+
 <main class="pb-5">
     <div class="history-hero shadow-sm">
-        <h3 class="fw-black m-0 text-dark">This Day in History</h3>
-        <p class="small text-muted fw-bold mb-0">Discover important national & international events</p>
+        <h3 class="fw-bold m-0 ">This Day in History</h3>
+        <p class="small text-white fw-normal mb-0">Discover important national & international events</p>
 
         <form id="dateFilterForm" class="date-pill">
             <i class="bi bi-calendar-check text-primary"></i>
@@ -197,7 +246,7 @@ $month = date('m', strtotime($target_date));
         </form>
     </div>
 
-    <div class="container-fluid px-3" style="margin-top: -25px;">
+    <div class="container-fluid px-3" id="eventContainer" style="margin-top: -25px;">
         <?php
         $sql = "SELECT * FROM history WHERE day = $day AND month = $month ORDER BY priority DESC";
         $res = $conn->query($sql);
@@ -205,34 +254,47 @@ $month = date('m', strtotime($target_date));
         if ($res->num_rows > 0):
             while ($row = $res->fetch_assoc()):
                 $icon = match ($row['category']) {
-                    'Scientist' => 'bi-atom',
+                    'Scientist' => 'bi-claude',
                     'Poet', 'Writer' => 'bi-pen-fill',
                     'Politicial' => 'bi-bank',
                     'Sports' => 'bi-trophy-fill',
                     'Singer', 'Artist' => 'bi-music-note-beamed',
                     default => 'bi-star-fill'
                 };
+
+                $hidden = 'hidden';
+                if ($row['sccode'] == 0 && $is_admin > 3) {
+                    $hidden = '';
+                }
+                if ($row['sccode'] != 0 && ($is_admin > 3 || $is_chief == 1)) {
+                    $hidden = '';
+                }
                 ?>
-                <div class="event-card shadow-sm d-flex align-items-center gap-3">
-                    <div class="cat-icon type-<?= $row['type'] ?>">
+                <div class="event-card shadow-sm d-flex align-items-center gap-3 item mb-3" data-id="<?= $row['id'] ?>">
+
+                    <div class="cat-icon type-<?= $row['type'] ?> shadow-xs">
                         <i class="bi <?= $icon ?>"></i>
                     </div>
+
                     <div class="flex-grow-1 overflow-hidden">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <span class="zone-badge"><?= $row['zone'] ?> • <?= $row['type'] ?></span>
-                            <div class="dropdown">
-                                <i class="bi bi-three-dots-vertical text-muted pointer" data-bs-toggle="dropdown"></i>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4">
-                                    <li><a class="dropdown-item fw-bold" onclick="editEvent(<?= $row['id'] ?>)"><i
-                                                class="bi bi-pencil me-2"></i> Edit</a></li>
-                                    <li><a class="dropdown-item fw-bold text-danger" onclick="deleteEvent(<?= $row['id'] ?>)"><i
-                                                class="bi bi-trash me-2"></i> Delete</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="fw-black text-dark text-truncate"><?= $row['category'] ?></div>
-                        <p class="small text-muted mb-0"><?= $row['details'] ?></p>
+                        <div class="zone-badge"><?= $row['zone'] ?> • <?= $row['type'] ?></div>
+                        <div class="fw-black text-dark text-truncate" style="font-size: 0.95rem;"><?= $row['category'] ?></div>
+                        <p class="small text-muted mb-0 text-truncate" style="font-size: 0.8rem;"><?= $row['details'] ?></p>
                     </div>
+
+                    <div class="dropdown">
+                        <div class="drag-handle dropdown-toggle p-2" data-bs-toggle="dropdown" aria-expanded="false"
+                            style="cursor: grab; color: #79747E;" <?= $hidden ?>>
+                            <i class="bi bi-grip-vertical fs-3"></i>
+                        </div>
+                        <ul class="dropdown-menu border-0 shadow-lg rounded-4" style="z-index:100;">
+                            <li><a class="dropdown-item fw-bold" onclick="editEvent(<?= $row['id'] ?>)">
+                                    <i class="bi bi-pencil me-2 text-primary"></i> Edit</a></li>
+                            <li><a class="dropdown-item fw-bold text-danger" onclick="deleteEvent(<?= $row['id'] ?>)">
+                                    <i class="bi bi-trash me-2"></i> Delete</a></li>
+                        </ul>
+                    </div>
+
                 </div>
                 <?php
             endwhile;
@@ -243,7 +305,7 @@ $month = date('m', strtotime($target_date));
     </div>
 
     <button class="m3-fab border-0 shadow-lg"
-        style="position:fixed; bottom:80px; right:30px; width:56px; height:56px; border-radius:16px; background:var(--m3-primary); color:white;"
+        style="position:fixed; bottom:80px; right:30px; width:56px; height:56px; border-radius:16px; background:var(--m3-primary); color:white; z-index:500;"
         onclick="openAddModal()">
         <i class="bi bi-plus-lg fs-3"></i>
     </button>
@@ -332,6 +394,53 @@ $month = date('m', strtotime($target_date));
 
 <?php include 'footer.php'; ?>
 
+
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+    $(function () {
+        $("#eventContainer").sortable({
+            handle: ".drag-handle", // শুধুমাত্র গ্রিপ আইকন দিয়ে ড্র্যাগ হবে
+            placeholder: "m3-drag-placeholder", // ড্র্যাগ করার সময় খালি জায়গা দেখাবে
+            update: function (event, ui) {
+                saveHistoryOrder(); // ড্রপ করার সাথে সাথে সেভ হবে
+            }
+        });
+    });
+
+    function saveHistoryOrder() {
+        // নতুন সিরিয়াল অনুযায়ী ID গুলোর অ্যারে তৈরি করা
+        let order = [];
+        $('.item').each(function (index) {
+            // নতুন সিরিয়াল হবে (লিস্টের নিচের দিকে গেলে প্রায়োরিটি কমবে)
+            // অথবা আপনি উল্টোটাও করতে পারেন (index + 1)
+            order.push({
+                id: $(this).data('id'),
+                priority: 100 - index // ওপরের ইভেন্ট বেশি প্রায়োরিটি পাবে
+            });
+        });
+
+        // AJAX এর মাধ্যমে ব্যাকএন্ডে পাঠানো
+        $.ajax({
+            url: 'backend/save-history-order.php',
+            type: 'POST',
+            data: { order: JSON.stringify(order) },
+            success: function (res) {
+                if (res.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Updated',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+                }
+            },
+            dataType: 'json'
+        });
+    }
+</script>
+
 <script>
     const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
 
@@ -344,17 +453,31 @@ $month = date('m', strtotime($target_date));
     }
 
     function editEvent(id) {
-        $.post('backend/get-history.php', { id }, function (res) {
-            const d = JSON.parse(res);
-            $('#e_id').val(d.id);
-            $('#e_date').val(d.date);
-            $('#e_category').val(d.category);
-            $('#e_type').val(d.type);
-            $('#e_zone').val(d.zone);
-            $('#e_details').val(d.details);
-            $('#e_priority').val(d.priority);
-            $('#modalTitle').text('Edit Entry');
-            eventModal.show();
+        console.log("Fetching ID:", id); // ডিবাগিং এর জন্য
+
+        $.post('backend/get-history.php', { id }, function (d) {
+            // এখানে সরাসরি 'd' ব্যবহার করা হয়েছে, JSON.parse করার প্রয়োজন নেই 
+            // কারণ আমরা শেষে 'json' টাইপ বলে দিয়েছি
+
+            if (d) {
+                $('#e_id').val(d.id);
+                $('#e_date').val(d.date);
+                $('#e_category').val(d.category);
+                $('#e_type').val(d.type);
+                $('#e_zone').val(d.zone);
+                $('#e_details').val(d.details);
+                $('#e_priority').val(d.priority);
+
+                $('#modalTitle').text('Edit History Entry');
+
+                // মডাল ওপেন করা
+                eventModal.show();
+            } else {
+                console.error("No data found for ID:", id);
+            }
+        }, 'json').fail(function (xhr, status, error) {
+            console.error("AJAX Error:", error);
+            alert("Failed to fetch data. Please check console.");
         });
     }
 
@@ -386,4 +509,14 @@ $month = date('m', strtotime($target_date));
             }
         });
     }
+
+    $(function () {
+        $("#eventContainer").sortable({
+            handle: ".drag-handle", // এটি নিশ্চিত করুন
+            placeholder: "m3-drag-placeholder",
+            update: function (event, ui) {
+                saveHistoryOrder();
+            }
+        });
+    });
 </script>
