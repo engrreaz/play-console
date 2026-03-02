@@ -234,16 +234,16 @@ foreach ($datam_calendar_events as $event) {
 
 <style>
     /* Hero Section Styles */
-    .hero-container {
+    .hero-container-ex {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
-        margin: 16px;
+        margin: 12px;
     }
 
     .hero-card {
         background: #fff;
-        border-radius: 20px;
+        border-radius: 16px;
         padding: 16px;
         border: 1px solid #E7E0EC;
         position: relative;
@@ -254,8 +254,15 @@ foreach ($datam_calendar_events as $event) {
         min-height: 120px;
     }
 
-    .hero-card.ongoing { background-color: #F3EDF7; border-color: #D0BCFF; }
-    .hero-card.next { background-color: #E8F0FF; border-color: #B2D7FF; }
+    .hero-card.ongoing {
+        background-color: #F3EDF7;
+        border-color: #D0BCFF;
+    }
+
+    .hero-card.next {
+        background-color: #E8F0FF;
+        border-color: #B2D7FF;
+    }
 
     .hero-label {
         font-size: 0.7rem;
@@ -265,32 +272,53 @@ foreach ($datam_calendar_events as $event) {
         margin-bottom: 8px;
         display: block;
     }
-    .ongoing .hero-label { color: #6750A4; }
-    .next .hero-label { color: #004A77; }
 
-    .hero-title { font-size: 1rem; font-weight: 900; margin: 0; line-height: 1.2; color: #1C1B1F; }
-    .hero-date { font-size: 0.75rem; font-weight: 600; color: #49454F; margin-top: 4px; }
-    
+    .ongoing .hero-label {
+        color: #6750A4;
+    }
+
+    .next .hero-label {
+        color: #004A77;
+    }
+
+    .hero-title {
+        font-size: 1rem;
+        font-weight: 900;
+        margin: 0;
+        line-height: 1.2;
+        color: #1C1B1F;
+    }
+
+    .hero-date {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #49454F;
+        margin-top: 4px;
+    }
+
     .hero-icon-bg {
         position: absolute;
-        right: -10px;
+        right: 10px;
         bottom: -10px;
-        font-size: 4rem;
+        font-size: 5rem;
         opacity: 0.1;
-        transform: rotate(-15deg);
+        transform: rotate(-25deg);
     }
 
     @media (max-width: 600px) {
-        .hero-container { grid-template-columns: 1fr; }
+        .hero-container-ex {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="hero-container">
+<div class="hero-container-ex">
     <div class="hero-card ongoing shadow-sm">
         <div>
             <span class="hero-label"><i class="bi bi-broadcast-pin me-1"></i> Ongoing Now</span>
             <h5 class="hero-title"><?= $ongoing_event ? $ongoing_event['descrip'] : 'Regular Class Day' ?></h5>
-            <p class="hero-date"><?= $ongoing_event ? date('d M', strtotime($ongoing_event['date'])) : 'Keep it up!' ?></p>
+            <p class="hero-date"><?= $ongoing_event ? date('d M', strtotime($ongoing_event['date'])) : 'Keep it up!' ?>
+            </p>
         </div>
         <i class="bi bi-stars hero-icon-bg"></i>
     </div>
@@ -337,6 +365,7 @@ foreach ($datam_calendar_events as $event) {
 
 
 
+<?php echo getPagePermission('calendar.php'); ?>
 
 
 
@@ -360,7 +389,7 @@ foreach ($datam_calendar_events as $event) {
                     <div class="row g-3 mb-3">
                         <div class="col-6">
                             <label class="m3-label">Start Date</label>
-                            <input type="date" name="date" id="event_date" class="m3-input-field w-100" >
+                            <input type="date" name="date" id="event_date" class="m3-input-field w-100">
                         </div>
                         <div class="col-6">
                             <label class="m3-label">End Date (Optional)</label>

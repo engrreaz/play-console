@@ -670,7 +670,8 @@ if (strpos($chain, 'class') !== false) {
             </div>
 
             <div class="col-12">
-                <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain" onclick="btn_chain();">
+                <!-- <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain" onclick="btn_chain();"> -->
+                <button type="button" class="btn-m3-primary shadow-sm" id="btn-chain" >
 
                     <i class="bi bi-arrow-right-circle-fill"></i>
                     <span><?= htmlspecialchars($chain_button_text) ?></span>

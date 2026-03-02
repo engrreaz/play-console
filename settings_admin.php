@@ -128,6 +128,18 @@ $sy_param = '%' . $current_session . '%';
     </a>
 
 
+<div class="m3-section-title px-3 mt-4">Account Management</div>
+
+  <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_billing_manager();">
+    <div class="icon-box bg-billing">
+        <i class="bi bi-receipt-cutoff fs-4"></i> 
+    </div>
+    <div class="setting-info">
+        <div class="st-title">Invoices & Payments</div>
+        <div class="st-desc">View your account billing, invoices, and payment history</div>
+    </div>
+    <i class="bi bi-chevron-right text-muted opacity-50 small"></i>
+</a>
 
     <div class="m3-section-title px-3 mt-4">Access Control</div>
 
@@ -267,6 +279,8 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_fin_setup() { window.location.href = "payment-setup.php"; }
     function settings_admin_data_center() { window.location.href = "hub-admin.php"; }
     function settings_admin_data_center_ins() { window.location.href = "information-hub.php"; }
+    function settings_billing_manager() { window.location.href = "billing-manager.php"; }
+
 </script>
 
 <?php include 'footer.php'; ?>

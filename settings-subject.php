@@ -117,7 +117,7 @@ $sy_param = '%' . $current_session . '%';
 </button>
 
 <main class="pb-5 mt-2">
-    <?php if ($userlevel == 'Administrator' || $userlevel == 'Head Teacher'): ?>
+
 
         <div class="selection-card shadow-sm">
             <?php
@@ -137,11 +137,7 @@ $sy_param = '%' . $current_session . '%';
             </div>
         </div>
 
-    <?php else: ?>
-        <div class="text-center py-5 opacity-50"><i class="bi bi-shield-lock display-1"></i>
-            <h5 class="fw-bold">Access Denied</h5>
-        </div>
-    <?php endif; ?>
+
 </main>
 
 <div class="modal fade" id="subModal" tabindex="-1" aria-hidden="true">
@@ -204,7 +200,7 @@ $sy_param = '%' . $current_session . '%';
         const clsf = document.getElementById("class-main").value;
         const secf = document.getElementById("section-main").value;
 
-        // alert(clsf + " | " + secf);
+        alert(clsf + " | " + secf);
         if (!secf || !clsf) {
             $('#fab-add-sub').fadeOut();
             return;

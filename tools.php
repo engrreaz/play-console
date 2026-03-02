@@ -40,11 +40,11 @@ $admin_tools = [
         'url' => 'leave-application-response.php'
     ],
     [
-        'title' => 'Notice Manager',
-        'desc' => 'Broadcast institute notifications',
-        'icon' => 'bi-megaphone',
+        'title' => 'History & Events',
+        'desc' => 'Manage important national and international historical milestones',
+        'icon' => 'bi-calendar-range',
         'color' => 'c-acad',
-        'url' => 'add-notice.php'
+        'url' => 'history-manager.php'
     ]
 ];
 ?>

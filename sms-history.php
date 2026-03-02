@@ -1,110 +1,158 @@
 <?php
+$page_title = 'SMS History';
 include 'inc.php';
 ?>
 
-<main>
-  <div class="container-fluidx">
-    <div class="card text-left" style="background:var(--dark); color:var(--lighter);">
-      <div class="card-body page-top-box">
-
-        <div class="menu-icon"><i class="bi bi-clock-history"></i></div>
-        <div class="menu-text"> SMS History </div>
-      </div>
-      <div class="card-body page-info-box">
-        <table width="100%" style="color:white;">
-          <tr>
-            <td>
-              <div style="font-size:20px; font-weight:700; line-height:15px;"></div>
-              <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">_
-              </div>
-              <br>
-              <div style="font-size:16px; font-weight:700; line-height:15px;"> </div>
-              <div style="font-size:12px; font-weight:400; font-style:italic; line-height:18px;">-</div>
-            </td>
-            <td style="text-align:right;">
-              <div style="font-size:30px; font-weight:700; line-height:20px;" id="cnt"></div>
-              <div style="font-size:12px; font-weight:400; font-style:italic; line-height:24px;">Total Sent</div>
-            </td>
-          </tr>
-
-        </table>
-      </div>
-    </div>
-
-
-    <?php
-    $datam_sms = array();
-    $sql0 = "SELECT * FROM sms where sccode = '$sccode'  order by date desc, modifieddate desc, id desc";
-    //echo $sql0;
-    $result0 = $conn->query($sql0);
-    if ($result0->num_rows > 0) {
-      while ($row0 = $result0->fetch_assoc()) {
-        $datam_sms[] = $row0;
-      }
+<style>
+    :root {
+        /* M3 Tonal Palette colors */
+        --m3-surface: #F7F9FF;
+        --m3-on-surface: #1A1C1E;
+        --m3-primary-container: #D1E4FF;
+        --m3-on-primary-container: #001D36;
+        --m3-surface-variant: #E0E2EC;
+        --m3-on-surface-variant: #44474E;
+        --m3-success: #198754;
+        --m3-error: #B3261E;
+        --m3-card-outline: #C4C6D0;
     }
 
-    $total_qnt = 0;
-    foreach ($datam_sms as $camps) {
-      $ccode = $camps['response_code'];
-                $cost = $camps['cost'];
-                if ($ccode == 1002) {
-                  $icon = 'check-circle-fill';
-                  $color = 'seagreen';
-                } else {
-                  $icon = 'x-circle-fill';
-                  $color = '#800';
-                }
-      ?>
-      <div class="card text-start gg mb-1" style="background:var(--lighter); color:var(--darker);"
-        onclick="class_section_list_for_student_list_edit('<?php echo $lnk; ?>')">
-        <div class="card-body ">
-          <div class="row">
-            <div class="col-9">
-              <div class="stname-ben" style="color:<?php echo $color;?>;"><?php echo $camps['mobile_number']; ?></div>
-            </div>
+    body {
+        background-color: var(--m3-surface);
+        font-family: 'Roboto', sans-serif;
+        color: var(--m3-on-surface);
+        margin: 0;
+    }
 
+    .m3-main { padding: 16px; max-width: 600px; margin: 0 auto; }
 
-            <div class="col-3">
-              <div class=" ">
-                <?php
-                
+    /* M3 Header Card */
+    .header-box {
+        background-color: var(--m3-primary-container);
+        color: var(--m3-on-primary-container);
+        border-radius: 24px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
 
+    .header-info h2 { margin: 0; font-size: 20px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+    
+    .counter-section { text-align: right; }
+    .counter-val { font-size: 28px; font-weight: 700; line-height: 1; }
+    .counter-label { font-size: 11px; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.5px; }
 
-                ?>
-                <div class="text-right">
-                  <i class="bi bi-<?php echo $icon; ?>" style="color: <?php echo $color; ?>"></i>
+    /* SMS History Cards */
+    .history-card {
+        background: #FFFFFF;
+        border: 1px solid var(--m3-card-outline);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: background-color 0.2s;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-                </div>
-              </div>
+    .history-card:active {
+        background-color: var(--m3-surface-variant);
+    }
 
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
 
-            </div>
+    .mobile-no {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
 
+    .status-icon { font-size: 18px; }
 
-          </div>
+    .sms-content {
+        font-size: 14px;
+        color: var(--m3-on-surface);
+        line-height: 1.5;
+        margin-bottom: 10px;
+        word-wrap: break-word;
+    }
 
+    .meta-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--m3-on-surface-variant);
+        font-weight: 500;
+    }
 
-          <div class="row">
-            <div class="col-12">
-              <div class="st-id text-black"><?php echo $camps['sms_text']; ?></div>
-              <div class="st-id text-muted mb-2"><?php echo date('d-m-Y H:i:s', strtotime($camps['send_time'])); ?></div>
-            </div>
-          </div>
+    /* Status Specific Colors */
+    .status-success { color: var(--m3-success); }
+    .status-failed { color: var(--m3-error); }
+</style>
+
+<main class="m3-main">
+    <div class="header-box">
+        <div class="header-info">
+            <h2><i class="bi bi-clock-history"></i> SMS History</h2>
+            <div style="font-size: 12px; opacity: 0.7; margin-top: 4px;">Logs of sent messages</div>
         </div>
-      </div>
+        <div class="counter-section">
+            <div id="cnt" class="counter-val">0</div>
+            <div class="counter-label">Total Sent</div>
+        </div>
     </div>
-    <?php 
-    } ?>
 
+    <?php
+    $sql0 = "SELECT * FROM sms WHERE sccode = '$sccode' ORDER BY send_time DESC LIMIT 50";
+    $result0 = $conn->query($sql0);
+    $total_sent = 0;
 
-  </div>
+    if ($result0 && $result0->num_rows > 0) {
+        $total_sent = $result0->num_rows; 
+        while ($row = $result0->fetch_assoc()) {
+            $is_success = ($row['response_code'] == 1002);
+            $status_class = $is_success ? 'status-success' : 'status-failed';
+            $status_icon = $is_success ? 'check-circle-fill' : 'x-circle-fill';
+            ?>
+            
+            <div class="history-card" onclick="/* Handle Click */">
+                <div class="card-top">
+                    <div class="mobile-no <?php echo $status_class; ?>">
+                        <?php echo htmlspecialchars($row['mobile_number']); ?>
+                    </div>
+                    <div class="status-icon <?php echo $status_class; ?>">
+                        <i class="bi bi-<?php echo $status_icon; ?>"></i>
+                    </div>
+                </div>
 
+                <div class="sms-content">
+                    <?php echo nl2br(htmlspecialchars($row['sms_text'])); ?>
+                </div>
+
+                <div class="meta-info">
+                    <span><i class="bi bi-calendar3"></i> <?php echo date('d M, Y', strtotime($row['send_time'])); ?></span>
+                    <span><i class="bi bi-alarm"></i> <?php echo date('h:i A', strtotime($row['send_time'])); ?></span>
+                </div>
+            </div>
+
+            <?php
+        }
+    } else {
+        echo '<div style="text-align:center; padding:40px; color:gray;">No history found.</div>';
+    }
+    ?>
 </main>
 
-<div style="height:52px;"></div>
+<?php include 'footer.php'; ?>
+
 
 <script>
-
-  document.getElementById("cnt").innerHTML = <?php echo $total_qnt; ?>;
-
+    // Update counter safely
+    document.getElementById("cnt").innerHTML = "<?php echo $total_sent; ?>";
 </script>

@@ -3,7 +3,8 @@ $page_title = "Payment Setup";
 include 'inc.php'; // আপনার মূল হেডার ফাইল
 
 $slot = $_COOKIE['chain-slot'] ?? '';
-$sessionyear_param = '%' . $_COOKIE['chain-session'] . '%';
+$ss = $_COOKIE['chain-session'] ?? 2000;
+$sessionyear_param = '%' . $ss . '%';
 
 ?>
 
@@ -17,10 +18,7 @@ $sessionyear_param = '%' . $_COOKIE['chain-session'] . '%';
         --m3-tertiary-container: #FFDDB3;
     }
 
-    body {
-        background-color: var(--m3-surface);
-        font-family: 'Inter', sans-serif;
-    }
+
 
     /* M3 Tonal Hero Section */
     .setup-hero {
@@ -230,6 +228,9 @@ $sessionyear_param = '%' . $_COOKIE['chain-session'] . '%';
     }
 </style>
 
+
+
+
 <main>
     <section class="setup-hero shadow-sm">
 
@@ -283,15 +284,15 @@ $sessionyear_param = '%' . $_COOKIE['chain-session'] . '%';
                             ৳ <?= number_format($valAmount, 2) ?>
                         </div>
                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4">
-                            <li><a class="dropdown-item fw-bold" onclick="openEdit(<?= $id ?>)"><i
+                            <li><a class="dropdown-item " onclick="openEdit(<?= $id ?>)"><i
                                         class="bi bi-pencil me-2 text-primary"></i> Edit Details</a></li>
-                            <li><a class="dropdown-item fw-bold"
+                            <li><a class="dropdown-item "
                                     onclick="openAmountModal(<?= $id ?>, '<?= $itemcode ?>', <?= $r['splitable'] ?? 0 ?>, '<?= $r['particulareng'] ?>')"><i
                                         class="bi bi-currency-dollar me-2 text-success"></i> Change Default Amount</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item fw-bold text-danger" onclick="delItem(<?= $id ?>)"><i
+                            <li><a class="dropdown-item text-danger" onclick="delItem(<?= $id ?>)"><i
                                         class="bi bi-trash me-2"></i> Delete Item</a></li>
                         </ul>
                     </div>

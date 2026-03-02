@@ -1,143 +1,161 @@
 <?php
-include 'inc.php'; // DB সংযোগ এবং সেশন লোড করবে
+$page_title = "Accounts Hub";
+include 'inc.php'; 
 
 // ১. কুইক ক্যালকুলেশন (Prepared Statements - Secure)
 $sy_param = "%$sy%";
 
 // Cash-in-my-hand (CIMH) ক্যালকুলেশন
-$stmt1 = $conn->prepare("SELECT SUM(amount) FROM transaction WHERE sessionyear LIKE ? AND sccode = ? AND receivedby = ?");
-$stmt1->bind_param("sss", $sy_param, $sccode, $usr);
-$stmt1->execute();
-$stmt1->bind_result($money_rec);
-$stmt1->fetch();
-$stmt1->close();
+function get_sum($conn, $query, $params, $types) {
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $stmt->bind_result($result);
+    $stmt->fetch();
+    $stmt->close();
+    return $result ?? 0;
+}
 
-$stmt2 = $conn->prepare("SELECT SUM(amount) FROM banktrans WHERE entryby = ? AND sccode = ? AND transtype = 'Deposit'");
-$stmt2->bind_param("ss", $usr, $sccode);
-$stmt2->execute();
-$stmt2->bind_result($money_dep);
-$stmt2->fetch();
-$stmt2->close();
+$money_rec = get_sum($conn, "SELECT SUM(amount) FROM transaction WHERE sessionyear LIKE ? AND sccode = ? AND receivedby = ?", [$sy_param, $sccode, $usr], "sss");
+$money_dep = get_sum($conn, "SELECT SUM(amount) FROM banktrans WHERE entryby = ? AND sccode = ? AND transtype = 'Deposit'", [$usr, $sccode], "ss");
+$money_wth = get_sum($conn, "SELECT SUM(amount) FROM banktrans WHERE entryby = ? AND sccode = ? AND transtype = 'Withdraw'", [$usr, $sccode], "ss");
 
-$stmt3 = $conn->prepare("SELECT SUM(amount) FROM banktrans WHERE entryby = ? AND sccode = ? AND transtype = 'Withdraw'");
-$stmt3->bind_param("ss", $usr, $sccode);
-$stmt3->execute();
-$stmt3->bind_result($money_wth);
-$stmt3->fetch();
-$stmt3->close();
-
-// আপনার লজিক অনুযায়ী CIMH ক্যালকুলেশন (হার্ডকোড অংশসহ)
-$cimh = (($money_rec ?? 0) + ($money_wth ?? 0) - ($money_dep ?? 0)) - 4832462.5;
+// আপনার লজিক অনুযায়ী CIMH (অ্যাডজাস্টমেন্টসহ)
+$cimh = ($money_rec + $money_wth - $money_dep) - 4832462.5;
 ?>
 
 <style>
-    body { background-color: #FEF7FF; } /* M3 Surface */
+    :root {
+        --m3-primary: #6750A4;
+        --m3-on-primary: #FFFFFF;
+        --m3-primary-container: #EADDFF;
+        --m3-on-primary-container: #21005D;
+        --m3-surface: #FEF7FF;
+        --m3-surface-container: #F3EDF7;
+        --m3-secondary: #625B71;
+        --m3-outline: #79747E;
+    }
 
-    /* Top Hero Bar */
-    .m3-hero-bar {
-        background: linear-gradient(135deg, #6750A4, #9581CD);
-        border-radius: 0 0 32px 32px;
-        padding: 30px 20px 40px;
+    body { background-color: var(--m3-surface); font-family: 'Roboto', sans-serif; margin: 0; }
+
+    /* Top Gradient Hero Section */
+    .hero-box {
+        background: linear-gradient(180deg, var(--m3-primary) 0%, #9581CD 100%);
+        padding: 40px 20px 60px;
         color: white;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(103,80,164,0.2);
-    }
-    .total-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; opacity: 0.8; letter-spacing: 1px; }
-    .total-val { font-size: 2.2rem; font-weight: 800; line-height: 1; }
-
-    /* Settlement Card */
-    .settle-card {
-        background: white; border-radius: 28px; padding: 20px;
-        margin: -20px 16px 20px; border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-radius: 0 0 32px 32px;
     }
 
-    /* List Item Styling */
-    .m3-list-card {
-        background: #fff; border-radius: 20px; padding: 16px;
-        margin: 0 16px 12px; border: none;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        display: flex; flex-direction: column;
+    .hero-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8; font-weight: 700; }
+    .hero-box .amount { font-size: 36px; font-weight: 800; margin-top: 5px; }
+
+    /* Floating Action Card (Deposit) */
+    .m3-card-elevated {
+        background: white;
+        border-radius: 24px;
+        padding: 20px;
+        margin: -40px 16px 24px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
     }
-    
-    .user-info { display: flex; align-items: center; margin-bottom: 12px; }
-    .avatar-icon {
-        width: 44px; height: 44px; border-radius: 12px;
-        background: #F3EDF7; color: #6750A4;
+
+    /* List Items */
+    .staff-card {
+        background: white;
+        border-radius: 20px;
+        padding: 16px;
+        margin: 0 16px 12px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s;
+        border: 1px solid var(--m3-surface-container);
+    }
+
+    .staff-card:active { transform: scale(0.98); background: var(--m3-surface-container); }
+
+    .avatar-circle {
+        width: 48px; height: 48px; border-radius: 12px;
+        background: var(--m3-primary-container);
+        color: var(--m3-on-primary-container);
         display: flex; align-items: center; justify-content: center;
-        margin-right: 12px;
+        font-size: 20px; margin-right: 12px;
     }
 
-    .form-floating > .form-control, .form-floating > .form-select {
-        border-radius: 12px; border: 1px solid #79747E; background: transparent;
+    /* Form Styling */
+    .m3-input-group {
+        display: flex; gap: 8px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--m3-outline);
     }
 
-    .btn-m3-tonal {
-        background: #EADDFF; color: #21005D; border-radius: 100px;
-        font-weight: 700; border: none; padding: 10px 20px; font-size: 0.85rem;
+    .m3-field {
+        flex: 1; border: 1px solid var(--m3-outline); border-radius: 8px;
+        padding: 8px 12px; font-size: 14px; outline: none;
     }
-    .btn-m3-primary {
-        background: #6750A4; color: white; border-radius: 100px;
-        font-weight: 700; border: none; padding: 12px 24px;
+
+    .btn-tonal {
+        background: var(--m3-primary-container); color: var(--m3-on-primary-container);
+        border: none; border-radius: 100px; padding: 10px 16px; font-weight: 600; font-size: 13px;
+    }
+
+    .btn-primary-m3 {
+        background: var(--m3-primary); color: white;
+        border: none; border-radius: 100px; padding: 12px 24px; font-weight: 600; width: 100%;
     }
 </style>
 
-<main class="pb-5">
-    <div class="m3-hero-bar">
+<main>
+    <div class="hero-box">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="reporthome.php" class="text-white"><i class="bi bi-arrow-left fs-4"></i></a>
-            <h6 class="fw-bold mb-0">Cash Settlement</h6>
-            <div style="width: 24px;"></div>
+            <a href="reporthome.php" class="text-white"><i class="bi bi-arrow-left-short fs-2"></i></a>
+            <span class="fw-bold">Accounts Hub</span>
+            <div style="width:32px;"></div>
         </div>
-        <div class="total-label">Combined Net Receivable</div>
-        <div class="total-val">৳ <span id="sobar_display">0.00</span></div>
+        <div class="label">Total Net Receivable</div>
+        <div class="amount">৳ <span id="sobar_display">0.00</span></div>
     </div>
 
-    <div class="settle-card shadow">
-        <h6 class="fw-bold text-primary mb-3 small uppercase">Deposit to Bank</h6>
-        <div class="form-floating mb-3">
-            <select class="form-select" id="partid2">
-                <?php
-                $stmt_bank = $conn->prepare("SELECT id, bankname, acctype FROM bankinfo WHERE sccode = ? AND status = 1");
-                $stmt_bank->bind_param("s", $sccode);
-                $stmt_bank->execute();
-                $res_bank = $stmt_bank->get_result();
-                while($row = $res_bank->fetch_assoc()) {
-                    echo "<option value='".$row['id']."'>".$row['bankname']." (".$row['acctype'].")</option>";
-                }
-                $stmt_bank->close();
-                ?>
-            </select>
-            <label>Select Bank Account</label>
+    <div class="m3-card-elevated">
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-bank2 text-primary me-2"></i>
+            <span class="fw-bold small text-uppercase">Bank Deposit Settlement</span>
         </div>
-        <div class="row g-2">
+        
+        <select class="m3-field mb-3 w-100" id="partid2" style="height: 45px;">
+            <?php
+            $stmt_bank = $conn->prepare("SELECT id, bankname, acctype FROM bankinfo WHERE sccode = ? AND status = 1");
+            $stmt_bank->bind_param("s", $sccode);
+            $stmt_bank->execute();
+            $res_bank = $stmt_bank->get_result();
+            while($row = $res_bank->fetch_assoc()) {
+                echo "<option value='".$row['id']."'>".$row['bankname']." (".$row['acctype'].")</option>";
+            }
+            $stmt_bank->close();
+            ?>
+        </select>
+
+        <div class="row g-2 mb-3">
             <div class="col-6">
-                <div class="form-floating mb-3">
-                    <input type="date" class="form-control" id="date" value="<?php echo date('Y-m-d'); ?>">
-                    <label>Date</label>
-                </div>
+                <input type="date" class="m3-field w-100" id="date" value="<?php echo date('Y-m-d'); ?>">
             </div>
             <div class="col-6">
-                <div class="form-floating mb-3">
-                    <input type="number" class="form-control" id="amount" value="<?php echo round($cimh, 2); ?>">
-                    <label>Amount</label>
-                </div>
+                <input type="number" class="m3-field w-100" id="amount" value="<?php echo round($cimh, 2); ?>" placeholder="Amount">
             </div>
         </div>
-        <button class="btn btn-m3-primary w-100 shadow-sm" id="subm" onclick="add_bank_deposit();">
-            <i class="bi bi-cloud-arrow-up-fill me-2"></i> SUBMIT DEPOSIT
+
+        <button class="btn-primary-m3 shadow-sm" id="subm" onclick="add_bank_deposit();">
+            <i class="bi bi-check2-circle me-1"></i> Confirm Deposit
         </button>
-        <div id="status" class="text-center mt-2"></div>
     </div>
 
-    <h6 class="ms-4 mb-3 text-secondary fw-bold small text-uppercase tracking-wider">Receivable from Staff</h6>
+    <div class="px-4 mb-3 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-secondary small">STAFF BALANCES</span>
+        <i class="bi bi-funnel small"></i>
+    </div>
 
     <div id="receivable-list">
         <?php
         $sl = 0; $sobar = 0;
-        
-        // ২. স্টুডেন্ট পেমেন্ট থেকে বকেয়া ফেচ করা
-        $sql_stpr = "SELECT entryby, classname, sectionname, SUM(amount) as mottaka FROM stpr WHERE sccode = ? AND sessionyear LIKE ? GROUP BY entryby";
+        $sql_stpr = "SELECT entryby, SUM(amount) as mottaka FROM stpr WHERE sccode = ? AND sessionyear LIKE ? GROUP BY entryby";
         $stmt_stpr = $conn->prepare($sql_stpr);
         $stmt_stpr->bind_param("ss", $sccode, $sy_param);
         $stmt_stpr->execute();
@@ -147,48 +165,34 @@ $cimh = (($money_rec ?? 0) + ($money_wth ?? 0) - ($money_dep ?? 0)) - 4832462.5;
             $by = $row["entryby"];
             $mottaka_raw = $row["mottaka"];
 
-            // অলরেডি হ্যান্ডওভার করা টাকা চেক করা
-            $stmt_paid = $conn->prepare("SELECT SUM(amount) FROM transaction WHERE receivedfrom = ? AND sccode = ? AND classname != 'Cashbook'");
-            $stmt_paid->bind_param("ss", $by, $sccode);
-            $stmt_paid->execute();
-            $stmt_paid->bind_result($handed_over);
-            $stmt_paid->fetch();
-            $stmt_paid->close();
+            // হ্যান্ডওভার চেক
+            $handed_over = get_sum($conn, "SELECT SUM(amount) FROM transaction WHERE receivedfrom = ? AND sccode = ? AND classname != 'Cashbook'", [$by, $sccode], "ss");
 
-            $balance = $mottaka_raw - ($handed_over ?? 0);
+            $balance = $mottaka_raw - $handed_over;
             if ($balance > 0) {
                 $sobar += $balance;
-                // ইউজার/টিচার নাম ফেচ করা
-                $stmt_usr = $conn->prepare("SELECT profilename FROM usersapp WHERE email = ? LIMIT 1");
-                $stmt_usr->bind_param("s", $by);
-                $stmt_usr->execute();
-                $stmt_usr->bind_result($tname);
-                $stmt_usr->fetch();
-                $stmt_usr->close();
+                // ইউজার নাম ফেচ
+                $tname = get_sum($conn, "SELECT profilename FROM usersapp WHERE email = ? LIMIT 1", [$by], "s");
         ?>
-            <div class="m3-list-card shadow-sm">
-                <div class="user-info">
-                    <div class="avatar-icon"><i class="bi bi-person-fill"></i></div>
-                    <div class="overflow-hidden">
-                        <div class="fw-bold text-dark text-truncate small"><?php echo $tname ?? $by; ?></div>
-                        <div class="text-muted" style="font-size: 0.65rem;"><?php echo $by; ?></div>
+            <div class="staff-card shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle">
+                        <i class="bi bi-person-badge"></i>
                     </div>
-                    <div class="ms-auto text-end">
-                        <div class="fw-extrabold text-primary h5 mb-0">৳<?php echo number_format($balance, 0); ?></div>
-                        <div class="small text-muted" style="font-size: 0.6rem;">PENDING</div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold text-dark text-truncate"><?php echo $tname ?: 'Unknown Staff'; ?></div>
+                        <div class="text-muted small"><?php echo $by; ?></div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-primary h5 mb-0">৳<?php echo number_format($balance, 0); ?></div>
+                        <div class="text-danger" style="font-size: 10px; font-weight: 700;">DUE</div>
                     </div>
                 </div>
                 
-                <input type="hidden" id="from<?php echo $sl; ?>" value="<?php echo $by; ?>">
-                <input type="hidden" id="cls<?php echo $sl; ?>" value=""> <input type="hidden" id="sec<?php echo $sl; ?>" value="">
-
-                <div class="d-flex gap-2 align-items-center border-top pt-3 mt-1">
-                    <div class="input-group input-group-sm" style="max-width: 150px;">
-                        <span class="input-group-text bg-white border-0">৳</span>
-                        <input type="number" class="form-control border-primary-subtle" id="amt<?php echo $sl; ?>" value="<?php echo $balance; ?>">
-                    </div>
-                    <button class="btn btn-m3-tonal flex-grow-1" id="btnbox<?php echo $sl; ?>" onclick="receive_cash(<?php echo $sl; ?>);">
-                        RECEIVE BY ME
+                <div class="m3-input-group">
+                    <input type="number" class="m3-field" style="max-width: 120px;" id="amt<?php echo $sl; ?>" value="<?php echo $balance; ?>">
+                    <button class="btn-tonal flex-grow-1" id="btnbox<?php echo $sl; ?>" onclick="receive_cash(<?php echo $sl; ?>, '<?php echo $by; ?>');">
+                        <i class="bi bi-plus-lg me-1"></i> Receive
                     </button>
                 </div>
             </div>
@@ -201,63 +205,51 @@ $cimh = (($money_rec ?? 0) + ($money_wth ?? 0) - ($money_dep ?? 0)) - 4832462.5;
     </div>
 </main>
 
-<div style="height: 60px;"></div>
-
-
-
+<?php include 'footer.php'; ?>
 <script>
     document.getElementById("sobar_display").innerText = "<?php echo number_format($sobar, 2); ?>";
 
-    // ১. স্টাফ থেকে ক্যাশ গ্রহণ
-    function receive_cash(sl) {
-        const from = document.getElementById("from" + sl).value;
+    function receive_cash(sl, from) {
         const amt = document.getElementById("amt" + sl).value;
         const btn = document.getElementById("btnbox" + sl);
 
         if(amt <= 0) return;
 
         Swal.fire({
-            title: 'Confirm Receipt?',
-            text: `You are confirming ৳${amt} from ${from}`,
-            icon: 'question',
+            title: 'Receive Cash?',
+            text: `Confirming ৳${amt} from ${from}`,
+            icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#6750A4'
+            confirmButtonColor: '#6750A4',
+            confirmButtonText: 'Yes, Confirm'
         }).then((result) => {
             if (result.isConfirmed) {
-                const data = `user=<?php echo $usr; ?>&sccode=<?php echo $sccode; ?>&sy=<?php echo $sy; ?>&cls=&sec=&from=${from}&amt=${amt}&tail=0`;
-                
                 $.ajax({
                     type: "POST",
                     url: "paymentreceived.php",
-                    data: data,
-                    beforeSend: function () { btn.innerHTML = '<div class="spinner-border spinner-border-sm"></div>'; btn.disabled = true; },
-                    success: function (html) {
-                        Swal.fire('Success', 'Cash received successfully', 'success').then(() => location.reload());
+                    data: { user: '<?php echo $usr; ?>', sccode: '<?php echo $sccode; ?>', sy: '<?php echo $sy; ?>', from: from, amt: amt, tail: 0 },
+                    beforeSend: function () { btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; btn.disabled = true; },
+                    success: function () {
+                        Swal.fire('Success', 'Receipt Recorded', 'success').then(() => location.reload());
                     }
                 });
             }
         });
     }
 
-    // ২. ব্যাংক ডিপোজিট এন্ট্রি
     function add_bank_deposit() {
-        const partid2 = document.getElementById("partid2").value;
-        const date = document.getElementById("date").value;
         const amount = document.getElementById("amount").value;
-        const btn = document.getElementById("subm");
-
         if(!amount || amount <= 0) return;
 
         $.ajax({
             type: "POST",
             url: "savebanktrans.php",
-            data: `date=${date}&partid2=${partid2}&amount=${amount}&tail=0`,
-            beforeSend: function () { btn.disabled = true; $('#status').html('<div class="spinner-border text-primary"></div>'); },
-            success: function (html) {
-                Swal.fire('Deposited!', 'Bank entry saved.', 'success').then(() => location.reload());
+            data: { date: $('#date').val(), partid2: $('#partid2').val(), amount: amount, tail: 0 },
+            beforeSend: function () { $('#subm').disabled = true; },
+            success: function () {
+                Swal.fire('Deposited!', 'Entry saved.', 'success').then(() => location.reload());
             }
         });
     }
 </script>
 
-<?php include 'footer.php'; ?>

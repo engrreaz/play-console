@@ -13,7 +13,7 @@ $row = $stmt->get_result()->fetch_assoc();
 
 // মডিউল লিস্ট ফেচিং (মডিউল টেবিল থেকে)
 $modules_db = [];
-$mod_res = $conn->query("SELECT module_name FROM modulelist ORDER BY module_name ASC");
+$mod_res = $conn->query("SELECT module_name FROM modulelist where is_public=1 ORDER BY module_name ASC");
 while($m = $mod_res->fetch_assoc()) $modules_db[] = $m['module_name'];
 
 // স্ট্রিং থেকে অ্যারেতে রূপান্তর (Helper Function)

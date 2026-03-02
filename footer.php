@@ -1337,7 +1337,7 @@ showUserStats($conn, $usr, $sccode);
 </script>
 
 <script>
-    function btn_chain() {
-        window.location.reload();
-    }
+    // function btn_chain() {
+    //     window.location.reload();
+    // }
 </script>
