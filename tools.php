@@ -31,6 +31,16 @@ $academic_tools = [
     ]
 ];
 
+$student_tools = [
+    [
+        'title' => 'Subject Assignment',
+        'desc' => 'Indivisual subject assignment',
+        'icon' => 'bi-book',
+        'color' => 'c-exit', 
+        'url' => 'subject-assign-tool.php'
+    ]
+];
+
 $admin_tools = [
     [
         'title' => 'Leave Applications',
@@ -112,6 +122,21 @@ $admin_tools = [
             </div>
         <?php endforeach; ?>
 
+        <div class="m3-section-title px-3 mt-3">Students</div>
+        <?php foreach ($student_tools as $item): ?>
+            <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $sessionyear; ?>')">
+                <div class="icon-box <?php echo $item['color']; ?>">
+                    <i class="bi <?php echo $item['icon']; ?>"></i>
+                </div>
+                <div class="item-info">
+                    <div class="st-title"><?php echo $item['title']; ?></div>
+                    <div class="st-desc"><?php echo $item['desc']; ?></div>
+                </div>
+                <div style="color: var(--m3-outline); opacity: 0.3;"><i class="bi bi-chevron-right"></i></div>
+            </div>
+        <?php endforeach; ?>
+        
+        
         <div class="m3-section-title px-3 mt-3">Administration</div>
         <?php foreach ($admin_tools as $item): ?>
             <div class="m3-list-item shadow-sm" onclick="go('<?php echo $item['url']; ?>', 'year=<?php echo $sessionyear; ?>')">
