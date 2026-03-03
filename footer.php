@@ -463,6 +463,12 @@ showUserStats($conn, $usr, $sccode);
 </div>
 
 
+
+
+
+
+
+
 <style>
     /* মডাল কন্টেইনার */
     .modal-m3-redesign {
@@ -687,6 +693,98 @@ showUserStats($conn, $usr, $sccode);
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="globalSearchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content m3-search-modal border-0 shadow-lg">
+
+            <div class="modal-header border-0 pb-0 pt-3 px-3">
+                <div class="m3-search-input-wrapper w-100 d-flex align-items-center">
+                    <i class="bi bi-search ms-3 text-primary"></i>
+                    <input type="text" id="globalSearchInput" class="form-control border-0 bg-transparent py-3 ps-2"
+                        placeholder="Search student, page or settings..." autocomplete="off">
+                    <button type="button" class="btn-close me-2 shadow-none" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+
+            <div class="modal-body p-3" id="searchResultArea" style="max-height: 70vh; overflow-y: auto;">
+                <div class="text-center py-5 opacity-50">
+                    <i class="bi bi-keyboard fs-1"></i>
+                    <p class="fw-bold">Start typing to search...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .m3-search-modal {
+        background-color: #FEF7FF;
+        /* M3 Surface */
+        border-radius: 28px !important;
+    }
+
+    .m3-search-input-wrapper {
+        background-color: #F3EDF7;
+        /* M3 Secondary Container */
+        border-radius: 100px;
+        border: 1px solid #E7E0EC;
+    }
+
+    .m3-search-input-wrapper input:focus {
+        box-shadow: none;
+        outline: none;
+    }
+
+    /* Result Card Style */
+    .m3-result-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #1C1B1F;
+        transition: 0.2s;
+        margin-bottom: 4px;
+        background: #fff;
+        border: 1px solid transparent;
+    }
+
+    .m3-result-item:hover {
+        background-color: #EADDFF;
+        /* Tonal Purple Hover */
+        border-color: #6750A4;
+    }
+
+    .result-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #F3EDF7;
+        color: #6750A4;
+        font-size: 1.2rem;
+    }
+
+    .result-type-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #79747E;
+        background: #E7E0EC;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+</style>
 
 
 
@@ -1340,4 +1438,88 @@ showUserStats($conn, $usr, $sccode);
     // function btn_chain() {
     //     window.location.reload();
     // }
+</script>
+
+
+<script>
+    // ১. ফিক্সড অ্যারে (Static Menu Items)
+    const staticPages = [
+        { title: 'Dashboard', title_bn: 'ড্যাশবোর্ড', url: 'index.php', icon: 'bi-grid-fill', type: 'menu' },
+        { title: 'Fee Setup', title_bn: 'ফি সেটআপ', url: 'payment-setup.php', icon: 'bi-cash-stack', type: 'settings' },
+        { title: 'User Permissions', title_bn: 'পারমিশন', url: 'permission-mapper.php', icon: 'bi-shield-lock', type: 'admin' },
+        { title: 'History Events', title_bn: 'ইতিহাস', url: 'history-manager.php', icon: 'bi-calendar-event', type: 'data' }
+    ];
+
+    let searchTimer;
+    const searchModal = new bootstrap.Modal(document.getElementById('globalSearchModal'));
+
+    // মূল ফাংশন
+    function common_search() {
+        searchModal.show();
+        setTimeout(() => document.getElementById('globalSearchInput').focus(), 500);
+    }
+
+    // ইনপুট লিসেনার (Debounce 400ms)
+    document.getElementById('globalSearchInput').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        const query = this.value.trim().toLowerCase();
+        const resultArea = document.getElementById('searchResultArea');
+
+        if (query.length < 2) {
+            resultArea.innerHTML = '<div class="text-center py-5 opacity-25"><i class="bi bi-search fs-1"></i><p>Type at least 2 characters...</p></div>';
+            return;
+        }
+
+        searchTimer = setTimeout(() => {
+            performGlobalSearch(query);
+        }, 400);
+    });
+
+    async function performGlobalSearch(query) {
+        const resultArea = document.getElementById('searchResultArea');
+        resultArea.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> Searching...</div>';
+
+        // ১. স্ট্যাটিক অ্যারে থেকে ফিল্টার করা
+        let combinedResults = staticPages.filter(item =>
+            item.title.toLowerCase().includes(query) ||
+            item.title_bn.includes(query)
+        );
+
+        // ২. ডাটাবেস থেকে সার্চ করা (AJAX)
+        try {
+            const response = await fetch('backend/global-search-api.php?q=' + encodeURIComponent(query));
+            const dbData = await response.json();
+
+            if (dbData.status === 'success') {
+                combinedResults = [...combinedResults, ...dbData.results];
+            }
+        } catch (e) { console.error("DB Search Failed"); }
+
+        renderSearchResults(combinedResults);
+    }
+
+    function renderSearchResults(results) {
+        const area = document.getElementById('searchResultArea');
+        if (results.length === 0) {
+            area.innerHTML = '<div class="text-center py-5 text-danger fw-bold">No results found!</div>';
+            return;
+        }
+
+        let html = '';
+        results.forEach(item => {
+            html += `
+            <a href="${item.url_app}.php" class="m3-result-item shadow-sm">
+                <div class="result-icon">
+                    <i class="bi ${item.icon || 'bi-link-45deg'}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-black">${item.title}</div>
+                    <div class="small text-muted">${item.title_bn || ''}</div>
+                </div>
+                <span class="result-type-badge">${item.type}</span>
+            </a>
+        `;
+        });
+        area.innerHTML = html;
+    }
 </script>

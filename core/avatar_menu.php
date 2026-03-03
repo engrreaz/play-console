@@ -8,13 +8,22 @@
 
     </div>
 
-    <?php  if ($is_admin > 3) {  ?>
+    <?php if ($is_admin > 3) { ?>
         <div class="dd-divider"></div>
         <div class=" d-flex justify-content-between align-items-center mx-4 py-2">
             <i class="dd-item bi bi-shield-fill-check text-success fs-5 p-0 perm" data-perm="3"></i>
             <i class="dd-item bi bi-shield-fill-exclamation text-info fs-5 p-0 perm" data-perm="2"></i>
             <i class="dd-item bi bi-shield-slash-fill text-warning fs-5 p-0 perm" data-perm="1"></i>
             <i class="dd-item bi bi-shield-fill-x text-danger fs-5 p-0 perm" data-perm="0"></i>
+        </div>
+        <div class="dd-divider"></div>
+
+        <div class="d-flex text-primary" onclick="common_search()">
+            <div class="dd-item fs-tiny flex-grow-1"> <i class="bi bi-search me-2"></i>
+                Search
+        <i class="bi bi-search fs-6  float-end"></i>
+            </div>
+    
         </div>
         <div class="dd-divider"></div>
 
@@ -67,16 +76,16 @@
     <div class="dd-item" onclick="task_manager()"> <i class="bi bi-list-task me-2"></i>Task Manager</div>
     <div class="dd-divider"></div>
     <div class=" d-flex justify-content-between align-items-center mx-4 py-2">
-        <i class="dd-item bi bi-file-earmark-fill text-info fs-5 p-0" style="cursor:pointer;" 
-   data-bs-toggle="modal" 
-   data-bs-target="#pageDocModal"></i>
-      
-</i>
+        <i class="dd-item bi bi-file-earmark-fill text-info fs-5 p-0" style="cursor:pointer;" data-bs-toggle="modal"
+            data-bs-target="#pageDocModal"></i>
+
+        </i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-youtube text-danger fs-5 p-0" onclick="openVideo('<?php echo $video_id; ?>')"></i>
         <!-- <div class="vr"></div> -->
         <i class="dd-item bi bi-star-fill text-warning fs-5 p-0" onclick="openFeatureSelector();"></i>
-        <i class="dd-item bi bi-trophy text-primary fs-5 p-0" data-bs-toggle="modal" data-bs-target="#userStatsModal"></i>
+        <i class="dd-item bi bi-trophy text-primary fs-5 p-0" data-bs-toggle="modal"
+            data-bs-target="#userStatsModal"></i>
     </div>
     <div class="dd-divider"></div>
     <div class="dd-item" onclick="toggleTheme()"> <i class="bi bi-moon-fill me-2"></i>Dark Mode</div>

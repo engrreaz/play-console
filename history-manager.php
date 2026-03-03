@@ -248,7 +248,7 @@ $month = date('m', strtotime($target_date));
 
     <div class="container-fluid px-3" id="eventContainer" style="margin-top: -25px;">
         <?php
-        $sql = "SELECT * FROM history WHERE day = $day AND month = $month ORDER BY priority DESC";
+        $sql = "SELECT * FROM history WHERE day = $day AND month = $month  and (sccode=0 or sccode='$sccode') ORDER BY priority DESC";
         $res = $conn->query($sql);
 
         if ($res->num_rows > 0):
@@ -263,11 +263,11 @@ $month = date('m', strtotime($target_date));
                 };
 
                 $hidden = 'hidden';
-                if ($row['sccode'] == 0 && $is_admin > 3) {
+                if ($row['sccode'] == 0 && $is_admin > 3 || $row['sccode'] == $sccode) {
                     $hidden = '';
                 }
                 if ($row['sccode'] != 0 && ($is_admin > 3 || $is_chief == 1)) {
-                    $hidden = '';
+                    // $hidden = '';
                 }
                 ?>
                 <div class="event-card shadow-sm d-flex align-items-center gap-3 item mb-3" data-id="<?= $row['id'] ?>">
