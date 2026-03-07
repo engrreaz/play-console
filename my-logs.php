@@ -25,7 +25,7 @@ $log_sql = "SELECT l.*, p.module, p.page_title
             ) p ON l.pagename = p.page_name 
             WHERE l.email = '$usr' AND l.sccode = '$sccode'";
 $log_res = $conn->query($log_sql);
-
+// echo $log_sql;
 $module_summary = [];
 $page_summary = [];
 $global_stats = ['visits' => 0, 'bw' => 0, 'duration' => 0];
@@ -61,7 +61,7 @@ while ($l = $log_res->fetch_assoc()) {
         ];
     }
 
-    $page_summary[$p]['pagename'] = $p . '-';
+    $page_summary[$p]['title'] = $p . '-';
     $page_summary[$p]['visits']++;
     $page_summary[$p]['bw'] += $l['bandwidth'];
     $page_summary[$p]['duration'] += $l['duration'];

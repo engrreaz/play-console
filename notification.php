@@ -188,17 +188,17 @@ $unread_count = $unread_q->fetch_assoc()['total'];
     }
 </style>
 
-<header class="m3-app-bar">
-    <div class="d-flex justify-content-between align-items-center w-100">
-        <h5 class="fw-bold mb-0">Notifications</h5>
-        <?php if ($unread_count > 0): ?>
-            <button class="btn-read-all" onclick="markAllAsRead();">
-                <i class="bi bi-check-all"></i> MARK ALL
-            </button>
-        <?php endif; ?>
-    </div>
-</header>
+<?php if ($unread_count > 0): ?>
+    <header class="m3-app-bar">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <h5 class="fw-bold mb-0"></h5>
 
+            <button class="btn-read-all" onclick="markAllAsRead();">
+                <i class="bi bi-check-all"></i> MARK ALL READ
+            </button>
+        </div>
+    </header>
+<?php endif; ?>
 
 <main class="notif-container">
     <div id="notif-list-wrapper">

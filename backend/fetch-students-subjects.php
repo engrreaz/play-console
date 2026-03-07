@@ -6,6 +6,9 @@ $session = $_POST['session'];
 $class = $_POST['class'];
 $section = $_POST['section'];
 
+$total_students = 0;
+
+
 $sql = "SELECT si.stid, si.rollno, si.subject_list, st.stnameeng, st.stnameben 
         FROM sessioninfo si 
         JOIN students st ON si.stid = st.stid 
@@ -14,7 +17,10 @@ $sql = "SELECT si.stid, si.rollno, si.subject_list, st.stnameeng, st.stnameben
         ORDER BY si.rollno ASC";
 
 $rs = $conn->query($sql);
-while($r = $rs->fetch_assoc()): ?>
+$cardList = '';
+while ($r = $rs->fetch_assoc()):
+    $cardList .= $r['stid'] . '.';
+    ?>
     <div class="col-md-4 col-lg-3">
         <div class="student-card shadow-sm card-<?= $r['stid'] ?>" onclick="toggleStudent('<?= $r['stid'] ?>')">
             <i class="bi bi-check-circle-fill check-icon fs-5"></i>
@@ -30,4 +36,7 @@ while($r = $rs->fetch_assoc()): ?>
             </div>
         </div>
     </div>
-<?php endwhile; ?>
+    <?php $total_students++; endwhile; ?>
+
+<div id="total_count"><?= $total_students ?></div>
+<div id="cardList"><?= $cardList ?></div>

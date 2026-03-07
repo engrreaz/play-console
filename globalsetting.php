@@ -12,6 +12,7 @@ if (isset($_GET['token'])) {
 } else {
     $devicetoken = $token;
 }
+
 ?>
 
 <style>
@@ -23,10 +24,6 @@ if (isset($_GET['token'])) {
         --m3-on-secondary-container: #1D192B;
     }
 
-    body {
-        background-color: var(--m3-surface);
-        font-family: 'Inter', sans-serif;
-    }
 
     /* Hero Section */
     .m3-hero {
@@ -160,6 +157,56 @@ if (isset($_GET['token'])) {
         border: none;
         width: 100%;
     }
+
+    /* M3 Switch Styling */
+    .m3-switch {
+        width: 52px;
+        height: 32px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .m3-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .m3-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #E7E0EC;
+        /* Outlined color */
+        border: 2px solid #79747E;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .m3-slider:before {
+        position: absolute;
+        content: "";
+        height: 24px;
+        width: 24px;
+        left: 2px;
+        bottom: 2px;
+        background-color: #79747E;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.m3-slider {
+        background-color: #6750A4;
+        border-color: #6750A4;
+    }
+
+    input:checked+.m3-slider:before {
+        transform: translateX(20px);
+        background-color: white;
+    }
 </style>
 
 <div class="modal fade" id="setstudentbox" tabindex="-1">
@@ -239,7 +286,7 @@ if (isset($_GET['token'])) {
     </div>
 
     <div class="m3-section-title px-4 mt-4 mb-2">Device Security</div>
-    
+
     <div class="m3-card-list shadow-sm mx-3 mt-1">
         <div class="p-3">
             <div class="d-flex align-items-center gap-3 mb-3">
@@ -261,14 +308,33 @@ if (isset($_GET['token'])) {
 
 
 
+    <div class="m3-card-list shadow-sm mx-3 mt-3">
+        <div class="p-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <div class="m3-icon-box" style="background: #D1E1FF; color: #0042A5;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <div class="fw-black" style="font-size: 0.9rem;">Two-Step Verification</div>
+                    <small class="text-muted">Extra security for login</small>
+                </div>
+            </div>
 
-    <div class="m3-list-item shadow-sm mt-3" style="background: #FFFBFF; border: 1px solid #79747E;"
+            <label class="m3-switch">
+                <input type="checkbox" id="mfaToggle" <?php echo ($mfa_enabled == 1) ? 'checked' : ''; ?>
+                    onchange="toggleMFA(this)">
+                <span class="m3-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="m3-list-item shadow-sm mt-3 gap-3 p-4" style="background: #fffbfb; border: 1px solid #ffe4e4;"
         data-bs-toggle="modal" data-bs-target="#changePasswordModal">
         <div class="m3-icon-box" style="background: #F9DEDC; color: #B3261E;"><i class="bi bi-key"></i></div>
-        <div class="item-info">
-            <div class="st-desc" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; opacity: 0.6;">
+        <div class="item-info" style="color:#B3261E;">
+            <div class="st-descx" style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; opacity: 0.6;">
                 Account Security</div>
-            <div class="st-title" style="font-size: 0.95rem;">Change Password</div>
+            <div class="st-titlex" style="font-size: 0.95rem;">Change Password</div>
         </div>
         <i class="bi bi-chevron-right text-muted"></i>
     </div>
@@ -323,5 +389,33 @@ if (isset($_GET['token'])) {
                 }
             });
     });
-</script>
 
+    function toggleMFA(el) {
+        let status = el.checked ? 1 : 0;
+        let fd = new FormData();
+        fd.append('mfa_status', status);
+        fd.append('toggle_mfa', 1);
+
+        fetch('security/update-security.php', {
+            method: 'POST',
+            body: fd
+        })
+            .then(r => r.text())
+            .then(t => {
+                if (t.includes("1")) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: status ? 'MFA Enabled' : 'MFA Disabled',
+                        toast: true,
+                        position: 'middle-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    // যদি ফেইল করে তবে সুইচ আগের অবস্থায় ফেরত যাবে
+                    el.checked = !el.checked;
+                    Swal.fire('Error', 'Failed to update MFA settings', 'error');
+                }
+            });
+    }
+</script>

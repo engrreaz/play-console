@@ -75,7 +75,7 @@ include 'inc.php';
         <?php foreach ($blocks as $id => $info): ?>
             <div class="m3-block-card" data-id="<?= $id ?>" id="block-wrapper-<?= $id ?>">
                 <div class="block-header">
-                    <i class="bi bi-grid-3x3-gap-fill drag-handle"></i>
+                    <i class="bi bi-grip-horizontal drag-handle"></i>
                     <span class="flex-grow-1 small fw-bold text-muted text-uppercase" style="letter-spacing:1px;"><?= $info['title'] ?></span>
 
                     <div class="dropdown">
@@ -86,7 +86,7 @@ include 'inc.php';
                                     <i class="bi bi-eye-slash me-2"></i> Disable Card
                                 </a>
                             </li>
-                            <li><a class="dropdown-item fw-bold small" href="<?= $info['link'] ?>"><i class="bi bi-box-arrow-up-right me-2"></i> Open Full Page</a></li>
+                            <li hidden><a class="dropdown-item fw-bold small" href="<?= $info['link'] ?>" ><i class="bi bi-box-arrow-up-right me-2" ></i> Open Full Page</a></li>
                         </ul>
                     </div>
                 </div>

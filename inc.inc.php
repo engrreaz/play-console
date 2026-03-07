@@ -144,6 +144,7 @@ if ($result0->num_rows > 0) {
         $otptime = $row0["otptime"];
         $is_chief = $row0["is_chief"];
         $is_admin = $row0["admin"];
+        $mfa_enabled = $row0["mfa_enabled"];
     }
 } else {
     $query33p = "insert into usersapp (sccode, email, token, firstlogin, lastlogin, photourl, userlevel) values ('$eiin', '$usr', '$token', '$cur', '$cur', '$pth' , '$dflt')";

@@ -10,12 +10,9 @@ include 'inc.php';
         --m3-primary-container: #EADDFF;
         --m3-on-primary-container: #21005D;
         --m3-secondary-container: #F3EDF7;
-        --m3-tertiary-container: #FFDDB3;
+        --m3-tertiary-container: #eea142;
     }
 
-    body {
-        background: var(--m3-surface);
-    }
 
     .selection-card {
         background-color: var(--m3-secondary-container);
@@ -27,7 +24,7 @@ include 'inc.php';
     /* Student Card Styling */
     .student-card {
         background: white;
-        border-radius: 20px;
+        border-radius: 16px;
         border: 2px solid transparent;
         padding: 16px;
         transition: 0.3s;
@@ -97,6 +94,8 @@ include 'inc.php';
         display: none;
         /* Initially hidden */
         z-index: 1000;
+        font-size: 24px;
+        ;
     }
 </style>
 
@@ -191,6 +190,29 @@ include 'inc.php';
     }
 </style>
 
+<style>
+    .btn-m3-text {
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
+
+    .btn-m3-text:hover {
+        background: rgba(103, 80, 164, 0.08);
+    }
+
+    #student-count {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--m3-primary);
+    }
+</style>
+
 
 <main class="pb-5">
     <div class="selection-card shadow-sm">
@@ -198,6 +220,10 @@ include 'inc.php';
         $chain_param = '-c 6 -t Choose Parameters -u -b Get Student List -h ';
         include 'component/tree-ui.php';
         ?>
+        <div class="d-flex">
+            <div class="flex-grow-1" id="student-count"></div>
+            <div class="checkAllNone" onclick="syncCardSelection()">Select ALL</div>
+        </div>
     </div>
 
     <div class="container-fluid">
@@ -231,8 +257,83 @@ include 'inc.php';
 <?php include 'footer.php'; ?>
 
 <script>
-    let selectedStudents = [];
-    let selectedSubjects = [];
+    // শুরুতে ভেরিয়েবলগুলো গ্লোবাল হিসেবে ডিফাইন করুন
+    window.selectedStudents = [];
+    window.selectedSubjects = [];
+    window.selectedFourthSubjects = [];
+    window.card = [];
+
+    // ১. মেইন সাবজেক্ট টোগল
+    function toggleSubject(subcode) {
+        const card = $(`.sub-${subcode}`);
+        const icon = card.find('.check-box-icon');
+
+        card.toggleClass('selected');
+
+        // সব জায়গায় window. ব্যবহার নিশ্চিত করুন
+        if (card.hasClass('selected')) {
+            icon.removeClass('bi-circle').addClass('bi-check-circle-fill');
+            if (!window.selectedSubjects.includes(subcode)) {
+                window.selectedSubjects.push(subcode);
+            }
+        } else {
+            icon.removeClass('bi-check-circle-fill').addClass('bi-circle');
+            window.selectedSubjects = window.selectedSubjects.filter(id => id !== subcode);
+        }
+        console.log("Global Main Update:", window.selectedSubjects);
+    }
+
+    // ২. ফোর্থ সাবজেক্ট চিপ টোগল
+    function toggleFourthSubject(subcode) {
+        const chip = $(`.chip-${subcode}`);
+        const icon = chip.find('.chip-icon');
+
+        chip.toggleClass('selected');
+
+        if (chip.hasClass('selected')) {
+            icon.removeClass('bi-plus-lg').addClass('bi-check-lg');
+            if (!window.selectedFourthSubjects.includes(subcode)) {
+                window.selectedFourthSubjects.push(subcode);
+            }
+        } else {
+            icon.removeClass('bi-check-lg').addClass('bi-plus-lg');
+            window.selectedFourthSubjects = window.selectedFourthSubjects.filter(id => id !== subcode);
+        }
+        console.log("Global Fourth Update:", window.selectedFourthSubjects);
+    }
+
+    // ৩. সেভ করার ফাংশন (অবশ্যই window. দিয়ে চেক করবেন)
+    function processAssignment() {
+        console.log("Attempting to save:", window.selectedSubjects); // চেক করার জন্য
+
+        if (window.selectedSubjects.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Wait!',
+                text: 'Please select at least one main subject.',
+                confirmButtonColor: '#6750A4'
+            });
+            return;
+        }
+
+        $.post('backend/assign-subject-logic.php', {
+            stids: window.selectedStudents,
+            subjects: window.selectedSubjects.join(','),
+            fourth_subject: window.selectedFourthSubjects.join(','),
+            slot: $("#slot-main").val(),
+            session: $("#session-main").val()
+        }, function (res) {
+            if (res.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'Success', text: res.message, toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+                bootstrap.Modal.getInstance(document.getElementById('subjectModal')).hide();
+                btn_chain_function();
+            }
+        }, 'json');
+    }
+</script>
+
+<script>
+
 
     // ১. স্টুডেন্ট লিস্ট ফেচ করা
     function btn_chain_function() {
@@ -257,9 +358,12 @@ include 'inc.php';
         $(`.card-${stid}`).toggleClass('selected');
         if (selectedStudents.includes(stid)) {
             selectedStudents = selectedStudents.filter(id => id !== stid);
+
         } else {
             selectedStudents.push(stid);
         }
+        let count = selectedStudents.length;
+        $('#student-count').text(count + ' Student(s) Selected');
     }
 
     // ৩. সাবজেক্ট মডাল ওপেন করা
@@ -273,25 +377,18 @@ include 'inc.php';
             slot: $("#slot-main").val(),
             session: $("#session-main").val(),
             class: $("#class-main").val(),
-            section: $("#section-main").val()
+            section: $("#section-main").val(),
+            stids: selectedStudents,
         };
 
         $.post('backend/fetch-available-subjects.php', params, function (res) {
             $("#subject-list").html(res);
             new bootstrap.Modal(document.getElementById('subjectModal')).show();
-            selectedSubjects = [];
+            // selectedSubjects = [];
         });
     }
 
     // ৪. সাবজেক্ট টোগল
-    function toggleSubject(subcode) {
-        $(`.sub-${subcode}`).toggleClass('selected');
-        if (selectedSubjects.includes(subcode)) {
-            selectedSubjects = selectedSubjects.filter(code => code !== subcode);
-        } else {
-            selectedSubjects.push(subcode);
-        }
-    }
 
 
 
@@ -299,7 +396,7 @@ include 'inc.php';
 
 
     // ৫. ফাইনাল অ্যাসাইনমেন্ট
-    function processAssignment() {
+    function processAssignmentx() {
         // ১. ভ্যালিডেশন: কমপক্ষে একটি মেইন সাবজেক্ট সিলেক্ট করা আছে কিনা
         if (selectedSubjects.length === 0) {
             Swal.fire({
@@ -314,6 +411,15 @@ include 'inc.php';
         // ২. ডেটা প্রসেসিং (অ্যারে থেকে কমা-সেপারেটেড স্ট্রিং তৈরি)
         let mainSubjectsString = selectedSubjects.join(',');
         let fourthSubjectsString = selectedFourthSubjects.join(',');
+
+        Swal.fire({
+            title: 'Updating Subjects...',
+            text: 'Please wait while we process the bulk assignment.',
+            allowOutsideClick: false, // বাইরে ক্লিক করলে যেন বন্ধ না হয়
+            didOpen: () => {
+                Swal.showLoading(); // স্পিনার দেখাবে
+            }
+        });
 
         // ৩. ব্যাকএন্ডে ডেটা পাঠানো
         $.post('backend/assign-subject-logic.php', {
@@ -358,19 +464,25 @@ include 'inc.php';
 </script>
 
 <script>
+    function syncCardSelection() {
+        let rawText = document.getElementById('cardList').innerText;
+        let cardArray = rawText.split('.').filter(item => item.trim() !== "");
 
-    let selectedFourthSubjects = [];
+        cardArray.forEach(val => {
+            let cardElement = $(`.card-${val}`);
 
-    function toggleFourthSubject(subcode) {
-        const chip = $(`.chip-${subcode}`);
-        chip.toggleClass('selected');
-
-        if (selectedFourthSubjects.includes(subcode)) {
-            selectedFourthSubjects = selectedFourthSubjects.filter(id => id !== subcode);
-        } else {
-            selectedFourthSubjects.push(subcode);
-        }
-
-        console.log("Selected Fourth Subjects:", selectedFourthSubjects);
+            if (cardElement.length > 0) {
+                if (cardElement.hasClass('selected')) {
+                    // 'selected' ক্লাস থাকলে এখানে আপনার লজিক (something)
+                    console.log(`Card ${val} is already selected.`);
+                    // executeSomething(val);
+                } else {
+                    // 'selected' ক্লাস না থাকলে এখানে অন্য লজিক
+                    toggleStudent(val);
+                    console.log(`Card ${val} is NOT selected.`);
+                    // executeOtherThing(val);
+                }
+            }
+        });
     }
 </script>

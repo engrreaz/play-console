@@ -8,7 +8,13 @@ $subjects = str_replace(',', '.', $_POST['subjects'] ?? '') . '.';
 $slot = $_POST['slot'];
 $session = $_POST['session'];
 
-$fourth_sub = is_array($_POST['fourth_subject']) ? implode('.', $_POST['fourth_subject']) : $_POST['fourth_subject'] . '.';
+if (empty($raw_fourth)) {
+    $fourth_sub = '0';
+} else {
+    // জাভাস্ক্রিপ্ট থেকে যদি স্ট্রিং আসে তবে সরাসরি সেটি ব্যবহার হবে
+    // আর যদি কোনো কারণে অ্যারে আসে তবে সেটি ডট (.) দিয়ে জোড়া লাগবে
+    $fourth_sub = is_array($raw_fourth) ? implode('.', $raw_fourth) : $raw_fourth;
+}
 
 $success_count = 0;
 foreach ($stids as $stid) {

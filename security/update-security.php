@@ -27,3 +27,20 @@ if (isset($_POST['update_pass'])) {
     }
     exit;
 }
+
+
+// MFA Toggle লজিক
+if (isset($_POST['toggle_mfa'])) {
+    $mfa_status = intval($_POST['mfa_status']);
+
+    $stmt = $conn->prepare("UPDATE usersapp SET mfa_enabled্ = ? WHERE email = ?");
+    $stmt->bind_param("is", $mfa_status, $usr);
+
+    if ($stmt->execute()) {
+        echo "1";
+    } else {
+        echo "0";
+    }
+    $stmt->close();
+    exit;
+}
