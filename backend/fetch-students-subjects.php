@@ -38,5 +38,11 @@ while ($r = $rs->fetch_assoc()):
     </div>
     <?php $total_students++; endwhile; ?>
 
-<div id="total_count"><?= $total_students ?></div>
-<div id="cardList"><?= $cardList ?></div>
+<div hidden>
+    <div id="total_count"><?= $total_students ?></div>
+    <div id="cardList"><?= $cardList ?></div>
+</div>
+
+<script>
+    document.getElementById("blblock").hidden = false;
+</script>

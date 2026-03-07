@@ -211,6 +211,14 @@ include 'inc.php';
         font-weight: 700;
         color: var(--m3-primary);
     }
+
+    .checkAllNone {
+        background: #291800;
+        color: white;
+        border-radius: 100px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
 </style>
 
 
@@ -220,9 +228,9 @@ include 'inc.php';
         $chain_param = '-c 6 -t Choose Parameters -u -b Get Student List -h ';
         include 'component/tree-ui.php';
         ?>
-        <div class="d-flex">
-            <div class="flex-grow-1" id="student-count"></div>
-            <div class="checkAllNone" onclick="syncCardSelection()">Select ALL</div>
+        <div class="d-flex" id="blblock" hidden>
+            <div class="flex-grow-1 py-2" id="student-count"></div>
+            <button class="checkAllNone nav-pills" onclick="syncCardSelection()">Select All Students</button>
         </div>
     </div>
 
@@ -258,6 +266,8 @@ include 'inc.php';
 
 <script>
     // শুরুতে ভেরিয়েবলগুলো গ্লোবাল হিসেবে ডিফাইন করুন
+
+
     window.selectedStudents = [];
     window.selectedSubjects = [];
     window.selectedFourthSubjects = [];
@@ -315,6 +325,15 @@ include 'inc.php';
             });
             return;
         }
+
+        Swal.fire({
+            title: 'Updating Subjects...',
+            text: 'Please wait while we process the bulk assignment.',
+            allowOutsideClick: false, // বাইরে ক্লিক করলে যেন বন্ধ না হয়
+            didOpen: () => {
+                Swal.showLoading(); // স্পিনার দেখাবে
+            }
+        });
 
         $.post('backend/assign-subject-logic.php', {
             stids: window.selectedStudents,
@@ -485,4 +504,6 @@ include 'inc.php';
             }
         });
     }
+
+    document.getElementById("blblock").hidden = true;
 </script>
