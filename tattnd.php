@@ -45,7 +45,7 @@ if ($result->num_rows > 0) {
 
     // ইনসার্ট কুয়েরি থেকে sessionyear সরিয়ে ফেলা হয়েছে
 
-    $ssql  = 
+   echo $distance;
     $ins = $conn->prepare("INSERT INTO teacherattnd (user, tid, adate, reqin, reqout, realin, balin, statusin, detectin, disin, sccode, entryby, entrytime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'GPS', ?, ?, ?, ?)");
     $ins->bind_param("ssssssssdsss", $usr, $userid, $today, $full_reqin, $reqout, $current_time, $balin, $stst, $distance, $sccode, $usr, $current_time);
     $ins->execute();
