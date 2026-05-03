@@ -1,6 +1,8 @@
 <?php
+$page_title = "Teacher's Attendance";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
+echo 'Hexa';
 $current_time = $cur; 
 $today = $td;
 
@@ -42,6 +44,8 @@ if ($result->num_rows > 0) {
     $balin = sprintf('%02d:%02d:%02d', ($abs_diff/3600), ($abs_diff/60%60), ($abs_diff%60));
 
     // ইনসার্ট কুয়েরি থেকে sessionyear সরিয়ে ফেলা হয়েছে
+
+    $ssql  = 
     $ins = $conn->prepare("INSERT INTO teacherattnd (user, tid, adate, reqin, reqout, realin, balin, statusin, detectin, disin, sccode, entryby, entrytime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'GPS', ?, ?, ?, ?)");
     $ins->bind_param("ssssssssdsss", $usr, $userid, $today, $full_reqin, $reqout, $current_time, $balin, $stst, $distance, $sccode, $usr, $current_time);
     $ins->execute();

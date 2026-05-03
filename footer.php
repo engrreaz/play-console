@@ -170,7 +170,7 @@ showUserStats($conn, $usr, $sccode);
 <div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
 
-        <?php if (in_array($userlevel, ['Head Teacher', 'Asstt. Head Teacher', 'Administrator', 'Super Administrator'])): ?>
+        <?php if (in_array($userlevel, ['Head Teacher', 'Asstt. Head Teacher', 'Administrator', 'Super Administrator', 'Chief'])): ?>
             <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
                 <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
                 <span>Home</span>
