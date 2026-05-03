@@ -36,6 +36,7 @@ if ($result->num_rows > 0) {
     $inout = 'out';
 } else {
     // --- Attendance In সেশন ---
+    echo 'ABC';
     $full_reqin = $today . ' ' . $reqin;
     $diff_seconds = strtotime($current_time) - strtotime($full_reqin);
     
