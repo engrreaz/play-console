@@ -2,7 +2,7 @@
 $page_title = "Teacher's Attendance";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
-echo 'Hexa';
+
 $current_time = $cur; 
 $today = $td;
 
@@ -13,13 +13,17 @@ $reqout = ($out_time_user != '00:00:00') ? $out_time_user : $out_time;
 $inout = 'in';
 $stst = '';
 
+echo 'Hexa';
 // ১. হাজিরা প্রসেসিং লজিক (Prepared Statements)
+$ddd = "SELECT id FROM teacherattnd WHERE user = '$usr' AND adate = '$today' AND sccode = '$sccode' LIMIT 1";
+echo $ddd;
 $stmt = $conn->prepare("SELECT id FROM teacherattnd WHERE user = ? AND adate = ? AND sccode = ? LIMIT 1");
 $stmt->bind_param("sss", $usr, $today, $sccode);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
+    echo 'XYZ';
     // --- Attendance Out সেশন ---
     $row = $result->fetch_assoc();
     $db_id = $row["id"];
