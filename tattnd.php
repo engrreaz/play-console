@@ -15,7 +15,7 @@ $stst = '';
 
 echo 'Hexa';
 // ১. হাজিরা প্রসেসিং লজিক (Prepared Statements)
-$ddd = "SELECT id FROM teacherattnd WHERE user = '$usr' AND adate = '$today' AND sccode = '$sccode' LIMIT 1";
+$ddd = "SELECT id FROM teacherattnd WHERE entryuser = '$usr' AND adate = '$today' AND sccode = '$sccode' LIMIT 1";
 echo $ddd;
 $stmt = $conn->prepare("SELECT id FROM teacherattnd WHERE user = ? AND adate = ? AND sccode = ? LIMIT 1");
 $stmt->bind_param("sss", $usr, $today, $sccode);
