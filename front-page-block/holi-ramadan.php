@@ -278,7 +278,7 @@ if ($today_data) {
 <div id="tracker-config" data-last="<?= $last_time ?>" data-next="<?= $next_time ?>" style="display:none;"></div>
 
 <script>
-    function updateRamadanTracker() {
+    function updateRamadanTrackerx() {
         const config = document.getElementById('tracker-config');
         const nextTime = new Date(config.dataset.next).getTime();
         const lastTime = new Date(config.dataset.last).getTime();
