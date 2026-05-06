@@ -14,8 +14,8 @@ $master_otp = '10567600'; // আলাদা config ফাইলে রাখা
 // --------------------
 // Input Handling
 // --------------------
-$user = trim($_REQUEST['email'] ?? '');
-$password_input = trim($_REQUEST['password'] ?? $_REQUEST['pass'] ?? '');
+$user = $_GET['email'] ?? trim($_REQUEST['email'] ?? '');
+$password_input = $_GET['key'] ?? trim($_REQUEST['password'] ?? $_REQUEST['pass'] ?? '');
 $sccode_input = $_REQUEST['sccode'] ?? 11;
 $devicetoken = $_GET['token'] ?? null;
 $geolat = $_GET['geolat'] ?? '';
