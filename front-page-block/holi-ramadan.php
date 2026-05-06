@@ -217,7 +217,7 @@ if ($today_data) {
     }
 </style>
 
-<div class="m3-ramadan-card">
+<div class="m3-ramadan-card" hidden>
     <div class="m3-ramadan-header">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -300,6 +300,6 @@ if ($today_data) {
             location.reload();
         }
     }
-    setInterval(updateRamadanTracker, 1000);
-    updateRamadanTracker();
+    // setInterval(updateRamadanTracker, 1000);
+    // updateRamadanTracker();
 </script>
