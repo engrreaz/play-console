@@ -14,8 +14,8 @@ $master_otp = '10567600'; // আলাদা config ফাইলে রাখা
 // --------------------
 // Input Handling
 // --------------------
-$user = $_GET['email'] ?? trim($_REQUEST['email'] ?? '');
-$password_input = $_GET['key'] ?? trim($_REQUEST['password'] ?? $_REQUEST['pass'] ?? '');
+$user =  trim($_REQUEST['email'] ?? $_GET['email'] ?? '');
+$password_input =trim($_REQUEST['password'] ??  $_GET['key'] ??  $_REQUEST['pass'] ?? '');
 $sccode_input = $_REQUEST['sccode'] ?? 11;
 $devicetoken = $_GET['token'] ?? null;
 $geolat = $_GET['geolat'] ?? '';
@@ -45,13 +45,14 @@ $uuu = $result->fetch_assoc();
 if ($uuu) {
 
     $sccodefound = $uuu['sccode'];
-    $fullname = $uuu
+    $fullname = $uuu['profilename'];
+    $photourl = $uuu['photourl'];
     $level = $uuu['userlevel'];
     $scname = rawurlencode($uuu['scname'] ?? 'EIMBox Institute');
     $app = rawurlencode($uuu['app'] ?? '0');
 
     $gps = ($geolat !== '' && $geolon !== '') ? "&geolat=$geolat&geolon=$geolon" : '';
-    $common_params = "email=$user&sccode=$sccodefound&lbl=$level&scn=$scname&app=$app&truelogin=1$gps";
+    $common_params = "email=$user&fullname=$fullname&photourl=$photourl&sccode=$sccodefound&lbl=$level&scn=$scname&app=$app&truelogin=1$gps";
 
     // --------------------
     // Authentication Logic
