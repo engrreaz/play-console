@@ -45,6 +45,7 @@ $uuu = $result->fetch_assoc();
 if ($uuu) {
 
     $sccodefound = $uuu['sccode'];
+    $fullname = $uuu
     $level = $uuu['userlevel'];
     $scname = rawurlencode($uuu['scname'] ?? 'EIMBox Institute');
     $app = rawurlencode($uuu['app'] ?? '0');
