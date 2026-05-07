@@ -12,7 +12,7 @@ define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcT
 // $title= $_POST["title"];
 // $message= $_POST["message"];
 // $postlink= $_POST["postlink"];
-     $token = 'dyNNzaM0TpWsUtgK6j9MEH:APA91bEkjhXZ_iaUwJ0hdbrSFMcj1xF_cW0ZYB3ty8zajZ_gtUTNuIWaxM3lXwR1J2f-TD8uYmmoW7bdNuVgQVwPgbGNPbuKw4tISpxWaX5SAGeASXRjFcc';
+     $token = 'd9bEq1MSSBOkO-DtXB5cEJ:APA91bEmc_dZnL3mkaHh37aPXLrwaKRTIMSSynseNMWChXf_WuZk8b5Ns5WT39tkJz5DlpYJK5kpohN8yvGEHK8GnPCfzWespwD8CWjfWMXk4DydCWAxc4Y';
      $title = 'Hello Test';
      $message = "Hello message";
      $postlink = "index.php";
