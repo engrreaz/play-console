@@ -124,7 +124,7 @@ if ($uuu) {
             $q = "UPDATE usersapp SET token = '$devicetoken' WHERE email = '$user'";
 
             $conn->query($q);
- 
+ exit;
 
         }
 
