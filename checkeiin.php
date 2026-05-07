@@ -122,9 +122,9 @@ if ($uuu) {
             $_SESSION["devicetoken"] = $devicetoken;
 
             $q = "UPDATE usersapp SET token = '$devicetoken' WHERE email = '$user'";
-            echo $q;
+
             $conn->query($q);
-            exit;
+ 
 
         }
 
