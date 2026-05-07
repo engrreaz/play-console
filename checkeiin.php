@@ -14,8 +14,8 @@ $master_otp = '10567600'; // আলাদা config ফাইলে রাখা
 // --------------------
 // Input Handling
 // --------------------
-$user =  trim($_REQUEST['email'] ?? $_GET['email'] ?? '');
-$password_input =trim($_REQUEST['password'] ??  $_GET['key'] ??  $_REQUEST['pass'] ?? '');
+$user = trim($_REQUEST['email'] ?? $_GET['email'] ?? '');
+$password_input = trim($_REQUEST['password'] ?? $_GET['key'] ?? $_REQUEST['pass'] ?? '');
 $sccode_input = $_REQUEST['sccode'] ?? 11;
 $devicetoken = $_GET['token'] ?? null;
 $geolat = $_GET['geolat'] ?? '';
@@ -115,13 +115,13 @@ if ($uuu) {
         // Device Token Update
         // --------------------
         if (!empty($devicetoken)) {
-            $_SESSION["devicetoken"] = $devicetoken;
+        $_SESSION["devicetoken"] = $devicetoken;
 
-            $stmt_tk = $conn->prepare("UPDATE usersapp SET token = ? WHERE email = ?");
-            $stmt_tk->bind_param("ss", $devicetoken, $user);
-            $stmt_tk->execute();
+        $stmt_tk = $conn->prepare("UPDATE usersapp SET token = ? WHERE email = ?");
+        $stmt_tk->bind_param("ss", $devicetoken, $user);
+        $stmt_tk->execute();
         }
- 
+
         header("Location: " . $redirect_url);
         exit();
 
