@@ -115,6 +115,7 @@ $pxx = '';
 if ($token_found == 1 && $devicetoken != '') {
     $query33pxy_device_token = "UPDATE usersapp set token='$devicetoken' where email='$usr';";
     $conn->query($query33pxy_device_token);
+    echo 'Execute';
 
 }
 if (isset($_SESSION["devicetoken"]) && $usr != '') {
@@ -122,6 +123,7 @@ if (isset($_SESSION["devicetoken"]) && $usr != '') {
     $query33pxy_device_token = "UPDATE usersapp set token='$devicetoken' where email='$usr';";
     $conn->query($query33pxy_device_token);
     $_SESSION["devicetoken"] = '';
+    echo 'Execute 2';
 }
 
 
