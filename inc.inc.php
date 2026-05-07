@@ -121,6 +121,7 @@ if ($token_found == 1 && $devicetoken != '') {
 if (isset($_SESSION["devicetoken"]) && $usr != '') {
     $devicetoken = $_SESSION["devicetoken"];
     $query33pxy_device_token = "UPDATE usersapp set token='$devicetoken' where email='$usr';";
+    echo $query33pxy_device_token;
     $conn->query($query33pxy_device_token);
     $_SESSION["devicetoken"] = '';
     echo 'Execute 2';
