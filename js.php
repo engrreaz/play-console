@@ -440,7 +440,7 @@
             type: 'POST',
             data: { prno: prno },
             success: function (fullUrl) {
-                if (fullUrl && fullUrl.includes('stpr.php')) {
+                if (fullUrl && fullUrl.includes('receipt.php')) { //stpr.php আছে ছিলো
                     // ২. প্রাপ্ত ফুল ইউআরএল-এ রিডাইরেক্ট করা
                     console.log("Redirecting to: " + fullUrl);
                     window.location.href = fullUrl;
