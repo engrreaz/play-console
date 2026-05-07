@@ -121,17 +121,11 @@ if ($uuu) {
 
             $_SESSION["devicetoken"] = $devicetoken;
 
-            $stmt_tk = $conn->prepare("UPDATE usersapp SET token = ? WHERE email = ?");
+            $q = "UPDATE usersapp SET token = '$devicetoken WHERE email = '$user'";
+            echo $q;
+            $conn->query($q);
+            exit;
 
-            if ($stmt_tk) {
-
-                $stmt_tk->bind_param("ss", $devicetoken, $user);
-
-                if (!$stmt_tk->execute()) {
-                    error_log("Token update failed: " . $stmt_tk->error);
-                    exit;
-                }
-            }
         }
 
         header("Location: " . $redirect_url);
