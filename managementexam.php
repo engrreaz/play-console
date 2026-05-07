@@ -1,14 +1,6 @@
 <?php
 include 'inc.php';
-if(isset($_GET['token'])){
-     $devicetoken = $_GET['token'];
-     if($token != $devicetoken){
-        $query33px ="update usersapp set token='$devicetoken' where  email='$usr' LIMIT 1";
-        $conn->query($query33px) ;
-    }
-} else {
-    $devicetoken = $token;
-}
+
    
 
 

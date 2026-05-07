@@ -33,7 +33,7 @@ if (isset($_POST['update_pass'])) {
 if (isset($_POST['toggle_mfa'])) {
     $mfa_status = intval($_POST['mfa_status']);
 
-    $stmt = $conn->prepare("UPDATE usersapp SET mfa_enabled্ = ? WHERE email = ?");
+    $stmt = $conn->prepare("UPDATE usersapp SET mfa_enabled = ? WHERE email = ?");
     $stmt->bind_param("is", $mfa_status, $usr);
 
     if ($stmt->execute()) {

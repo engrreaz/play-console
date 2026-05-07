@@ -2,17 +2,6 @@
 $page_title = 'Security Settings';
 include 'inc.php';
 
-// ১. টোকেন আপডেট লজিক (অপরিবর্তিত)
-if (isset($_GET['token'])) {
-    $devicetoken = $_GET['token'];
-    if ($token != $devicetoken) {
-        $query33px = "UPDATE usersapp SET token='$devicetoken' WHERE email='$usr' LIMIT 1";
-        $conn->query($query33px);
-        echo  $query33px . ' / Execute 3';
-    }
-} else {
-    $devicetoken = $token;
-}
 
 ?>
 
