@@ -24,7 +24,7 @@ $geolon = $_GET['geolon'] ?? '';
 $output_message = "Invalid login credentials.";
 
 
-echo $devicetoken;
+echo 'Device Token : ' . $devicetoken . '..........';
 exit;
 
 if ($user === '' || $password_input === '') {
