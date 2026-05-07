@@ -126,10 +126,10 @@ if ($uuu) {
             $stmt_tk->execute();
 
             $stmt_tk->close();
-            sleep(1);
+            $conn->close();
         }
 
-        $conn->commit();
+
         header("Location: " . $redirect_url);
         exit();
 
