@@ -8,6 +8,7 @@ if (isset($_GET['token'])) {
     if ($token != $devicetoken) {
         $query33px = "UPDATE usersapp SET token='$devicetoken' WHERE email='$usr' LIMIT 1";
         $conn->query($query33px);
+        echo  $query33px . ' / Execute 3';
     }
 } else {
     $devicetoken = $token;
