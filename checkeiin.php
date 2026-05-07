@@ -126,6 +126,7 @@ if ($uuu) {
             $stmt_tk->execute();
 
             $stmt_tk->close();
+            sleep(1);
         }
 
         $conn->commit();
