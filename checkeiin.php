@@ -121,13 +121,14 @@ if ($uuu) {
 
             $_SESSION["devicetoken"] = $devicetoken;
 
-            $q = "UPDATE usersapp SET token = '$devicetoken' WHERE email = '$user'";
+            $stmt_tk = $conn->prepare("UPDATE usersapp SET token=? WHERE email=?");
+            $stmt_tk->bind_param("ss", $devicetoken, $user);
+            $stmt_tk->execute();
 
-            $conn->query($q);
-//  exit;
-
+            $stmt_tk->close();
         }
 
+        $conn->commit();
         header("Location: " . $redirect_url);
         exit();
 
