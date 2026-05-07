@@ -1,5 +1,5 @@
 <?php
-require 'functions.php';
+require 'functions-fcm.php';
 define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcTZnHEPqIK7Nr38PQhMJrWTpt9g0VI6U9DMvRT58K-D8AwHwwBvG3YqK8hKbxTMNu9qjaAm6KGj09FGyYT3RVUwExfs4IWXSfucp'); // Replace YOUR FIREBASE CLOUD MESSAGING API KEY with your Firebase Cloud Messaging server Key
 $token = 'd9bEq1MSSBOkO-DtXB5cEJ:APA91bEmc_dZnL3mkaHh37aPXLrwaKRTIMSSynseNMWChXf_WuZk8b5Ns5WT39tkJz5DlpYJK5kpohN8yvGEHK8GnPCfzWespwD8CWjfWMXk4DydCWAxc4Y';
 
