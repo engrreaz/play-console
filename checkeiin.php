@@ -24,8 +24,7 @@ $geolon = $_GET['geolon'] ?? '';
 $output_message = "Invalid login credentials.";
 
 
-echo 'Device Token : ' . $devicetoken . '..........';
-exit;
+
 
 if ($user === '' || $password_input === '') {
     header("Location: login.php?error=" . urlencode("Email and Password are required."));
@@ -119,11 +118,20 @@ if ($uuu) {
         // Device Token Update
         // --------------------
         if (!empty($devicetoken)) {
-        $_SESSION["devicetoken"] = $devicetoken;
 
-        $stmt_tk = $conn->prepare("UPDATE usersapp SET token = ? WHERE email = ?");
-        $stmt_tk->bind_param("ss", $devicetoken, $user);
-        $stmt_tk->execute();
+            $_SESSION["devicetoken"] = $devicetoken;
+
+            $stmt_tk = $conn->prepare("UPDATE usersapp SET token = ? WHERE email = ?");
+
+            if ($stmt_tk) {
+
+                $stmt_tk->bind_param("ss", $devicetoken, $user);
+
+                if (!$stmt_tk->execute()) {
+                    error_log("Token update failed: " . $stmt_tk->error);
+                    exit;
+                }
+            }
         }
 
         header("Location: " . $redirect_url);
