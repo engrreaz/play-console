@@ -1,17 +1,8 @@
 <?php
 
-// Server key from Firebase Console
 define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcTZnHEPqIK7Nr38PQhMJrWTpt9g0VI6U9DMvRT58K-D8AwHwwBvG3YqK8hKbxTMNu9qjaAm6KGj09FGyYT3RVUwExfs4IWXSfucp'); // Replace YOUR FIREBASE CLOUD MESSAGING API KEY with your Firebase Cloud Messaging server Key
-
-
-// if($_SERVER["REQUEST_METHOD"] == "POST")
 {
 
-     // POST values
-// $token= $_POST["token"];
-// $title= $_POST["title"];
-// $message= $_POST["message"];
-// $postlink= $_POST["postlink"];
      $token = 'd9bEq1MSSBOkO-DtXB5cEJ:APA91bEmc_dZnL3mkaHh37aPXLrwaKRTIMSSynseNMWChXf_WuZk8b5Ns5WT39tkJz5DlpYJK5kpohN8yvGEHK8GnPCfzWespwD8CWjfWMXk4DydCWAxc4Y';
      $title = 'Hello Test';
      $message = "Hello message";
@@ -22,7 +13,6 @@ define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcT
      $message = htmlspecialchars($message, ENT_COMPAT);
      $postlink = htmlspecialchars($postlink, ENT_COMPAT);
 
-     // Push Data's
      $data = array(
           "to" => "$token",
           "notification" => array(
@@ -33,13 +23,10 @@ define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcT
           )
      );
 
-     // Print Output in JSON Format
      $data_string = json_encode($data);
 
-     // FCM API Token URL
      $url = "https://fcm.googleapis.com/fcm/send";
 
-     //Curl Headers
      $headers = array
      (
           'Authorization: key=' . API_ACCESS_KEY,
@@ -53,7 +40,6 @@ define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcT
      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
      curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
 
-     // Variable for Print the Result
      $result = curl_exec($ch);
 
      curl_close($ch);
