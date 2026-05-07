@@ -7,6 +7,8 @@ $token = 'd9bEq1MSSBOkO-DtXB5cEJ:APA91bEmc_dZnL3mkaHh37aPXLrwaKRTIMSSynseNMWChXf
 
 
 $accessToken = getAccessToken();
+var_dump($accessToken);
+exit;
 
 $projectId = 'eimbox-9014d';
 
