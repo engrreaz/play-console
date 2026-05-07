@@ -68,7 +68,7 @@ if ($result0bg->num_rows > 0) {
 }
 
 // ফাইনাল লিংক জেনারেশন
-$baseUrl = 'https://playconsole.eimbox.com/stpr.php?';
+$baseUrl = 'https://playconsole.eimbox.com/receipt.php?';
 $params = [
     'prno' => $prno,
     'prdate' => $prdate,
