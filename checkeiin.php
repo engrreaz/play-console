@@ -23,6 +23,10 @@ $geolon = $_GET['geolon'] ?? '';
 
 $output_message = "Invalid login credentials.";
 
+
+echo $devicetoken;
+exit;
+
 if ($user === '' || $password_input === '') {
     header("Location: login.php?error=" . urlencode("Email and Password are required."));
     exit();
