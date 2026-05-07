@@ -89,7 +89,7 @@ function saveTeacherAttendance($tid, $detect, $val = NULL, $time = null)
     $entryuser = $usr;
 
 
-    
+
 
     /* =========================
        1️⃣ Determine ReqIn / ReqOut
@@ -218,7 +218,8 @@ function saveTeacherAttendance($tid, $detect, $val = NULL, $time = null)
 
 
 
-function getPagePermission($curfile) {
+function getPagePermission($curfile)
+{
     global $conn, $sccode, $usr, $userlevel, $reallevel, $is_admin, $is_chief;
 
     if (session_status() === PHP_SESSION_NONE) {
@@ -226,8 +227,10 @@ function getPagePermission($curfile) {
     }
 
     // SAFE DEFAULTS
-    if(!$is_admin) $is_admin = 0;
-    if(!$is_chief) $is_chief = 0;
+    if (!$is_admin)
+        $is_admin = 0;
+    if (!$is_chief)
+        $is_chief = 0;
 
     // NOT LOGGED IN
     if (!isset($_SESSION['user'])) {
@@ -311,8 +314,10 @@ function getPagePermission($curfile) {
             }
 
             // Special module overrides
-            if ($module_name == 'Core') $permission = 3;
-            if ($module_name == 'Developement') $permission = 0;
+            if ($module_name == 'Core')
+                $permission = 3;
+            if ($module_name == 'Developement')
+                $permission = 0;
         } else {
             $permission = 0;
         }
@@ -324,4 +329,65 @@ function getPagePermission($curfile) {
     }
 
     return $permission;
+}
+
+
+
+function base64UrlEncode($data)
+{
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+function getAccessToken()
+{
+    $json = json_decode(file_get_contents('firebase-key.json'), true);
+
+    $header = [
+        'alg' => 'RS256',
+        'typ' => 'JWT'
+    ];
+
+    $now = time();
+
+    $payload = [
+        'iss' => $json['client_email'],
+        'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+        'aud' => 'https://oauth2.googleapis.com/token',
+        'iat' => $now,
+        'exp' => $now + 3600
+    ];
+
+    $base64Header = base64UrlEncode(json_encode($header));
+    $base64Payload = base64UrlEncode(json_encode($payload));
+
+    $unsignedJWT = $base64Header . "." . $base64Payload;
+
+    openssl_sign(
+        $unsignedJWT,
+        $signature,
+        $json['private_key'],
+        'SHA256'
+    );
+
+    $jwt = $unsignedJWT . '.' . base64UrlEncode($signature);
+
+    $postFields = http_build_query([
+        'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        'assertion' => $jwt
+    ]);
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+
+    curl_close($ch);
+
+    $result = json_decode($response, true);
+
+    return $result['access_token'] ?? null;
 }
