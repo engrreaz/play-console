@@ -121,7 +121,7 @@ if ($uuu) {
             $stmt_tk->bind_param("ss", $devicetoken, $user);
             $stmt_tk->execute();
         }
-
+ 
         header("Location: " . $redirect_url);
         exit();
 
