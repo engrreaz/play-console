@@ -52,7 +52,7 @@ if ($stmt) {
             $stmt->bind_param(
                 "isisiiiiiiiiissssi",
                 $sccode,    // inc.back থেকে প্রাপ্ত
-                $sy,        // inc.back থেকে প্রাপ্ত (Session Year)
+                $sessionyear,        // inc.back থেকে প্রাপ্ত (Session Year)
                 $stid,      // Student ID
                 $adate,     // Attendance Date
                 $yn, $yn, $yn, $yn, $yn, $yn, $yn, $yn, // Period 1-8
