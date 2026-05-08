@@ -15,7 +15,7 @@ $sec   = $_POST['sec']   ?? '';
 $adate = $_POST['adate'] ?? '';
 $eby   = $_POST['eby']   ?? '';
 
-echo $cls . '/' . $sec . '/' . $adate . '/' . $eby . $sy . '/' . $count . '<br>';
+echo $cls . '/' . $sec . '/' . $adate . '/' . $eby . '/' . $sessionyear . '/' . $count . '<br>';
 
 // যদি ডাটা না থাকে তবে প্রসেস বন্ধ করা
 if ($count <= 0 || empty($adate)) {
