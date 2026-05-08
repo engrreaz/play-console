@@ -15,6 +15,8 @@ $sec   = $_POST['sec']   ?? '';
 $adate = $_POST['adate'] ?? '';
 $eby   = $_POST['eby']   ?? '';
 
+echo $cls . '/' . $sec . '/' . $adate . '/' . $eby . $sy . '/' . $count . '<br>';
+
 // যদি ডাটা না থাকে তবে প্রসেস বন্ধ করা
 if ($count <= 0 || empty($adate)) {
     die("❌ No data received for syncing.");
@@ -64,7 +66,7 @@ if ($stmt) {
 
             $stmt->execute();
         }
-        echo $stid;
+
     }
     $stmt->close();
     
