@@ -19,7 +19,7 @@ $data = [
         "token" => $token,
         "notification" => [
             "title" => "Hello",
-            "body" => "Test Message",
+            "body" => "Test Message @ $ttm",
             "image" => "https://eimbox.com/images/fav.png"
         ],
         "data" => [
