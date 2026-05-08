@@ -19,8 +19,7 @@ $data = [
         "notification" => [
             "title" => "Hello",
             "body" => "Test Message",
-            "image" => "https://eimbox.com/images/fav.png",
-            "data1" => $ttm
+            "image" => "https://eimbox.com/images/fav.png"
         ],
         "data" => [
             "title" => "EIMBox আপডেট",
