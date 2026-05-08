@@ -4,7 +4,7 @@ define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcT
 $token = 'd9bEq1MSSBOkO-DtXB5cEJ:APA91bEmc_dZnL3mkaHh37aPXLrwaKRTIMSSynseNMWChXf_WuZk8b5Ns5WT39tkJz5DlpYJK5kpohN8yvGEHK8GnPCfzWespwD8CWjfWMXk4DydCWAxc4Y';
 
 
-
+$ttm = date("H:i:s");
 
 $accessToken = getAccessToken();
 
@@ -24,7 +24,7 @@ $data = [
             "title" => "EIMBox আপডেট",
             "body" => "আপনার প্রোফাইল চেক করুন",
             "image" => "https://eimbox.com/images/fav.png",
-            "data1" => "অতিরিক্ত তথ্য এখানে"
+            "data1" => $ttm
         ]
     ]
 ];
