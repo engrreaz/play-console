@@ -64,6 +64,7 @@ if ($stmt) {
 
             $stmt->execute();
         }
+        echo $stid;
     }
     $stmt->close();
     
