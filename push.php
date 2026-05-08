@@ -14,11 +14,14 @@ $projectId = 'eimbox-9014d';
 $url = "https://fcm.googleapis.com/v1/projects/$projectId/messages:send";
 
 $data = [
+    "priority" => "high",
     "message" => [
         "token" => $token,
         "notification" => [
             "title" => "Hello",
-            "body" => "Test Message"
+            "body" => "Test Message",
+            "image" => "https://eimbox.com/images/fav.png",
+            "data1" => $ttm
         ],
         "data" => [
             "title" => "EIMBox আপডেট",
