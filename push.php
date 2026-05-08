@@ -19,6 +19,12 @@ $data = [
         "notification" => [
             "title" => "Hello",
             "body" => "Test Message"
+        ],
+        "data" => [
+            "title" => "EIMBox আপডেট",
+            "body" => "আপনার প্রোফাইল চেক করুন",
+            "image" => "https://eimbox.com/images/fav.png",
+            "data1" => "অতিরিক্ত তথ্য এখানে"
         ]
     ]
 ];
