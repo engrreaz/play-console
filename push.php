@@ -28,8 +28,7 @@ $data = [
             "image" => "https://eimbox.com/images/fav.png",
             'm_icon' => 'baseline_fingerprint_24',
             "data1" => $ttm
-        ],
-        'priority' => 'high'
+        ]
     ]
 ];
 
