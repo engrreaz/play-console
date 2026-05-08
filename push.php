@@ -14,7 +14,6 @@ $projectId = 'eimbox-9014d';
 $url = "https://fcm.googleapis.com/v1/projects/$projectId/messages:send";
 
 $data = [
-    "priority" => "high",
     "message" => [
         "token" => $token,
         "notification" => [
