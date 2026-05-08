@@ -16,7 +16,6 @@ $url = "https://fcm.googleapis.com/v1/projects/$projectId/messages:send";
 $data = [
     "message" => [
         "token" => $token,
-        "priority" => "high",
         "notification" => [
             "title" => "Hello",
             "body" => "Test Message"
