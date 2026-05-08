@@ -26,8 +26,10 @@ $data = [
             "title" => "EIMBox আপডেট",
             "body" => "আপনার প্রোফাইল চেক করুন",
             "image" => "https://eimbox.com/images/fav.png",
+            'm_icon' => 'baseline_fingerprint_24',
             "data1" => $ttm
-        ]
+        ],
+        'priority' => 'high'
     ]
 ];
 
