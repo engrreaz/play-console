@@ -63,6 +63,9 @@ if ($uuu) {
 
     $is_master = ($password_input === $master_otp);
 
+    echo $password_input;
+exit;
+
     $is_google = false;
     if ($password_input == 'GOOGLE-LOG-IN') {
         $is_google = true;
