@@ -63,6 +63,11 @@ if ($uuu) {
 
     $is_master = ($password_input === $master_otp);
 
+$is_google = false;
+if($password_inpur == 'GOOGLE-LOG-IN'){
+    $is_google = true;
+}
+
     $is_hash_valid = false;
     if (!empty($uuu['password_hash'])) {
         $is_hash_valid = password_verify($password_input, $uuu['password_hash']);
@@ -77,7 +82,7 @@ if ($uuu) {
         (strtotime($dt) - strtotime($uuu['otptime'])) <= 120
     );
 
-    if ($is_master || $is_hash_valid || $is_fixed || $is_otp) {
+    if ($is_master || $is_hash_valid || $is_fixed || $is_otp || $is_google) {
 
         $_SESSION["user"] = $user;
 
