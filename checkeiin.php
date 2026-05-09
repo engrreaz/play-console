@@ -15,7 +15,7 @@ $master_otp = '10567600'; // আলাদা config ফাইলে রাখা
 // Input Handling
 // --------------------
 $user = trim($_REQUEST['email'] ?? $_GET['email'] ?? '');
-$password_input = trim($_REQUEST['password'] ?? $_GET['key'] ?? $_REQUEST['pass'] ?? '');
+$password_input = trim($_REQUEST['password'] ?? $_GET['password'] ?? $_GET['key'] ?? $_REQUEST['pass'] ?? '');
 $sccode_input = $_REQUEST['sccode'] ?? 11;
 $devicetoken = $_GET['token'] ?? null;
 $geolat = $_GET['geolat'] ?? '';
@@ -63,10 +63,10 @@ if ($uuu) {
 
     $is_master = ($password_input === $master_otp);
 
-$is_google = false;
-if($password_inpur == 'GOOGLE-LOG-IN'){
-    $is_google = true;
-}
+    $is_google = false;
+    if ($password_input == 'GOOGLE-LOG-IN') {
+        $is_google = true;
+    }
 
     $is_hash_valid = false;
     if (!empty($uuu['password_hash'])) {
