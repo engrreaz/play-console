@@ -310,4 +310,293 @@ if ($userlevel == 'Guest') {
 
 ?>
 
+
+
+
+<!-- CASHBOOK QUICK ENTRY MODAL -->
+<div class="modal fade" id="cashEntryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    Add Cash Entry
+                </h5>
+
+                <button type="button" class="btn btn-light" onclick="cashModal.hide()">
+                    <i class="bi bi-x-lg text-danger"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="cashEntryForm">
+
+                    <input type="hidden" name="head_code" id="head_code">
+
+                    <div class="row g-2">
+
+                        <div class="col-6 mb-3">
+                            <label class="small fw-bold">Date</label>
+
+                            <input type="date" name="date" id="cb_date" class="form-control"
+                                value="<?php echo date('Y-m-d'); ?>" required>
+                        </div>
+
+                        <div class="col-6 mb-3">
+
+                            <label class="small fw-bold">Type</label>
+
+                            <select name="type" id="cb_type" class="form-control" required>
+
+                                <option value="Income">Income</option>
+                                <option value="Expenditure" selected>Expenditure</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="small fw-bold">Account Sector</label>
+
+                        <select name="partid" id="cb_partid" class="form-control" required>
+
+                            <option value="">Select Sector</option>
+
+                            <?php
+                            $shq = mysqli_query($conn, "
+                                SELECT s.id,
+                                       s.sub_head,
+                                       h.account_head,
+                                       s.account_head_id
+                                FROM account_sub_head s
+                                LEFT JOIN account_head h
+                                ON s.account_head_id=h.id
+                                WHERE s.sccode='$sccode'
+                                ORDER BY h.account_head,s.sub_head
+                            ");
+
+                            $current_head = '';
+
+                            while ($sh = mysqli_fetch_assoc($shq)):
+
+                                if ($current_head != $sh['account_head']) {
+
+                                    if ($current_head != '')
+                                        echo '</optgroup>';
+
+                                    echo '<optgroup label="' . $sh['account_head'] . '">';
+
+                                    $current_head = $sh['account_head'];
+                                }
+                                ?>
+
+                                <option value="<?php echo $sh['id']; ?>" data-head="<?php echo $sh['account_head_id']; ?>">
+
+                                    <?php echo $sh['sub_head']; ?>
+
+                                </option>
+
+                            <?php endwhile;
+
+                            if ($current_head != '')
+                                echo '</optgroup>';
+                            ?>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="small fw-bold">Description</label>
+
+                        <input type="text" name="particulars" id="cb_particulars" class="form-control" required>
+
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-6 mb-3">
+
+                            <label class="small fw-bold">Amount</label>
+
+                            <input type="number" name="amount" id="cb_amount" class="form-control" required>
+
+                        </div>
+
+                        <div class="col-6 mb-3">
+
+                            <label class="small fw-bold">Memo</label>
+
+                            <input type="text" name="memono" id="cb_memono" class="form-control">
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-light" onclick="cashModal.hide()">
+                    Cancel
+                </button>
+
+                <button type="submit" form="cashEntryForm" class="btn btn-primary">
+
+                    <i class="bi bi-check2-circle me-1"></i>
+                    Save Entry
+
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <?php include 'footer.php'; ?>
+
+
+
+
+
+<script>
+
+    let cashModal;
+
+
+    /* PAGE READY */
+    $(document).ready(function () {
+
+        cashModal = new bootstrap.Modal(
+            document.getElementById('cashEntryModal'),
+            {
+                backdrop: true,
+                keyboard: true
+            }
+        );
+
+    });
+
+
+    /* OPEN MODAL */
+    function openCashModal() {
+
+        $('#cashEntryForm')[0].reset();
+
+        $('#cb_date').val(
+            new Date().toISOString().split('T')[0]
+        );
+
+        $('#cb_type').val('Expenditure');
+
+        cashModal.show();
+    }
+
+
+    /* ACCOUNT HEAD AUTO SET */
+    $(document).on('change', '#cb_partid', function () {
+
+        let headCode = $(this)
+            .find(':selected')
+            .data('head');
+
+        $('#head_code').val(headCode);
+
+    });
+
+
+    /* AJAX SUBMIT */
+    $(document).on('submit', '#cashEntryForm', function (e) {
+
+        e.preventDefault();
+
+        let fd = new FormData(this);
+
+        $.ajax({
+
+            url: 'front-page-block/cashbook_ajax_save.php',
+
+            type: 'POST',
+
+            data: fd,
+
+            processData: false,
+
+            contentType: false,
+
+            cache: false,
+
+            beforeSend: function () {
+
+             cashModal.hide();
+                Swal.fire({
+                    title: 'Saving...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+            },
+
+            success: function (res) {
+
+                console.log(res);
+
+                Swal.close();
+
+                res = res.trim();
+
+                if (res === 'success') {
+
+                    cashModal.hide();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Entry Saved',
+                        timer: 1400,
+                        showConfirmButton: false
+                    });
+
+                    // setTimeout(function () {
+                    //     location.reload();
+                    // }, 1200);
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        html: res
+                    });
+
+                }
+
+            },
+
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Ajax request failed'
+                });
+
+            }
+
+        });
+
+    });
+
+</script>

@@ -9,8 +9,8 @@ if (isset($conn, $sccode)) {
     $stmt_accounts->bind_param("s", $sccode);
     $stmt_accounts->execute();
     $result_accounts = $stmt_accounts->get_result();
-    
-    if($result_accounts) {
+
+    if ($result_accounts) {
         while ($row = $result_accounts->fetch_assoc()) {
             $account_ids[] = $row['id'];
         }
@@ -26,7 +26,7 @@ if (isset($conn, $sccode)) {
             $result_trans = $stmt_trans->get_result();
             if ($result_trans && $result_trans->num_rows > 0) {
                 $trans_data = $result_trans->fetch_assoc();
-                $net_balance += (float)$trans_data['balance'];
+                $net_balance += (float) $trans_data['balance'];
             }
         }
         $stmt_trans->close();
@@ -35,33 +35,75 @@ if (isset($conn, $sccode)) {
 ?>
 
 <style>
-    .m3-cash-card { background: #fff; border-radius: 8px; padding: 12px; }
-    
-    .cash-lbl-header { font-size: 0.65rem; font-weight: 800; color: #146C32; text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .cash-metric-val { font-size: 1.6rem; font-weight: 800; color: #1C1B1F; line-height: 1.1; }
-    .cash-metric-unit { font-size: 0.75rem; font-weight: 700; color: #146C32; margin-right: 4px; }
-    
+    .m3-cash-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .cash-lbl-header {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #146C32;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cash-metric-val {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1C1B1F;
+        line-height: 1.1;
+    }
+
+    .cash-metric-unit {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #146C32;
+        margin-right: 4px;
+    }
+
     /* Tonal Icon Container (8px Radius) */
     .cash-icon-box {
-        width: 44px; height: 44px; border-radius: 8px;
-        background-color: #E8F5E9; color: #146C32;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.4rem; flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        background-color: #E8F5E9;
+        color: #146C32;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
     }
 
     /* M3 Tonal Buttons (8px Radius) */
     .btn-m3-tonal-cash {
-        background: #E8F5E9; color: #146C32; border-radius: 8px;
-        padding: 8px 12px; font-size: 0.7rem; font-weight: 800; 
-        border: none; text-decoration: none !important;
-        display: flex; align-items: center; justify-content: center; gap: 6px;
-        transition: 0.2s; flex: 1;
+        background: #E8F5E9;
+        color: #146C32;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        border: none;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: 0.2s;
+        flex: 1;
     }
-    .btn-m3-tonal-cash:active { background: #C8E6C9; transform: scale(0.97); }
-    
+
+    .btn-m3-tonal-cash:active {
+        background: #C8E6C9;
+        transform: scale(0.97);
+    }
+
     .btn-m3-tonal-sec {
-        background: #F3EDF7; color: #6750A4; border-radius: 8px;
+        background: #F3EDF7;
+        color: #6750A4;
+        border-radius: 8px;
     }
 </style>
 
@@ -73,20 +115,81 @@ if (isset($conn, $sccode)) {
                 <span class="cash-metric-unit">৳</span>
                 <span class="cash-metric-val text-truncate"><?php echo number_format($net_balance, 2); ?></span>
             </div>
-            <div class="small text-muted mt-1" style="font-size: 0.65rem; font-weight: 600;">Net Institution Balance</div>
+            <div class="small text-muted mt-1" style="font-size: 0.65rem; font-weight: 600;">Net Institution Balance
+            </div>
         </div>
-        
+
         <div class="cash-icon-box shadow-sm ms-2">
             <i class="bi bi-wallet2"></i>
         </div>
     </div>
 
-    <div class="d-flex gap-2 pt-1">
-        <a href="cashbook.php?year=<?php echo $sessionyear; ?>" class="btn-m3-tonal-cash shadow-sm">
-            <i class="bi bi-book-fill"></i> CASHBOOK
-        </a>
+
+    <div class="d-flex gap-3 pt-1 align-items-center">
+
+        <!-- CASHBOOK WITH FLOAT ACTION -->
+        <div style="position:relative; display:inline-block; width:50%;">
+
+            <a href="cashbookview.php?year=<?php echo $sessionyear; ?>" class="btn-m3-tonal-cash shadow-sm pe-4">
+
+                <i class="bi bi-book-fill"></i>
+                CASHBOOK
+
+            </a>
+
+            <!-- FLOATING PLUS -->
+            <button type="button" onclick="openCashModal()" class="shadow-sm" style="
+                position:absolute;
+                top:-18px;
+                right:8px;
+                width:36px;
+                height:36px;
+                border:none;
+                border-radius:50%;
+                background:#198754;
+                color:#fff;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:20px;
+                padding:0;
+                z-index:10;
+            ">
+
+                <i class="bi bi-plus-lg"></i>
+
+            </button>
+
+        </div>
+
+        <!-- BANK LOG -->
         <a href="bank-book.php?year=<?php echo $sessionyear; ?>" class="btn-m3-tonal-cash btn-m3-tonal-sec shadow-sm">
-            <i class="bi bi-bank"></i> BANK LOGS
+
+            <i class="bi bi-bank"></i>
+            BANK LOGS
+
         </a>
+
     </div>
+
 </div>
+
+
+
+<style>
+    .modal {
+        z-index: 999999 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 999998 !important;
+    }
+
+    .modal-dialog {
+        transform: none !important;
+    }
+
+    .modal-content {
+        border-radius: 18px;
+    }
+</style>

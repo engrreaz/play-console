@@ -1,452 +1,366 @@
 <?php
-$page_title = "Cashbook Manager";
+$page_title = "Cash Book Ledger";
 include 'inc.php';
 
-/** ---------------- ১. ডেটা প্রসেসিং (CRUD) ---------------- **/
-if (isset($_COOKIE['form-submitted']) && $_COOKIE['form-submitted'] == "true") {
-    $form_submitted = true;
-} else {
-    $form_submitted = false;
-}
+// ১. ফিল্টার প্যারামিটার
+$dtst = $_GET['dtst'] ?? $_COOKIE['dtst'] ?? date('Y-m-01');
+$dted = $_GET['dted'] ?? $_COOKIE['dted'] ?? date('Y-m-d');
+
+// ২. ডাটা ফেচিং
+$sql0 = "SELECT id, date, type, partid, particulars, amount, entrytime, entryby, 
+                memono, refno, month, year
+         FROM cashbook
+         WHERE sccode='$sccode'
+         AND date BETWEEN '$dtst' AND '$dted'
+         ORDER BY entrytime DESC";
+
+$result0 = $conn->query($sql0);
+
+$cnt = 0;
+$mottaka = 0;
 
 
-// ১.১ এন্ট্রি সেভ/আপডেট লজিক
-if (isset($_POST['save_entry']) && $form_submitted) {
-    $id = $_POST['entry_id'];
-    $date = $_POST['date'];
-    $partid = $_POST['partid']; // sub_head_id
-    $head_id = $_POST['head_code'];
-    $particulars = mysqli_real_escape_string($conn, $_POST['particulars']);
-    $amount = $_POST['amount'];
-    $type = $_POST['type'];
-    $memono = $_POST['memono'] ?? '';
-    $month = $_POST['month'] ?? date('n');
-    $year = $_POST['year'] ?? date('Y');
-    $entryby = $usr;
-    $new_sccode = $sccode * 10; // সরাসরি স্যানকশনড হিসেবে সেভ হবে
 
-    if (!empty($id)) {
-        // Update
-        $sql = "UPDATE cashbook SET date='$date', account_head='$head_id', partid='$partid', particulars='$particulars', amount='$amount', type='$type', memono='$memono', month='$month', year='$year' WHERE id='$id'";
-        $conn->query($sql);
-    } else {
-        // Insert (সরাসরি স্যানকশনড হিসেবে সেভ হবে)
-        $sql = "INSERT INTO cashbook (sccode, date, account_head, partid, particulars, amount, type, memono, month, year, entryby, entrytime, sessionyear) 
-                      VALUES ('$new_sccode', '$date', '$head_id', '$partid', '$particulars', '$amount', '$type', '$memono', '$month', '$year', '$usr', '$cur', '$sessionyear')";
-        $conn->query($sql);
-    }
-    echo $sql;
-    exit;
-    // header("Location: accounts-cashbook-advanced.php"); exit();
-}
-
-/** ---------------- ২. ডেটা লোড ---------------- **/
-
-// সাব-হেড লিস্ট (ড্রপডাউনের জন্য) - হেড নামসহ জয়েন করা হয়েছে
-$sub_heads = $conn->query("SELECT s.id, s.sub_head, h.account_head ,  s.account_head_id
+$sub_heads = $conn->query("SELECT s.id, s.sub_head, h.account_head, s.account_head_id
                            FROM account_sub_head s 
                            LEFT JOIN account_head h ON s.account_head_id = h.id 
                            WHERE s.sccode='$sccode' ORDER BY h.account_head, s.sub_head");
 
-// ক্যাশবুক ডেটা লোড
-$datefrom = date('2025-01-01');
-$dateto = date('Y-m-t');
-$sql_main = "SELECT c.*, s.sub_head as head_name FROM cashbook c 
-             LEFT JOIN account_sub_head s ON c.partid = s.id 
-             WHERE (c.sccode='$sccode' OR c.sccode='" . ($sccode * 10) . "') 
-             AND c.date BETWEEN '$datefrom' AND '$dateto' 
-             ORDER BY c.date DESC, c.id DESC";
-$res_main = $conn->query($sql_main);
-
-$approved = [];
-$pending = [];
-$total_in = 0;
-$total_ex = 0;
-
-while ($row = $res_main->fetch_assoc()) {
-    if ($row['sccode'] == $sccode) {
-        $approved[] = $row;
-        if ($row['type'] == 'Income')
-            $total_in += $row['amount'];
-        else
-            $total_ex += $row['amount'];
-    } else {
-        $pending[] = $row;
-    }
+// সাব-হেড ডেটা লোড করার পর এই অংশটুকু যোগ করুন
+$sub_heads_map = [];
+$sub_heads->data_seek(0); // পয়েন্টার শুরুতে নেওয়া
+while ($sh = $sub_heads->fetch_assoc()) {
+    $sub_heads_map[$sh['id']] = [
+        'sub_name' => $sh['sub_head'],
+        'main_name' => $sh['account_head']
+    ];
 }
+
 ?>
 
 <style>
-    /* M3 Custom Styles */
-    .m3-tab-bar {
-        background: #fff;
-        padding: 10px;
-        border-radius: 0 0 20px 20px;
-        box-shadow: var(--m3-shadow-sm);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+    /* ১. হিরো সেকশন স্পেসিফিক */
+    .hero-ledger {
+        padding-bottom: 35px;
     }
 
-    .filter-chip-group {
-        display: flex;
-        gap: 8px;
-        padding: 15px 12px;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .chip {
-        background: #fff;
-        border: 1px solid var(--m3-outline);
-        border-radius: 8px;
-        padding: 6px 15px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #444;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .chip.active {
-        background: var(--m3-tonal-container);
-        color: var(--m3-primary);
-        border-color: var(--m3-primary);
-    }
-
-    .v-card {
-        padding: 15px;
-        margin: 0 12px 12px;
-        border-radius: 12px;
+    /* ২. ট্রানজ্যাকশন কার্ড */
+    .trans-card {
+        padding: 14px 16px;
+        margin-bottom: 12px;
         border: 1px solid rgba(0, 0, 0, 0.04);
-    }
-
-    .Income {
-        border-left: 5px solid #2E7D32;
-    }
-
-    .Expenditure {
-        border-left: 5px solid #B3261E;
-    }
-
-    .m3-fab {
-        position: fixed;
-        bottom: 85px;
-        right: 20px;
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        background: var(--m3-primary-gradient);
-        color: white;
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        box-shadow: var(--m3-shadow-lg);
+        gap: 15px;
+    }
+
+    .amt-income {
+        color: #2E7D32;
+        font-weight: 900;
+        font-size: 1.1rem;
+    }
+
+    .amt-expense {
+        color: #B3261E;
+        font-weight: 900;
+        font-size: 1.1rem;
+    }
+
+    /* ৩. পিরিয়ড চিপ (Actionable) */
+    .period-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--m3-tonal-container);
+        color: var(--m3-primary);
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .period-chip:active {
+        transform: scale(0.95);
+        background: var(--m3-primary);
+        color: white;
+    }
+
+    .session-pill-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+        color: #0D47A1;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: .65rem;
+        font-weight: 800;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 2px 6px rgba(13, 71, 161, .15);
+        transition: .2s ease;
+    }
+
+    .session-pill-date:hover,
+    .period-chip:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(13, 71, 161, .25);
+    }
+
+
+    /* ৪. মডাল কাস্টমাইজেশন */
+    .m3-modal-content {
+        border-radius: 28px;
+        padding: 20px;
         border: none;
-        z-index: 1000;
     }
 </style>
 
 <main>
-    <div class="hero-container" style="padding-bottom: 40px;">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <div style="font-size: 1.6rem; font-weight: 950;">
-                    ৳<?php echo number_format($total_in - $total_ex, 2); ?></div>
-                <div style="font-size: 0.7rem; opacity: 0.8; font-weight: 800; letter-spacing: 1px;">CASH IN HAND</div>
-            </div>
-            <div style="text-align: right;">
-                <div class="small fw-bold text-success">In: +<?php echo number_format($total_in); ?></div>
-                <div class="small fw-bold text-danger">Out: -<?php echo number_format($total_ex); ?></div>
-            </div>
-        </div>
-    </div>
+    <div class="hero-container hero-ledger">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
 
-    <div class="m3-tab-bar">
-        <ul class="nav nav-pills nav-justified" id="cb-tabs">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill"
-                    data-bs-target="#approved-list"><i class="bi bi-shield-check me-1"></i> SANCTIONED</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pending-list"><i
-                        class="bi bi-clock-history me-1"></i> PENDING (<?php echo count($pending); ?>)</button></li>
-        </ul>
-    </div>
-
-    <div class="tab-content pb-5">
-        <div class="tab-pane fade show active" id="approved-list">
-            <div class="filter-chip-group">
-                <div class="chip active" onclick="filterData('all', 'approved-list')">All Items</div>
-                <div class="chip" onclick="filterData('Income', 'approved-list')">Incomes</div>
-                <div class="chip" onclick="filterData('Expenditure', 'approved-list')">Expenditures</div>
-            </div>
-
-            <div class="list-container">
-                <?php foreach ($approved as $v): ?>
-                    <div class="m3-list-item v-card shadow-sm <?php echo $v['type']; ?>">
-                        <div class="d-flex justify-content-between w-100">
-                            <div class="d-flex gap-3">
-                                <div class="icon-box <?php echo ($v['type'] == 'Income' ? 'c-inst' : 'c-exit'); ?>"
-                                    style="width: 44px; height: 44px;">
-                                    <i
-                                        class="bi <?php echo ($v['type'] == 'Income' ? 'bi-arrow-down-left' : 'bi-arrow-up-right'); ?>"></i>
-                                </div>
-                                <div>
-                                    <div class="st-title" style="font-size: 0.95rem; font-weight: 850;">
-                                        <?php echo $v['particulars']; ?>
-                                    </div>
-                                    <div class="st-desc"
-                                        style="font-size: 0.75rem; font-weight: 600; color:var(--m3-primary);">
-                                        <?php echo $v['head_name']; ?>
-                                    </div>
-                                    <div class="small text-muted mt-1"><i
-                                            class="bi bi-calendar3 me-1"></i><?php echo date('d M, y', strtotime($v['date'])); ?>
-                                        | Memo: <?php echo $v['memono'] ?: 'N/A'; ?></div>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <div style="font-weight:900;"
-                                    class="<?php echo $v['type'] == 'Income' ? 'income-text' : 'expense-text'; ?>">
-                                    ৳<?php echo number_format($v['amount']); ?></div>
-                                <div class="d-flex gap-2 mt-2 justify-content-end">
-                                    <i class="bi bi-pencil-square text-primary fs-5"
-                                        onclick='editEntry(<?php echo json_encode($v); ?>)'></i>
-                                    <i class="bi bi-trash3 text-danger fs-5"
-                                        onclick="deleteEntry(<?php echo $v['id']; ?>)"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="pending-list">
-            <div class="filter-chip-group">
-                <div class="chip active" onclick="filterData('all', 'pending-list')">All Pending</div>
-                <div class="chip" onclick="filterData('Income', 'pending-list')">Incomes</div>
-                <div class="chip" onclick="filterData('Expenditure', 'pending-list')">Expenditures</div>
-            </div>
-
-            <?php foreach ($pending as $v): ?>
-                <div class="m3-list-item v-card shadow-sm <?php echo $v['type']; ?>" style="background: #FFF9C4;">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <div>
-                            <div class="fw-bold"><?php echo $v['particulars']; ?></div>
-                            | by : <?php echo $v['entryby']; ?>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="fs-3 text-muted text-right fw-bold">৳<?php echo $v['amount']; ?></div>
-
-                        <div class="d-flex gap-3">
-                            <i class="bi bi-pencil-square text-primary fs-5"
-                                onclick='editEntry(<?php echo json_encode($v); ?>)'></i>
-                            <i class="bi bi-check-circle-fill text-success fs-5"
-                                onclick="processVoucher(<?php echo $v['id']; ?>, 2)"></i>
-                            <i class="bi bi-x-circle text-danger fs-5"
-                                onclick="processVoucher(<?php echo $v['id']; ?>, 1)"></i>
-                        </div>
-                    </div>
-
+                <div>
+                    <div style="font-size: 1.4rem; font-weight: 950; line-height: 1.1;">Cash Ledger</div>
+                    <div style="font-size: 0.75rem; opacity: 0.85; font-weight: 600;">Full Transaction View</div>
                 </div>
             </div>
-        <?php endforeach; ?>
-    </div>
+            <div class="tonal-icon-btn"
+                style="background: rgba(255,255,255,0.2); z-index:9999; color: #fff; border:none; margin:0; padding:0; font-size:24px;"
+                onclick="cashbookviewpage();">
+                <i class="bi bi-file-text-fill"></i>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 10px;">
+            <div
+                style="font-size: 0.65rem; font-weight: 800; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase;">
+                Total Volume in Period</div>
+            <div style="font-size: 2.2rem; font-weight: 950;" id="hero_total_amt">৳ 0.00</div>
+            <span class="session-pill-date" onclick="openDateRangeModal()">
+                <i class="bi bi-calendar3"></i>
+                <?= date('d M', strtotime($dtst)) ?> - <?= date('d M Y', strtotime($dted)) ?>
+            </span>
+
+        </div>
     </div>
 
-    <button class="m3-fab shadow-lg" onclick="addEntry()"><i class="bi bi-plus-lg"></i></button>
+    <div class="widget-grid" style="padding: 15px 12px 100px;">
+        <div class="m3-section-title" style="margin-left: 5px;">Ledger Records</div>
+
+        <?php if ($result0->num_rows): ?>
+            <?php while ($row0 = $result0->fetch_assoc()):
+                $cnt++;
+                $mottaka += $row0['amount'];
+                $id = $row0['id'];
+                $type = $row0['type'];
+                $tk = $row0['amount'];
+
+
+                ?>
+                <div class="m3-list-item trans-card shadow-sm mx-0" id="block<?= $id ?>">
+                    <div class="icon-box <?= ($type == 'Income' ? 'c-inst' : 'c-exit') ?>"
+                        style="width: 44px; height: 44px; border-radius: 10px;">
+                        <i class="bi <?= ($type == 'Income' ? 'bi-arrow-down-left-circle' : 'bi-arrow-up-right-circle') ?>"></i>
+                    </div>
+
+                    <div class="item-info">
+                        <div class="st-title" style="font-size: 0.75rem; font-weight: 500; color:#B3261E;">
+                            <?php
+                            $id = $row0['partid'];
+                            if (isset($sub_heads_map[$id])) {
+                                echo $sub_heads_map[$id]['main_name'] . ' | ' . $sub_heads_map[$id]['sub_name'];
+                            } else {
+                                echo "Unknown Head | ID: " . $id;
+                            }
+                            ?>
+
+                        </div>
+                        <div class="st-desc" style="font-size: 0.95rem; font-weight:bold; color: #555;">
+                            <?= $row0['particulars'] ?>
+                        </div>
+
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <span class="period-chip shadow-sm"
+                                onclick="openMonthYearModal(<?= $id ?>, '<?= $row0['month'] ?>', '<?= $row0['year'] ?>')">
+                                <i class="bi bi-clock-history"></i> <?= $row0['month'] . '/' . $row0['year'] ?>
+                            </span>
+                            <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">
+                                MEMO: <?= $row0['memono'] ?: 'N/A' ?> | <i class="bi bi-event me-1"></i>
+                                <?= date('d M, Y', strtotime($row0['date'])) ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <div class="<?= ($type == 'Income' ? 'amt-income' : 'amt-expense') ?>">
+                            <?= ($type == 'Income' ? '+' : '-') ?>৳<?= number_format($tk, 0) ?>
+                        </div>
+                        <div style="font-size: 0.55rem; color: #ccc; font-weight: 700; margin-top: 5px;">
+                            ID: #<?= $id ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div style="text-align: center; padding: 80px 20px; opacity: 0.4;">
+                <i class="bi bi-search" style="font-size: 3.5rem;"></i>
+                <div style="font-weight: 800; margin-top: 10px;">No Data Found</div>
+            </div>
+        <?php endif; ?>
+    </div>
 </main>
 
 
 
-<div class="modal fade" id="entryModal" tabindex="-1">
+<div class="modal fade" id="monthYearModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content m3-modal-content border-0 shadow-lg" style="width:90vw; margin:auto; padding:20px;">
-            <h5 class="fw-bold mb-4" id="modalTitle" style="color: var(--m3-primary);">Add Transaction</h5>
-            <form method="post" id="entryForm">
-                <input type="hidden" name="entry_id" id="entry_id">
-                <input type="hidden" name="head_code" id="head_code">
+        <div class="modal-content m3-modal-content shadow-lg">
+            <h5 class="fw-bold mb-4" style="color: var(--m3-primary);"><i class="bi bi-calendar-event me-2"></i>Adjust
+                Period</h5>
+
+            <form id="monthYearForm">
+                <input type="hidden" id="my_entry_id">
 
                 <div class="row g-2">
                     <div class="col-6">
                         <div class="m3-floating-group">
-                            <i class="bi bi-calendar-event m3-field-icon"></i>
-                            <input type="date" name="date" id="e_date" class="m3-input-floating"
-                                value="<?php echo date('Y-m-d'); ?>" required>
-                            <label class="m3-floating-label">DATE</label>
+                            <i class="bi bi-calendar-month m3-field-icon"></i>
+                            <input type="number" id="my_month" min="1" max="12" class="m3-input-floating"
+                                placeholder=" ">
+                            <label class="m3-floating-label">MONTH</label>
                         </div>
                     </div>
+
                     <div class="col-6">
                         <div class="m3-floating-group">
-                            <i class="bi bi-arrow-left-right m3-field-icon"></i>
-                            <select name="type" id="e_type" class="m3-select-floating" required>
-                                <option value="Income">Income</option>
-                                <option value="Expenditure">Expenditure</option>
-                            </select>
-                            <label class="m3-floating-label">TYPE</label>
+                            <i class="bi bi-calendar-check m3-field-icon"></i>
+                            <input type="number" id="my_year" class="m3-input-floating" placeholder=" ">
+                            <label class="m3-floating-label">YEAR</label>
                         </div>
                     </div>
                 </div>
 
-                <div class="m3-floating-group">
-                    <i class="bi bi-tags m3-field-icon"></i>
-                    <select name="partid" id="e_partid" class="m3-select-floating" required>
-                        <option value=""></option>
-
-                        <?php
-                        $sub_heads->data_seek(0);
-
-                        $current_head = '';
-
-                        while ($sh = $sub_heads->fetch_assoc()):
-
-                            // নতুন group শুরু
-                            if ($current_head != $sh['account_head']) {
-
-                                // আগের group close
-                                if ($current_head != '') {
-                                    echo '</optgroup>';
-                                }
-
-                                echo '<optgroup label="' . $sh['account_head'] . '">';
-
-                                $current_head = $sh['account_head'];
-                            }
-                            ?>
-
-                            <option value="<?php echo $sh['id']; ?>" data-head="<?php echo $sh['account_head_id']; ?>">
-                                <?php echo $sh['sub_head']; ?>
-                            </option>
-
-                        <?php endwhile;
-
-                        // শেষ group close
-                        if ($current_head != '') {
-                            echo '</optgroup>';
-                        }
-                        ?>
-                    </select>
-
-                    <label class="m3-floating-label">ACCOUNT SECTOR (SUB-HEAD)</label>
-                </div>
-
-                <div class="m3-floating-group">
-                    <i class="bi bi-pencil m3-field-icon"></i>
-                    <input type="text" name="particulars" id="e_particulars" class="m3-input-floating" placeholder=" "
-                        required>
-                    <label class="m3-floating-label">DESCRIPTION</label>
-                </div>
-
-                <div class="row g-2">
-                    <div class="col-6">
-                        <div class="m3-floating-group">
-                            <i class="bi bi-cash-stack m3-field-icon"></i>
-                            <input type="number" name="amount" id="e_amount" class="m3-input-floating" placeholder=" "
-                                required>
-                            <label class="m3-floating-label">AMOUNT</label>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="m3-floating-group">
-                            <i class="bi bi-hash m3-field-icon"></i>
-                            <input type="text" name="memono" id="e_memono" class="m3-input-floating" placeholder=" ">
-                            <label class="m3-floating-label">MEMO NO.</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2 mt-4">
+                <div class="d-flex gap-2 mt-3">
                     <button type="button" class="btn btn-light flex-fill py-2"
-                        style="border-radius:12px; font-weight:700;" data-bs-dismiss="modal">CANCEL</button>
-                    <button type="submit" name="save_entry" class="btn btn-primary flex-fill py-2"
-                        style="border-radius:12px; font-weight:700;">SAVE RECORD</button>
+                        style="border-radius: 12px; font-weight: 700;" data-bs-dismiss="modal">CANCEL</button>
+                    <button type="submit" class="btn btn-primary flex-fill py-2"
+                        style="border-radius: 12px; font-weight: 700;">UPDATE DATA</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+
+
+
+<div class="modal fade" id="dateRangeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <h5 class="fw-bold mb-3">Select Date Range</h5>
+
+            <form id="dateRangeForm">
+
+                <div class="row g-2">
+
+                    <div class="col-6">
+                        <label class="small fw-bold">From</label>
+                        <input type="date" id="dr_from" class="form-control" value="<?= $dtst ?>">
+                    </div>
+
+                    <div class="col-6">
+                        <label class="small fw-bold">To</label>
+                        <input type="date" id="dr_to" class="form-control" value="<?= $dted ?>">
+                    </div>
+
+                </div>
+
+                <div class="text-end mt-3">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+
 <?php include 'footer.php'; ?>
 
 <script>
-    const entryModal = new bootstrap.Modal('#entryModal');
+    // ৪. হিরো সেকশনে টোটাল আপডেট
+    document.getElementById("hero_total_amt").innerText = "৳ <?= number_format($mottaka, 2) ?>";
 
-    // ১. ফিল্টারিং লজিক
-    function filterData(type, tabId) {
-        const tab = document.getElementById(tabId);
-        const chips = tab.querySelectorAll('.chip');
-        const cards = tab.querySelectorAll('.v-card');
+    const myModal = new bootstrap.Modal('#monthYearModal');
 
-        chips.forEach(c => c.classList.remove('active'));
-        event.target.classList.add('active');
+    // মডাল ওপেন
+    function openMonthYearModal(id, month, year) {
+        $('#my_entry_id').val(id);
+        $('#my_month').val(month);
+        $('#my_year').val(year);
+        myModal.show();
+    }
 
-        cards.forEach(card => {
-            if (type === 'all' || card.classList.contains(type)) card.style.display = 'block';
-            else card.style.display = 'none';
+    // AJAX সাবমিট
+    $('#monthYearForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const btn = $(this).find('button[type="submit"]');
+        btn.html('<span class="spinner-border spinner-border-sm"></span>');
+
+        $.post('ajax/ajax-update-monthyear.php', {
+            id: $('#my_entry_id').val(),
+            month: $('#my_month').val(),
+            year: $('#my_year').val()
+        }, function () {
+            myModal.hide();
+            Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: 'Transaction period has been updated.',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => location.reload());
         });
+    });
+</script>
+
+
+<script>
+    const dateRangeModal = new bootstrap.Modal('#dateRangeModal');
+
+    function openDateRangeModal() {
+        dateRangeModal.show();
     }
 
-    // ২. অ্যাড/এডিট ফাংশন
-    function addEntry() {
-        document.getElementById('modalTitle').innerText = "New Voucher";
-        document.getElementById('entry_id').value = "";
-        document.getElementById('entryForm').reset();
-        document.getElementById('e_type').value = 'Expenditure';
+    $('#dateRangeForm').on('submit', function (e) {
 
-        $('#e_type').trigger('change');
+        e.preventDefault();
 
-        entryModal.show();
+        let from = $('#dr_from').val();
+        let to = $('#dr_to').val();
 
-    }
+        document.cookie = "dtst=" + from + ";path=/";
+        document.cookie = "dted=" + to + ";path=/";
 
-    function editEntry(data) {
-        document.getElementById('modalTitle').innerText = "Edit Voucher";
-        document.getElementById('entry_id').value = data.id;
-        document.getElementById('e_date').value = data.date;
-        document.getElementById('e_partid').value = data.partid;
-        document.getElementById('e_particulars').value = data.particulars;
-        document.getElementById('e_amount').value = data.amount;
-        document.getElementById('e_type').value = data.type;
-        document.getElementById('e_memono').value = data.memono;
-        $('#e_type').trigger('change');
-        entryModal.show();
-    }
+        location.reload();
+    });
 
-    // ৩. ডিলিট এবং অ্যাপ্রুভ
-    function deleteEntry(id) {
-        Swal.fire({ title: 'Delete Item?', text: "This will remove the transaction forever!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#B3261E', confirmButtonText: 'Yes, Delete' })
-            .then((result) => { if (result.isConfirmed) { window.location.href = "accounts-cashbook-advanced.php?del_id=" + id; } });
-    }
-
-    function processVoucher(id, tail) {
-        $.post("delcashbook.php", { sccode: '<?php echo $sccode; ?>', id: id, tail: tail }, function () { setCookie("form-submitted", "true", 1); window.location.href = "cashbookview.php"; });
-    }
 </script>
 
 <script>
-    document.getElementById('e_type').addEventListener('change', function () {
-
-        let type = this.value;
-
-        $.ajax({
-            url: 'ajax/ajax-get-subhead.php',
-            type: 'POST',
-            data: { type: type },
-            success: function (data) {
-                $('#e_partid').html(data);
-            }
-        });
-
-    });
-
-
-    $('#e_partid').on('change', function () {
-
-        let opt = this.options[this.selectedIndex];
-
-        $('#head_code').val(opt.getAttribute('data-head'));
-
-    });
-
+    function cashbookviewpage() {
+        // alert('OK');
+        window.location.href = 'cashbook.php';
+    }
 </script>
