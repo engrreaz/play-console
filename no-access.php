@@ -1,5 +1,5 @@
 <?php 
-// $page_title = "Access Denied";
+$page_title = "Access Denied";
 include 'header.php'; 
 ?>
 
@@ -93,4 +93,8 @@ include 'header.php';
 
 
 
-<?php include 'footer.php'; ?>
+<?php 
+exit;
+include 'footer.php';
+
+?>
