@@ -35,7 +35,8 @@ if (isset($_POST['save_entry']) && $form_submitted) {
                       VALUES ('$new_sccode', '$date', '$head_id', '$partid', '$particulars', '$amount', '$type', '$memono', '$month', '$year', '$usr', '$cur', '$sessionyear')";
         $conn->query($sql);
     }
-    // echo $sql;
+    echo $sql;
+    exit;
     // header("Location: accounts-cashbook-advanced.php"); exit();
 }
 
