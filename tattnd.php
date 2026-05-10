@@ -108,6 +108,10 @@ if ($distance == 0) {
     $icon = 'geo-alt-fill';
     $entry = false;
 }
+
+
+$tokens[] = $token;
+pushFCM($tokens, 'Attendance', $msg);
 ?>
 
 <style>
