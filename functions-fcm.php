@@ -138,6 +138,7 @@ function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eim
             ];
         }
 
+        var_dump($results);
 
 
         curl_close($ch);
