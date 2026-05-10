@@ -17,13 +17,13 @@ $txt2 = 'Collection : ' . number_format($total,2);
 
 $data = [
     "to_do_value" => $to_do_value,
-    "txt0" =>"Bingo Batle",
-    "txt1" => 'Attendance : 1430',
+    "txt0" => $txt0,
+    "txt1" => $txt1,
     "txt2" => $txt2,
-    "txt3" => 'Time Range : 11:00 - 11:55',
+    "txt3" => $txt3,
     "progress" => $progress,
-    "in_time" => '09:30:32',
-    "out_time" => '04:12:21'
+    "in_time" => $in_time,
+    "out_time" => $out_time
 ];
 
 echo json_encode($data);
