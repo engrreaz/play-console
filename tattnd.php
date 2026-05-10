@@ -5,7 +5,7 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
 
 $current_time = $cur;
 $today = $td;
-
+$entry = true;
 // ইন এবং আউট টাইম সেটিংস
 $reqin = ($in_time_user != '00:00:00') ? $in_time_user : $in_time;
 $reqout = ($out_time_user != '00:00:00') ? $out_time_user : $out_time;
@@ -23,6 +23,7 @@ $icon = 'shield-lock-fill';
 if ($distance == 0) {
     $msg = 'Location not detected';
     $icon = 'geo-alt-fill';
+    $entry = false;
 } else if ($distance > 0 && $distance <= $dista_differ) {
 
 
@@ -102,6 +103,10 @@ if ($distance == 0) {
         $msg = ($stst == 'Fast') ? '<b>Checked Out</b><br>Leaving early? Have a safe trip.' : '<b>Checked Out</b><br>Duty completed. Well done!';
     }
     $icon = 'check-circle-fill';
+} else {
+    $msg = 'You\'r now out of area.';
+    $icon = 'geo-alt-fill';
+    $entry = false;
 }
 ?>
 
@@ -364,11 +369,16 @@ if ($distance == 0) {
         </div>
 
         <?php
-        if ($inout == 'in') {
-            $title = 'Attendance Recorded';
+        if ($entry) {
+            if ($inout == 'in') {
+                $title = 'Attendance Recorded';
+            } else {
+                $title = 'Checkout Completed';
+            }
         } else {
-            $title = 'Checkout Completed';
+            $title = 'Location not correct';
         }
+
         ?>
 
         <div class="text-center">
