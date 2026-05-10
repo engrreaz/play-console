@@ -92,7 +92,7 @@ if ($distance == 0) {
 ?>
 
 <style>
-    body { margin: 0; background-color: <?php echo $bgclr; ?>; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; overflow: hidden; }
+    body { margin: 0; top:0; background-color: <?php echo $bgclr; ?>; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; overflow: hidden; }
     
     .result-card {
         background: rgba(255, 255, 255, 0.12);
