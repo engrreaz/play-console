@@ -7,8 +7,8 @@ $tokens = [
 ];
 
 // $tokens[] = $token;
-// pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playconsole.eimbox.com/notific-icon/fingerprint.png');
-// /*
+pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playconsole.eimbox.com/notific-icon/fingerprint.png');
+/*
 $ttm = date("H:i:s");
 
 $accessToken = getAccessToken();
@@ -73,4 +73,4 @@ foreach ($tokens as $token) {
     curl_close($ch);
 
 }
-    // */
+    */
