@@ -1,4 +1,5 @@
 <?php 
+include_once 'inc.light.php';
 $to_do_value = 0;
 $txt0 = '';
 $txt1 = '';
