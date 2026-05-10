@@ -19,7 +19,7 @@ $total = mysqli_fetch_row(mysqli_query($conn,"SELECT SUM(amount) FROM stpr WHERE
 $txt2 = 'Collection : ' . number_format($total,2);
 
 
-$realin = mysqli_fetch_row(mysqli_query($conn,"SELECT realin FROM teacherattnd WHERE entryuser='$usr' AND adate='$td' AND sccode='$sccode'"))[0] ?? 0;
+$realin = mysqli_fetch_row(mysqli_query($conn,"SELECT realin FROM teacherattnd WHERE entryuser='$usr' AND adate='$td' AND sccode='$sccode'"))[0] ?? '';
 $in_time =  $realin;
 
 $data = [
