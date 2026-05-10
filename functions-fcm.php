@@ -152,6 +152,7 @@ function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eim
             $stmt->bind_param("s", $token);
             $stmt->execute();
             $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
             $email = $row['email'] ?? '';
             $sccode = $row['sccode'] ?? '';
             echo $token . ' | ' . $success . ' | ' . $response . ' | ' . $email . ' | ' . $sccode;
