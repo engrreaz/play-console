@@ -92,58 +92,303 @@ if ($distance == 0) {
 ?>
 
 <style>
-    body { margin: 0; top:0; background-color: <?php echo $bgclr; ?>; color: white; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; overflow: hidden; }
-    
-    .result-card {
-        background: rgba(255, 255, 255, 0.12);
-        backdrop-filter: blur(15px);
-        border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
-        padding: 40px 24px;
-        margin: 20px;
-        text-align: center;
-        width: 85%;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+
+:root{
+
+    --success:#146C32;
+    --warning:#E46C0A;
+    --error:#B3261E;
+
+}
+
+
+/* BODY */
+
+body{
+
+    margin:0;
+    padding:0;
+
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+        180deg,
+        <?php echo $bgclr; ?> 0%,
+        color-mix(in srgb, <?php echo $bgclr; ?> 82%, black) 100%
+    );
+
+    font-family:'Roboto',sans-serif;
+
+    /* display:flex; */
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    color:#fff;
+
+}
+
+
+/* MAIN WRAPPER */
+
+.m3-wrapper{
+
+    width:100%;
+    max-width:420px;
+margin:auto;
+    padding:24px;
+
+}
+
+
+/* TONAL CARD */
+
+.result-card{
+
+    position:relative;
+
+    background:
+    rgba(255,255,255,0.12);
+
+    border:
+    1px solid rgba(255,255,255,0.14);
+
+    border-radius:28px;
+
+    padding:40px 24px 28px;
+
+    backdrop-filter:blur(18px);
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,0.18);
+
+    overflow:hidden;
+
+}
+
+
+/* TOP GLOW */
+
+.result-card::before{
+
+    content:'';
+
+    position:absolute;
+
+    top:-120px;
+    left:-80px;
+
+    width:220px;
+    height:220px;
+
+    background:
+    rgba(255,255,255,0.08);
+
+    border-radius:50%;
+
+}
+
+
+/* ICON */
+
+.icon-wrap{
+
+    width:88px;
+    height:88px;
+
+    border-radius:28px;
+
+    background:
+    rgba(255,255,255,0.16);
+
+    border:
+    1px solid rgba(255,255,255,0.16);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin:0 auto 28px;
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.08),
+    0 4px 12px rgba(0,0,0,0.15);
+
+}
+
+
+.icon-wrap i{
+
+    font-size:42px;
+    color:#fff;
+
+}
+
+
+/* TITLE */
+
+.status-title{
+
+    font-size:1.45rem;
+    font-weight:800;
+
+    letter-spacing:0.3px;
+
+    margin-bottom:10px;
+
+}
+
+
+/* SUBTITLE */
+
+.status-sub{
+
+    font-size:0.92rem;
+
+    line-height:1.7;
+
+    opacity:0.88;
+
+    font-weight:400;
+
+    margin-bottom:34px;
+
+}
+
+
+/* ACTION BUTTON */
+
+.btn-m3{
+
+    width:100%;
+
+    height:54px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:
+    rgba(255,255,255,0.18);
+
+    color:#fff;
+
+    font-size:0.92rem;
+    font-weight:800;
+
+    letter-spacing:0.6px;
+
+    backdrop-filter:blur(10px);
+
+    transition:0.18s;
+
+    box-shadow:
+    0 2px 10px rgba(0,0,0,0.14);
+
+}
+
+
+.btn-m3:hover{
+
+    background:
+    rgba(255,255,255,0.22);
+
+}
+
+
+.btn-m3:active{
+
+    transform:scale(0.97);
+
+}
+
+
+/* FOOT NOTE */
+
+.meta-info{
+
+    text-align:center;
+
+    margin-top:22px;
+
+    font-size:0.72rem;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    opacity:0.72;
+
+}
+
+
+/* SMALL MOBILE */
+
+@media(max-width:480px){
+
+    .result-card{
+
+        border-radius:24px;
+
+        padding:34px 20px 24px;
+
     }
 
-    .icon-circle {
-        width: 90px; height: 90px;
-        background: white; color: <?php echo $bgclr; ?>;
-        border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 24px; font-size: 48px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
+}
 
-    .status-msg { font-size: 1.1rem; line-height: 1.5; margin-bottom: 32px; font-weight: 400; letter-spacing: 0.3px; }
-    
-    .btn-m3 {
-        background: white; color: <?php echo $bgclr; ?>;
-        border: none; padding: 12px 48px;
-        border-radius: 8px; /* গাইডলাইন অনুযায়ী ৮ পিক্সেল */
-        font-weight: 800; font-size: 0.9rem;
-        letter-spacing: 1px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        transition: 0.2s;
-    }
-    .btn-m3:active { transform: scale(0.96); opacity: 0.9; }
 </style>
 
-<main class="text-center w-100">
-    <div class="result-card shadow-lg">
-        <div class="icon-circle">
+<main class="m3-wrapper">
+
+    <div class="result-card">
+
+        <div class="icon-wrap">
             <i class="bi bi-<?php echo $icon; ?>"></i>
         </div>
 
-        <div class="status-msg">
-            <?php echo $msg; ?>
+        <?php
+        if($inout=='in'){
+            $title='Attendance Recorded';
+        }else{
+            $title='Checkout Completed';
+        }
+        ?>
+
+        <div class="text-center">
+
+            <div class="status-title">
+                <?php echo $title; ?>
+            </div>
+
+            <div class="status-sub">
+                <?php echo strip_tags($msg,'<br><b>'); ?>
+            </div>
+
         </div>
 
-        <button class="btn-m3" onclick="finish();">
+        <button class="btn-m3"
+            onclick="finish()">
+
             DONE
+
         </button>
+
     </div>
-    
-    <div class="mt-4 small opacity-50 fw-bold" style="letter-spacing: 1px;">
-        <?php echo date('h:i A'); ?> <i class="bi bi-dot"></i> ID: <?php echo $userid; ?>
+
+    <div class="meta-info">
+
+        <?php echo date('h:i A'); ?>
+
+        <i class="bi bi-dot"></i>
+
+        ID: <?php echo $userid; ?>
+
     </div>
+
 </main>
 
 <script>
