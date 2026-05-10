@@ -6,9 +6,9 @@ include 'inc.light.php';
 //     'dRx0KEj0QwOCm0aJr7mb71:APA91bFHZ5lpsPANkvI_zU7Oo34W9z7rSw1UIIQCD_1kwFHkDXMsvDxiDnupLJUTIP2hWkHwiVL97clXs0cNgCYTzkgdgsVqLm5JARSX8tGsp5sgbi4_RcA',
 // ];
 
-$tokens[] = $token;
-pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playconsole.eimbox.com/notific-icon/fingerprint.png');
-/*
+// $tokens[] = $token;
+// pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playconsole.eimbox.com/notific-icon/fingerprint.png');
+// /*
 $ttm = date("H:i:s");
 
 $accessToken = getAccessToken();
@@ -73,4 +73,4 @@ foreach ($tokens as $token) {
     curl_close($ch);
 
 }
-    */
+    // */
