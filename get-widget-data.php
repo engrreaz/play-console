@@ -7,7 +7,7 @@ $txt2 = '';
 $txt3 = '';
 $progress = 0;
 $in_time = '09:00:00';
-$out_time = '';
+$out_time = '16:00:00';
 
 $attnd = mysqli_fetch_row(mysqli_query($conn,"SELECT COUNT(yn) FROM stattnd WHERE adate='$td' AND sccode='$sccode' AND yn=1"))[0] ?? 0;
 $txt1 = 'Attendance : ' . $attnd;
