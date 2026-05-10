@@ -2,13 +2,10 @@
 require 'functions-fcm.php';
 define('API_ACCESS_KEY', 'AAAAiSanis8:APA91bGHIRxAjn8YBaf562fukaYy9N9_8LiNIm5XcTZnHEPqIK7Nr38PQhMJrWTpt9g0VI6U9DMvRT58K-D8AwHwwBvG3YqK8hKbxTMNu9qjaAm6KGj09FGyYT3RVUwExfs4IWXSfucp'); // Replace YOUR FIREBASE CLOUD MESSAGING API KEY with your Firebase Cloud Messaging server Key
 $token = 'dRx0KEj0QwOCm0aJr7mb71:APA91bFHZ5lpsPANkvI_zU7Oo34W9z7rSw1UIIQCD_1kwFHkDXMsvDxiDnupLJUTIP2hWkHwiVL97clXs0cNgCYTzkgdgsVqLm5JARSX8tGsp5sgbi4_RcA';
-// $token = 'fJCTf1zdTc6WiaAbJ8PYB2:APA91bEgZYqfDo2-7N1ylHXHXA003Bws1tk3T47nF-UGuLuW2e0bj4i8nJV8cKevdyd_9KZ-XdQj78C42VfeK2iHO6_MNgcg_9xQhJ-72RvrzJjhHq46Whg';
-
 
 $ttm = date("H:i:s");
 
 $accessToken = getAccessToken();
-
 
 $projectId = 'eimbox-9014d';
 
@@ -50,5 +47,3 @@ $response = curl_exec($ch);
 curl_close($ch);
 
 echo $response;
-
-echo 'NO';
