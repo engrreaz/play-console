@@ -1,6 +1,4 @@
 <?php 
-
-
 function base64UrlEncode($data)
 {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
@@ -62,7 +60,7 @@ function getAccessToken()
 
 
 
-function pushFCM($tokens = [], $title = '', $body = '', $url = 'https://eimbox.com/images/fav.png', $icon = 'noti_currency', $db=1)
+function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eimbox.com/images/fav.png', $icon = 'noti_currency', $db=1)
 {
 
     if (empty($tokens)) {
@@ -98,13 +96,13 @@ function pushFCM($tokens = [], $title = '', $body = '', $url = 'https://eimbox.c
                 "data" => [
                     "title" => $title,
                     "body" => $body,
-                    "image" => $url,
+                    "image" => $imageurl,
                     "m_icon" => $icon
                 ],
 
                 "android" => [
                     "notification" => [
-                        "image" => $icon,
+                        "image" => $imageurl,
                         "sound" => "default",
                         "channel_id" => "default_channel"
                     ]
