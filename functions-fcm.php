@@ -59,3 +59,91 @@ function getAccessToken()
 
     return $result['access_token'] ?? null;
 }
+
+
+
+function pushFCM($tokens = [], $title = '', $body = '', $icon = 'noti_currency', $db=1)
+{
+
+    if (empty($tokens)) {
+        return false;
+    }
+
+    $projectId = 'eimbox-9014d';
+
+    $url = "https://fcm.googleapis.com/v1/projects/" . $projectId . "/messages:send";
+
+    $accessToken = getAccessToken();
+
+    $headers = [
+        "Authorization: Bearer " . $accessToken,
+        "Content-Type: application/json"
+    ];
+
+    $results = [];
+
+    foreach ($tokens as $token) {
+
+        $data = [
+
+            "message" => [
+
+                "token" => $token,
+
+                "notification" => [
+                    "title" => $title,
+                    "body" => $body
+                ],
+
+                "data" => [
+                    "title" => $title,
+                    "body" => $body,
+                    "image" => $icon,
+                    "m_icon" => $icon
+                ],
+
+                "android" => [
+                    "notification" => [
+                        "image" => $icon,
+                        "sound" => "default",
+                        "channel_id" => "default_channel"
+                    ]
+                ]
+
+            ]
+        ];
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+
+            $results[] = [
+                'token' => $token,
+                'success' => false,
+                'message' => curl_error($ch)
+            ];
+
+        } else {
+
+            $results[] = [
+                'token' => $token,
+                'success' => true,
+                'response' => json_decode($response, true)
+            ];
+        }
+
+
+
+        curl_close($ch);
+    }
+
+    return $results;
+}
