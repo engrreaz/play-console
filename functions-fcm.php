@@ -145,36 +145,27 @@ function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eim
             $responseData = json_decode($response, true);
 
             if (curl_errno($ch)) {
-
                 $success = 0;
                 $responseText = curl_error($ch);
-
             } else {
-
                 $responseText = json_encode($responseData);
             }
 
             $stmt = $conn->prepare("SELECT email, sccode FROM usersapp WHERE token=?");
-
             $stmt->bind_param("s", $token);
-
             $stmt->execute();
-
             $result = $stmt->get_result();
-
             $row = $result->fetch_assoc();
-
             $email = $row['email'] ?? '';
-
             $sccode = $row['sccode'] ?? '';
-
+            $stmt->close();
+            
             echo $token . ' | ' .
                 $success . ' | ' .
                 $responseText . ' | ' .
                 $email . ' | ' .
                 $sccode . '<br>';
 
-            $stmt->close();
         }
 
 
