@@ -20,7 +20,7 @@ foreach ($tokens as $token) {
         "message" => [
             "topic" => "Administrator",
 
-            "token" => $token,
+            // "token" => $token,
 
             "notification" => [
                 "title" => "Hello",
