@@ -1,4 +1,5 @@
 <?php
+include 'inc.light.php';
 
 require 'functions-fcm.php'; // function file name.
 
