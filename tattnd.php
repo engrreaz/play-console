@@ -318,7 +318,9 @@ if ($distance == 0) {
 
     }
 
-
+.page-title{
+    color:black;
+}
     .btn-m3:active {
 
         transform: scale(0.97);
