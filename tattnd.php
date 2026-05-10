@@ -376,7 +376,7 @@ if ($distance == 0) {
                 $title = 'Checkout Completed';
             }
         } else {
-            $title = 'Location not correct';
+            $title = 'Location Error!';
         }
 
         ?>
