@@ -2,11 +2,11 @@
 
 require 'functions-fcm.php'; // function file name.
 
-// $tokens = [
-//     'dRx0KEj0QwOCm0aJr7mb71:APA91bFHZ5lpsPANkvI_zU7Oo34W9z7rSw1UIIQCD_1kwFHkDXMsvDxiDnupLJUTIP2hWkHwiVL97clXs0cNgCYTzkgdgsVqLm5JARSX8tGsp5sgbi4_RcA',
-// ];
+$tokens = [
+    'dRx0KEj0QwOCm0aJr7mb71:APA91bFHZ5lpsPANkvI_zU7Oo34W9z7rSw1UIIQCD_1kwFHkDXMsvDxiDnupLJUTIP2hWkHwiVL97clXs0cNgCYTzkgdgsVqLm5JARSX8tGsp5sgbi4_RcA',
+];
 
-$tokens[] = $token;
+// $tokens[] = $token;
 pushFCM($tokens, 'Hello', 'Test Message, This is for check');
 /*
 $ttm = date("H:i:s");
