@@ -12,12 +12,12 @@ $total = mysqli_fetch_row(mysqli_query($conn,"SELECT SUM(amount)FROM stpr WHERE 
 $txt2 = 'Collection : ' . number_format($total,2);
 
 $data = [
-    "to_do_value" => 3,
+    "to_do_value" => $to_do_value,
     "txt0" =>"Bingo Batle",
     "txt1" => 'Attendance : 1430',
     "txt2" => $txt2,
     "txt3" => 'Time Range : 11:00 - 11:55',
-    "progress" => 70,
+    "progress" => $progress,
     "in_time" => '09:30:32',
     "out_time" => '04:12:21'
 ];
