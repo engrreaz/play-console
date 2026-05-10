@@ -89,8 +89,8 @@ $greeting = ($hour < 12) ? "Good Morning" : (($hour < 17) ? "Good Afternoon" : "
 
 <header class="m3-app-bar">
     <div class="d-flex align-items-center flex-grow-1">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
-            style="height: 38px; background: #6750A4 !important;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
+            style="width: 38px; background: #6750A4 !important;">
             <img src="iimg/logo.png" width="100%">
         </div>
         <div class="flex-grow-1 text-container" style="min-width: 0;" data-feature="Home Page">
