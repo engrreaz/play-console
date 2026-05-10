@@ -18,7 +18,7 @@ foreach ($tokens as $token) {
 
     $data = [
         "message" => [
-            "topic" => "Administrator",
+            "topic" => "EIMBox Nofifications",
 
             // "token" => $token,
 
