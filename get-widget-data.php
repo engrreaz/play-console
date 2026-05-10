@@ -9,7 +9,7 @@ $txt3 = '';
 $progress = 0;
 $in_time = '';
 $out_time = '';
-$attnd = false;
+$is_attnd = false;
 
 $txt0 = $sccode . ' | ' . $userlevel;
 
@@ -32,7 +32,7 @@ $data = [
     "progress" => $progress,
     "in_time" => $in_time,
     "out_time" => $out_time, 
-    "attnd" => $attnd
+    "attnd" => $is_attnd
 ];
 
 echo json_encode($data);
