@@ -8,7 +8,7 @@ $progress = 0;
 $in_time = '';
 $out_time = '';
 
-$total = mysqli_fetch_row(mysqli_query($conn,"SELECT SUM(amount)FROM stpr WHERE prdate='$td' AND sccode='$sccode'"))[0] ?? 0;
+$total = mysqli_fetch_row(mysqli_query($conn,"SELECT SUM(amount) FROM stpr WHERE prdate='$td' AND sccode='$sccode'"))[0] ?? 0;
 $txt2 = 'Collection : ' . number_format($total,2);
 
 $data = [
