@@ -331,3 +331,6 @@ function getPagePermission($curfile)
     return $permission;
 }
 
+
+
+include 'functions-fcm.php';
