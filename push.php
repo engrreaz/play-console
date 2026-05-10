@@ -7,7 +7,7 @@ include 'inc.light.php';
 // ];
 
 $tokens[] = $token;
-pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playstore.eimbox.com/notific-icon/fingerprint.webp');
+pushFCM($tokens, 'Hello', 'Test Message, This is for check', 'https://playstore.eimbox.com/notific-icon/fingerprint.png');
 /*
 $ttm = date("H:i:s");
 
