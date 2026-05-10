@@ -1,4 +1,4 @@
-<?php 
+<?php
 function base64UrlEncode($data)
 {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
@@ -60,7 +60,7 @@ function getAccessToken()
 
 
 
-function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eimbox.com/images/fav.png', $icon = 'noti_currency', $db=1)
+function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eimbox.com/images/fav.png', $icon = 'noti_currency', $db = 1, $conn = $conn)
 {
 
     if (empty($tokens)) {
@@ -138,7 +138,24 @@ function pushFCM($tokens = [], $title = '', $body = '', $imageurl = 'https://eim
             ];
         }
 
-        var_dump($results);
+        if ($db == 1) {
+            $token = $results['token'];
+            $success = $results['success'];
+            if ($success) {
+                $response = $results['response'];
+            } else {
+                $response = $results['message'];
+            }
+
+            $stmt = $conn->prepare("SELECT email, sccode FROM usersapp WHERE token=?");
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $email = $row['email'] ?? '';
+            $sccode = $row['sccode'] ?? '';
+            echo $token . ' | ' . $success . ' | ' . $response . ' | ' . $email . ' | ' . $sccode;
+
+        }
 
 
         curl_close($ch);
