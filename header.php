@@ -60,7 +60,7 @@
         .form-control,
         .form-select,
         .m3-app-bar {
-            border-radius: 8px !important;
+            border-radius: 0 0 8px 8px !important;
         }
 
         /* ফুল-ওয়াইড টপ বার ফিক্স */
