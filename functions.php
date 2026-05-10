@@ -1,6 +1,6 @@
 <?php
 
-include_once 'inc.light.php';
+// include_once 'inc.light.php';
 function student_profile_image_path($student_id)
 {
     global $BASE_PATH_URL_FILE, $BASE_PATH_URL;
