@@ -1,5 +1,6 @@
 <?php 
 include_once 'inc.light.php';
+$sccode = $_GET['sccode'];
 $to_do_value = 0;
 $txt0 = '';
 $txt1 = '';
