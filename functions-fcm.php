@@ -98,7 +98,7 @@ function pushFCM($tokens = [], $title = '', $body = '', $url = 'https://eimbox.c
                 "data" => [
                     "title" => $title,
                     "body" => $body,
-                    "image" => $icon,
+                    "image" => $url,
                     "m_icon" => $icon
                 ],
 
