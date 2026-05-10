@@ -9,6 +9,8 @@ $progress = 0;
 $in_time = '';
 $out_time = '';
 
+$txt0 = $sccode . ' | ' . $userlevel;
+
 $attnd = mysqli_fetch_row(mysqli_query($conn,"SELECT COUNT(yn) FROM stattnd WHERE adate='$td' AND sccode='$sccode' AND yn=1"))[0] ?? 0;
 $txt1 = 'Attendance : ' . $attnd;
 
