@@ -62,7 +62,7 @@ function getAccessToken()
 
 
 
-function pushFCM($tokens = [], $title = '', $body = '', $icon = 'noti_currency', $db=1)
+function pushFCM($tokens = [], $title = '', $body = '', $url = 'https://eimbox.com/images/fav.png', $icon = 'noti_currency', $db=1)
 {
 
     if (empty($tokens)) {
