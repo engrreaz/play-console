@@ -395,7 +395,7 @@ if ($distance == 0) {
 
         <button class="btn-m3" onclick="finish()">
 
-            DONE
+            View Attendance Log
 
         </button>
 
