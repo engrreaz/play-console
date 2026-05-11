@@ -445,11 +445,11 @@ if ($userlevel == 'Guest') {
 
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-light" onclick="cashModal.hide()">
+                <button type="button"  class="btn btn-light" onclick="cashModal.hide()">
                     Cancel
                 </button>
 
-                <button type="submit" form="cashEntryForm" class="btn btn-primary">
+                <button type="submit" id="cashentrybutton" form="cashEntryForm" class="btn btn-primary">
 
                     <i class="bi bi-check2-circle me-1"></i>
                     Save Entry
@@ -530,6 +530,9 @@ if ($userlevel == 'Guest') {
     $(document).on('submit', '#cashEntryForm', function (e) {
 
         e.preventDefault();
+
+        document.getElementById('cashentrybutton').disabled = true;
+
 
         let fd = new FormData(this);
         let date = document.getElementById('cb_date').value;
