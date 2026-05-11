@@ -503,16 +503,16 @@ if ($userlevel == 'Guest') {
             $('#cb_date').val(last_date);
         }
 
-    }
-    if (memo) {
-        $('#cb_memono').val(memono + 1);
-    }
+
+        if (memo) {
+            $('#cb_memono').val(memono + 1);
+        }
 
 
 
-    $('#cb_type').val('Expenditure');
+        $('#cb_type').val('Expenditure');
 
-    cashModal.show();
+        cashModal.show();
     }
 
 
