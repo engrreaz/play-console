@@ -426,3 +426,4 @@ pushFCM($tokens, 'Attendance', $msg, $imageurl);
     }
 </script>
 
+<?php include 'footer.php'; ?>
