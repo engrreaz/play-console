@@ -2,9 +2,24 @@
 $page_title = "Cash Book Ledger";
 include 'inc.php';
 
+$report_type = [
+    "date" => "Date Based Report",
+    "head" => 'Account Head Based Report'
+];
 // ১. ফিল্টার প্যারামিটার
 $dtst = $_GET['dtst'] ?? $_COOKIE['dtst'] ?? date('Y-m-01');
 $dted = $_GET['dted'] ?? $_COOKIE['dted'] ?? date('Y-m-d');
+$report_style = $_GET['report_type'] ?? $_COOKIE['report_type'] ?? 'date';
+
+// month input এর জন্য
+if (
+    date('Y-m-01', strtotime($dtst)) ==
+    date('Y-m-01', strtotime($dted))
+) {
+    $month = date('Y-m', strtotime($dtst));
+} else {
+    $month = date('Y-m');
+}
 
 // ২. ডাটা ফেচিং
 $sql0 = "SELECT id, date, type, partid, particulars, amount, entrytime, entryby, 
@@ -153,64 +168,256 @@ while ($sh = $sub_heads->fetch_assoc()) {
         <div class="m3-section-title" style="margin-left: 5px;">Ledger Records</div>
 
         <?php if ($result0->num_rows): ?>
-            <?php while ($row0 = $result0->fetch_assoc()):
-                $cnt++;
-                $mottaka += $row0['amount'];
-                $id = $row0['id'];
-                $type = $row0['type'];
-                $tk = $row0['amount'];
 
+            <?php
+
+            $ledger = [];
+
+            while ($row0 = $result0->fetch_assoc()) {
+
+                $date = $row0['date'];
+
+                $headid = $row0['partid'];
+
+                $main_head = $sub_heads_map[$headid]['main_name'] ?? 'Unknown';
+                $sub_head = $sub_heads_map[$headid]['sub_name'] ?? 'Unknown';
+
+                $ledger[$date][$main_head][$sub_head][] = $row0;
+            }
+
+            ?>
+
+
+
+            <?php if ($report_style == 'date'): ?>
+
+                <?php foreach ($ledger as $date => $heads): ?>
+
+                    <?php $date_total = 0; ?>
+
+                    <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <div>
+                                    <div style="font-size:1.1rem;font-weight:900;">
+                                        <?= date('d M Y', strtotime($date)) ?>
+                                    </div>
+
+                                    <div style="font-size:.7rem;color:#777;">
+                                        DATE BASED REPORT
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <?php foreach ($heads as $main_head => $subs): ?>
+
+                                <div class="mb-3">
+
+                                    <div class="fw-bold text-primary mb-2">
+                                        <?= $main_head ?>
+                                    </div>
+
+                                    <?php foreach ($subs as $sub_head => $rows): ?>
+
+                                        <div class="border rounded-3 p-2 mb-2">
+
+                                            <div class="fw-bold mb-2" style="font-size:.85rem;">
+                                                <?= $sub_head ?>
+                                            </div>
+
+                                            <?php foreach ($rows as $r): ?>
+
+                                                <?php
+
+                                                $amt = $r['amount'];
+
+                                                if ($r['type'] == 'Expense') {
+                                                    $amt = -$amt;
+                                                }
+
+                                                $date_total += $amt;
+
+                                                ?>
+
+                                                <div class="d-flex justify-content-between border-bottom py-2">
+
+                                                    <div>
+
+                                                        <div style="font-weight:700;font-size:.8rem;">
+                                                            <?= $r['particulars'] ?>
+                                                        </div>
+
+                                                        <div style="font-size:.65rem;color:#888;">
+                                                            Memo: <?= $r['memono'] ?: 'N/A' ?>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="<?= ($r['type'] == 'Income' ? 'amt-income' : 'amt-expense') ?>">
+                                                        <?= ($r['type'] == 'Income' ? '+' : '-') ?>
+                                                        ৳<?= number_format($r['amount'], 0) ?>
+                                                    </div>
+
+                                                </div>
+
+                                            <?php endforeach; ?>
+
+                                        </div>
+
+                                    <?php endforeach; ?>
+
+                                </div>
+
+                            <?php endforeach; ?>
+
+                            <div class="text-end mt-3">
+
+                                <div class="fw-bold">
+                                    SUB TOTAL :
+                                    ৳<?= number_format($date_total, 2) ?>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+
+            <?php else: ?>
+
+                <?php
+
+                $head_based = [];
+
+                foreach ($ledger as $date => $heads) {
+
+                    foreach ($heads as $main_head => $subs) {
+
+                        foreach ($subs as $sub_head => $rows) {
+
+                            foreach ($rows as $r) {
+
+                                $head_based[$main_head][$sub_head][$date][] = $r;
+                            }
+                        }
+                    }
+                }
 
                 ?>
-                <div class="m3-list-item trans-card shadow-sm mx-0" id="block<?= $id ?>">
-                    <div class="icon-box <?= ($type == 'Income' ? 'c-inst' : 'c-exit') ?>"
-                        style="width: 44px; height: 44px; border-radius: 10px;">
-                        <i class="bi <?= ($type == 'Income' ? 'bi-arrow-down-left-circle' : 'bi-arrow-up-right-circle') ?>"></i>
-                    </div>
 
-                    <div class="item-info">
-                        <div class="st-title" style="font-size: 0.75rem; font-weight: 500; color:#B3261E;">
-                            <?php
-                            $id = $row0['partid'];
-                            if (isset($sub_heads_map[$id])) {
-                                echo $sub_heads_map[$id]['main_name'] . ' | ' . $sub_heads_map[$id]['sub_name'];
-                            } else {
-                                echo "Unknown Head | ID: " . $id;
-                            }
-                            ?>
+                <?php foreach ($head_based as $main_head => $subs): ?>
 
-                        </div>
-                        <div class="st-desc" style="font-size: 0.95rem; font-weight:bold; color: #555;">
-                            <?= $row0['particulars'] ?>
-                        </div>
+                    <?php $head_total = 0; ?>
 
-                        <div class="mt-2 d-flex align-items-center gap-2">
-                            <span class="period-chip shadow-sm"
-                                onclick="openMonthYearModal(<?= $id ?>, '<?= $row0['month'] ?>', '<?= $row0['year'] ?>')">
-                                <i class="bi bi-clock-history"></i> <?= $row0['month'] . '/' . $row0['year'] ?>
-                            </span>
-                            <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">
-                                MEMO: <?= $row0['memono'] ?: 'N/A' ?> | <i class="bi bi-event me-1"></i>
-                                <?= date('d M, Y', strtotime($row0['date'])) ?>
+                    <div class="card shadow-sm mb-4 border-0 rounded-4">
+
+                        <div class="card-body">
+
+                            <div class="mb-3">
+
+                                <div style="font-size:1.1rem;font-weight:900;">
+                                    <?= $main_head ?>
+                                </div>
+
+                                <div style="font-size:.7rem;color:#777;">
+                                    ACCOUNT HEAD BASED REPORT
+                                </div>
+
                             </div>
+
+                            <?php foreach ($subs as $sub_head => $dates): ?>
+
+                                <div class="border rounded-3 p-3 mb-3">
+
+                                    <div class="fw-bold text-primary mb-2">
+                                        <?= $sub_head ?>
+                                    </div>
+
+                                    <?php foreach ($dates as $date => $rows): ?>
+
+                                        <div class="mb-2">
+
+                                            <div class="fw-bold mb-2" style="font-size:.8rem;">
+                                                <?= date('d M Y', strtotime($date)) ?>
+                                            </div>
+
+                                            <?php foreach ($rows as $r): ?>
+
+                                                <?php
+
+                                                $amt = $r['amount'];
+
+                                                if ($r['type'] == 'Expense') {
+                                                    $amt = -$amt;
+                                                }
+
+                                                $head_total += $amt;
+
+                                                ?>
+
+                                                <div class="d-flex justify-content-between border-bottom py-2">
+
+                                                    <div>
+
+                                                        <div style="font-weight:700;font-size:.8rem;">
+                                                            <?= $r['particulars'] ?>
+                                                        </div>
+
+                                                        <div style="font-size:.65rem;color:#888;">
+                                                            Memo: <?= $r['memono'] ?: 'N/A' ?>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="<?= ($r['type'] == 'Income' ? 'amt-income' : 'amt-expense') ?>">
+                                                        <?= ($r['type'] == 'Income' ? '+' : '-') ?>
+                                                        ৳<?= number_format($r['amount'], 0) ?>
+                                                    </div>
+
+                                                </div>
+
+                                            <?php endforeach; ?>
+
+                                        </div>
+
+                                    <?php endforeach; ?>
+
+                                </div>
+
+                            <?php endforeach; ?>
+
+                            <div class="text-end">
+
+                                <div class="fw-bold">
+                                    HEAD TOTAL :
+                                    ৳<?= number_format($head_total, 2) ?>
+                                </div>
+
+                            </div>
+
                         </div>
+
                     </div>
 
-                    <div style="text-align: right;">
-                        <div class="<?= ($type == 'Income' ? 'amt-income' : 'amt-expense') ?>">
-                            <?= ($type == 'Income' ? '+' : '-') ?>৳<?= number_format($tk, 0) ?>
-                        </div>
-                        <div style="font-size: 0.55rem; color: #ccc; font-weight: 700; margin-top: 5px;">
-                            ID: #<?= $id ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endwhile; ?>
+                <?php endforeach; ?>
+
+            <?php endif; ?>
+
         <?php else: ?>
+
             <div style="text-align: center; padding: 80px 20px; opacity: 0.4;">
                 <i class="bi bi-search" style="font-size: 3.5rem;"></i>
                 <div style="font-weight: 800; margin-top: 10px;">No Data Found</div>
             </div>
+
         <?php endif; ?>
     </div>
 </main>
@@ -281,6 +488,30 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                 </div>
 
+                <div class="row">
+                    <div class="col-6">
+                        <label class="small fw-bold">or, Choose Month</label>
+                        <input type="month" id="dr_month" class="form-control" value="<?= $month ?>">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <label class="small fw-bold">Report Style</label>
+                        <select id="report_type" class="form-control">
+
+                            <?php foreach ($report_type as $k => $v): ?>
+
+                                <option value="<?= $k ?>" <?= ($report_style == $k ? 'selected' : '') ?>>
+                                    <?= $v ?>
+                                </option>
+
+                            <?php endforeach; ?>
+
+                        </select>
+                    </div>
+                </div>
+
                 <div class="text-end mt-3">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Apply</button>
@@ -349,11 +580,27 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
         let from = $('#dr_from').val();
         let to = $('#dr_to').val();
+        let month = $('#dr_month').val();
+        let report_type = $('#report_type').val();
+
+        // month select করলে auto from/to
+        if (month) {
+
+            from = month + '-01';
+
+            let d = new Date(month + '-01');
+            d.setMonth(d.getMonth() + 1);
+            d.setDate(0);
+
+            to = d.toISOString().split('T')[0];
+        }
 
         document.cookie = "dtst=" + from + ";path=/";
         document.cookie = "dted=" + to + ";path=/";
+        document.cookie = "report_type=" + report_type + ";path=/";
 
         location.reload();
+
     });
 
 </script>
