@@ -222,7 +222,7 @@ while ($row = $res_main->fetch_assoc()) {
                                 <div class="mt-2">
                                     <i class="bi bi-pencil-square text-primary me-2"
                                         onclick='editEntry(<?php echo json_encode($v); ?>)'></i>
-                                    <i class="bi bi-trash3 text-danger" onclick="deleteEntry(<?php echo $v['id']; ?>)"></i>
+                                    <i class="bi bi-trash3 text-danger" onclick="processVoucher(<?php echo $v['id']; ?>, 1)"></i>
                                 </div>
                             </div>
                         </div>
