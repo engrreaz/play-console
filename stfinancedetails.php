@@ -362,7 +362,7 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
                 <h5 class="fw-black text-primary"><i class="bi bi-clock-history me-2"></i>Payment History</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4 m3-scroll-body">
+            <div class="modal-body p-2 m3-scroll-body">
                 <div id="history_content">
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary" role="status"></div>
