@@ -111,7 +111,7 @@ if ($distance == 0) {
 
 
 $tokens[] = $token;
-pushFCM($tokens, 'Attendance', $msg);
+pushFCM($tokens, 'Attendance', $msg, 'https://playconsole.eimbox.com/notific-icon/fingerprint.png');
 ?>
 
 <style>
