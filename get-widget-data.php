@@ -9,7 +9,7 @@ $txt3 = '';
 $progress = 0;
 $in_time = '';
 $out_time = '';
-$is_attnd = false;
+$is_attnd = true;
 
 $txt0 = $sccode . ' | ' . $userlevel;
 
