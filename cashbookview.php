@@ -173,6 +173,8 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
             $ledger = [];
 
+            $mottaka = 0;
+
             while ($row0 = $result0->fetch_assoc()) {
 
                 $date = $row0['date'];
@@ -181,6 +183,13 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                 $main_head = $sub_heads_map[$headid]['main_name'] ?? 'Unknown';
                 $sub_head = $sub_heads_map[$headid]['sub_name'] ?? 'Unknown';
+
+                // GRAND TOTAL
+                if ($row0['type'] == 'Income') {
+                    $mottaka += $row0['amount'];
+                } else {
+                    $mottaka -= $row0['amount'];
+                }
 
                 $ledger[$date][$main_head][$sub_head][] = $row0;
             }
