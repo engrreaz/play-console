@@ -19,6 +19,7 @@ $txt1 = 'Attendance : ' . $attnd;
 $total = mysqli_fetch_row(mysqli_query($conn,"SELECT SUM(amount) FROM stpr WHERE prdate='$td' AND sccode='$sccode'"))[0] ?? 0;
 $txt2 = 'Collection : ' . number_format($total,2);
 
+$txt3 = "Running Period : ";
 
 $realin = mysqli_fetch_row(mysqli_query($conn,"SELECT realin FROM teacherattnd WHERE entryuser='$usr' AND adate='$td' AND sccode='$sccode'"))[0] ?? '';
 $in_time =  $realin;
