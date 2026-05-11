@@ -445,7 +445,7 @@ if ($userlevel == 'Guest') {
 
             <div class="modal-footer">
 
-                <button type="button"  class="btn btn-light" onclick="cashModal.hide()">
+                <button type="button" class="btn btn-light" onclick="cashModal.hide()">
                     Cancel
                 </button>
 
@@ -496,21 +496,23 @@ if ($userlevel == 'Guest') {
             new Date().toISOString().split('T')[0]
         );
 
-        let date = getCookie("last_date");
-        let memo = parseInt(("memono")) + 1;
+        let last_date = localStorage.getItem("last_date");
+        let memono = localStorage.getItem("memono");
 
-        if (date) {
-            $('#cb_date').val(date);
-        }
-        if (memo) {
-            $('#cb_memono').val(memo);
+        if (last_date) {
+            $('#cb_date').val(last_date);
         }
 
+    }
+    if (memo) {
+        $('#cb_memono').val(memono + 1);
+    }
 
 
-        $('#cb_type').val('Expenditure');
 
-        cashModal.show();
+    $('#cb_type').val('Expenditure');
+
+    cashModal.show();
     }
 
 
@@ -577,8 +579,9 @@ if ($userlevel == 'Guest') {
                 res = res.trim();
 
                 if (res === 'success') {
-                    setCookie("last_date", date);
-                    setCookie("memono", memo);
+                    localStorage.setItem("last_date", date);
+                    localStorage.setItem("memono", memo);
+
 
                     cashModal.hide();
 
