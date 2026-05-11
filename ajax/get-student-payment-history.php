@@ -26,10 +26,11 @@ if ($receipts->num_rows == 0) {
                     <span class="badge rounded-pill bg-primary px-3">Receipt: <?= $current_prno ?></span>
                     <div class="small text-muted mt-1 px-1"><i
                             class="bi bi-calendar3 me-1"></i><?= date('d M, Y', strtotime($pr['prdate'])) ?></div>
+                    <div class="small text-muted" style="font-size: 0.7rem;"><?= $pr['entryby'] ?></div>
                 </div>
                 <div class="text-end">
                     <div class="fw-black text-primary h5 mb-0">৳<?= number_format($pr['amount'], 2) ?></div>
-                    <div class="small text-muted" style="font-size: 0.7rem;"><?= $pr['entryby'] ?></div>
+
                 </div>
             </div>
 
