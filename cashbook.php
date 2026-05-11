@@ -65,7 +65,7 @@ $sql_main = "SELECT c.*, s.sub_head as head_name FROM cashbook c
              LEFT JOIN account_sub_head s ON c.partid = s.id 
              WHERE (c.sccode='$sccode' OR c.sccode='" . ($sccode * 10) . "') 
              AND c.date BETWEEN '$datefrom' AND '$dateto' 
-             ORDER BY c.date DESC, c.id DESC";
+             ORDER BY c.memono DESC, c.date DESC, c.id DESC";
 $res_main = $conn->query($sql_main);
 
 $approved = [];
