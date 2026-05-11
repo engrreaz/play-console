@@ -496,6 +496,18 @@ if ($userlevel == 'Guest') {
             new Date().toISOString().split('T')[0]
         );
 
+        let date = getCookie("last_date");
+        let memo = parseInt(("memono")) + 1;
+
+        if (date) {
+            $('#cb_date').val(date);
+        }
+        if (memo) {
+            $('#cb_memono').val(memo);
+        }
+
+
+
         $('#cb_type').val('Expenditure');
 
         cashModal.show();
@@ -520,6 +532,11 @@ if ($userlevel == 'Guest') {
         e.preventDefault();
 
         let fd = new FormData(this);
+        let date = document.getElementById('cb_date').value;
+        let memo = document.getElementById('cb_memono').value;
+
+
+
 
         $.ajax({
 
@@ -537,7 +554,7 @@ if ($userlevel == 'Guest') {
 
             beforeSend: function () {
 
-             cashModal.hide();
+                cashModal.hide();
                 Swal.fire({
                     title: 'Saving...',
                     allowOutsideClick: false,
@@ -557,6 +574,8 @@ if ($userlevel == 'Guest') {
                 res = res.trim();
 
                 if (res === 'success') {
+                    setCookie("last_date", date);
+                    setCookie("memono", memo);
 
                     cashModal.hide();
 
