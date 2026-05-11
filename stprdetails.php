@@ -118,11 +118,7 @@ $stmt_st->close();
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i></a>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons"><i class="bi bi-printer"></i></div>
-</header>
+
 
 <main class="pb-5 mt-2">
     <div class="st-hero-card shadow-sm">

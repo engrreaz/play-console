@@ -10,7 +10,7 @@ $page_title = "Dues List";
 
 // ৩. ডাটা ফেচিং অপ্টিমাইজেশন (Single Joined Query with Prepared Statement)
 $student_list = [];
-echo $sy_param;
+// echo $sy_param;
 $sql = "
 SELECT 
     s.stid,
