@@ -583,6 +583,29 @@ while ($sh = $sub_heads->fetch_assoc()) {
         dateRangeModal.show();
     }
 
+    $('#dr_month').on('change', function () {
+
+        let month = $(this).val();
+
+        if (!month) return;
+
+        // FROM DATE
+        let from = month + '-01';
+
+        // LAST DATE OF MONTH
+        let d = new Date(month + '-01');
+
+        d.setMonth(d.getMonth() + 1);
+        d.setDate(0);
+
+        let to = d.toISOString().split('T')[0];
+
+        // SET INPUTS
+        $('#dr_from').val(from);
+        $('#dr_to').val(to);
+
+    });
+
     $('#dateRangeForm').on('submit', function (e) {
 
         e.preventDefault();
