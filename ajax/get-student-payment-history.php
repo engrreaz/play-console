@@ -5,8 +5,8 @@ $stid = $_POST['stid'];
 
 
 // ১. রশিদের তথ্য ফেচ করা (stpr)
-$stmt = $conn->prepare("SELECT * FROM stpr WHERE sccode = ? AND stid = ? ORDER BY prdate DESC, prno DESC");
-$stmt->bind_param("ss", $sccode, $stid);
+$stmt = $conn->prepare("SELECT * FROM stpr WHERE sccode = ? AND stid = ? and sessionyear LIKE ? ORDER BY prdate DESC, prno DESC");
+$stmt->bind_param("ss", $sccode, $stid, $sessionyear_param);
 $stmt->execute();
 $receipts = $stmt->get_result();
 
