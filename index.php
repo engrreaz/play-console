@@ -504,7 +504,7 @@ if ($userlevel == 'Guest') {
         }
 
 
-        if (memo) {
+        if (memono) {
             $('#cb_memono').val(memono + 1);
         }
 
