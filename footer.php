@@ -10,6 +10,9 @@ if (empty($usr) || $userlevel == 'Guest') {
     exit;
 }
 
+
+ var_dump($GLOBALS['query_text']);
+
 include_once('logbook.php');
 
 
