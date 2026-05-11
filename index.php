@@ -497,7 +497,7 @@ if ($userlevel == 'Guest') {
         );
 
         let last_date = localStorage.getItem("last_date");
-        let memono = localStorage.getItem("memono");
+        let memono = parseInt(localStorage.getItem("memono"))+1;
 
         if (last_date) {
             $('#cb_date').val(last_date);
@@ -505,7 +505,7 @@ if ($userlevel == 'Guest') {
 
 
         if (memono) {
-            $('#cb_memono').val(memono + 1);
+            $('#cb_memono').val(memono );
         }
 
 
