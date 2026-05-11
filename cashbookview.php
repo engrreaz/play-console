@@ -132,6 +132,49 @@ while ($sh = $sub_heads->fetch_assoc()) {
         padding: 20px;
         border: none;
     }
+
+
+    .report-date-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #E8F0FE, #D2E3FC);
+        color: #0B57D0;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: .72rem;
+        font-weight: 800;
+        border: 1px solid rgba(11, 87, 208, .15);
+    }
+
+    .subhead-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #F3E8FF, #E9D5FF);
+        color: #7E22CE;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: .72rem;
+        font-weight: 800;
+        border: 1px solid rgba(126, 34, 206, .15);
+        margin-bottom: 10px;
+    }
+
+    .record-line {
+        background: #fafafa;
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+    }
+
+    .group-block {
+        background: #fcfcfc;
+        border: 1px solid #f1f1f1;
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 16px;
+    }
 </style>
 
 <main>
@@ -233,9 +276,10 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                                     <?php foreach ($subs as $sub_head => $rows): ?>
 
-                                        <div class="border rounded-3 p-2 mb-2">
+                                        <div class="group-block">
 
-                                            <div class="fw-bold mb-2" style="font-size:.85rem;">
+                                            <div class="subhead-chip">
+                                                <i class="bi bi-folder2-open"></i>
                                                 <?= $sub_head ?>
                                             </div>
 
@@ -253,7 +297,7 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                                                 ?>
 
-                                                <div class="d-flex justify-content-between border-bottom py-2">
+                                                <div class="d-flex justify-content-between align-items-center record-line">
 
                                                     <div>
 
@@ -344,7 +388,7 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                             <?php foreach ($subs as $sub_head => $dates): ?>
 
-                                <div class="border rounded-3 p-3 mb-3">
+                                <div class="group-block">
 
                                     <div class="fw-bold text-primary mb-2">
                                         <?= $sub_head ?>
@@ -354,9 +398,10 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                                         <div class="mb-2">
 
-                                            <div class="fw-bold mb-2" style="font-size:.8rem;">
-                                                <?= date('d M Y', strtotime($date)) ?>
-                                            </div>
+                                            <div class="report-date-pill mb-2">
+    <i class="bi bi-calendar3"></i>
+    <?= date('d M Y', strtotime($date)) ?>
+</div>
 
                                             <?php foreach ($rows as $r): ?>
 
@@ -372,7 +417,7 @@ while ($sh = $sub_heads->fetch_assoc()) {
 
                                                 ?>
 
-                                                <div class="d-flex justify-content-between border-bottom py-2">
+                                               <div class="d-flex justify-content-between align-items-center record-line">
 
                                                     <div>
 
