@@ -11,7 +11,6 @@ if (empty($usr) || $userlevel == 'Guest') {
 }
 
 
- var_dump($GLOBALS);
 
 include_once('logbook.php');
 
