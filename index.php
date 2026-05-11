@@ -581,6 +581,7 @@ if ($userlevel == 'Guest') {
                 if (res === 'success') {
                     localStorage.setItem("last_date", date);
                     localStorage.setItem("memono", memo);
+                      document.getElementById('cashentrybutton').disabled = false;
 
 
                     cashModal.hide();
