@@ -9,7 +9,7 @@ date_default_timezone_set('Asia/Dhaka');
 require_once 'db.php';
 
 $dt = date('Y-m-d H:i:s');
-$master_otp = '10567600'; // আলাদা config ফাইলে রাখা ভালো
+$master_otp = 'argon2di'; // আলাদা config ফাইলে রাখা ভালো
 
 // --------------------
 // Input Handling
