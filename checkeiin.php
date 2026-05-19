@@ -9,67 +9,7 @@ date_default_timezone_set('Asia/Dhaka');
 require_once 'db.php';
 
 
-?>
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: Arial, sans-serif;
-    }
-
-    .loading-wrapper {
-        width: 100%;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #f4f4f4;
-    }
-
-    .progress-container {
-        width: 300px;
-        height: 12px;
-        background: #ddd;
-        border-radius: 50px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .progress-bar {
-        width: 40%;
-        height: 100%;
-        background: #007bff;
-        border-radius: 50px;
-        position: absolute;
-        animation: loading 1.5s infinite ease-in-out;
-    }
-
-    @keyframes loading {
-        0% {
-            left: -40%;
-        }
-
-        100% {
-            left: 100%;
-        }
-    }
-</style>
-
-
-<div class="loading-wrapper">
-    <div class="progress-container">
-        <div class="progress-bar"></div>
-    </div>
-</div>
-
-
-
-<?php
 
 $dt = date('Y-m-d H:i:s');
 $master_otp = 'argon2di'; // আলাদা config ফাইলে রাখা ভালো
