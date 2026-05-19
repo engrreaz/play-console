@@ -3,7 +3,7 @@ include 'inc.light.php';
 
 
 $tokens = [
-    'dRx0KEj0QwOCm0aJr7mb71:APA91bFHZ5lpsPANkvI_zU7Oo34W9z7rSw1UIIQCD_1kwFHkDXMsvDxiDnupLJUTIP2hWkHwiVL97clXs0cNgCYTzkgdgsVqLm5JARSX8tGsp5sgbi4_RcA',
+    $token
 ];
 
 // $tokens[] = $token;
