@@ -1,4 +1,4 @@
-<?php include('header.php'); ?>
+<?php include('inc.php'); ?>
 
 <div style="max-width:900px;margin:auto;padding:20px;font-family:Arial;line-height:1.7;color:#222;">
 
