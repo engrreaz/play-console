@@ -251,7 +251,7 @@ $stslist = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
                     <div class="icon-grid row-1 c-comm">
                         <!-- Call -->
-                        <a href="make-call.php?mobilenumber=<?= $st['s_mob'] ?>" class="btn-action">
+                        <a href="tel:<?= $st['s_mob'] ?>" class="btn-action">
                             <i class="bi bi-telephone-fill"></i>
                         </a>
 
