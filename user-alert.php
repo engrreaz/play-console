@@ -72,7 +72,7 @@ box-shadow:0 4px 20px rgba(0,0,0,0.12);
     display:flex;
     gap:10px;
     justify-content:flex-end;
-    ">
+    " hidden>
 
         <button style="
         border:none;
