@@ -1,35 +1,184 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include 'inc.php'; ?>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Terms & Conditions - EIMBox</title>
+
   <style>
+    :root {
+      /* Material 3 Light Theme Colors */
+      --md-sys-color-background: #FEF7FF;
+      --md-sys-color-surface: #F7F2FA;
+      --md-sys-color-surface-container: #F3EDF7;
+      --md-sys-color-primary: #6750A4;
+      --md-sys-color-on-primary: #FFFFFF;
+      --md-sys-color-on-surface: #1D1B20;
+      --md-sys-color-on-surface-variant: #49454F;
+      --md-sys-color-outline-variant: #CAC4D0;
+      --md-sys-color-primary-container: #EADDFF;
+      --md-sys-color-on-primary-container: #21005D;
+      
+      /* Shape & Elevation Tokens */
+      --md-shape-corner-medium: 12px;
+      --md-shape-corner-large: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      line-height: 1.7;
-      padding: 20px;
-      color: #222;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-surface);
+      line-height: 1.6;
+      padding: 40px 16px;
+      justify-content: center;
     }
 
+    /* Main Container (M3 Card Structure) */
     .container {
-      max-width: 900px;
-      margin: auto;
+      max-width: 840px;
+      width: 100%;
+      background-color: var(--md-sys-color-surface);
+      padding: 40px;
+      border-radius: var(--md-shape-corner-large);
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
     }
 
-    h1,
+    /* Typography */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 500;
+      color: var(--md-sys-color-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .effective-date {
+      font-size: 0.9rem;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
     h2 {
-      color: #111;
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--md-sys-color-primary);
+      margin-top: 32px;
+      margin-bottom: 12px;
     }
 
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--md-sys-color-on-surface);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 1rem;
+      color: var(--md-sys-color-on-surface-variant);
+      margin-bottom: 16px;
+    }
+
+    /* Lists styling */
+    ul {
+      list-style-type: none; /* Custom M3 bullet feel */
+      margin-bottom: 20px;
+      padding-left: 8px;
+    }
+
+    ul li {
+      position: relative;
+      font-size: 0.95rem;
+      color: var(--md-sys-color-on-surface-variant);
+      padding-left: 24px;
+      margin-bottom: 8px;
+    }
+
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 6px;
+      color: var(--md-sys-color-primary);
+      font-size: 1.2rem;
+      top: -2px;
+    }
+
+    /* M3 Divider */
     hr {
+      border: none;
+      height: 1px;
+      background-color: var(--md-sys-color-outline-variant);
+      margin: 28px 0;
+    }
+
+    /* Links & Buttons */
+    a {
+      color: var(--md-sys-color-primary);
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dashed var(--md-sys-color-primary);
+      transition: all 0.2s ease;
+    }
+
+    a:hover {
+      color: var(--md-sys-color-on-primary-container);
+      border-bottom-style: solid;
+    }
+
+    /* Action Box for Links */
+    .action-card {
+      background-color: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      padding: 16px;
+      border-radius: var(--md-shape-corner-medium);
       margin: 20px 0;
+      display: inline-block;
+    }
+
+    .action-card a {
+      color: var(--md-sys-color-on-primary-container);
+      border-bottom-color: var(--md-sys-color-on-primary-container);
+      font-weight: 700;
+    }
+
+    /* Contact List Custom Grid */
+    .contact-list li {
+      padding-left: 0;
+      margin-bottom: 12px;
+    }
+    
+    .contact-list li::before {
+      display: none;
+    }
+
+    .contact-list strong {
+      color: var(--md-sys-color-primary);
+      display: inline-block;
+      width: 110px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 8px;
+      }
+      .container {
+        padding: 24px 16px;
+        border-radius: var(--md-shape-corner-medium);
+      }
+      h1 { font-size: 2rem; }
+      h2 { font-size: 1.25rem; }
+      .contact-list strong {
+        display: block;
+        margin-bottom: 2px;
+      }
     }
   </style>
-</head>
-
-<body>
+  
   <div class="container">
 <div style="max-width:900px;margin:auto;padding:20px;font-family:Arial;line-height:1.7;color:#222;">
 
@@ -138,6 +287,8 @@ All deletion requests are processed securely through HTTPS encrypted communicati
 </ul>
 
 </div>
+
+<?php include 'footer.php'; ?>
 </body>
 
 </html>

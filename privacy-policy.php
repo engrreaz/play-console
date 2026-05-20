@@ -3,8 +3,10 @@ session_start();
 $pageTitle = "Privacy Policy - EIMBox";
 if(isset($_SESSION["user"])) {
    include 'inc.php';
+
 } else {
     include 'header.all.php';
+  
 }
 
 

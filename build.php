@@ -117,6 +117,36 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
         </div>
         <i class="bi bi-chevron-right text-danger opacity-25"></i>
     </div>
+
+
+    <div class="section-lbl">Legal & Compliance</div>
+
+    <div class="m3-list-item shadow-sm" onclick="settings_menu_privacy_policy();">
+        <div class="icon-box c-secu"><i class="bi bi-file-earmark-lock"></i></div>
+        <div class="item-info">
+            <div class="st-title">Privacy Policy</div>
+            <div class="st-desc">Review our privacy practices and data handling</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </div>
+    
+    <div class="m3-list-item shadow-sm" onclick="settings_menu_terms_conditions();">
+        <div class="icon-box c-secu"><i class="bi bi-journal-text"></i></div>
+        <div class="item-info">
+            <div class="st-title">Terms & Conditions</div>
+            <div class="st-desc">Review our terms and conditions of use</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted opacity-25"></i>
+    </div>
+
+    <div class="m3-list-item shadow-sm bg" onclick="settings_account_deletion_policy();">
+        <div class="icon-box c-exit"><i class="bi bi-person-x-fill"></i></div>
+        <div class="item-info">
+            <div class="st-title text-danger">Account Deletion</div>
+            <div class="st-desc text-danger opacity-75">Learn about your account deletion rights</div>
+        </div>
+        <i class="bi bi-chevron-right text-danger opacity-25"></i>
+    </div>
 </main>
 
 
@@ -130,6 +160,9 @@ include 'inc.php'; // header.php এবং DB কানেকশন লোড �
     function profile_menu_my_logs() { window.location.href = "my-logs.php"; }
     function profile_menu_permissions() { window.location.href = "my-permissions.php"; }
     function front_page_manager() { window.location.href = "front-page-manager.php"; }
+    function settings_account_deletion_policy() { window.location.href = "account-deletion-policy.php"; }
+    function settings_menu_privacy_policy() { window.location.href = "privacy-policy.php"; }
+    function settings_menu_terms_conditions() { window.location.href = "tc.php"; }
 
     function settings_menu_logout() {
         Swal.fire({
