@@ -25,7 +25,9 @@ $sy_like = "%$current_session%";
 $stmt_pr->bind_param("sss", $sy_like, $sccode, $usr);
 $stmt_pr->execute();
 $res_pr = $stmt_pr->get_result();
-if ($row = $res_pr->fetch_assoc()) { $paisi = $row["total"] ?? 0; }
+if ($row = $res_pr->fetch_assoc()) {
+    $paisi = $row["total"] ?? 0;
+}
 $stmt_pr->close();
 
 // ডাইনামিক গ্রিটিং
@@ -35,74 +37,119 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
 
 <style>
     /* ড্যাশবোর্ড র‍্যাপার */
-    .m3-dashboard { padding: 12px; }
+    .m3-dashboard {
+        padding: 12px;
+    }
 
     /* গ্লোবাল ৮ পিক্সেল রেডিয়াস */
-    .card, .m-card, .btn, .block-unit, .collapse-content { 
-        border-radius: 8px !important; border: 1px solid #f0f0f0 !important; 
+    .card,
+    .m-card,
+    .btn,
+    .block-unit,
+    .collapse-content {
+        border-radius: 8px !important;
+        border: 1px solid #f0f0f0 !important;
     }
 
     /* কালেকশন চিপ (M3 Success Tonal) */
     .m3-collection-hero {
-        background: #E8F5E9; border: 1px solid #C8E6C9; padding: 16px;
-        margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+        background: #E8F5E9;
+        border: 1px solid #C8E6C9;
+        padding: 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-    .coll-label { font-size: 0.65rem; font-weight: 800; color: #2E7D32; text-transform: uppercase; }
-    .coll-amount { font-size: 1.25rem; font-weight: 900; color: #1B5E20; display: block; }
+
+    .coll-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #2E7D32;
+        text-transform: uppercase;
+    }
+
+    .coll-amount {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #1B5E20;
+        display: block;
+    }
 
     /* ক্যাটাগরি লেবেল (Condensed) */
     .m3-lbl {
-        font-size: 0.65rem; font-weight: 800; text-transform: uppercase; 
-        color: #6750A4; margin: 16px 0 8px 4px; letter-spacing: 1px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #6750A4;
+        margin: 16px 0 8px 4px;
+        letter-spacing: 1px;
     }
 
     /* গ্রিড এবং স্পেসিং */
-    .block-item { margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); overflow: hidden; }
+    .block-item {
+        margin-bottom: 12px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        overflow: hidden;
+    }
 
     /* কুইক অ্যাকশন বাটন */
     .btn-m3-tonal {
-        background: #F3EDF7; color: #6750A4; font-size: 0.75rem; 
-        font-weight: 700; padding: 8px; border: none !important;
+        background: #F3EDF7;
+        color: #6750A4;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 8px;
+        border: none !important;
     }
-    .btn-m3-tonal:active { background: #EADDFF; transform: scale(0.98); }
+
+    .btn-m3-tonal:active {
+        background: #EADDFF;
+        transform: scale(0.98);
+    }
 </style>
 
-    <div class="hero-container">
-        <div class="small fw-bold opacity-75 text-uppercase mb-1" style="letter-spacing: 1px;">
-            <?php echo $greeting; ?>, Sir
-        </div>
-        <div class="h3 fw-bold mb-0"><?php echo date('l'); ?></div>
-        <div class="small opacity-90"><?php echo date('d M, Y'); ?></div>
-        
-        <div class="mt-3 d-flex gap-2">
-            <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm" style="font-size: 0.6rem;">
-                <i class="bi bi-shield-check me-1"></i> System Active
-            </span>
-        </div>
+<div class="hero-container">
+    <div class="small fw-bold opacity-75 text-uppercase mb-1" style="letter-spacing: 1px;">
+        <?php echo $greeting; ?>, Sir
     </div>
+    <div class="h3 fw-bold mb-0"><?php echo date('l'); ?></div>
+    <div class="small opacity-90"><?php echo date('d M, Y'); ?></div>
+
+    <div class="mt-3 d-flex gap-2">
+        <span class="badge bg-white text-primary rounded-pill px-3 py-2 border-0 shadow-sm" style="font-size: 0.6rem;">
+            <i class="bi bi-shield-check me-1"></i> System Active
+        </span>
+    </div>
+</div>
 
 
 <div class="m3-dashboard pb-5">
-    
+
     <div class="m3-collection-hero shadow-sm">
         <div>
             <span class="coll-label">Session Collection (<?php echo $current_session; ?>)</span>
             <span class="coll-amount">৳ <?php echo number_format($paisi, 0); ?></span>
         </div>
-        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 42px; height: 42px;">
+        <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+            style="width: 42px; height: 42px;">
             <i class="bi bi-wallet2 text-success fs-5"></i>
         </div>
     </div>
 
     <div class="row g-2">
-        <div class="col-12"><div class="block-item"><?php include 'front-page-block/schedule.php'; ?></div></div>
-        <div class="col-12"><div class="block-item"><?php include 'front-page-block/holi-ramadan.php'; ?></div></div>
+        <div class="col-12">
+            <div class="block-item"><?php include 'front-page-block/schedule.php'; ?></div>
+        </div>
+        <div class="col-12">
+            <div class="block-item"><?php include 'front-page-block/holi-ramadan.php'; ?></div>
+        </div>
     </div>
 
     <div class="m3-lbl">Daily Operations</div>
     <div class="block-item"><?php include 'front-page-block/task-teacher.php'; ?></div>
-    
-    <?php if($notice_block == 1): ?>
+
+    <?php if ($notice_block == 1): ?>
         <div class="block-item border-start border-4 border-warning bg-white shadow-sm p-1">
             <?php include 'front-page-block/notice.php'; ?>
         </div>
@@ -110,15 +157,20 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
 
     <div class="m3-lbl">Class Tracking</div>
     <div class="row g-2">
-        <div class="col-12"><div class="block-item"><?php include 'front-page-block/cls-teacher-attendance.php'; ?></div></div>
-        <div class="col-12"><div class="block-item"><?php include 'front-page-block/clsteacherblock.php'; ?></div></div>
+        <div class="col-12">
+            <div class="block-item"><?php include 'front-page-block/cls-teacher-attendance.php'; ?></div>
+        </div>
+        <div class="col-12">
+            <div class="block-item"><?php include 'front-page-block/clsteacherblock.php'; ?></div>
+        </div>
     </div>
 
-   
+
 
 </div>
 
-<div style="height: 65px;"></div> <script>
+<div style="height: 65px;"></div>
+<script>
     /**
      * Session Persistence Navigation
      */
@@ -132,10 +184,10 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
     function sublist() { nav('tools_allsubjects.php'); }
     function mypr() { nav('mypr.php'); }
     function goclsattall() { nav('attndclssec.php'); }
-    
-    function register(c, s) { 
+
+    function register(c, s) {
         const session = '<?php echo $current_session; ?>';
-        window.location.href = `st-attnd-register.php?cls=${c}&sec=${s}&year=${session}`; 
+        window.location.href = `st-attnd-register.php?cls=${c}&sec=${s}&year=${session}`;
     }
 </script>
 
@@ -282,14 +334,19 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
         <div id="blocksContainer">
             <?php
             foreach ($blocks as $id => $info):
-                ?>
-                <div class="block-unit shadow-sm" id="block-<?php echo $id; ?>" data-id="<?php echo $id; ?>">
-                    <?php
-                    // ফাইলটি লোড করার আগে চেক করে নিন সেটি সঠিক কি না
-                    include 'front-page-block/' . $info['link'];
+                $valid_user =  $info['role'] ?? '';
+                $roles = explode('|', $valid_user);
+                if (in_array($userlevel, $roles)) {
+
                     ?>
-                </div>
-                <?php
+                    <div class="block-unit shadow-sm" id="block-<?php echo $id; ?>" data-id="<?php echo $id; ?>">
+                        <?php
+                        // ফাইলটি লোড করার আগে চেক করে নিন সেটি সঠিক কি না
+                        include 'front-page-block/' . $info['link'];
+                        ?>
+                    </div>
+                    <?php
+                }
             endforeach;
             ?>
         </div>
