@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 include_once '../inc.light.php';
 
-if(!isset($_SESSION['user_id'])){
+if(!isset($_SESSION['user'])){
     echo json_encode([
         "status" => "error",
         "message" => "Unauthorized access."
@@ -12,10 +12,10 @@ if(!isset($_SESSION['user_id'])){
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user = $_SESSION['user'];
 
 // prevent duplicate request (optional safety)
-$check = mysqli_query($conn, "SELECT id FROM deletion_requests WHERE user_id='$user_id' AND status='pending' LIMIT 1");
+$check = mysqli_query($conn, "SELECT id FROM deletion_requests WHERE user_mail='$user' AND sccode='$sccode' AND  status='pending' LIMIT 1");
 
 if(mysqli_num_rows($check) > 0){
     echo json_encode([
@@ -28,9 +28,9 @@ if(mysqli_num_rows($check) > 0){
 // insert request instead of direct delete (SAFE approach)
 $insert = mysqli_query($conn, "
     INSERT INTO deletion_requests 
-    (user_id, request_date, status) 
+    (user_mail, sccode, request_date, status) 
     VALUES 
-    ('$user_id', NOW(), 'pending')
+    ('$user', '$sccode', NOW(), 'pending')
 ");
 
 if($insert){

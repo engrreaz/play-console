@@ -8,6 +8,12 @@ function isActive($targetFile, $currentFile)
 }
 ?>
 
+<style>
+    a {
+        text-align: center;;
+    }
+</style>
+
 <div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
         <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
@@ -21,6 +27,10 @@ function isActive($targetFile, $currentFile)
         <a href="tc.php" class="nav-item <?= isActive('tc.php', $curfile) ?>">
             <div class="icon-wrapper"><i class="bi bi-journal-text"></i></div>
             <span>Terms & Conditions</span>
+        </a>
+        <a href="account-deletion-policy.php" class="nav-item <?= isActive('account-deletion-policy.php', $curfile) ?>">
+            <div class="icon-wrapper"><i class="bi bi-person-x-fill"></i></div>
+            <span>Account Deletion Policy</span>
         </a>
 
 

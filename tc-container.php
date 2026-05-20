@@ -29,7 +29,6 @@
       background-color: var(--md-sys-color-background);
       color: var(--md-sys-color-on-surface);
       line-height: 1.6;
-      padding: 40px 16px;
       justify-content: center;
     }
 
@@ -160,9 +159,7 @@
 
     /* Responsive adjustments */
     @media (max-width: 600px) {
-      body {
-        padding: 16px 8px;
-      }
+    
       .container {
         padding: 24px 16px;
         border-radius: var(--md-shape-corner-medium);
@@ -190,7 +187,7 @@
     <h2>1. Introduction</h2>
     <p>
       These Terms and Conditions govern the use of the EIMBox School Management System application provided by
-      <strong>Reaz IT (“EIMBox”)</strong>.
+      <strong>“EIMBox”</strong>.
       By accessing or using this application, you agree to comply with these terms.
     </p>
 
@@ -265,8 +262,8 @@
     </p>
 
     <p>
-      <a href="https://eimbox.com/privacy-policy">
-        https://eimbox.com/privacy-policy
+      <a href="https://playconsole.eimbox.com/privacy-policy.php">
+        https://playconsole.eimbox.com/privacy-policy.php
       </a>
     </p>
 
@@ -287,6 +284,19 @@
         Account Deletion Request
       </a>
     </p>
+
+    <p>
+      Alternatively, users may contact their institution administrator to initiate deletion.
+    </p>
+
+    <p>
+        You may learn more about our account deletion policy here: <a href="https://playconsole.eimbox.com/account-deletion-policy.php">Account Deletion Policy</a>
+    </p>
+
+    <p>
+        Account logout will clear session data immediately.
+    </p>
+
 
     <hr>
 
@@ -333,11 +343,17 @@
 
     <ul>
       <li><strong>Developer:</strong> Engr. Reazul Hoque</li>
-      <li><strong>Organization:</strong> Reaz IT (“EIMBox”)</li>
-      <li><strong>Website:</strong> https://eimbox.com</li>
-      <li><strong>Email:</strong> engrreaz@gmail.com</li>
-      <li><strong>Phone:</strong> 01919629672</li>
-      <li><strong>Address:</strong> Reaz IT, Batakandi, Titas, Cumilla, Bangladesh</li>
+      <li><strong>Organization:</strong> “EIMBox”</li>
+      <li><strong>Website:</strong> <a href="https://eimbox.com" target="_blank">https://eimbox.com</a></li>
+      <li><strong>Email:</strong> developer.eimbox@gmail.com </li>
+      <li><strong>Phone:</strong> +880 1919-629672, +880 1813-606714</li>
+      <li><strong>Address:</strong> 
+      <b>Main Office :</b><br>
+      EIMBox, 15/B Mirpur Road Dhaka-1205, Bangladesh.
+      <br>
+      <b>Development Center :</b><br>
+      Reaz IT, Batakandi, Titas, Cumilla, Bangladesh.
+    </li>
     </ul>
 
   </div>
