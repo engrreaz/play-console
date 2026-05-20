@@ -1,35 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
+$pageTitle = "Terms & Conditions - EIMBox";
+if(isset($_SESSION["user"])) {
+   include 'inc.php';
+} else {
+    include 'header.all.php';
+}
+?>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Terms & Conditions - EIMBox</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.7;
-      padding: 20px;
-      color: #222;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    h1,
-    h2 {
-      color: #111;
-    }
-
-    hr {
-      margin: 20px 0;
-    }
-  </style>
-</head>
-
-<body>
   <div class="container">
 
     <h1>Terms & Conditions</h1>
@@ -192,6 +170,16 @@
     </ul>
 
   </div>
+
+  
+
+  <?php 
+  if(isset($_SESSION["user"])) {
+   include 'footer.php';
+} else {
+    include 'footer.all.php';
+}
+?>
 </body>
 
 </html>
