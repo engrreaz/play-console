@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Privacy Policy - EIMBox</title>
+if(isset($_SESSION["user"])) {
+   include 'inc.php';
+} else {
+    include 'header.php';
+}
+?>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -28,8 +31,6 @@
       margin: 20px 0;
     }
   </style>
-</head>
-
 <body>
   <div class="container">
 
@@ -247,6 +248,17 @@
     </ul>
 
   </div>
+
+
+
+
+  <?php 
+  if(isset($_SESSION["user"])) {
+   include 'footer.php';
+} else {
+    include 'footer.all.php';
+}
+?>
 </body>
 
 </html>
