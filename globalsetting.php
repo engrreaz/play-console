@@ -352,7 +352,7 @@ include 'inc.php';
                         <input type="password" name="new_pass" id="new_pass" placeholder="New Password" required>
                     </div>
                     <div id="pass_msg" class="text-center mt-2"></div>
-                    <button type="submit" class="m3-btn-verify mt-3">Update with Argon2id</button>
+                    <button type="submit" class="m3-btn-verify mt-3">Update Password</button>
                 </form>
             </div>
         </div>
