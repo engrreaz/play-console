@@ -134,6 +134,17 @@ $error_message = $_GET['error'] ?? '';
             </button>
         </form>
 
+
+<div class="flex text-center fw-tiny">
+    <a href="privacy-policy.php" class="text-muted small me-3" style="text-decoration: none;">
+        <i class="bi bi-file-earmark-lock me-1"></i>Privacy Policy
+    </a>
+    <a href="tc.php" class="text-muted small" style="text-decoration: none;">
+        <i class="bi bi-journal-text me-1"></i>Terms & Conditions
+    </a>
+</div>
+
+
         <div class="mt-4 pt-2">
             <p class="text-muted mb-0" style="font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700;">
                 © 2026 EIMBox Global Service
