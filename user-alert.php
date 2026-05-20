@@ -16,19 +16,93 @@
 </head>
 
 <body>
-    <div
-        style="padding:16px;border-radius:12px;background:#f5f5f5;font-family:Roboto,Arial,sans-serif;line-height:1.6;">
-        <h3 style="margin:0 0 10px 0;">Permissions Needed</h3>
+    
+<div style="
+max-width:420px;
+margin:auto;
+background:#ffffff;
+border-radius:24px;
+padding:24px;
+font-family:Roboto, Arial, sans-serif;
+box-shadow:0 4px 20px rgba(0,0,0,0.12);
+">
 
-        <p style="margin:0;">
-            EIMBox requires a few permissions to work properly.<br>
-            Location is used only for attendance verification at the institution.<br>
-            Camera is used only for scanning QR codes.<br>
-            Bluetooth is used for printing receipts via supported devices.<br>
-            Notifications are used for updates like attendance, results, and notices.<br>
-            No data is collected, stored, or shared without permission.
-        </p>
+    <div style="text-align:center;margin-bottom:18px;">
+        <div style="
+        width:70px;
+        height:70px;
+        line-height:70px;
+        border-radius:50%;
+        background:#e8f0fe;
+        margin:auto;
+        font-size:34px;
+        ">
+            🔐
+        </div>
     </div>
+
+    <h2 style="
+    margin:0 0 14px 0;
+    font-size:22px;
+    font-weight:600;
+    color:#202124;
+    text-align:center;
+    ">
+        Permissions Needed
+    </h2>
+
+    <p style="
+    margin:0;
+    color:#5f6368;
+    font-size:15px;
+    line-height:1.8;
+    text-align:left;
+    ">
+        📍 <strong>Location</strong> — Attendance verification<br>
+        📷 <strong>Camera</strong> — Scan QR codes<br>
+        🖨️ <strong>Bluetooth</strong> — Print receipts<br>
+        🔔 <strong>Notifications</strong> — Results & updates<br><br>
+
+        Your privacy is important to us. 
+        EIMBox does not track, sell, or share your personal data.
+    </p>
+
+    <div style="
+    margin-top:24px;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    ">
+
+        <button style="
+        border:none;
+        background:transparent;
+        color:#5f6368;
+        font-size:14px;
+        cursor:pointer;
+        padding:10px 14px;
+        ">
+            Not Now
+        </button>
+
+        <button style="
+        border:none;
+        background:#1a73e8;
+        color:#fff;
+        border-radius:20px;
+        padding:10px 18px;
+        font-size:14px;
+        font-weight:500;
+        cursor:pointer;
+        ">
+            Continue
+        </button>
+
+    </div>
+
+</div>
 </body>
 
 </html>
+
+
