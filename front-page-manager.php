@@ -72,7 +72,15 @@ include 'inc.php';
     </div>
 
     <div id="blocksContainer" class="container mt-n5 px-3" style="margin-top: -60px; position: relative; z-index: 10;">
-        <?php foreach ($blocks as $id => $info): ?>
+        <?php foreach ($blocks as $id => $info): 
+             $valid_user = $info['role'] ?? '';
+                echo $valid_user;
+                $roles = array_map('trim', explode('|', $valid_user));
+             
+                if (in_array($userlevel, $roles)) {
+                echo $userlevel;
+                var_dump(in_array($userlevel, $roles));
+            ?>
             <div class="m3-block-card" data-id="<?= $id ?>" id="block-wrapper-<?= $id ?>">
                 <div class="block-header">
                     <i class="bi bi-grip-horizontal drag-handle"></i>
@@ -98,7 +106,7 @@ include 'inc.php';
                     <div class="placeholder-title"><?= $info['title'] ?></div>
                 </a>
             </div>
-        <?php endforeach; ?>
+        <?php } endforeach; ?>
     </div>
 </main>
 
