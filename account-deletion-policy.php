@@ -1,4 +1,6 @@
-<?php include 'inc.php'; ?>
+<?php 
+$page_title = "Account Deletion Policy - EIMBox";
+include 'inc.php'; ?>
 
 
   <style>
