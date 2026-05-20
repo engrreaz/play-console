@@ -386,7 +386,7 @@ include 'inc.php';
 
 
 <div class="modal fade" id="permModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" >
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content m3-modal-main shadow-lg border-0">
 
             <div class="modal-header border-0 px-4 pt-4 pb-2">
@@ -632,7 +632,7 @@ include 'inc.php';
         container.innerHTML = "";
         visibleCount = 0;
         renderBatch();
-        window.scrollTo(0, 0);
+        // window.scrollTo(0, 0);
     }
 
     function openEditor(file) {
@@ -684,9 +684,14 @@ include 'inc.php';
 
         if (data.ok) {
 
-            await manualSync(document.querySelector('.pill:last-child'));
-
             pModal.hide();
+
+            // শুধু লোকাল ডাটা আপডেট
+            const index = masterData.findIndex(x => x.file === data.item.file);
+
+            if (index !== -1) {
+                masterData[index] = data.item;
+            }
 
         } else {
             alert("Save Failed");
@@ -709,7 +714,7 @@ include 'inc.php';
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
-            setupData(data);
+            masterData = data.files;
 
         } catch (e) {
             alert("Sync Failed");
@@ -746,7 +751,7 @@ include 'inc.php';
     // Modal Controller (Clean Version)
     // ================================
 
-   
+
 
     // মডাল ইন্সট্যান্সগুলো একবারই ডিক্লেয়ার করুন
     const permModalEl = document.getElementById('permModal');
