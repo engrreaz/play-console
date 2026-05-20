@@ -10,7 +10,6 @@ if(isset($_SESSION["user"])) {
 ?>
 
  
-<body>
   <div class="container">
 
     <h1>Privacy Policy</h1>
