@@ -335,8 +335,11 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
             <?php
             foreach ($blocks as $id => $info):
                 $valid_user = $info['role'] ?? '';
-                echo $valid_user;
+                echo $valid_user . '/' . $userlevel . '<br>';
                 $roles = explode('|', $valid_user);
+                foreach($roles as $r){
+                    echo '--' . $r . '--<br>';
+                }
                 if (in_array($userlevel, $roles)) {
                     ?>
                     <div class="block-unit shadow-sm" id="block-<?php echo $id; ?>" data-id="<?php echo $id; ?>">
