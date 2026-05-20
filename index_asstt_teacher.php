@@ -114,23 +114,7 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
         <div class="col-12"><div class="block-item"><?php include 'front-page-block/clsteacherblock.php'; ?></div></div>
     </div>
 
-    <div class="mt-4">
-        <button class="btn btn-dark w-100 btn-sm fw-bold py-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#consoleBox">
-            <i class="bi bi-cpu-fill me-1"></i> QUICK CONSOLE
-        </button>
-        
-        <div class="collapse mt-2" id="consoleBox">
-            <div class="card card-body p-2 bg-white shadow-sm">
-                <div class="row g-2">
-                    <div class="col-6"><a class="btn btn-m3-tonal w-100" href="admin-sclist.php">Institutes</a></div>
-                    <div class="col-6"><a class="btn btn-m3-tonal w-100" href="receipt.php?cls=Nine&sec=Science&roll=25">EPOS</a></div>
-                    <div class="col-6"><a class="btn btn-m3-tonal w-100" href="kbase.php">Knowledge</a></div>
-                    <div class="col-6"><a class="btn btn-m3-tonal w-100" href="?time=<?php echo random_int(100, 999); ?>">Reload</a></div>
-                    <div class="col-12 mt-2"><a class="btn btn-danger btn-sm w-100 fw-bold py-2" href="sout.php">LOGOUT SESSION</a></div>
-                </div>
-            </div>
-        </div>
-    </div>
+   
 
 </div>
 

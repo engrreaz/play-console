@@ -91,7 +91,7 @@ $randval = random_int(1000, 9999);
         </div>
     <?php endif; ?>
 
-    <div class="m3-section-lbl">Quick Console</div>
+    <div class="m3-section-lbl" hidden>Quick Console</div>
     <div class="row g-2 mb-4">
         <div class="col-6">
             <button class="btn-m3-outline w-100 shadow-sm" onclick="navigateTo('admin-sclist.php')">
