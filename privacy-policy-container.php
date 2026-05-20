@@ -118,7 +118,7 @@
       color: var(--md-sys-color-primary);
       text-decoration: none;
       font-weight: 500;
-      border-bottom: 1px dashed var(--md-sys-color-primary);
+  
       transition: all 0.2s ease;
     }
 
