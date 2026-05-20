@@ -1,3 +1,8 @@
+<?php 
+$curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+$curfile = basename($_SERVER["SCRIPT_FILENAME"]);
+?>
+
 <div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
             <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
