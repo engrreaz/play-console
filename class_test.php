@@ -50,7 +50,6 @@
     .construction-card {
       max-width: 540px;
       width: 100%;
-      height: 100vh;
       background-color: var(--md-sys-color-surface);
       padding: 48px 32px;
       border-radius: var(--md-shape-corner-large);
