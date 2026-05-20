@@ -5,6 +5,7 @@ if(isset($_SESSION["user"])) {
    include 'inc.php';
 } else {
     include 'header.php';
+    echo 'xxxx';
 }
 ?>
 
