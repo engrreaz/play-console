@@ -336,7 +336,7 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
             foreach ($blocks as $id => $info):
                 $valid_user = $info['role'] ?? '';
                 echo $valid_user . '/' . $userlevel . '<br>';
-                $roles = explode('|', $valid_user);
+                $roles = array_map('trim', explode('|', $valid_user));
                 foreach($roles as $r){
                     echo '--' . trim($r) . '--<br>';
                 }
