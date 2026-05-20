@@ -1,37 +1,15 @@
 <?php
 session_start();
-
+$pageTitle = "Privacy Policy - EIMBox";
 if(isset($_SESSION["user"])) {
    include 'inc.php';
 } else {
-    include 'header.php';
+    include 'header.all.php';
     echo 'xxxx';
 }
 ?>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      padding: 20px;
-      color: #222;
-    }
-
-    h1,
-    h2,
-    h3 {
-      color: #111;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    hr {
-      margin: 20px 0;
-    }
-  </style>
+ 
 <body>
   <div class="container">
 
