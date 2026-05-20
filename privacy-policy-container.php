@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - EIMBox</title>
-  <!-- Google Material Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       /* Material 3 Light Theme Colors */
@@ -40,7 +30,6 @@
       color: var(--md-sys-color-on-surface);
       line-height: 1.6;
       padding: 40px 16px;
-      display: flex;
       justify-content: center;
     }
 
