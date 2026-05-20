@@ -135,7 +135,7 @@ $error_message = $_GET['error'] ?? '';
         </form>
 
 
-<div class="flex text-center fw-tiny">
+<div class="flex text-center fw-tiny mt-3">
     <a href="privacy-policy.php" class="text-muted small me-3" style="text-decoration: none;">
         <i class="bi bi-file-earmark-lock me-1"></i>Privacy Policy
     </a>
