@@ -1,25 +1,30 @@
-<?php 
+<?php
 $curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
 $curfile = basename($_SERVER["SCRIPT_FILENAME"]);
+
+function isActive($targetFile, $currentFile)
+{
+    return ($targetFile === $currentFile) ? 'active' : '';
+}
 ?>
 
 <div id="bottom-nav-bar" class="bottom-nav-container noprint">
     <div class="bottom-nav">
-            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
-                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
-                <span>Home</span>
-            </a>
-            <a href="privacy-policy.php" class="nav-item <?= isActive('privacy-policy.php', $curfile) ?>">
-                <div class="icon-wrapper"><i class="bi bi-file-earmark-lock"></i></div>
-                <span>Privacy Policy</span>
-            </a>
-            <a href="tc.php" class="nav-item <?= isActive('tc.php', $curfile) ?>">
-                <div class="icon-wrapper"><i class="bi bi-journal-text"></i></div>
-                <span>Terms & Conditions</span>
-            </a>
-         
+        <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>" data-action="Navigation">
+            <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="privacy-policy.php" class="nav-item <?= isActive('privacy-policy.php', $curfile) ?>">
+            <div class="icon-wrapper"><i class="bi bi-file-earmark-lock"></i></div>
+            <span>Privacy Policy</span>
+        </a>
+        <a href="tc.php" class="nav-item <?= isActive('tc.php', $curfile) ?>">
+            <div class="icon-wrapper"><i class="bi bi-journal-text"></i></div>
+            <span>Terms & Conditions</span>
+        </a>
 
-      
+
+
 
     </div>
 </div>
