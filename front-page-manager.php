@@ -115,7 +115,13 @@ include 'inc.php';
     </div>
     <div class="offcanvas-body px-4">
         <div id="configList">
-            <?php foreach ($blocks as $id => $info): ?>
+            <?php foreach ($blocks as $id => $info): 
+                $valid_user = $info['role'] ?? '';
+                $roles = array_map('trim', explode('|', $valid_user));
+             
+                if (in_array($userlevel, $roles)) {
+                
+                ?>
                 <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-4 mb-2">
                     <div class="d-flex align-items-center gap-3">
                         <i class="bi <?= $info['icon'] ?> text-primary"></i>
@@ -125,7 +131,7 @@ include 'inc.php';
                         <input class="form-check-input block-toggle" type="checkbox" data-id="<?= $id ?>" id="sw-<?= $id ?>" checked>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            <?php } endforeach; ?>
         </div>
         <button class="btn btn-m3-tonal w-100 rounded-pill py-3 mt-4 fw-bold" onclick="resetLayout()">RESET TO DEFAULT</button>
     </div>
