@@ -117,10 +117,12 @@ include 'inc.php';
         <div id="configList">
             <?php foreach ($blocks as $id => $info): 
                 $valid_user = $info['role'] ?? '';
+                echo $valid_user;
                 $roles = array_map('trim', explode('|', $valid_user));
              
                 if (in_array($userlevel, $roles)) {
-                
+                echo $userlevel;
+                var_dump(in_array($userlevel, $roles));
                 ?>
                 <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-4 mb-2">
                     <div class="d-flex align-items-center gap-3">
