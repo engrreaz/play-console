@@ -338,7 +338,7 @@ $greet = ($hr < 12) ? "Good Morning" : (($hr < 17) ? "Good Afternoon" : "Good Ev
                 echo $valid_user . '/' . $userlevel . '<br>';
                 $roles = explode('|', $valid_user);
                 foreach($roles as $r){
-                    echo '--' . $r . '--<br>';
+                    echo '--' . trim($r) . '--<br>';
                 }
                 if (in_array($userlevel, $roles)) {
                     ?>
