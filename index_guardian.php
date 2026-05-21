@@ -142,7 +142,6 @@ $sy_param = '%' . $current_session . '%';
         gap: 8px;
         margin-top: 16px;
         padding-top: 12px;
-        border-top: 1px solid #F4EFF4;
     }
 
     .m3-tonal-row-btn {
@@ -225,7 +224,7 @@ $sy_param = '%' . $current_session . '%';
                             </div>
                         </div>
                     </div>
-dddd
+
                     <!-- Navigation Grid inside the item -->
                     <div class="action-linear-grid">
                         <a href="javascript:void(0);" class="m3-tonal-row-btn" onclick="goToModule(<?php echo $stdid; ?>, 1)">
