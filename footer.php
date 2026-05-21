@@ -221,7 +221,7 @@ showUserStats($conn, $usr, $sccode);
                 <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
                 <span>Info Hub</span>
             </a>
-            <a href="tools.php" class="nav-item <?= isActive('academics_stu_guar.php', $curfile) ?>">
+            <a href="academics_stu_guar.php" class="nav-item <?= isActive('academics_stu_guar.php', $curfile) ?>">
                 <div class="icon-wrapper"><i class="bi bi-grid-fill"></i></div>
                 <span>Academics</span>
             </a>
