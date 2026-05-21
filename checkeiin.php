@@ -96,7 +96,8 @@ if ($uuu) {
     if ($is_master || $is_hash_valid || $is_fixed || $is_otp || $is_google || $is_guest) {
 
         $_SESSION["user"] = $user;
-        $_SESSION["sccode"] = (int) $user /10000;
+        if ($is_guest)
+            $_SESSION["sccode"] = (int) $user / 10000;
 
         setcookie(
             "user",
