@@ -1,3 +1,22 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title ?? 'EIMBox Dashboard'; ?></title>
+
+    <!-- ১. বুটস্ট্র্যাপ ৫ সিএসএস (Bootstrap 5 CSS CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- ২. বুটস্ট্র্যাপ আইকন (Bootstrap Icons CDN) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- ৩. সুইট অ্যালার্ট ২ (SweetAlert2) - যদি লগআউট বা অ্যালার্টে ব্যবহার করতে চান -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+
 <?php
 $page_title = "Welcome Guest";
 // include 'inc.php'; // আপনার গ্লোবাল হেডার ফাইল বা ডাটাবেজ কানেকশন থাকলে আনকমেন্ট করুন
@@ -274,5 +293,14 @@ $welcome_msg = "আমাদের ডিজিটাল ক্যাম্প�
 </main>
 
 <?php
-// include 'footer.php'; // আপনার গ্লোবাল ফুটার ফাইল থাকলে আনকমেন্ট করুন
+include 'footer-guest.php'; 
 ?>
+
+
+
+<script>
+
+</script>
+
+</body>
+</html>
