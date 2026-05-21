@@ -23,7 +23,7 @@ $page_title = "Welcome Guest";
 
 // প্রতিষ্ঠানের কিছু ডামি ইনফরমেশন (আপনার ডাটাবেজ বা ভেরিয়েবল দিয়ে রিপ্লেস করে নেবেন)
 $institution_name = "EIMBox International School";
-$institution_code = "EIIN: 123456 | Estd: 2012";
+$institution_code = "EIIN: $sccode | Estd: 2012";
 $welcome_msg = "আমাদের ডিজিটাল ক্যাম্পাসে আপনাকে স্বাগতম। একজন অতিথি (Guest) হিসেবে আপনি প্রতিষ্ঠানের পাবলিক রিসোর্স, নোটিশ এবং সাধারণ তথ্যাদি সরাসরি ব্রাউজ করতে পারবেন।";
 ?>
 
