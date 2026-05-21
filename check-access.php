@@ -155,6 +155,11 @@ if ($is_admin > 3 || $is_chief > 0) {
 // --- get override permission if any web/console
 // --- get app override permission if any
 
+if($userlevel == 'Guest' && $curfile == 'index.php') {
+    header("Location: index_guest.php");
+    exit();
+}
+
 
 if (isset($_GET['perm']) && $is_admin > 3)
     $permission = $_GET['perm'];
@@ -167,7 +172,3 @@ if ($permission == 0) {
 
 $readonly = ($permission == 1);
 
-if($userlevel == 'Guest' && $curfile == 'index.php') {
-    header("Location: index_guest.php");
-    exit();
-}
