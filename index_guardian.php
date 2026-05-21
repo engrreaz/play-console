@@ -105,7 +105,7 @@ $sy_param = '%' . $current_session . '%';
     .st-avatar-squircle {
         width: 64px;
         height: 64px;
-        border-radius: 18px;
+        border-radius: 8px;
         /* M3 Squircle Metric */
         object-fit: cover;
         border: 1px solid #EADDFF;
