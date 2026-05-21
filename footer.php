@@ -213,6 +213,10 @@ showUserStats($conn, $usr, $sccode);
             </a>
 
         <?php elseif ($userlevel == "Student" || $userlevel == "Guardian"): ?>
+            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
+                <span>Home</span>
+            </a>
             <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
                 <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
                 <span>Info Hub</span>
