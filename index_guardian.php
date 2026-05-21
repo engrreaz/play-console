@@ -1,6 +1,5 @@
 <?php
-$page_title = "Guardian Console";
-include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
 $current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear'] 
@@ -141,8 +140,6 @@ ddddddddddddddddd
 </main>
 
 <div style="height: 75px;"></div> 
-
-<?php include 'footer.php'; ?>
 
 <script>
     // নেভিগেশন ফাংশন
