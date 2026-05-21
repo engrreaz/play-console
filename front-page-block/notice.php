@@ -57,7 +57,7 @@ if (!empty($notices)) {
 
 <div class="m3-notice-card shadow-sm">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">
+        <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">
             <i class="bi bi-megaphone-fill me-1 text-primary"></i> Notice Board
         </span>
         <?php if (!empty($notices)): ?>

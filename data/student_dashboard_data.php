@@ -17,22 +17,3 @@ if (!isset($conn)) {
 $student_dashboard_data = [
     'daily_tasks' => []
 ];
-
-// Fetch daily tracking tasks for the logged-in student for today
-// We join with a presumed 'subjects' table to get the subject name.
-// This query might need adjustment based on the actual DB schema.
-$stmt = $conn->prepare(
-    "SELECT st.id, st.responsetime, s.subject_name_en 
-     FROM sttracking st
-     JOIN subjects s ON st.subid = s.id
-     WHERE st.stid = ? AND st.date = ?"
-);
-
-if ($stmt) {
-    $stmt->bind_param("ss", $userid, $td);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $student_dashboard_data['daily_tasks'] = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-}
-// If the query fails or returns no rows, 'daily_tasks' will remain an empty array.

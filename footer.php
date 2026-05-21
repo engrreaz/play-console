@@ -213,17 +213,18 @@ showUserStats($conn, $usr, $sccode);
             </a>
 
         <?php elseif ($userlevel == "Student" || $userlevel == "Guardian"): ?>
-            <a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
-                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
-                <span>Home</span>
+            <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
+                <span>Info Hub</span>
             </a>
-            <a href="my-profile.php" class="nav-item <?= isActive('my-profile.php', $curfile) ?>">
-                <div class="icon-wrapper"><i class="bi bi-person-fill"></i></div>
+            <a href="tools.php" class="nav-item <?= isActive('tools.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-grid-fill"></i></div>
+                <span>Academics</span>
+            </a>
+       
+            <a href="build.php" class="nav-item <?= isActive('build.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-person-circle"></i></div>
                 <span>Profile</span>
-            </a>
-            <a href="globalsetting.php" class="nav-item <?= isActive('globalsetting.php', $curfile) ?>">
-                <div class="icon-wrapper"><i class="bi bi-sliders"></i></div>
-                <span>Settings</span>
             </a>
         <?php endif; ?>
 

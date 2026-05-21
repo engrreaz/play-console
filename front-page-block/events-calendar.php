@@ -64,7 +64,7 @@ $res_history = $conn->query($sql_history);
                 margin-bottom: 2px;
                 display: inline-block;
         }
-            .history-lbl-header { font-size: 0.65rem; font-weight: 800; color: #146C32; text-transform: uppercase; letter-spacing: 0.5px; }
+            .history-lbl-header { font-size: 0.85rem; font-weight: 500; color: #146C32; text-transform: uppercase; letter-spacing: 0.5px; }
 
 </style>
 

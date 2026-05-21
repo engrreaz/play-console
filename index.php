@@ -497,7 +497,7 @@ if ($userlevel == 'Guest') {
         );
 
         let last_date = localStorage.getItem("last_date");
-        let memono = parseInt(localStorage.getItem("memono"))+1;
+        let memono = parseInt(localStorage.getItem("memono")) + 1;
 
         if (last_date) {
             $('#cb_date').val(last_date);
@@ -505,7 +505,7 @@ if ($userlevel == 'Guest') {
 
 
         if (memono) {
-            $('#cb_memono').val(memono );
+            $('#cb_memono').val(memono);
         }
 
 
@@ -581,7 +581,7 @@ if ($userlevel == 'Guest') {
                 if (res === 'success') {
                     localStorage.setItem("last_date", date);
                     localStorage.setItem("memono", memo);
-                      document.getElementById('cashentrybutton').disabled = false;
+                    document.getElementById('cashentrybutton').disabled = false;
 
 
                     cashModal.hide();
@@ -626,3 +626,8 @@ if ($userlevel == 'Guest') {
     });
 
 </script>
+
+
+</body>
+
+</html>
