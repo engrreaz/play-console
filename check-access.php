@@ -168,5 +168,6 @@ if ($permission == 0) {
 $readonly = ($permission == 1);
 
 if($userlevel == 'Guest' && $curfile == 'index.php') {
-    $permission = 3; 
+    header("Location: index_guest.php");
+    exit();
 }
