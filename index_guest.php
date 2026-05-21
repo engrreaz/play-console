@@ -18,6 +18,7 @@
 
 
 <?php
+$sccode = $_SESSION['sccode'] ?? '00000';
 $page_title = "Welcome Guest";
 // include 'inc.php'; // আপনার গ্লোবাল হেডার ফাইল বা ডাটাবেজ কানেকশন থাকলে আনকমেন্ট করুন
 
