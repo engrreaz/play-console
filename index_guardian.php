@@ -166,7 +166,7 @@ $sy_param = '%' . $current_session . '%';
     }
 
     .m3-tonal-row-btn i {
-        font-size: 1.15rem;
+        font-size: 1.5rem;
         display: block;
         margin-bottom: 2px;
         color: #6750A4;
@@ -186,8 +186,6 @@ $sy_param = '%' . $current_session . '%';
         </div>
     </div>
 
-    <!-- NOTICE SYSTEM -->
-    <?php include 'notice.php'; ?>
 
     <!-- 2. REGISTERED CHILDREN MODULE (LINIAR GROUP) -->
     <div class="section-lbl">Registered Children</div>
