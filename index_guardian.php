@@ -148,7 +148,11 @@ $page_title = "Guardian Console";
     </div>
 </main>
 
-<div style="height: 75px;"></div> <script>
+<div style="height: 75px;"></div> 
+
+<?php include 'footer.php'; ?>
+
+<script>
     // নেভিগেশন ফাংশন
     function goToModule(id, type){
         const session = '<?php echo $current_session; ?>';
@@ -179,4 +183,3 @@ $page_title = "Guardian Console";
     updateM3Clock();
 </script>
 
-<?php include 'footer.php'; ?>
