@@ -9,7 +9,7 @@ $sy_param = '%' . $current_session . '%';
 
 
 ?>
-ddddddddddddddddd
+
 <style>
     body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
@@ -139,7 +139,6 @@ ddddddddddddddddd
     </div>
 </main>
 
-<div style="height: 75px;"></div> 
 
 <script>
     // নেভিগেশন ফাংশন
