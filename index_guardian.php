@@ -1,4 +1,5 @@
 <?php
+$page_title = "Guardian Console";
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
 
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
@@ -7,9 +8,9 @@ $current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['ses
                    ?? $sy;
 $sy_param = '%' . $current_session . '%';
 
-$page_title = "Guardian Console";
-?>
 
+?>
+ddddddddddddddddd
 <style>
     body { background-color: #FEF7FF; font-size: 0.9rem; margin: 0; padding: 0; }
 
@@ -68,15 +69,6 @@ $page_title = "Guardian Console";
     }
 </style>
 
-<header class="m3-app-bar shadow-sm">
-    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-        <i class="bi bi-person-heart"></i>
-    </div>
-    <h1 class="page-title"><?php echo $page_title; ?></h1>
-    <div class="action-icons">
-        <span class="session-badge"><?php echo $current_session; ?></span>
-    </div>
-</header>
 
 <main class="pb-5">
     <div class="hero-timer-card shadow-sm">
