@@ -239,5 +239,3 @@ if (empty($usr) || (is_numeric(substr($usr, 0, 1)) && substr($usr, 0, 1) > 0)) {
         window.location.href = 'index.php?email=<?php echo $usr; ?>';
     }
 </script>
-
-<?php include 'footer.php'; ?>
