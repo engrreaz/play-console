@@ -48,6 +48,8 @@ if ($event_block_visible):
         </ul>
     </div>
 </div>
+
 <?php 
 endif; 
 ?>
+0

@@ -7,7 +7,7 @@ $today_m = date('m');
 $sql_history = "SELECT * FROM history WHERE day = $today_d AND month = $today_m ORDER BY priority DESC LIMIT 3";
 $res_history = $conn->query($sql_history);
 ?>
-dddd
+
 <style>
         .history-block-container {
                 height: 100%;
