@@ -2,10 +2,8 @@
 $page_title = "Faculty & Staff";
 include 'inc.guest.php'; 
 
-// Fetch Teachers Data
 include_once 'datam/datam-teacher.php';
 
-// ১. র‍্যাঙ্ক রেজোলিউশনের জন্য ডেজিগনেশন ম্যাপ তৈরি (teachers-list.php এর মতো)
 $designation_map = [];
 $res_desig = $conn->query("SELECT title, ranks FROM designation");
 if ($res_desig) {
@@ -14,13 +12,11 @@ if ($res_desig) {
     }
 }
 
-// ২. টিচার এবং স্টাফদের জন্য আলাদা অ্যারে
 $faculty_list = [];
 $support_staff_list = [];
 
 if(isset($datam_teacher_profile) && is_array($datam_teacher_profile)) {
     foreach ($datam_teacher_profile as $t) {
-        // Skip inactive members for guest view
         if(isset($t['status']) && $t['status'] == 0) continue;
 
         $eff_rank = $t['ranks'] ?? '';
@@ -39,7 +35,7 @@ if(isset($datam_teacher_profile) && is_array($datam_teacher_profile)) {
     }
 }
 
-// র‍্যাঙ্ক অনুযায়ী সর্টিং
+
 usort($faculty_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_rank']);
 usort($support_staff_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_rank']);
 
