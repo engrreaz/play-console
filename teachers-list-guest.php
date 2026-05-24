@@ -66,8 +66,7 @@ usort($support_staff_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_
         <?php else: ?>
             <?php foreach($faculty_list as $t): 
                 $tid = $t['tid'];
-                $image_path = function_exists('teacher_profile_image_path') ? teacher_profile_image_path($tid) : 'iimg/default_teacher.png';
-            ?>
+    $image_path = 'https://eimbox.com/teacher/' . $tid . '.jpg';            ?>
             <div class="m3-list-flat-item">
                 <div class="icon-box-flat p-0 overflow-hidden" style="background: #E8DEF8; border: 1px solid #D0BCFF;">
                     <img src="<?= htmlspecialchars($image_path) ?>" alt="Teacher" style="width: 100%; height: 100%; object-fit: cover;" >
@@ -89,7 +88,7 @@ usort($support_staff_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_
         <?php else: ?>
             <?php foreach($support_staff_list as $s): 
                 $tid = $s['tid'];
-                $image_path = function_exists('teacher_profile_image_path') ? teacher_profile_image_path($tid) : 'iimg/default_staff.png';
+                $image_path = 'https://eimbox.com/teacher/' . $tid . '.jpg';
             ?>
             <div class="m3-list-flat-item">
                 <div class="icon-box-flat p-0 overflow-hidden" style="background: #FFF3E0; border: 1px solid #FFCC80;">
