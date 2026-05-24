@@ -31,25 +31,23 @@ if ($event_block_visible) {
 
 // --- Presentation ---
 if ($event_block_visible):
-?>
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h6 class="card-title fw-bold">Today's Events</h6>
-        <ul class="list-group list-group-flush">
-            <?php foreach ($events_today as $event): ?>
-                <li class="list-group-item px-0 d-flex align-items-start">
-                    <i class="bi bi-<?php echo htmlspecialchars($event['icon'] ?? 'calendar-event'); ?> me-3" style="font-size: 1.5rem; color: <?php echo htmlspecialchars($event['color'] ?? '#6c757d'); ?>;"></i>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold"><?php echo htmlspecialchars($event['descrip']); ?></div>
-                        <small class="text-muted"><?php echo htmlspecialchars($event['category']); ?></small>
-                    </div>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-</div>
+    ?>
 
-<?php 
-endif; 
+    <h6 class="card-title fw-bold">Today's Events</h6>
+    <ul class="list-group list-group-flush">
+        <?php foreach ($events_today as $event): ?>
+            <li class="list-group-item px-0 d-flex align-items-start">
+                <i class="bi bi-<?php echo htmlspecialchars($event['icon'] ?? 'calendar-event'); ?> me-3"
+                    style="font-size: 1.5rem; color: <?php echo htmlspecialchars($event['color'] ?? '#6c757d'); ?>;"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold"><?php echo htmlspecialchars($event['descrip']); ?></div>
+                    <small class="text-muted"><?php echo htmlspecialchars($event['category']); ?></small>
+                </div>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+
+
+<?php
+endif;
 ?>
-0
