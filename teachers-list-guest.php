@@ -1,6 +1,48 @@
 <?php 
 $page_title = "Faculty & Staff";
 include 'inc.guest.php'; 
+
+// Fetch Teachers Data
+include_once 'datam/datam-teacher.php';
+
+// ১. র‍্যাঙ্ক রেজোলিউশনের জন্য ডেজিগনেশন ম্যাপ তৈরি (teachers-list.php এর মতো)
+$designation_map = [];
+$res_desig = $conn->query("SELECT title, ranks FROM designation");
+if ($res_desig) {
+    while ($d = $res_desig->fetch_assoc()) {
+        $designation_map[$d['title']] = $d['ranks'];
+    }
+}
+
+// ২. টিচার এবং স্টাফদের জন্য আলাদা অ্যারে
+$faculty_list = [];
+$support_staff_list = [];
+
+if(isset($datam_teacher_profile) && is_array($datam_teacher_profile)) {
+    foreach ($datam_teacher_profile as $t) {
+        // Skip inactive members for guest view
+        if(isset($t['status']) && $t['status'] == 0) continue;
+
+        $eff_rank = $t['ranks'] ?? '';
+        if (empty($eff_rank)) {
+            $pos = $t['position'] ?? '';
+            $eff_rank = $designation_map[$pos] ?? 99; 
+        }
+
+        $t['effective_rank'] = (int) $eff_rank;
+
+        if ($t['effective_rank'] < 40) {
+            $faculty_list[] = $t;
+        } else {
+            $support_staff_list[] = $t;
+        }
+    }
+}
+
+// র‍্যাঙ্ক অনুযায়ী সর্টিং
+usort($faculty_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_rank']);
+usort($support_staff_list, fn($a, $b) => $a['effective_rank'] <=> $b['effective_rank']);
+
 ?>
 
 <main class="pb-5">
@@ -16,49 +58,50 @@ include 'inc.guest.php';
         <div class="inst-desc mt-2">Meet the dedicated educators and professionals guiding our students.</div>
     </div>
 
-    <!-- ADMINISTRATION -->
-    <div class="section-lbl">Administration</div>
+    <!-- FACULTY DIRECTORY -->
+    <div class="section-lbl">Academic Faculty</div>
     <div class="m3-flat-list-group">
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #FFF3E0; color: #E65100;"><i class="bi bi-person-fill"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Principal</div>
-                <div class="st-flat-desc">Head of Institution</div>
+        <?php if(empty($faculty_list)): ?>
+            <div class="p-4 text-center text-muted" style="font-weight: 600;">No faculty records found.</div>
+        <?php else: ?>
+            <?php foreach($faculty_list as $t): 
+                $tid = $t['tid'];
+                $image_path = function_exists('teacher_profile_image_path') ? teacher_profile_image_path($tid) : 'iimg/default_teacher.png';
+            ?>
+            <div class="m3-list-flat-item">
+                <div class="icon-box-flat p-0 overflow-hidden" style="background: #E8DEF8; border: 1px solid #D0BCFF;">
+                    <img src="<?= htmlspecialchars($image_path) ?>" alt="Teacher" style="width: 100%; height: 100%; object-fit: cover;" >
+                </div>
+                <div class="item-info-block">
+                    <div class="st-flat-title"><?= htmlspecialchars($t['tname'] ?? 'N/A') ?></div>
+                    <div class="st-flat-desc"><?= htmlspecialchars($t['position'] ?? 'Faculty Member') ?></div>
+                </div>
             </div>
-        </div>
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #E8F5E9; color: #1B5E20;"><i class="bi bi-person-fill"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Vice Principal</div>
-                <div class="st-flat-desc">Academic & Administrative Coordinator</div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 
-    <!-- SENIOR FACULTY -->
-    <div class="section-lbl">Senior Faculty</div>
+    <!-- ADMINISTRATION & SUPPORT -->
+    <div class="section-lbl">Administration & Support</div>
     <div class="m3-flat-list-group">
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #FCE4EC; color: #C2185B;"><i class="bi bi-person-badge"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Science Department</div>
-                <div class="st-flat-desc">Senior Teachers - Physics, Chemistry, Biology</div>
+        <?php if(empty($support_staff_list)): ?>
+            <div class="p-4 text-center text-muted" style="font-weight: 600;">No support staff records found.</div>
+        <?php else: ?>
+            <?php foreach($support_staff_list as $s): 
+                $tid = $s['tid'];
+                $image_path = function_exists('teacher_profile_image_path') ? teacher_profile_image_path($tid) : 'iimg/default_staff.png';
+            ?>
+            <div class="m3-list-flat-item">
+                <div class="icon-box-flat p-0 overflow-hidden" style="background: #FFF3E0; border: 1px solid #FFCC80;">
+                    <img src="<?= htmlspecialchars($image_path) ?>" alt="Staff" style="width: 100%; height: 100%; object-fit: cover;" >
+                </div>
+                <div class="item-info-block">
+                    <div class="st-flat-title"><?= htmlspecialchars($s['tname'] ?? 'N/A') ?></div>
+                    <div class="st-flat-desc"><?= htmlspecialchars($s['position'] ?? 'Support Staff') ?></div>
+                </div>
             </div>
-        </div>
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #E8DEF8; color: #381E72;"><i class="bi bi-person-badge"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Arts & Humanities</div>
-                <div class="st-flat-desc">Senior Teachers - History, Economics, Geography</div>
-            </div>
-        </div>
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #E0F7FA; color: #006064;"><i class="bi bi-person-badge"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Business Studies</div>
-                <div class="st-flat-desc">Senior Teachers - Accounting, Management</div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </main>
 

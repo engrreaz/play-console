@@ -36,10 +36,7 @@
     <!-- 2. QUICK GATEWAY ACCESS -->
     <div class="section-lbl">Instant Gateway</div>
     <div class="guest-gate-panel">
-        <a href="guest-dashboard.php" class="btn-m3-primary-tonal">
-            <i class="bi bi-person-bounding-box"></i> Enter As Guest
-        </a>
-        <span class="gate-warning-text">* কোনো পাসওয়ার্ড বা রেজিস্ট্রেশন ছাড়াই পাবলিক মডিউলগুলো দেখুন</span>
+       
     </div>
 
     <!-- 3. PUBLIC INFORMATION EXPLORER (FLAT LINIAR ROWS) -->

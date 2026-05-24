@@ -1,6 +1,37 @@
 <?php 
 $page_title = "Academic Calendar";
 include 'inc.guest.php'; 
+
+// ১. সেশন ইয়ার হ্যান্ডলিং (calendar.php এর মতো)
+$current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_COOKIE['query-session'] ?? $sy ?? date('Y');
+
+// ২. ক্যালেন্ডার ডেটা ফেচ করা
+include_once 'datam/datam-calendar.php';
+
+$today = date('Y-m-d');
+$upcoming_events = [];
+$exam_schedules = [];
+
+if(isset($datam_calendar_events) && is_array($datam_calendar_events)) {
+    foreach ($datam_calendar_events as $event) {
+        // Find upcoming events or exams
+        if ($event['date'] >= $today) {
+            if (isset($event['category']) && $event['category'] === 'Exam') {
+                $exam_schedules[] = $event;
+            } else {
+                $upcoming_events[] = $event;
+            }
+        }
+    }
+}
+
+// সর্টিং করা (কাছাকাছি ডেট আগে দেখানোর জন্য)
+usort($upcoming_events, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
+usort($exam_schedules, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
+
+// গেস্ট ভিউতে শুধু প্রথম ৫টি করে দেখাবো
+$upcoming_events = array_slice($upcoming_events, 0, 5);
+$exam_schedules = array_slice($exam_schedules, 0, 5);
 ?>
 
 <main class="pb-5">
@@ -19,45 +50,53 @@ include 'inc.guest.php';
     <!-- UPCOMING EVENTS -->
     <div class="section-lbl">Upcoming Events</div>
     <div class="m3-flat-list-group">
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #FFF3E0; color: #E65100; flex-direction: column; justify-content: center;">
-                <div style="font-size: 0.75rem; font-weight: bold; line-height: 1;">APR</div>
-                <div style="font-size: 1.1rem; font-weight: bold; line-height: 1; margin-top: 2px;">14</div>
+        <?php if(empty($upcoming_events)): ?>
+            <div class="p-4 text-center text-muted" style="font-weight: 600;">No upcoming events currently scheduled.</div>
+        <?php else: ?>
+            <?php foreach($upcoming_events as $event): 
+                $month = date('M', strtotime($event['date']));
+                $day = date('d', strtotime($event['date']));
+                $bg_color = !empty($event['color']) ? $event['color'] : '#E65100'; // Default
+                $bg_color_light = $bg_color . '20'; // Add transparency
+            ?>
+            <div class="m3-list-flat-item">
+                <div class="icon-box-flat" style="background: <?= $bg_color_light ?>; color: <?= $bg_color ?>; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 0.75rem; font-weight: bold; line-height: 1;"><?= strtoupper($month) ?></div>
+                    <div style="font-size: 1.1rem; font-weight: bold; line-height: 1; margin-top: 2px;"><?= $day ?></div>
+                </div>
+                <div class="item-info-block">
+                    <div class="st-flat-title"><?= htmlspecialchars($event['descrip']) ?></div>
+                    <div class="st-flat-desc"><?= (isset($event['work']) && $event['work'] == 0) ? 'Holiday / Campus Closed' : 'Event / Regular Activity' ?></div>
+                </div>
             </div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Pohela Boishakh</div>
-                <div class="st-flat-desc">Bengali New Year Celebration - Campus closed for classes.</div>
-            </div>
-        </div>
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #E3F2FD; color: #1565C0; flex-direction: column; justify-content: center;">
-                <div style="font-size: 0.75rem; font-weight: bold; line-height: 1;">MAY</div>
-                <div style="font-size: 1.1rem; font-weight: bold; line-height: 1; margin-top: 2px;">01</div>
-            </div>
-            <div class="item-info-block">
-                <div class="st-flat-title">May Day</div>
-                <div class="st-flat-desc">International Workers' Day - National Holiday.</div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 
     <!-- ACADEMIC SCHEDULE -->
     <div class="section-lbl">Exam & Term Schedule</div>
     <div class="m3-flat-list-group">
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #FCE4EC; color: #C2185B;"><i class="bi bi-pencil-square"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Half Yearly Examination</div>
-                <div class="st-flat-desc">Starts from 15th June. Routine will be published soon.</div>
+        <?php if(empty($exam_schedules)): ?>
+            <div class="p-4 text-center text-muted" style="font-weight: 600;">No exams currently scheduled.</div>
+        <?php else: ?>
+            <?php foreach($exam_schedules as $exam): 
+                $month = date('M', strtotime($exam['date']));
+                $day = date('d', strtotime($exam['date']));
+                $icon = !empty($exam['icon']) ? $exam['icon'] : 'pencil-square';
+                $bg_color = !empty($exam['color']) ? $exam['color'] : '#C2185B'; // Default Exam color
+                $bg_color_light = $bg_color . '20'; // Add transparency
+            ?>
+            <div class="m3-list-flat-item">
+                <div class="icon-box-flat" style="background: <?= $bg_color_light ?>; color: <?= $bg_color ?>;">
+                    <i class="bi bi-<?= htmlspecialchars($icon) ?>"></i>
+                </div>
+                <div class="item-info-block">
+                    <div class="st-flat-title"><?= htmlspecialchars($exam['descrip']) ?></div>
+                    <div class="st-flat-desc">Scheduled for <?= date('d M, Y', strtotime($exam['date'])) ?>.</div>
+                </div>
             </div>
-        </div>
-        <div class="m3-list-flat-item">
-            <div class="icon-box-flat" style="background: #E8DEF8; color: #381E72;"><i class="bi bi-journal-check"></i></div>
-            <div class="item-info-block">
-                <div class="st-flat-title">Result Publication</div>
-                <div class="st-flat-desc">Half Yearly Exam results will be distributed on 10th July.</div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </main>
 
