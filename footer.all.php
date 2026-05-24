@@ -131,10 +131,3 @@ function isActive($targetFile, $currentFile)
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-<script>
-
-    function goMy() { }
-
-</script>
