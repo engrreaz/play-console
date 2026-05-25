@@ -23,8 +23,8 @@ $sy_param = '%' . $current_session . '%';
 
 <style>
     .square-box {
-        width: 80px;
-        height: 80px;
+        width:33%;
+        height: 33%;
         background: #f8f9fa;
         border-radius: 12px;
         display: flex;
