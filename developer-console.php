@@ -61,7 +61,7 @@ $sy_param = '%' . $current_session . '%';
 
 
         <div class="d-flex p-3" id="flex-box" style="gap: 12px;">
-            <div class="square-box shadow-sm" data-bs-toggle="modal" data-bs-target="#changeEiinModal">
+            <div class="square-box shadow-sm" data-bs-toggle="modal" data-points="5" data-bs-target="#changeEiinModal">
                 <i class="bi bi-arrow-left-right"></i>
                 <div>Change EIIN</div>
             </div>
