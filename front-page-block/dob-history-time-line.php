@@ -1,4 +1,3 @@
-3
 <?php
 /**
  * Today's Birthdays - M3 Refactored
