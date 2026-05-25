@@ -12,32 +12,53 @@ $stmt_weekend->execute();
 $weekend_row = $stmt_weekend->get_result()->fetch_assoc();
 $weekends_str = $weekend_row ? $weekend_row['settings_value'] : '';
 $is_weekend = str_contains($weekends_str, $today);
+
+$weekends = array_map('trim', explode(',', $weekends_str));
+$is_weekend = in_array($today, $weekends);
+
 $stmt_weekend->close();
 
 // Check Holiday (Using PHP to avoid MySQL strict DATE errors with empty strings)
 $stmt_holiday = $conn->prepare("
     SELECT category, descrip, date, dateto 
     FROM calendar 
-    WHERE (sccode = ? OR sccode = 0) AND work = 0
+    WHERE (sccode = ? OR sccode = 0)
+    AND work = 0
+    AND (
+        date >= ?
+        OR IFNULL(dateto, date) >= ?
+    )
 ");
-$stmt_holiday->bind_param("s", $sccode);
+$stmt_holiday->bind_param("sss", $sccode, $today_date, $today_date);
 $stmt_holiday->execute();
 $res_holiday = $stmt_holiday->get_result();
 
+$holiday_ranges = [];
 $is_holiday = false;
 $holiday_name = '';
 
 while ($row = $res_holiday->fetch_assoc()) {
     $d_start = $row['date'];
     $d_end = (!empty($row['dateto']) && $row['dateto'] !== '0000-00-00') ? $row['dateto'] : $row['date'];
+    $h_name = ($row['descrip'] ?: $row['category']) ?: 'Institutional Holiday';
+    
+    $holiday_ranges[] = ['start' => $d_start, 'end' => $d_end, 'name' => $h_name];
 
     if ($today_date >= $d_start && $today_date <= $d_end) {
         $is_holiday = true;
-        $holiday_name = ($row['descrip'] ?: $row['category']) ?: 'Institutional Holiday';
-        break;
+        $holiday_name = $h_name;
     }
 }
 $stmt_holiday->close();
+
+function is_date_holiday($date, $ranges) {
+    foreach ($ranges as $h) {
+        if ($date >= $h['start'] && $date <= $h['end']) {
+            return true;
+        }
+    }
+    return false;
+}
 
 /**
  * ২. বর্তমান চলমান পিরিয়ড খুঁজে বের করা (Global Schedule)
@@ -49,17 +70,72 @@ $stmt_p->bind_param("sss", $sccode, $sessionyear_param, $now_str);
 $stmt_p->execute();
 $current_period = $stmt_p->get_result()->fetch_assoc();
 
+// Calculate Next Class Time
+$next_class_msg = "";
+$stmt_periods = $conn->prepare("SELECT timestart FROM classschedule WHERE sccode = ? AND sessionyear LIKE ? ORDER BY timestart ASC");
+$stmt_periods->bind_param("ss", $sccode, $sessionyear_param);
+$stmt_periods->execute();
+$res_periods = $stmt_periods->get_result();
+$all_periods = [];
+while ($row = $res_periods->fetch_assoc()) {
+    $all_periods[] = $row['timestart'];
+}
+$stmt_periods->close();
+
+if (count($all_periods) > 0) {
+    $first_period_time = $all_periods[0];
+    $next_period_today = null;
+    
+    if (!$is_weekend && !$is_holiday) {
+        foreach ($all_periods as $t_start) {
+            if ($now_str < $t_start) {
+                $next_period_today = $t_start;
+                break;
+            }
+        }
+    }
+
+    if ($next_period_today) {
+        $next_class_msg = "Next class starts today at " . date("h:i A", strtotime($next_period_today));
+    } else {
+        // Find next working day
+        $check_date = $today_date;
+        $found_day = null;
+        for ($i = 1; $i <= 30; $i++) {
+            $check_date = date('Y-m-d', strtotime("+1 day", strtotime($check_date)));
+            $check_day_name = date('l', strtotime($check_date));
+            $is_w = str_contains($weekends_str, $check_day_name);
+            $is_h = is_date_holiday($check_date, $holiday_ranges);
+            if (!$is_w && !$is_h) {
+                $found_day = $check_date;
+                break;
+            }
+        }
+        
+        if ($found_day) {
+            $day_label = (date('Y-m-d', strtotime('+1 day', strtotime($today_date))) == $found_day) ? 'Tomorrow' : date('l, d M', strtotime($found_day));
+            $next_class_msg = "Next class starts {$day_label} at " . date("h:i A", strtotime($first_period_time));
+        }
+    }
+}
+
 if ($is_weekend): ?>
     <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
         <i class="bi bi-calendar-week display-1 opacity-25 text-primary" style="opacity: 0.3;"></i>
         <p class="text-primary fw-bold mt-3">Today is a Weekend (<?= $today ?>)</p>
-        <small class="text-muted">Enjoy your day off!</small>
+        <small class="text-muted d-block mb-2">Enjoy your day off!</small>
+        <?php if($next_class_msg): ?>
+            <span class="badge bg-light text-dark border"><i class="bi bi-clock-history me-1"></i> <?= $next_class_msg ?></span>
+        <?php endif; ?>
     </div>
 <?php elseif ($is_holiday): ?>
     <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
         <i class="bi bi-calendar-event display-1 opacity-25 text-danger" style="opacity: 0.3;"></i>
         <p class="text-danger fw-bold mt-3">Holiday: <?= htmlspecialchars($holiday_name) ?></p>
-        <small class="text-muted">Campus is closed today.</small>
+        <small class="text-muted d-block mb-2">Campus is closed today.</small>
+        <?php if($next_class_msg): ?>
+            <span class="badge bg-light text-dark border"><i class="bi bi-clock-history me-1"></i> <?= $next_class_msg ?></span>
+        <?php endif; ?>
     </div>
 <?php elseif ($current_period):
     // পিরিয়ডের প্রগ্রেস ক্যালকুলেশন
@@ -361,7 +437,7 @@ if ($is_weekend): ?>
                         <div class="subject-info">
                             <div class="fw-bold text-dark" style="font-size: 0.95rem;">
                                 Section <?= $row['sectionname'] ?> • <span
-                                    class="text-primary"><?= $row['subject'] ?? $row['subben'] ?></span>
+                                    class="text-primary"><?= $row['subject_name'] ?? $row['subben'] ?></span>
                             </div>
                             <div class="teacher-tag mt-1">
                                 <i class="bi bi-person-badge"></i>
@@ -378,7 +454,11 @@ if ($is_weekend): ?>
 <?php else: ?>
     <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
         <i class="bi bi-calendar-x display-1 opacity-10"></i>
-        <p class="text-muted fw-bold mt-3">No period is currently active.</p>
-        <small class="text-muted">Break time or after school hours (<?= date("h:i A") ?>)</small>
+        <p class="text-muted fw-bold mt-3 mb-1">No period is currently active.</p>
+        <small class="text-muted d-block mb-3">Break time or after school hours (<?= date("h:i A") ?>)</small>
+        
+        <?php if($next_class_msg): ?>
+            <span class="badge bg-light text-dark border"><i class="bi bi-clock-history me-1"></i> <?= $next_class_msg ?></span>
+        <?php endif; ?>
     </div>
 <?php endif; ?>
