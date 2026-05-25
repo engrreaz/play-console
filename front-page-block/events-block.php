@@ -32,14 +32,15 @@ if ($event_block_visible) {
 
 // --- Presentation ---
 if ($event_block_visible):
-?>
+    ?>
 
     <div class="card-body p-3fsws">
         <h6 class="card-title fw-bold">Today's Events</h6>
         <ul class="list-group list-group-flush">
             <?php foreach ($events_today as $event): ?>
                 <li class="list-group-item px-0 d-flex align-items-start">
-                    <i class="bi bi-<?php echo htmlspecialchars($event['icon'] ?? 'calendar-event'); ?> me-3" style="font-size: 1.5rem; color: <?php echo htmlspecialchars($event['color'] ?? '#6c757d'); ?>;"></i>
+                    <i class="bi bi-<?php echo htmlspecialchars($event['icon'] ?? 'calendar-event'); ?> me-3"
+                        style="font-size: 1.5rem; color: <?php echo htmlspecialchars($event['color'] ?? '#6c757d'); ?>;"></i>
                     <div class="flex-grow-1">
                         <div class="fw-bold"><?php echo htmlspecialchars($event['descrip']); ?></div>
                         <small class="text-muted"><?php echo htmlspecialchars($event['category']); ?></small>
@@ -50,6 +51,13 @@ if ($event_block_visible):
     </div>
 
 
-<?php 
-endif; 
+<?php
+else:
+    ?>
+    <div class="card-body p-3fsws d-flex flex-column align-items-center justify-content-center" style="min-height: 150px;">
+        <i class="bi bi-calendar-x" style="font-size: 2.5rem; color: #ced4da;"></i>
+        <div class="mt-3 fw-bold text-muted">No events for today</div>
+    </div>
+<?php
+endif;
 ?>
