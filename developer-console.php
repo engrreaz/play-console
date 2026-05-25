@@ -164,7 +164,7 @@ $sy_param = '%' . $current_session . '%';
                         placeholder="e.g. 104235" required min="100000" max="999999"
                         style="border-radius: 12px; background: #f8f9fa;">
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" data-points="5"
                     style="border-radius: 12px; background: #6750A4; border: none;">Save Changes</button>
             </form>
         </div>
