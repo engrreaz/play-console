@@ -13,7 +13,7 @@ $point = $data['point'] ?? 0;
 
 $ip = $_SERVER['REMOTE_ADDR'];
 $browser = $_SERVER['HTTP_USER_AGENT'];
-$platform = 'Android';
+$platform = 'Android-Console';
 
 // $rawTime = $_POST['timestamp']; 
 // $dt = new DateTime($rawTime);
