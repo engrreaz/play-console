@@ -1,8 +1,43 @@
 <?php
 // ১. বর্তমান সময় ও দিন নির্ধারণ
 $today = date('l');
+$today_date = date('Y-m-d');
 $now_str = date('H:i:s');
 $now_ts = strtotime($now_str);
+
+// Check Weekend
+$stmt_weekend = $conn->prepare("SELECT settings_value FROM settings WHERE sccode = ? AND setting_title = 'Weekends'");
+$stmt_weekend->bind_param("s", $sccode);
+$stmt_weekend->execute();
+$weekend_row = $stmt_weekend->get_result()->fetch_assoc();
+$weekends_str = $weekend_row ? $weekend_row['settings_value'] : '';
+$is_weekend = str_contains($weekends_str, $today);
+$stmt_weekend->close();
+
+// Check Holiday (Using PHP to avoid MySQL strict DATE errors with empty strings)
+$stmt_holiday = $conn->prepare("
+    SELECT category, descrip, date, dateto 
+    FROM calendar 
+    WHERE (sccode = ? OR sccode = 0) AND work = 0
+");
+$stmt_holiday->bind_param("s", $sccode);
+$stmt_holiday->execute();
+$res_holiday = $stmt_holiday->get_result();
+
+$is_holiday = false;
+$holiday_name = '';
+
+while ($row = $res_holiday->fetch_assoc()) {
+    $d_start = $row['date'];
+    $d_end = (!empty($row['dateto']) && $row['dateto'] !== '0000-00-00') ? $row['dateto'] : $row['date'];
+
+    if ($today_date >= $d_start && $today_date <= $d_end) {
+        $is_holiday = true;
+        $holiday_name = ($row['descrip'] ?: $row['category']) ?: 'Institutional Holiday';
+        break;
+    }
+}
+$stmt_holiday->close();
 
 /**
  * ২. বর্তমান চলমান পিরিয়ড খুঁজে বের করা (Global Schedule)
@@ -14,7 +49,19 @@ $stmt_p->bind_param("sss", $sccode, $sessionyear_param, $now_str);
 $stmt_p->execute();
 $current_period = $stmt_p->get_result()->fetch_assoc();
 
-if ($current_period):
+if ($is_weekend): ?>
+    <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
+        <i class="bi bi-calendar-week display-1 opacity-25 text-primary" style="opacity: 0.3;"></i>
+        <p class="text-primary fw-bold mt-3">Today is a Weekend (<?= $today ?>)</p>
+        <small class="text-muted">Enjoy your day off!</small>
+    </div>
+<?php elseif ($is_holiday): ?>
+    <div class="text-center py-5 m-3 border rounded-4 bg-white" style="border-style: dashed !important;">
+        <i class="bi bi-calendar-event display-1 opacity-25 text-danger" style="opacity: 0.3;"></i>
+        <p class="text-danger fw-bold mt-3">Holiday: <?= htmlspecialchars($holiday_name) ?></p>
+        <small class="text-muted">Campus is closed today.</small>
+    </div>
+<?php elseif ($current_period):
     // পিরিয়ডের প্রগ্রেস ক্যালকুলেশন
     $p_start_ts = strtotime($current_period['timestart']);
     $p_end_ts = strtotime($current_period['timeend']);
@@ -79,7 +126,7 @@ if ($current_period):
 
     <style>
         /* Global Period Progress Styling */
- 
+
 
         .m3-global-progress-bg {
             background: rgba(255, 255, 255, 0.2);
@@ -170,7 +217,7 @@ if ($current_period):
             background: linear-gradient(135deg, #6750A4 0%, #4F378B 100%);
             border-radius: 8px;
             padding: 16px;
-margin: 8px;
+            margin: 0px;
             color: white;
             box-shadow: 0 12px 30px rgba(103, 80, 164, 0.25);
             display: flex;

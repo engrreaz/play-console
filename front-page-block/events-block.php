@@ -33,7 +33,7 @@ if ($event_block_visible) {
 if ($event_block_visible):
 ?>
 
-    <div class="card-body p-3">
+    <div class="card-body p-3fsws">
         <h6 class="card-title fw-bold">Today's Events</h6>
         <ul class="list-group list-group-flush">
             <?php foreach ($events_today as $event): ?>
