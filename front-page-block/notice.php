@@ -2,25 +2,31 @@
 // ফাইল: front-page-block/notice.php
 
 // --- Data Fetching & Logic (Prepared & Optimized) ---
-$notice_authors = [];
-if (!empty($notices)) {
-    $author_emails = array_filter(array_unique(array_column($notices, 'entryby')));
+$local_notices = [];
+$sql = "SELECT n.title, n.descrip, n.icon, n.color, n.entrytime, u.profilename 
+        FROM notice n
+        LEFT JOIN usersapp u ON n.entryby = u.email AND n.sccode = u.sccode
+        WHERE n.sccode = ? 
+        ORDER BY n.entrytime DESC LIMIT 3";
 
-    if (!empty($author_emails)) {
-        $placeholders = implode(',', array_fill(0, count($author_emails), '?'));
-        $stmt = $conn->prepare("SELECT email, profilename FROM usersapp WHERE email IN ($placeholders)");
-        $stmt->bind_param(str_repeat('s', count($author_emails)), ...$author_emails);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if($result) {
-            while ($row = $result->fetch_assoc()) {
-                $notice_authors[$row['email']] = $row['profilename'];
-            }
-        }
-        $stmt->close();
-    }
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $sccode);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $local_notices[] = $row;
 }
+$stmt->close();
+
+$total_notices = 0;
+$stmt_count = $conn->prepare("SELECT COUNT(*) as cnt FROM notice WHERE sccode = ?");
+$stmt_count->bind_param("s", $sccode);
+$stmt_count->execute();
+$res_count = $stmt_count->get_result();
+if ($row_count = $res_count->fetch_assoc()) {
+    $total_notices = $row_count['cnt'];
+}
+$stmt_count->close();
 ?>
 
 <style>
@@ -60,23 +66,23 @@ if (!empty($notices)) {
         <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">
             <i class="bi bi-megaphone-fill me-1 text-primary"></i> Notice Board
         </span>
-        <?php if (!empty($notices)): ?>
+        <?php if (!empty($local_notices)): ?>
             <span class="badge bg-primary-subtle text-primary rounded-pill px-2" style="font-size: 0.6rem;">Latest</span>
         <?php endif; ?>
     </div>
 
-    <?php if (empty($notices)): ?>
+    <?php if (empty($local_notices)): ?>
         <div class="text-center py-4 opacity-25">
             <i class="bi bi-chat-left-dots display-6"></i>
             <p class="small fw-bold mt-2 mb-0">No active notices.</p>
         </div>
     <?php else: ?>
         <div class="notice-list">
-            <?php foreach (array_slice($notices, 0, 3) as $index => $notice): 
-                $author = $notice_authors[$notice['entryby']] ?? 'System';
+            <?php foreach ($local_notices as $index => $notice): 
+                $author = $notice['profilename'] ?: 'System';
                 $n_id = 'n_collapse_' . $index;
-                $icon = htmlspecialchars($notice['icon'] ?? 'bell-fill');
-                $color = htmlspecialchars($notice['color'] ?? '#6750A4');
+                $icon = htmlspecialchars($notice['icon'] ?: 'bell-fill');
+                $color = htmlspecialchars($notice['color'] ?: '#6750A4');
             ?>
                 <div class="notice-item-m3 shadow-sm">
                     <div class="d-flex align-items-center" data-bs-toggle="collapse" href="#<?php echo $n_id; ?>" role="button">
@@ -102,9 +108,9 @@ if (!empty($notices)) {
             <?php endforeach; ?>
         </div>
 
-        <?php if (count($notices) > 3): ?>
-            <a href="notices.php?year=<?php echo $current_session; ?>" class="btn-all-notices shadow-sm">
-                VIEW ALL NOTICES (<?php echo count($notices); ?>)
+        <?php if ($total_notices > 3): ?>
+            <a href="notices.php?year=<?php echo $current_session ?? ''; ?>" class="btn-all-notices shadow-sm">
+                VIEW ALL NOTICES (<?php echo $total_notices; ?>)
             </a>
         <?php endif; ?>
     <?php endif; ?>
