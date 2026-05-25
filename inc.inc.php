@@ -3,7 +3,7 @@
 $curfile = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
 $curfile = basename($_SERVER["SCRIPT_FILENAME"]);
 //*****************************************************************
-
+$time_differ = 10;
 if (isset($_POST['save_timeline'])) {
 
     $usr = $_SESSION["user"] ?? 'Admin';
@@ -153,8 +153,8 @@ if ($result0xrty->num_rows > 0) {
         $latlat = $row0x["geolat"];
         $lonlon = $row0x["geolon"];
 
-        $dista_differ = $row0x["dista_differ"];
-        $time_differ = $row0x["time_differ"];
+        $dista_differ = $row0x["dista_differ"] ?? 50;
+        $time_differ = $row0x["time_differ"] ?? 10;
 
         $in_time = $row0x["intime"];
         $out_time = $row0x["outtime"];

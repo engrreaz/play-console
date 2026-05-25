@@ -2,20 +2,76 @@
 $page_title = "System Settings";
 include 'inc.php'; // header.php এবং কানেকশন লোড করবে
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['new_eiin'])) {
+    $new_eiin = $_POST['new_eiin'];
+    $update_sql = "UPDATE usersapp SET sccode = ? WHERE email = ?";
+    $stmt = $conn->prepare($update_sql);
+    $stmt->bind_param("ss", $new_eiin, $usr);
+    if($stmt->execute()) {
+        echo "<script>alert('EIIN Changed Successfully'); window.location.href='developer-console.php';</script>";
+        exit;
+    }
+}
+
 // ১. সেশন ইয়ার হ্যান্ডলিং (Priority: GET > COOKIE > Default $sy)
 $current_session = $_GET['year'] ?? $_GET['y'] ?? $_GET['session'] ?? $_GET['sessionyear']
     ?? $_COOKIE['query-session']
     ?? $sy;
 $sy_param = '%' . $current_session . '%';
 
-
 ?>
 
-
+<style>
+    .square-box {
+        width: 80px;
+        height: 80px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+        border: 1px solid #e9ecef;
+    }
+    .square-box:hover {
+        background: #e2e6ea;
+    }
+    .square-box i {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+        color: #6750A4;
+    }
+    .square-box div {
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #49454F;
+    }
+</style>
 
 <main class="pb-5 mt-2">
 
     <?php if ($usr == 'engrreaz@gmail.com'): ?>
+
+
+        <div class="d-flex p-3" id="flex-box" style="gap: 12px;">
+            <div class="square-box shadow-sm" data-bs-toggle="modal" data-bs-target="#changeEiinModal">
+                <i class="bi bi-arrow-left-right"></i>
+                <div>Change EIIN</div>
+            </div>
+            <div class="square-box shadow-sm">
+                <i class="bi bi-palette2"></i>
+                <div>Theme</div>
+            </div>
+            <div class="square-box shadow-sm">
+                <i class="bi bi-database-check"></i>
+                <div>Logs</div>
+            </div>
+        </div>
+
         <div class="m3-section-title px-3 mt-4">Developer Console</div>
 
         <a href="javascript:void(0);" class="m3-setting-card shadow-sm" onclick="settings_admin_task_manager();">
@@ -89,5 +145,24 @@ $sy_param = '%' . $current_session . '%';
     function settings_admin_data_center() { window.location.href = "hub-admin.php"; }
     function settings_admin_data_center_ins() { window.location.href = "information-hub.php"; }
 </script>
+
+<!-- Change EIIN Modal -->
+<div class="modal fade" id="changeEiinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #21005D;">Change EIIN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="developer-console.php" class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Enter 6-digit EIIN</label>
+                    <input type="number" name="new_eiin" class="form-control form-control-lg" placeholder="e.g. 104235" required min="100000" max="999999" style="border-radius: 12px; background: #f8f9fa;">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 12px; background: #6750A4; border: none;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php include 'footer.php'; ?>
