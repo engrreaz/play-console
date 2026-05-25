@@ -23,5 +23,4 @@ $stmt->bind_param("ssssssssis", $sccode, $email, $url,  $page, $action, $cur, $i
 $stmt->execute();
 
 echo 'Success';
-exit;
 
