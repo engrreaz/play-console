@@ -157,7 +157,7 @@ $sy_param = '%' . $current_session . '%';
             <form method="POST" action="developer-console.php" class="modal-body p-4">
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Enter 6-digit EIIN</label>
-                    <input type="number" name="new_eiin" class="form-control form-control-lg" placeholder="e.g. 104235" required min="100000" max="999999" style="border-radius: 12px; background: #f8f9fa;">
+                    <input type="number" name="new_eiin" class="form-control form-control-lg" value="<?= $sccode ?>" placeholder="e.g. 104235" required min="100000" max="999999" style="border-radius: 12px; background: #f8f9fa;">
                 </div>
                 <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 12px; background: #6750A4; border: none;">Save Changes</button>
             </form>
