@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['new_eiin'])) {
     $update_sql = "UPDATE usersapp SET sccode = ? WHERE email = ?";
     $stmt = $conn->prepare($update_sql);
     $stmt->bind_param("ss", $new_eiin, $usr);
-    if($stmt->execute()) {
+    if ($stmt->execute()) {
         echo "<script>alert('EIIN Changed Successfully'); window.location.href='developer-console.php';</script>";
         exit;
     }
@@ -23,8 +23,8 @@ $sy_param = '%' . $current_session . '%';
 
 <style>
     .square-box {
-        width:33%;
-        height: 33%;
+        width: 33%;
+        aspect-ratio: 1 / 1;
         background: #f8f9fa;
         border-radius: 12px;
         display: flex;
@@ -36,14 +36,17 @@ $sy_param = '%' . $current_session . '%';
         transition: 0.2s;
         border: 1px solid #e9ecef;
     }
+
     .square-box:hover {
         background: #e2e6ea;
     }
+
     .square-box i {
         font-size: 1.5rem;
         margin-bottom: 5px;
         color: #6750A4;
     }
+
     .square-box div {
         font-size: 0.75rem;
         font-weight: 600;
@@ -157,9 +160,12 @@ $sy_param = '%' . $current_session . '%';
             <form method="POST" action="developer-console.php" class="modal-body p-4">
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Enter 6-digit EIIN</label>
-                    <input type="number" name="new_eiin" class="form-control form-control-lg" value="<?= $sccode ?>" placeholder="e.g. 104235" required min="100000" max="999999" style="border-radius: 12px; background: #f8f9fa;">
+                    <input type="number" name="new_eiin" class="form-control form-control-lg" value="<?= $sccode ?>"
+                        placeholder="e.g. 104235" required min="100000" max="999999"
+                        style="border-radius: 12px; background: #f8f9fa;">
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 12px; background: #6750A4; border: none;">Save Changes</button>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"
+                    style="border-radius: 12px; background: #6750A4; border: none;">Save Changes</button>
             </form>
         </div>
     </div>
