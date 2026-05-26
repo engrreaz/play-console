@@ -176,7 +176,7 @@ include 'inc.php';
     .tree ul {
         list-style: none;
         margin: 0;
-        padding-left: 24px;
+        padding-left: 8px;
         position: relative;
     }
 
