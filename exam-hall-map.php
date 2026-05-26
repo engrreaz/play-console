@@ -535,7 +535,7 @@ include 'inc.php';
             </button>
             <div class="flex-grow-1"></div>
             <div class="vr"></div>
-            <div class="border-info me-1 ">
+            <div class="border-info me-1  ">
                 <div class="text-center fs-6 text-success fw-bold" id="totalCapacityMain"></div>
                 <div class="fs-tiny small text-muted">Capacity</div>
             </div>

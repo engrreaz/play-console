@@ -3,7 +3,7 @@ include '../inc.light.php';
 
 $examtitle = $_POST['examtitle'] ?? '';
 
-if(empty($examtitle)) {
+if (empty($examtitle)) {
     echo "No exam selected.";
     exit;
 }
@@ -47,23 +47,26 @@ $query = "
 
 $result = $conn->query($query);
 
-if($result && $result->num_rows > 0) {
+if ($result && $result->num_rows > 0) {
     echo '<div class="list-group">';
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $room_id = $row['id'];
         $name = htmlspecialchars($row['building_name'] . ' - ' . $row['floor_name'] . ' - ' . $row['room_name']);
-        
+
         // Count students in this room for this exam
         $count_q = $conn->query("SELECT COUNT(*) as total FROM seat_plan_allocations a JOIN seat_plans p ON a.plan_id = p.id WHERE p.examtitle = '$examtitle_esc' AND a.room_id = '$room_id'");
         $count_row = $count_q->fetch_assoc();
         $total_students = $count_row['total'];
 
         echo "<div class=\"list-group-item list-group-item-action d-flex justify-content-between align-items-center\">
-                <a href=\"javascript:void(0)\" onclick=\"loadAllocatedRoomMap({$room_id}, '{$examtitle}')\" style=\"flex-grow: 1; text-decoration: none; color: inherit;\">
+       <div>
+        
+        <a href=\"javascript:void(0)\" onclick=\"loadAllocatedRoomMap({$room_id}, '{$examtitle}')\" style=\"flex-grow: 1; text-decoration: none; color: inherit;\">
                     {$name}
-                </a>
-                <div >
-                    <span class=\"badge bg-primary rounded-pill me-2\">{$total_students} Students</span>
+                </a><br>
+                                    <div class=\"badge bg-primary rounded-pill me-2\">{$total_students} Students</div>
+</div> 
+                <div class=\"d-flex align-items-center justify-content-end gap-2 \">
                     <a href=\"seat-plan/download-room-allocation-pdf.php?room_id={$room_id}&examtitle=" . urlencode($examtitle) . "\" target=\"_blank\" class=\"btn btn-sm btn-danger\" title=\"Download PDF\" 
                     style=\"bordeer-radius:50%;\"
                     >
