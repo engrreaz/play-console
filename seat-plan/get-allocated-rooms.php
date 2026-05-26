@@ -69,9 +69,7 @@ if($result && $result->num_rows > 0) {
                     >
                         <i class=\"bi bi-file-earmark-pdf-fill\"></i>
                     </a>
-                </div>
-
-                <div >
+       
                     <a href=\"seat-plan/download-attendance-sheet-pdf.php?room_id={$room_id}&examtitle=" . urlencode($examtitle) . "\" target=\"_blank\" class=\"btn btn-sm btn-info\" title=\"Download PDF\" 
                     style=\"bordeer-radius:50%;\"
                     >
