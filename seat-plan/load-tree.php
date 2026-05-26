@@ -36,7 +36,7 @@ SELECT * FROM seat_buildings ORDER BY building_name
                     <!-- MENU -->
                     <div class="tree-actions">
 
-                        <button class="tree-menu-btn" onclick="toggleMenu('b<?= $building['id'] ?>')">
+                        <button class="tree-menu-btn" onclick="event.stopPropagation(); toggleMenu('b<?= $building['id'] ?>')">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
 
@@ -91,7 +91,7 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
                                 <div class="tree-actions">
 
-                                    <button class="tree-menu-btn" onclick="toggleMenu('f<?= $floor['id'] ?>')">
+                                    <button class="tree-menu-btn" onclick="event.stopPropagation(); toggleMenu('f<?= $floor['id'] ?>')">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
 
@@ -156,7 +156,7 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
                                             <div class="tree-actions">
 
-                                                <button class="tree-menu-btn" onclick="toggleMenu('r<?= $room['id'] ?>')">
+                                                <button class="tree-menu-btn" onclick="event.stopPropagation(); toggleMenu('r<?= $room['id'] ?>')">
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
 
