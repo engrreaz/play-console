@@ -213,5 +213,8 @@ if ($count_class > 0) {
     function library_already_read() {
         window.location.href = `library-already-read.php`;
     }
+    function exam_hall_map() {
+        window.location.href = `exam-hall-map.php`;
+    }
     
 </script>
