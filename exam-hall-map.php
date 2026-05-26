@@ -495,12 +495,12 @@ include 'inc.php';
 
     <div class="col m3-card">
 
-        <div class="section-title">
+        <div class="section-title ms-3">
             <i class="bi bi-diagram-3-fill"></i>
             Hall Structure
         </div>
 
-        <div class="top-toolbar">
+        <div class="top-toolbar ms-3">
 
             <button class="fab-btn fab-primary" ondblclick="toggleFab(this)" onclick="openBuildingModal()">
 
