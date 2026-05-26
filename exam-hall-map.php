@@ -170,7 +170,7 @@ include 'inc.php';
 
     /* Tree structures */
     .tree {
-        margin-top: 24px;
+        margin-top: 8px;
     }
 
     .tree ul {
