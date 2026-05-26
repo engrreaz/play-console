@@ -42,7 +42,7 @@ if ($result3) {
     }
 }
 
-var_dump($rooms);
+
 ?>
 
 <div class="row">
