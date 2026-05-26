@@ -199,4 +199,4 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
 </ul>
 
-<div id="totalCapacity" hidden><?= $total_capacity ?></div>>
+<div id="totalCapacity" hidden><?= $total_capacity ?></div>
