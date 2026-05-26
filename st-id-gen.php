@@ -182,7 +182,7 @@ ksort($grouped_areas); // শ্রেণি অনুযায়ী সর্ট�
                                 </div>
 
                                 <button class="btn btn-m3-tonal btn-sm rounded-pill px-3 fw-bold"
-                                    onclick="openGenModal(<?= $sec['id'] ?>, '<?= $class ?>', '<?= $sec['subarea'] ?>', <?= $sec['rollfrom'] ?>, <?= $sec['rollto'] ?>)">
+                                    onclick="openGenModal(<?= $sec['id'] ?>, '<?= $class ?>', '<?= $sec['subarea'] ?>', <?= $sec['rollfrom'] ?? 0 ?>, <?= $sec['rollto'] ?? 0 ?>)">
                                     <i class="bi bi-qr-code me-1"></i> GENERATE
                                 </button>
                             </div>

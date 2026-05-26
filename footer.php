@@ -1514,8 +1514,16 @@ showUserStats($conn, $usr, $sccode);
 
         let html = '';
         results.forEach(item => {
+
+        let url = item.url_app || '';
+
+    // যদি শেষে .php থাকে, তাহলে আর যোগ করা হবে না
+    if (url.slice(-4) !== '.php') {
+        url = url + '.php';
+    }
+    
             html += `
-            <a href="${item.url_app}.php" class="m3-result-item shadow-sm">
+            <a href="${url}" class="m3-result-item shadow-sm">
                 <div class="result-icon">
                     <i class="bi ${item.icon || 'bi-link-45deg'}"></i>
                 </div>

@@ -56,7 +56,7 @@
         /* আপনার নির্দেশিত ৮ পিক্সেল রেডিয়াস গ্লোবালি সেট করা হলো */
         .m-card,
         .card,
-        .btn,
+        .btn2,
         .form-control,
         .form-select,
         .m3-app-bar {

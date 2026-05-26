@@ -11,9 +11,9 @@ $sec = $_POST['sec'];
 
 if ($action == 1) {
     if ($id == '') {
-        $query33 = "INSERT INTO areas (id, idno, user, areaname, subarea, sessionyear, yesno) VALUES (null, 0, '$rootuser', '$cls', '$sec', '$sy', 1);";
+        $query33 = "INSERT INTO areas (id, idno, user, areaname, subarea, sessionyear, yesno, sccode) VALUES (null, 0, '$rootuser', '$cls', '$sec', '$sy', 1, '$sccode');";
     } else {
-        $query33 = "UPDATE areas set areaname = '$cls', subarea = '$sec' where id='$id';";
+        $query33 = "UPDATE areas set areaname = '$cls', subarea = '$sec' where id='$id' AND sccode='$sccode';";
     }
 } else {
     $query33 = "DELETE from areas  where id='$id';";

@@ -188,11 +188,11 @@ $data = $stmt->get_result()->fetch_assoc();
 
                 <div class="d-flex gap-2 mt-5">
                     <button type="submit" name="save_doc"
-                        class="btn btn-primary px-5 rounded-pill py-1 fw-black shadow">
-                        <i class="bi bi-cloud-arrow-up-fill me-2 fs-1"></i>
+                        class="btn btn-primary btn-sm px-5 rounded-pill py-1 fw-black shadow">
+                        <i class="bi bi-cloud-arrow-up-fill me-2 fs-6"></i> Save Changes
                     </button>
                     <a href="<?= $page_to_edit ?>"
-                        class="btn btn-link text-muted text-decoration-none fw-bold px-4">Discard Changes</a>
+                        class="btn btn-link btn-sm text-muted text-decoration-none fw-bold px-4">Discard Changes</a>
                 </div>
             </form>
         </div>
