@@ -4,14 +4,6 @@ include '../inc.light.php';
 require_once '../vendor/autoload.php';
 
 
-require_once '../vendor/autoload.php';
-
-if (!class_exists('\Mpdf\Mpdf')) {
-    die("mPDF is NOT loaded");
-} else {
-    die("mPDF is loaded");
-}
-
 
 use Mpdf\Mpdf;
 
