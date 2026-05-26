@@ -516,7 +516,7 @@ include 'inc.php';
     }
 </style>
 
-<div class="page-wrapper row">
+<div class="page-wrapper">
 
     <div class="col m3-card">
 
