@@ -34,6 +34,7 @@ $room_query = "SELECT r.id, r.room_name, f.floor_name, b.building_name,
                JOIN seat_buildings b ON f.building_id = b.id
                WHERE b.sccode = '$sccode'
                ORDER BY b.building_name, f.floor_no, r.room_name";
+               echo $room_query;
 $result3 = $conn->query($room_query);
 if ($result3) {
     while ($row = $result3->fetch_assoc()) {
