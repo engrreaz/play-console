@@ -180,32 +180,14 @@ include 'inc.php';
         position: relative;
     }
 
-    .tree ul::before {
-        content: '';
-        position: absolute;
-        left: 11px;
-        top: 0;
-        width: 2px;
-        height: 100%;
-        background-color: var(--m3-outline-variant);
-        border-radius: 2px;
-    }
+    
 
     .tree li {
         position: relative;
         margin-bottom: 16px;
     }
 
-    .tree li::before {
-        content: '';
-        position: absolute;
-        left: -13px;
-        top: 28px;
-        width: 16px;
-        height: 2px;
-        background-color: var(--m3-outline-variant);
-        border-radius: 2px;
-    }
+   
 
     .tree-node {
         background-color: var(--m3-surface);
