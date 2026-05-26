@@ -40,6 +40,8 @@ if ($result3) {
         $rooms[] = $row;
     }
 }
+
+var_dump($rooms);
 ?>
 
 <div class="row">
