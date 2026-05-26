@@ -201,6 +201,53 @@ include 'inc.php';
         background-color: var(--m3-surface-container);
     }
 
+    /* Tonal classes for Tree Nodes */
+    .node-building {
+        background-color: var(--m3-primary-container);
+        border-color: var(--m3-primary-container);
+    }
+    .node-building:hover {
+        background-color: #B3D9FF;
+    }
+    .node-building .node-title, .node-building .node-sub, .node-building i.bi {
+        color: var(--m3-on-primary-container) !important;
+    }
+    .node-building .tree-menu-btn {
+        background-color: rgba(255,255,255,0.4);
+        color: var(--m3-on-primary-container);
+    }
+
+    .node-floor {
+        background-color: var(--m3-secondary-container);
+        border-color: var(--m3-secondary-container);
+    }
+    .node-floor:hover {
+        background-color: #C3D5E7;
+    }
+    .node-floor .node-title, .node-floor .node-sub, .node-floor i.bi {
+        color: var(--m3-on-secondary-container) !important;
+    }
+    .node-floor .tree-menu-btn {
+        background-color: rgba(255,255,255,0.4);
+        color: var(--m3-on-secondary-container);
+    }
+
+    .node-room {
+        background-color: var(--m3-tertiary-container);
+        border-color: var(--m3-tertiary-container);
+        cursor: pointer;
+    }
+    .node-room:hover {
+        background-color: #DBCBFF;
+    }
+    .node-room .node-title, .node-room .node-sub, .node-room i.bi {
+        color: var(--m3-on-tertiary-container) !important;
+    }
+    .node-room .tree-menu-btn {
+        background-color: rgba(255,255,255,0.4);
+        color: var(--m3-on-tertiary-container);
+    }
+
     .node-header {
         display: flex;
         align-items: center;

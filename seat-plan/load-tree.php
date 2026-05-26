@@ -16,7 +16,7 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
         <li>
 
-            <div class="tree-node">
+            <div class="tree-node node-building">
 
                 <div class="node-header">
 
@@ -134,7 +134,7 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
                                 <li>
 
-                                    <div class="tree-node room-active" onclick="loadBenchMap('<?= $room['id'] ?>')">
+                                    <div class="tree-node node-room room-active" onclick="loadBenchMap('<?= $room['id'] ?>')">
 
                                         <div class="node-header">
 
@@ -199,4 +199,4 @@ SELECT * FROM seat_buildings ORDER BY building_name
 
 </ul>
 
-<div id="totalCapacity" hidden><?= $total_capacity ?></div>
+<div id="totalCapacity" hidden><?= $total_capacity ?></div>>
