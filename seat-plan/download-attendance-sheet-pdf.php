@@ -221,6 +221,6 @@ Page {PAGENO}
 ');
 
 $mpdf->WriteHTML($html);
-$mpdf->Output("Attendance-" . $room['room_name'] . ".pdf", "D");
+$mpdf->Output("Attendance-" . $room['room_name'] . ".pdf", "I");
 
 exit;
