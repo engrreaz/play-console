@@ -1,287 +1,114 @@
 <?php
-
 include '../inc.light.php';
-
 ?>
 
 <ul class="tree-root">
 
-<?php
+    <?php
+    $total_capacity = 0;
 
-$total_capacity = 0;
-
-$buildings = mysqli_query($conn,"
-    SELECT *
-    FROM seat_buildings
-    ORDER BY building_name
+    $buildings = mysqli_query($conn, "
+SELECT * FROM seat_buildings ORDER BY building_name
 ");
 
-while($building = mysqli_fetch_assoc($buildings)){
-
-?>
-
-    <li class="tree-item">
-
-        <!-- BUILDING -->
-
-         <div class="tree-node tree-toggle">
-
-            <div class="node-header">
-
-                <div class="node-left tree-toggle">
-
-                    <span class="toggle-btn">
-
-                        <i class="bi bi-chevron-down toggle-icon"></i>
-
-                    </span>
-
-                    <div class="node-icon">
-                        <i class="bi bi-building"></i>
-                    </div>
-
-                    <div>
-
-                        <div class="node-title">
-                            <?= htmlspecialchars($building['building_name']) ?>
-                        </div>
-
-                        <div class="node-sub">
-                            Building
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="node-actions">
-
-                    <button
-                        class="icon-btn edit-btn"
-                        onclick="event.stopPropagation(); openFloorModal('<?= $building['id'] ?>')">
-
-                        <i class="bi bi-plus"></i>
-
-                    </button>
-
-                    <button
-                        class="icon-btn edit-btn"
-                        onclick="event.stopPropagation(); openBuildingModal(
-                            '<?= $building['id'] ?>',
-                            '<?= htmlspecialchars($building['building_name'],ENT_QUOTES) ?>'
-                        )">
-
-                        <i class="bi bi-pencil"></i>
-
-                    </button>
-
-                    <button
-                        class="icon-btn delete-btn"
-                        onclick="event.stopPropagation(); deleteBuilding('<?= $building['id'] ?>')">
-
-                        <i class="bi bi-trash"></i>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- FLOORS -->
-
-        <ul class="tree-children show">
-
-        <?php
-
-        $floors = mysqli_query($conn,"
-            SELECT *
-            FROM seat_floors
-            WHERE building_id='{$building['id']}'
-            ORDER BY floor_no
-        ");
-
-        while($floor = mysqli_fetch_assoc($floors)){
-
+    while ($building = mysqli_fetch_assoc($buildings)) {
         ?>
 
-            <li class="tree-item">
+        <li>
 
-                <div class="tree-node">
+            <div class="tree-node">
 
-                    <div class="node-header">
+                <div class="node-header">
 
-                        <div class="node-left tree-toggle">
+                    <div class="node-left">
 
-                            <span class="toggle-btn">
+                        <i class="bi bi-building"></i>
 
-                                <i class="bi bi-chevron-down toggle-icon"></i>
-
-                            </span>
-
-                            <div class="node-icon">
-                                <i class="bi bi-layers"></i>
+                        <div>
+                            <div class="node-title">
+                                <?= htmlspecialchars($building['building_name']) ?>
                             </div>
-
-                            <div>
-
-                                <div class="node-title">
-                                    <?= htmlspecialchars($floor['floor_name']) ?>
-                                </div>
-
-                                <div class="node-sub">
-                                    Floor <?= $floor['floor_no'] ?>
-                                </div>
-
-                            </div>
-
+                            <div class="node-sub">Building</div>
                         </div>
 
-                        <div class="node-actions">
+                    </div>
 
-                            <button
-                                class="icon-btn edit-btn"
-                                onclick="event.stopPropagation(); openRoomModal('<?= $floor['id'] ?>')">
+                    <!-- MENU -->
+                    <div class="tree-actions">
 
-                                <i class="bi bi-plus"></i>
+                        <button class="tree-menu-btn" onclick="toggleMenu('b<?= $building['id'] ?>')">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
 
-                            </button>
+                        <div class="tree-menu" id="menu_b<?= $building['id'] ?>">
 
-                            <button
-                                class="icon-btn edit-btn"
-                                onclick="event.stopPropagation(); openFloorModal(
-                                    '<?= $building['id'] ?>',
-                                    '<?= $floor['id'] ?>',
-                                    '<?= htmlspecialchars($floor['floor_name'],ENT_QUOTES) ?>',
-                                    '<?= $floor['floor_no'] ?>'
-                                )">
+                            <button onclick="openFloorModal('<?= $building['id'] ?>')">+ Floor</button>
 
-                                <i class="bi bi-pencil"></i>
+                            <button onclick="openBuildingModal(
+                        '<?= $building['id'] ?>',
+                        '<?= htmlspecialchars($building['building_name'], ENT_QUOTES) ?>'
+                    )">Edit</button>
 
-                            </button>
-
-                            <button
-                                class="icon-btn delete-btn"
-                                onclick="event.stopPropagation(); deleteFloor('<?= $floor['id'] ?>')">
-
-                                <i class="bi bi-trash"></i>
-
-                            </button>
+                            <button onclick="deleteBuilding('<?= $building['id'] ?>')">Delete</button>
 
                         </div>
 
                     </div>
 
                 </div>
+            </div>
 
-                <!-- ROOMS -->
-
-                <ul class="tree-children show">
+            <ul>
 
                 <?php
+                $floors = mysqli_query($conn, "
+        SELECT * FROM seat_floors
+        WHERE building_id='{$building['id']}'
+        ORDER BY floor_no
+    ");
 
-                $rooms = mysqli_query($conn,"
-                    SELECT
-                        sr.*,
-
-                        COALESCE(SUM(
-                            CASE
-                                WHEN srb.is_blocked=0
-                                THEN srb.capacity
-                                ELSE 0
-                            END
-                        ),0) AS total_capacity
-
-                    FROM seat_rooms sr
-
-                    LEFT JOIN seat_room_benches srb
-                        ON sr.id = srb.room_id
-
-                    WHERE sr.floor_id='{$floor['id']}'
-
-                    GROUP BY sr.id
-
-                    ORDER BY sr.room_name
-                ");
-
-                while($room = mysqli_fetch_assoc($rooms)){
-
-                    $total_capacity += (int)$room['total_capacity'];
-
-                ?>
+                while ($floor = mysqli_fetch_assoc($floors)) {
+                    ?>
 
                     <li>
 
-                        <div
-                            class="tree-node room-active"
-                            onclick="loadBenchMap('<?= $room['id'] ?>')">
+                        <div class="tree-node">
 
                             <div class="node-header">
 
                                 <div class="node-left">
 
-                                    <div class="node-icon">
-                                        <i class="bi bi-door-closed"></i>
-                                    </div>
+                                    <i class="bi bi-layers"></i>
 
                                     <div>
-
                                         <div class="node-title">
-                                            <?= htmlspecialchars($room['room_name']) ?>
+                                            <?= htmlspecialchars($floor['floor_name']) ?>
                                         </div>
-
-                                        <div class="node-sub">
-
-                                            <?= $room['total_rows'] ?>
-                                            ×
-                                            <?= $room['total_cols'] ?>
-
-                                            &bull;
-
-                                            <strong>
-
-                                                <i class="bi bi-person-fill"></i>
-
-                                                <?= $room['total_capacity'] ?>
-
-                                            </strong>
-
-                                        </div>
-
+                                        <div class="node-sub">Floor <?= $floor['floor_no'] ?></div>
                                     </div>
 
                                 </div>
 
-                                <div class="node-actions">
+                                <div class="tree-actions">
 
-                                    <button
-                                        class="icon-btn edit-btn"
-
-                                        onclick="event.stopPropagation();
-
-                                        openRoomModal(
-                                            '<?= $floor['id'] ?>',
-                                            '<?= $room['id'] ?>',
-                                            '<?= htmlspecialchars($room['room_name'],ENT_QUOTES) ?>',
-                                            '<?= $room['total_rows'] ?>',
-                                            '<?= $room['total_cols'] ?>'
-                                        )">
-
-                                        <i class="bi bi-pencil"></i>
-
+                                    <button class="tree-menu-btn" onclick="toggleMenu('f<?= $floor['id'] ?>')">
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
 
-                                    <button
-                                        class="icon-btn delete-btn"
+                                    <div class="tree-menu" id="menu_f<?= $floor['id'] ?>">
 
-                                        onclick="event.stopPropagation();
+                                        <button onclick="openRoomModal('<?= $floor['id'] ?>')">+ Room</button>
 
-                                        deleteRoom('<?= $room['id'] ?>')">
+                                        <button onclick="openFloorModal(
+                            '<?= $building['id'] ?>',
+                            '<?= $floor['id'] ?>',
+                            '<?= htmlspecialchars($floor['floor_name'], ENT_QUOTES) ?>',
+                            '<?= $floor['floor_no'] ?>'
+                        )">Edit</button>
 
-                                        <i class="bi bi-trash"></i>
+                                        <button onclick="deleteFloor('<?= $floor['id'] ?>')">Delete</button>
 
-                                    </button>
+                                    </div>
 
                                 </div>
 
@@ -289,24 +116,87 @@ while($building = mysqli_fetch_assoc($buildings)){
 
                         </div>
 
+                        <ul>
+
+                            <?php
+                            $rooms = mysqli_query($conn, "
+            SELECT sr.*,
+            COALESCE(SUM(CASE WHEN srb.is_blocked=0 THEN srb.capacity ELSE 0 END),0) AS total_capacity
+            FROM seat_rooms sr
+            LEFT JOIN seat_room_benches srb ON sr.id=srb.room_id
+            WHERE sr.floor_id='{$floor['id']}'
+            GROUP BY sr.id
+        ");
+
+                            while ($room = mysqli_fetch_assoc($rooms)) {
+                                $total_capacity += $room['total_capacity'];
+                                ?>
+
+                                <li>
+
+                                    <div class="tree-node room-active" onclick="loadBenchMap('<?= $room['id'] ?>')">
+
+                                        <div class="node-header">
+
+                                            <div class="node-left">
+
+                                                <i class="bi bi-door-closed"></i>
+
+                                                <div>
+                                                    <div class="node-title">
+                                                        <?= htmlspecialchars($room['room_name']) ?>
+                                                    </div>
+                                                    <div class="node-sub">
+                                                        <?= $room['total_rows'] ?> × <?= $room['total_cols'] ?>
+                                                        • <?= $room['total_capacity'] ?>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="tree-actions">
+
+                                                <button class="tree-menu-btn" onclick="toggleMenu('r<?= $room['id'] ?>')">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+
+                                                <div class="tree-menu" id="menu_r<?= $room['id'] ?>">
+
+                                                    <button onclick="event.stopPropagation(); openRoomModal(
+                                '<?= $floor['id'] ?>',
+                                '<?= $room['id'] ?>',
+                                '<?= htmlspecialchars($room['room_name'], ENT_QUOTES) ?>',
+                                '<?= $room['total_rows'] ?>',
+                                '<?= $room['total_cols'] ?>'
+                            )">Edit</button>
+
+                                                    <button
+                                                        onclick="event.stopPropagation(); deleteRoom('<?= $room['id'] ?>')">Delete</button>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </li>
+
+                            <?php } ?>
+
+                        </ul>
+
                     </li>
 
                 <?php } ?>
 
-                </ul>
+            </ul>
 
-            </li>
+        </li>
 
-        <?php } ?>
-
-        </ul>
-
-    </li>
-
-<?php } ?>
+    <?php } ?>
 
 </ul>
 
-<div id="totalCapacity" hidden>
-    <?= $total_capacity ?>
-</div>
+<div id="totalCapacity" hidden><?= $total_capacity ?></div>

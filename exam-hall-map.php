@@ -180,14 +180,14 @@ include 'inc.php';
         position: relative;
     }
 
-    
+
 
     .tree li {
         position: relative;
         margin-bottom: 16px;
     }
 
-   
+
 
     .tree-node {
         background-color: var(--m3-surface);
@@ -470,6 +470,49 @@ include 'inc.php';
     .tree-item.collapsed>.tree-node .toggle-icon {
         transform: rotate(-90deg);
         transition: 0.2s;
+    }
+
+    .tree-actions {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tree-menu-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .tree-menu {
+        position: absolute;
+        right: 0;
+        top: 40px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 999;
+        min-width: 140px;
+        overflow: hidden;
+    }
+
+    .tree-menu button {
+        width: 100%;
+        border: none;
+        background: none;
+        padding: 10px;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .tree-menu button:hover {
+        background: #f2f2f2;
     }
 </style>
 
@@ -1460,4 +1503,27 @@ include 'inc.php';
         });
 
     }
+</script>
+
+
+<script>
+    let menuTimer = null;
+
+    function toggleMenu(id) {
+        $(".tree-menu").hide();
+
+        let menu = $("#menu_" + id);
+        menu.toggle();
+
+        if (menu.is(":visible")) {
+            clearTimeout(menuTimer);
+            menuTimer = setTimeout(() => {
+                menu.hide();
+            }, 2500);
+        }
+    }
+
+    $(document).on("click", function () {
+        $(".tree-menu").hide();
+    });
 </script>
