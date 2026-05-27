@@ -149,12 +149,12 @@ if ($type == 'room') {
             continue;
 
         echo "<div class='card ton-card'>";
-        echo "<div class='card-header'><h3>📅 $date</h3></div>";
+        echo "<div class='card-header'><h5>📅 $date</h5></div>";
         echo "<div class='card-body'>";
 
         foreach ($rooms as $room_id => $rows) {
 
-            echo "<h4>🏫 Room $room_id</h4>";
+            echo "<h6>🏫 Room $room_id</h6>";
 
             foreach (['Morning', 'Day'] as $shift) {
 
@@ -176,9 +176,9 @@ if ($type == 'room') {
                     $tname = $tq['tname'] ?? '';
                 }
 
-                echo "<div class='inline-row'>";
-                echo "<b>$shift</b> — $tname";
-                echo "<button onclick=\"editMode('$room_id','$date','$shift')\">✏️</button>";
+                echo "<div class='inline-row d-flex'>";
+                echo "<span class='flex-grow-1'><b>$shift</b> — $tname</span>";
+                echo "<button class='float-end btn btn-link' onclick=\"editMode('$room_id','$date','$shift')\"><i class='bi bi-pencil'></i></button>";
                 echo "</div>";
             }
         }
@@ -211,17 +211,17 @@ if ($type == 'room') {
         $tname = $tq['tname'] ?? '';
 
         echo "<div class='card ton-card'>";
-        echo "<div class='card-header'><h3>👨‍🏫 $tname</h3></div>";
+        echo "<div class='card-header'><h5>👨‍🏫 $tname</h5></div>";
         echo "<div class='card-body'>";
 
         foreach ($dates as $date => $rows) {
 
-            echo "<h4>📅 $date</h4>";
+            echo "<h6>📅 $date</h6>";
 
             foreach ($rows as $r) {
-                echo "<div class='inline-row'>";
-                echo "<span>{$r['shift']} - Room {$r['room_id']}</span>";
-                echo "<button onclick=\"editMode('{$r['room_id']}','$date','{$r['shift']}')\">✏️</button>";
+                echo "<div class='inline-row d-flex'>";
+                echo "<span class='flex-grow-1'>{$r['shift']} - Room {$r['room_id']}</span>";
+                echo "<button class='float-end btn btn-link btn-secondary ' onclick=\"editMode('{$r['room_id']}','$date','{$r['shift']}')\"><i class='bi bi-pencil'></i></button>";
                 echo "</div>";
             }
         }
