@@ -150,15 +150,17 @@ $sy_param = '%' . $current_session . '%';
             <div class="modal-body p-4">
                 <input type="hidden" id="sub_id" value="">
 
-                <div class="form-floating mb-3">
-                    <input type="text" id="sub_name" class="form-control" placeholder="Name">
-                    <label for="sub_name">Subject Name</label>
-                </div>
+                <input type="hidden" id="setup_id">
 
-                <div class="form-floating mb-4">
-                    <input type="number" id="sub_code" class="form-control" placeholder="Code">
-                    <label for="sub_code">Subject Code</label>
-                </div>
+<div class="form-floating mb-3">
+    <select id="subject_code" class="form-select"></select>
+    <label>Select Subject</label>
+</div>
+
+<div class="form-floating mb-3">
+    <select id="teacher_id" class="form-select"></select>
+    <label>Assigned Teacher</label>
+</div>
 
                 <div class="row g-2 mb-4" id="marks_row">
                     <div class="col-3">
@@ -222,54 +224,114 @@ $sy_param = '%' . $current_session . '%';
         });
     }
 
-    function openAddSubjectModal() {
-        document.getElementById("sub_id").value = "";
-        document.getElementById("sub_name").value = "";
-        document.getElementById("sub_code").value = "";
-        document.getElementById("modalTitle").innerText = "Add New Subject";
-        subModal.show();
-    }
+  function openAddSubjectModal() {
 
-    function editSubject(id, name, code) {
-        document.getElementById("sub_id").value = id;
-        document.getElementById("sub_name").value = name;
-        document.getElementById("sub_code").value = code;
-        document.getElementById("modalTitle").innerText = "Update Subject Info";
-        subModal.show();
-    }
+    $('#setup_id').val('');
 
+    $('#ss').val(0);
+    $('#oo').val(0);
+    $('#pp').val(0);
+    $('#fm').val(100);
+
+    $('#modalTitle').text('Add Subject');
+
+    loadSubjectDropdown();
+    loadTeacherDropdown();
+
+    subModal.show();
+}
+
+   function editSubject(
+    id,
+    subject,
+    tid,
+    subj,
+    obj,
+    pra,
+    fullmarks
+) {
+
+    $('#setup_id').val(id);
+
+    $('#ss').val(subj);
+    $('#oo').val(obj);
+    $('#pp').val(pra);
+    $('#fm').val(fullmarks);
+
+    loadSubjectDropdown(subject);
+    loadTeacherDropdown(tid);
+
+    $('#modalTitle').text('Update Subject');
+
+    subModal.show();
+}
     function saveSubjectInfo() {
-        const classId = document.getElementById("cls_selector").value;
-        const payload = {
-            sub_id: $('#sub_id').val(),
-            sub_name: $('#sub_name').val(),
-            sub_code: $('#sub_code').val(),
-            ss: $('#ss').val(),
-            oo: $('#oo').val(),
-            pp: $('#pp').val(),
-            fm: $('#fm').val(),
-            id: classId,
-            rootuser: '<?php echo $rootuser; ?>',
-            sccode: '<?php echo $sccode; ?>',
-            tail: 5
-        };
 
-        if (!payload.sub_name || !payload.sub_code) {
-            Swal.fire('Error', 'Name and Code are required.', 'error');
-            return;
-        }
+    const payload = {
+        tail: $('#setup_id').val() ? 3 : 2,
 
-        $.ajax({
-            type: "POST",
-            url: "backend/add-edit-subject.php",
-            data: payload,
-            success: function (res) {
-                subModal.hide();
-                loadAssignedSubjects();
-                Swal.fire({ title: 'Synced!', icon: 'success', timer: 1000, showConfirmButton: false });
-            }
-        });
+        setup_id: $('#setup_id').val(),
+
+        slot: $('#slot-main').val(),
+        session: $('#session-main').val(),
+        clsf: $('#class-main').val(),
+        secf: $('#section-main').val(),
+
+        subject: $('#subject_code').val(),
+        tid: $('#teacher_id').val(),
+
+        subj: $('#ss').val(),
+        obj: $('#oo').val(),
+        pra: $('#pp').val(),
+        fullmarks: $('#fm').val(),
+
+        rootuser: '<?php echo $rootuser; ?>',
+        sccode: '<?php echo $sccode; ?>'
+    };
+
+    if (!payload.subject) {
+        Swal.fire('Error', 'Select Subject', 'error');
+        return;
     }
+
+    $.ajax({
+        type: "POST",
+        url: "backend/add-edit-subject.php",
+        data: payload,
+
+        beforeSend: function () {
+
+            $('.btn-m3-primary').html(`
+                <span class="spinner-border spinner-border-sm"></span>
+                Saving...
+            `);
+
+        },
+
+        success: function (res) {
+
+            bootstrap.Modal
+                .getInstance(document.getElementById('subModal'))
+                .hide();
+
+            loadAssignedSubjects();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Saved',
+                timer: 1200,
+                showConfirmButton: false
+            });
+
+            $('.btn-m3-primary').html(`
+                <i class="bi bi-cloud-check-fill me-2"></i>
+                CONFIRM CHANGES
+            `);
+
+        }
+    });
+
+}
 
     function toggleSubject(subId, tail) {
         const classId = document.getElementById("cls_selector").value;
@@ -285,4 +347,84 @@ $sy_param = '%' . $current_session . '%';
     function btn_chain_function() {
         loadAssignedSubjects();
     }
+</script>
+<script>
+    function loadSubjectDropdown(selected = '') {
+
+    $.post(
+        'backend/add-edit-subject.php',
+        {
+            tail: 99,
+            type: 'subject',
+            sccode: '<?php echo $sccode; ?>'
+        },
+
+        function(res){
+
+            $('#subject_code').html(res);
+
+            if(selected){
+                $('#subject_code').val(selected);
+            }
+
+        }
+    );
+
+}
+
+
+
+function loadTeacherDropdown(selected = '') {
+
+    $.post(
+        'backend/add-edit-subject.php',
+        {
+            tail: 99,
+            type: 'teacher',
+            sccode: '<?php echo $sccode; ?>'
+        },
+
+        function(res){
+
+            $('#teacher_id').html(res);
+
+            if(selected){
+                $('#teacher_id').val(selected);
+            }
+
+        }
+    );
+
+}
+
+
+function deleteSubject(id){
+
+    Swal.fire({
+        title:'Delete Subject?',
+        icon:'warning',
+        showCancelButton:true
+    }).then((r)=>{
+
+        if(r.isConfirmed){
+
+            $.post(
+                'backend/add-edit-subject.php',
+                {
+                    tail:4,
+                    id:id
+                },
+
+                function(){
+
+                    loadAssignedSubjects();
+
+                }
+            );
+
+        }
+
+    });
+
+}
 </script>

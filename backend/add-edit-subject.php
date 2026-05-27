@@ -9,6 +9,197 @@ $class_id = $_POST['id'] ?? ''; // areas table id
 $tail = $_POST['tail'];   // action indicator
 
 
+if($tail == 99 && $_POST['type'] == 'subject'){
+
+    $stmt = $conn->prepare("
+        SELECT subcode, subject
+        FROM subjects
+        WHERE (sccode='0' OR sccode=?)
+        AND sccategory=?
+        ORDER BY subject ASC
+    ");
+
+    $stmt->bind_param("ss", $sccode, $sctype);
+
+    $stmt->execute();
+
+    $res = $stmt->get_result();
+
+    echo '<option value="">Choose Subject</option>';
+
+    while($row = $res->fetch_assoc()){
+
+        echo '
+        <option value="'.$row['subcode'].'">
+            '.$row['subject'].' ['.$row['subcode'].']
+        </option>';
+
+    }
+
+    exit;
+}
+
+
+
+if($tail == 99 && $_POST['type'] == 'teacher'){
+
+    $stmt = $conn->prepare("
+        SELECT tid, tname
+        FROM teacher
+        WHERE sccode=?
+        ORDER BY sl ASC, tname ASC
+    ");
+
+    $stmt->bind_param("s", $sccode);
+
+    $stmt->execute();
+
+    $res = $stmt->get_result();
+
+    echo '<option value="">Choose Teacher</option>';
+
+    while($row = $res->fetch_assoc()){
+
+        echo '
+        <option value="'.$row['tid'].'">
+            '.$row['tname'].' ('.$row['tid'].')
+        </option>';
+
+    }
+
+    exit;
+}
+
+
+if($tail == 2){
+
+    $check = $conn->prepare("
+        SELECT id
+        FROM subsetup
+        WHERE
+        classname=?
+        AND sectionname=?
+        AND subject=?
+        AND sessionyear=?
+        AND sccode=?
+    ");
+
+    $check->bind_param(
+        "sssss",
+        $_POST['clsf'],
+        $_POST['secf'],
+        $_POST['subject'],
+        $_POST['session'],
+        $sccode
+    );
+
+    $check->execute();
+
+    if($check->get_result()->num_rows > 0){
+
+        exit('duplicate');
+
+    }
+
+    $stmt = $conn->prepare("
+        INSERT INTO subsetup
+        (
+            sccode,
+            sessionyear,
+            slot,
+            classname,
+            sectionname,
+            subject,
+            fullmarks,
+            subj,
+            obj,
+            pra,
+            tid
+        )
+
+        VALUES
+        (
+            ?,?,?,?,?,?,?,?,?,?,?
+        )
+    ");
+
+    $stmt->bind_param(
+        "sssssssssss",
+
+        $sccode,
+        $_POST['session'],
+        $_POST['slot'],
+        $_POST['clsf'],
+        $_POST['secf'],
+        $_POST['subject'],
+        $_POST['fullmarks'],
+        $_POST['subj'],
+        $_POST['obj'],
+        $_POST['pra'],
+        $_POST['tid']
+    );
+
+    $stmt->execute();
+
+    exit('success');
+}
+
+
+if($tail == 3){
+
+    $stmt = $conn->prepare("
+        UPDATE subsetup
+
+        SET
+        subject=?,
+        tid=?,
+        fullmarks=?,
+        subj=?,
+        obj=?,
+        pra=?
+
+        WHERE id=?
+    ");
+
+    $stmt->bind_param(
+        "ssssssi",
+
+        $_POST['subject'],
+        $_POST['tid'],
+        $_POST['fullmarks'],
+        $_POST['subj'],
+        $_POST['obj'],
+        $_POST['pra'],
+        $_POST['setup_id']
+    );
+
+    $stmt->execute();
+
+    exit('updated');
+}
+
+
+
+if($tail == 4){
+
+    $stmt = $conn->prepare("
+        DELETE FROM subsetup
+        WHERE id=?
+    ");
+
+    $stmt->bind_param("i", $_POST['id']);
+
+    $stmt->execute();
+
+    exit('deleted');
+}
+
+
+
+
+
+
+
 
 if ($tail != 2 || !$class_id) {
    $slot = $_POST['slot'] ?? '';
@@ -35,6 +226,7 @@ echo $clsf . " (" . $secf . ")";
 $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
             FROM subsetup a 
             INNER JOIN subjects b ON a.subject = b.subcode 
+            LEFT JOIN teacher t ON a.tid=t.tid
             WHERE a.classname = ? AND a.sectionname = ? AND a.sccode = ? AND a.sessionyear LIKE ? 
             AND b.sccategory = ? ORDER BY b.subcode ASC";
 
@@ -66,6 +258,7 @@ if ($result_sub->num_rows > 0) {
                         <?php echo $subname; ?>
                     </div>
                     <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
+                    <?= $row['tname'] ?>
                     
                     <?php if($marks_info): ?>
                         <div class="m3-marks-pill">
@@ -84,10 +277,19 @@ if ($result_sub->num_rows > 0) {
 
                 <div class="d-flex flex-column gap-1 ms-2">
                     <button class="btn-m3-icon text-primary" 
-                            onclick="editSubject(<?php echo $subcode; ?>, '<?php echo $subname; ?>', '<?php echo $subcode; ?>');">
+                            onclick="editSubject(
+'<?= $row['id'] ?>',
+'<?= $row['subject'] ?>',
+'<?= $row['tid'] ?>',
+'<?= $row['subj'] ?>',
+'<?= $row['obj'] ?>',
+'<?= $row['pra'] ?>',
+'<?= $row['fullmarks'] ?>'
+)"
+                    >
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn-m3-icon text-danger" onclick="toggleSubject(<?php echo $subcode; ?>, 0);">
+                    <button class="btn-m3-icon text-danger" onclick="deleteSubject('<?= $row['id'] ?>')">
                         <i class="bi bi-trash3-fill"></i>
                     </button>
                 </div>
