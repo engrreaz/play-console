@@ -217,7 +217,7 @@ if ($tail == 1) {
     <?php
 
     // ২. নির্ধারিত সাবজেক্টগুলো ফেচ করা
-    $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
+    $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth , t.tname
             FROM subsetup a 
             INNER JOIN subjects b ON a.subject = b.subcode 
             LEFT JOIN teacher t ON a.tid=t.tid
