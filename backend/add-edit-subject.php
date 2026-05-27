@@ -204,17 +204,17 @@ if ($tail == 4) {
 if ($tail == 1) {
 
 
-$clsf = $_POST['clsf'];
-$secf = $_POST['secf'];
-$slot = $_POST['slot'];
-$session = $_POST['session'];
+    $clsf = $_POST['clsf'];
+    $secf = $_POST['secf'];
+    $slot = $_POST['slot'];
+    $session = $_POST['session'];
 
 
 
 
-?>
-<div class="alert alert-info mx-3 p-2"><?= $clsf  . ' | ' . $secf ?></div>
-<?php 
+    ?>
+    <div class="alert alert-info mx-3 p-2"><?= $clsf . ' | ' . $secf ?></div>
+    <?php
 
     // ২. নির্ধারিত সাবজেক্টগুলো ফেচ করা
     $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
@@ -252,7 +252,8 @@ $session = $_POST['session'];
                             <?php echo $subname; ?>
                         </div>
                         <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
-                        <?= $row['tname'] ?>
+                        <div class="text-muted fw-bold small mb-1"> <?= $row['tname'] ?></div>
+
 
                         <?php if ($marks_info): ?>
                             <div class="m3-marks-pill">
