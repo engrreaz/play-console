@@ -52,21 +52,21 @@ if ($result->num_rows > 0) {
 
             <div class="d-flex justify-content-between align-items-start gap-2">
 
-                <div>
 
-                    <div class="m3-date-chip">
-                        <i class="bi bi-calendar-event"></i>
-                        <?= $exam_date ?>
-                    </div>
-
-                    <div class="m3-meta-pill">
-                        <i class="bi bi-clock-history me-1"></i>
-                        <?= htmlspecialchars($row['time']) ?>
-                    </div>
-
-
-
+                <div class="m3-date-chip">
+                    <i class="bi bi-calendar-event"></i>
+                    <?= $exam_date ?>
                 </div>
+                
+                <div class="flex-grow-1"></div>
+
+                <div class="m3-meta-pill">
+                    <i class="bi bi-clock-history me-1"></i>
+                    <?= htmlspecialchars($row['time']) ?>
+                </div>
+
+
+
 
             </div>
 
