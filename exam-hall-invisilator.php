@@ -41,7 +41,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
 
     .sub {
         display: block;
-        font-size: 12px;
+        font-size: 13px;
         color: #555;
     }
 

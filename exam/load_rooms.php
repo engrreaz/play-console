@@ -72,7 +72,7 @@ if ($type == 'room') {
 
             echo "<div class='card ton-card'>";
             echo "<div class='card-header d-flex'>";
-            echo "<h3>📅  $date</h3>";
+            echo "<h3 class='flex-grow-1'>📅  $date</h3>";
             echo "<span class='sub text-right'>🏫 Room $room_id</span>";
             echo "</div>";
 
