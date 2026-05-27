@@ -119,23 +119,23 @@ $sy_param = '%' . $current_session . '%';
 <main class="pb-5 mt-2">
 
 
-        <div class="selection-card shadow-sm">
-            <?php
-            $chain_param = '-c 4 -t Choose Values -u  -b View Subjects';
-            include 'component/tree-ui.php';
-            ?>
+    <div class="selection-card shadow-sm">
+        <?php
+        $chain_param = '-c 4 -t Choose Values -u  -b View Subjects';
+        include 'component/tree-ui.php';
+        ?>
+    </div>
+
+
+
+    <div class="m3-section-label">Institutional Curriculum</div>
+
+    <div id="subject-list-block" class="px-1">
+        <div class="text-center py-5 opacity-25">
+            <i class="bi bi-journal-plus display-1"></i>
+            <p class="fw-bold mt-2">Select a class to manage syllabus</p>
         </div>
-
-
-
-        <div class="m3-section-label">Institutional Curriculum</div>
-
-        <div id="subject-list-block" class="px-1">
-            <div class="text-center py-5 opacity-25">
-                <i class="bi bi-journal-plus display-1"></i>
-                <p class="fw-bold mt-2">Select a class to manage syllabus</p>
-            </div>
-        </div>
+    </div>
 
 
 </main>
@@ -152,15 +152,15 @@ $sy_param = '%' . $current_session . '%';
 
                 <input type="hidden" id="setup_id">
 
-<div class="form-floating mb-3">
-    <select id="subject_code" class="form-select"></select>
-    <label>Select Subject</label>
-</div>
+                <div class="form-floating mb-3">
+                    <select id="subject_code" class="form-select"></select>
+                    <label>Select Subject</label>
+                </div>
 
-<div class="form-floating mb-3">
-    <select id="teacher_id" class="form-select"></select>
-    <label>Assigned Teacher</label>
-</div>
+                <div class="form-floating mb-3">
+                    <select id="teacher_id" class="form-select"></select>
+                    <label>Assigned Teacher</label>
+                </div>
 
                 <div class="row g-2 mb-4" id="marks_row">
                     <div class="col-3">
@@ -214,7 +214,7 @@ $sy_param = '%' . $current_session . '%';
         $.ajax({
             type: "POST",
             url: "backend/add-edit-subject.php",
-            data: { rootuser: '<?php echo $rootuser; ?>', slot, session, clsf, secf, sccode: '<?php echo $sccode; ?>', tail: 2 },
+            data: { rootuser: '<?php echo $rootuser; ?>', slot, session, clsf, secf, sccode: '<?php echo $sccode; ?>', tail: 1 },
             beforeSend: function () {
                 $('#subject-list-block').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><br><small class="fw-bold mt-2 d-block">Configuring Modules...</small></div>');
             },
@@ -224,114 +224,114 @@ $sy_param = '%' . $current_session . '%';
         });
     }
 
-  function openAddSubjectModal() {
+    function openAddSubjectModal() {
 
-    $('#setup_id').val('');
+        $('#setup_id').val('');
 
-    $('#ss').val(0);
-    $('#oo').val(0);
-    $('#pp').val(0);
-    $('#fm').val(100);
+        $('#ss').val(0);
+        $('#oo').val(0);
+        $('#pp').val(0);
+        $('#fm').val(100);
 
-    $('#modalTitle').text('Add Subject');
+        $('#modalTitle').text('Add Subject');
 
-    loadSubjectDropdown();
-    loadTeacherDropdown();
+        loadSubjectDropdown();
+        loadTeacherDropdown();
 
-    subModal.show();
-}
-
-   function editSubject(
-    id,
-    subject,
-    tid,
-    subj,
-    obj,
-    pra,
-    fullmarks
-) {
-
-    $('#setup_id').val(id);
-
-    $('#ss').val(subj);
-    $('#oo').val(obj);
-    $('#pp').val(pra);
-    $('#fm').val(fullmarks);
-
-    loadSubjectDropdown(subject);
-    loadTeacherDropdown(tid);
-
-    $('#modalTitle').text('Update Subject');
-
-    subModal.show();
-}
-    function saveSubjectInfo() {
-
-    const payload = {
-        tail: $('#setup_id').val() ? 3 : 2,
-
-        setup_id: $('#setup_id').val(),
-
-        slot: $('#slot-main').val(),
-        session: $('#session-main').val(),
-        clsf: $('#class-main').val(),
-        secf: $('#section-main').val(),
-
-        subject: $('#subject_code').val(),
-        tid: $('#teacher_id').val(),
-
-        subj: $('#ss').val(),
-        obj: $('#oo').val(),
-        pra: $('#pp').val(),
-        fullmarks: $('#fm').val(),
-
-        rootuser: '<?php echo $rootuser; ?>',
-        sccode: '<?php echo $sccode; ?>'
-    };
-
-    if (!payload.subject) {
-        Swal.fire('Error', 'Select Subject', 'error');
-        return;
+        subModal.show();
     }
 
-    $.ajax({
-        type: "POST",
-        url: "backend/add-edit-subject.php",
-        data: payload,
+    function editSubject(
+        id,
+        subject,
+        tid,
+        subj,
+        obj,
+        pra,
+        fullmarks
+    ) {
 
-        beforeSend: function () {
+        $('#setup_id').val(id);
 
-            $('.btn-m3-primary').html(`
+        $('#ss').val(subj);
+        $('#oo').val(obj);
+        $('#pp').val(pra);
+        $('#fm').val(fullmarks);
+
+        loadSubjectDropdown(subject);
+        loadTeacherDropdown(tid);
+
+        $('#modalTitle').text('Update Subject');
+
+        subModal.show();
+    }
+    function saveSubjectInfo() {
+
+        const payload = {
+            tail: $('#setup_id').val() ? 3 : 2,
+
+            setup_id: $('#setup_id').val(),
+
+            slot: $('#slot-main').val(),
+            session: $('#session-main').val(),
+            clsf: $('#class-main').val(),
+            secf: $('#section-main').val(),
+
+            subject: $('#subject_code').val(),
+            tid: $('#teacher_id').val(),
+
+            subj: $('#ss').val(),
+            obj: $('#oo').val(),
+            pra: $('#pp').val(),
+            fullmarks: $('#fm').val(),
+
+            rootuser: '<?php echo $rootuser; ?>',
+            sccode: '<?php echo $sccode; ?>'
+        };
+
+        if (!payload.subject) {
+            Swal.fire('Error', 'Select Subject', 'error');
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "backend/add-edit-subject.php",
+            data: payload,
+
+            beforeSend: function () {
+
+                $('.btn-m3-primary').html(`
                 <span class="spinner-border spinner-border-sm"></span>
                 Saving...
             `);
 
-        },
+            },
 
-        success: function (res) {
+            success: function (res) {
 
-            bootstrap.Modal
-                .getInstance(document.getElementById('subModal'))
-                .hide();
+                bootstrap.Modal
+                    .getInstance(document.getElementById('subModal'))
+                    .hide();
 
-            loadAssignedSubjects();
+                loadAssignedSubjects();
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Saved',
-                timer: 1200,
-                showConfirmButton: false
-            });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
 
-            $('.btn-m3-primary').html(`
+                $('.btn-m3-primary').html(`
                 <i class="bi bi-cloud-check-fill me-2"></i>
                 CONFIRM CHANGES
             `);
 
-        }
-    });
+            }
+        });
 
-}
+    }
 
     function toggleSubject(subId, tail) {
         const classId = document.getElementById("cls_selector").value;
@@ -351,80 +351,80 @@ $sy_param = '%' . $current_session . '%';
 <script>
     function loadSubjectDropdown(selected = '') {
 
-    $.post(
-        'backend/add-edit-subject.php',
-        {
-            tail: 99,
-            type: 'subject',
-            sccode: '<?php echo $sccode; ?>'
-        },
+        $.post(
+            'backend/add-edit-subject.php',
+            {
+                tail: 99,
+                type: 'subject',
+                sccode: '<?php echo $sccode; ?>'
+            },
 
-        function(res){
+            function (res) {
 
-            $('#subject_code').html(res);
+                $('#subject_code').html(res);
 
-            if(selected){
-                $('#subject_code').val(selected);
-            }
-
-        }
-    );
-
-}
-
-
-
-function loadTeacherDropdown(selected = '') {
-
-    $.post(
-        'backend/add-edit-subject.php',
-        {
-            tail: 99,
-            type: 'teacher',
-            sccode: '<?php echo $sccode; ?>'
-        },
-
-        function(res){
-
-            $('#teacher_id').html(res);
-
-            if(selected){
-                $('#teacher_id').val(selected);
-            }
-
-        }
-    );
-
-}
-
-
-function deleteSubject(id){
-
-    Swal.fire({
-        title:'Delete Subject?',
-        icon:'warning',
-        showCancelButton:true
-    }).then((r)=>{
-
-        if(r.isConfirmed){
-
-            $.post(
-                'backend/add-edit-subject.php',
-                {
-                    tail:4,
-                    id:id
-                },
-
-                function(){
-
-                    loadAssignedSubjects();
-
+                if (selected) {
+                    $('#subject_code').val(selected);
                 }
-            );
 
-        }
+            }
+        );
 
-    });
+    }
 
-}
+
+
+    function loadTeacherDropdown(selected = '') {
+
+        $.post(
+            'backend/add-edit-subject.php',
+            {
+                tail: 99,
+                type: 'teacher',
+                sccode: '<?php echo $sccode; ?>'
+            },
+
+            function (res) {
+
+                $('#teacher_id').html(res);
+
+                if (selected) {
+                    $('#teacher_id').val(selected);
+                }
+
+            }
+        );
+
+    }
+
+
+    function deleteSubject(id) {
+
+        Swal.fire({
+            title: 'Delete Subject?',
+            icon: 'warning',
+            showCancelButton: true
+        }).then((r) => {
+
+            if (r.isConfirmed) {
+
+                $.post(
+                    'backend/add-edit-subject.php',
+                    {
+                        tail: 4,
+                        id: id
+                    },
+
+                    function () {
+
+                        loadAssignedSubjects();
+
+                    }
+                );
+
+            }
+
+        });
+
+    }
 </script>

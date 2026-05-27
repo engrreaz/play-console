@@ -141,7 +141,7 @@ if ($tail == 2) {
 
     $stmt->execute();
 
-    // exit('success');
+    exit('success');
 }
 
 
@@ -201,6 +201,7 @@ if ($tail == 4) {
 
 
 
+if ($tail == 1) {
     // ১. ক্লাস ও সেকশন নাম ফেচ করা
     $stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
     $stmt_cls->bind_param("i", $class_id);
@@ -306,7 +307,7 @@ if ($tail == 4) {
         </div>
         <?php
     }
-
+}
 $stmt_sub->close();
 ?>
 
