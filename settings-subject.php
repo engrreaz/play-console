@@ -202,7 +202,7 @@ $sy_param = '%' . $current_session . '%';
         const clsf = document.getElementById("class-main").value;
         const secf = document.getElementById("section-main").value;
 
-        alert(clsf + " | " + secf);
+        // alert(clsf + " | " + secf);
         if (!secf || !clsf) {
             $('#fab-add-sub').fadeOut();
             return;
