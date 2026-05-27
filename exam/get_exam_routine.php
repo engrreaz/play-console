@@ -2,13 +2,13 @@
 
 include '../inc.light.php';
 
-$slot        = $_POST['slot'] ?? '';
-$session     = $_POST['session'] ?? '';
-$classname   = $_POST['classname'] ?? '';
+$slot = $_POST['slot'] ?? '';
+$session = $_POST['session'] ?? '';
+$classname = $_POST['classname'] ?? '';
 $sectionname = $_POST['sectionname'] ?? '';
-$exam        = $_POST['exam'] ?? '';
+$exam = $_POST['exam'] ?? '';
 
-$session_param = "%".$session."%";
+$session_param = "%" . $session . "%";
 
 $sql = "
 SELECT *
@@ -40,9 +40,9 @@ $stmt->execute();
 
 $result = $stmt->get_result();
 
-if($result->num_rows > 0){
+if ($result->num_rows > 0) {
 
-    while($row = $result->fetch_assoc()){
+    while ($row = $result->fetch_assoc()) {
 
         $exam_date = date('d M Y', strtotime($row['date']));
 
@@ -59,12 +59,16 @@ if($result->num_rows > 0){
                         <?= $exam_date ?>
                     </div>
 
+                    <div class="m3-meta-pill">
+                        <i class="bi bi-clock-history me-1"></i>
+                        <?= htmlspecialchars($row['time']) ?>
+                    </div>
+
                     <div class="m3-subject-title">
                         <?= htmlspecialchars($row['subject']) ?>
                     </div>
 
                     <div class="m3-subcode">
-                        Subject Code :
                         <?= htmlspecialchars($row['subj']) ?>
                     </div>
 
@@ -72,28 +76,7 @@ if($result->num_rows > 0){
 
             </div>
 
-            <div class="m3-meta-row">
 
-                <div class="m3-meta-pill">
-                    <i class="bi bi-clock-history me-1"></i>
-                    <?= htmlspecialchars($row['time']) ?>
-                </div>
-
-                <div class="m3-meta-pill">
-                    <i class="bi bi-mortarboard me-1"></i>
-                    <?= htmlspecialchars($row['examname']) ?>
-                </div>
-
-                <div class="m3-meta-pill">
-                    <i class="bi bi-diagram-3 me-1"></i>
-                    <?= htmlspecialchars($row['clsname']) ?>
-
-                    <?php if($row['secname']){ ?>
-                        (<?= htmlspecialchars($row['secname']) ?>)
-                    <?php } ?>
-                </div>
-
-            </div>
 
         </div>
 
@@ -101,7 +84,7 @@ if($result->num_rows > 0){
 
     }
 
-}else{
+} else {
 
     ?>
 
