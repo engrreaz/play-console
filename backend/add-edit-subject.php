@@ -201,7 +201,7 @@ if ($tail == 4) {
 
 
 
-if ($tail ==2)  {
+if ($tail == 2) {
     // ১. ক্লাস ও সেকশন নাম ফেচ করা
     $stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
     $stmt_cls->bind_param("i", $class_id);
@@ -212,66 +212,66 @@ if ($tail ==2)  {
     $slot = $res_cls["slot"] ?? '';
     $session = $res_cls["sessionyear"] ?? '';
     $stmt_cls->close();
-}
 
 
-echo $clsf . " (" . $secf . ")";
 
-// ২. নির্ধারিত সাবজেক্টগুলো ফেচ করা
-$sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
+    echo $clsf . " (" . $secf . ")";
+
+    // ২. নির্ধারিত সাবজেক্টগুলো ফেচ করা
+    $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
             FROM subsetup a 
             INNER JOIN subjects b ON a.subject = b.subcode 
             LEFT JOIN teacher t ON a.tid=t.tid
             WHERE a.classname = ? AND a.sectionname = ? AND a.sccode = ? AND a.sessionyear LIKE ? 
             AND b.sccategory = ? ORDER BY b.subcode ASC";
 
-$stmt_sub = $conn->prepare($sql_sub);
-$sy_param = "%$sy%";
-$stmt_sub->bind_param("sssss", $clsf, $secf, $sccode, $session, $sctype);
-$stmt_sub->execute();
-$result_sub = $stmt_sub->get_result();
+    $stmt_sub = $conn->prepare($sql_sub);
+    $sy_param = "%$sy%";
+    $stmt_sub->bind_param("sssss", $clsf, $secf, $sccode, $session, $sctype);
+    $stmt_sub->execute();
+    $result_sub = $stmt_sub->get_result();
 
-if ($result_sub->num_rows > 0) {
-    while ($row = $result_sub->fetch_assoc()) {
-        $sub_setup_id = $row['id'];
-        $subcode = $row['subject'];
-        $subname = $row['subname'];
-        $subben = $row['subben'];
+    if ($result_sub->num_rows > 0) {
+        while ($row = $result_sub->fetch_assoc()) {
+            $sub_setup_id = $row['id'];
+            $subcode = $row['subject'];
+            $subname = $row['subname'];
+            $subben = $row['subben'];
 
-        $marks_info = ($clsf == 'Six' || $clsf == 'Seven') ? "" :
-            "SUB: <b>{$row['subj']}</b> | OBJ: <b>{$row['obj']}</b> | PRA: <b>{$row['pra']}</b> | TOTAL: <b>{$row['fullmarks']}</b>";
-        ?>
+            $marks_info = ($clsf == 'Six' || $clsf == 'Seven') ? "" :
+                "SUB: <b>{$row['subj']}</b> | OBJ: <b>{$row['obj']}</b> | PRA: <b>{$row['pra']}</b> | TOTAL: <b>{$row['fullmarks']}</b>";
+            ?>
 
-        <div class="m3-item-card shadow-sm animated-fade-in mb-2 mx-2">
-            <div class="d-flex align-items-start">
-                <div class="m3-icon-box tone-primary shadow-sm">
-                    <i class="bi bi-journal-text"></i>
-                </div>
-
-                <div class="flex-grow-1 overflow-hidden">
-                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;">
-                        <?php echo $subname; ?>
+            <div class="m3-item-card shadow-sm animated-fade-in mb-2 mx-2">
+                <div class="d-flex align-items-start">
+                    <div class="m3-icon-box tone-primary shadow-sm">
+                        <i class="bi bi-journal-text"></i>
                     </div>
-                    <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
-                    <?= $row['tname'] ?>
 
-                    <?php if ($marks_info): ?>
-                        <div class="m3-marks-pill">
-                            <?php echo $marks_info; ?>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;">
+                            <?php echo $subname; ?>
                         </div>
-                    <?php endif; ?>
+                        <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
+                        <?= $row['tname'] ?>
 
-                    <?php if ($row['fourth'] == 1): ?>
-                        <div id="opt-indicator-<?php echo $subcode; ?>" class="mt-2">
-                            <button class="btn btn-m3-tonal-sm" onclick="setOptionalSubject(<?php echo $subcode; ?>);">
-                                <i class="bi bi-star-fill me-1"></i> SET AS 4TH SUBJECT
-                            </button>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                        <?php if ($marks_info): ?>
+                            <div class="m3-marks-pill">
+                                <?php echo $marks_info; ?>
+                            </div>
+                        <?php endif; ?>
 
-                <div class="d-flex flex-column gap-1 ms-2">
-                    <button class="btn-m3-icon text-primary" onclick="editSubject(
+                        <?php if ($row['fourth'] == 1): ?>
+                            <div id="opt-indicator-<?php echo $subcode; ?>" class="mt-2">
+                                <button class="btn btn-m3-tonal-sm" onclick="setOptionalSubject(<?php echo $subcode; ?>);">
+                                    <i class="bi bi-star-fill me-1"></i> SET AS 4TH SUBJECT
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-column gap-1 ms-2">
+                        <button class="btn-m3-icon text-primary" onclick="editSubject(
 '<?= $row['id'] ?>',
 '<?= $row['subject'] ?>',
 '<?= $row['tid'] ?>',
@@ -280,32 +280,33 @@ if ($result_sub->num_rows > 0) {
 '<?= $row['pra'] ?>',
 '<?= $row['fullmarks'] ?>'
 )">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn-m3-icon text-danger" onclick="deleteSubject('<?= $row['id'] ?>')">
-                        <i class="bi bi-trash3-fill"></i>
-                    </button>
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn-m3-icon text-danger" onclick="deleteSubject('<?= $row['id'] ?>')">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    <?php }
-} else {
-    // সাবজেক্ট না থাকলে এম্পটি স্টেট
-    ?>
-    <div class="m3-empty-card text-center shadow-sm">
-        <div class="mb-3 text-warning">
-            <i class="bi bi-exclamation-triangle-fill display-4"></i>
-        </div>
-        <h6 class="fw-black text-dark">No Subjects Configured</h6>
-        <p class="small text-muted mb-4">Curriculum for <b><?php echo $clsf . " (" . $secf . ")"; ?></b> is currently empty.
-        </p>
+        <?php }
+    } else {
+        // সাবজেক্ট না থাকলে এম্পটি স্টেট
+        ?>
+        <div class="m3-empty-card text-center shadow-sm">
+            <div class="mb-3 text-warning">
+                <i class="bi bi-exclamation-triangle-fill display-4"></i>
+            </div>
+            <h6 class="fw-black text-dark">No Subjects Configured</h6>
+            <p class="small text-muted mb-4">Curriculum for <b><?php echo $clsf . " (" . $secf . ")"; ?></b> is currently empty.
+            </p>
 
-        <button class="btn btn-warning fw-bold px-4 m3-8px" onclick="applyDefaultSetup(<?php echo $class_id; ?>);">
-            <i class="bi bi-magic me-2"></i> APPLY DEFAULT SETUP
-        </button>
-    </div>
-    <?php
+            <button class="btn btn-warning fw-bold px-4 m3-8px" onclick="applyDefaultSetup(<?php echo $class_id; ?>);">
+                <i class="bi bi-magic me-2"></i> APPLY DEFAULT SETUP
+            </button>
+        </div>
+        <?php
+    }
 }
 $stmt_sub->close();
 ?>
