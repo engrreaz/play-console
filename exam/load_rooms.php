@@ -2,9 +2,9 @@
 include '../inc.light.php';
 
 $session = $_GET['session'] ?? '';
-$planid  = $_GET['planid'] ?? 0;
-$type    = $_GET['type'] ?? '';
-$params  = $_GET['params'] ?? '';
+$planid = $_GET['planid'] ?? 0;
+$type = $_GET['type'] ?? 'room';
+$params = $_GET['params'] ?? '';
 
 // exam info
 $examInfo = mysqli_fetch_assoc(mysqli_query($conn, "
@@ -16,25 +16,11 @@ $examInfo = mysqli_fetch_assoc(mysqli_query($conn, "
     LIMIT 1
 "));
 
-$examname  = $examInfo['examtitle'] ?? '';
-$exam_date = $examInfo['exam_date'] ?? date('Y-m-d');
-$slot      = $examInfo['slot'] ?? 'School';
+$examname = $examInfo['examtitle'] ?? '';
+$slot = $examInfo['slot'] ?? 'School';
 
 /* -----------------------------
-   FILTER SYSTEM
-------------------------------*/
-$filterSQL = "";
-
-if ($type == "room" && $params) {
-    $filterSQL .= " AND room_id='$params' ";
-} elseif ($type == "day" && $params) {
-    $filterSQL .= " AND exam_date='$params' ";
-} elseif ($type == "teacher" && $params) {
-    $filterSQL .= " AND tid='$params' ";
-}
-
-/* -----------------------------
-   MAIN QUERY (IMPORTANT)
+   MAIN QUERY
 ------------------------------*/
 $mainSQL = "
     SELECT * 
@@ -43,98 +29,205 @@ $mainSQL = "
       AND slot='$slot'
       AND sccode='$sccode'
       AND examname='$examname'
-      $filterSQL
     ORDER BY exam_date ASC, room_id ASC, shift ASC
 ";
 
 $result = mysqli_query($conn, $mainSQL);
 
-/* -----------------------------
-   GROUP DATA (ROOM WISE)
-------------------------------*/
 $data = [];
 
-while($row = mysqli_fetch_assoc($result)){
-    $room = $row['room_id'];
-    $shift = $row['shift'];
+/* -----------------------------
+   GROUPING LOGIC
+------------------------------*/
+while ($row = mysqli_fetch_assoc($result)) {
 
-    $data[$room][$shift][] = $row;
+    $date = $row['exam_date'];
+    $room = $row['room_id'];
+    $tid = $row['tid'];
+
+    $data[$date][$room][] = $row;
 }
 
-/* -----------------------------
-   UI RENDER (MATERIAL 3 STYLE)
-------------------------------*/
 echo "<div class='grid'>";
 
-foreach($data as $room_id => $shifts){
+/* =========================================================
+   TYPE = ROOM (ROOM WISE DATE CARDS)
+=========================================================*/
+if ($type == 'room') {
 
-    echo "<div class='card ton-card'>";
+    $roomGroup = [];
 
-    echo "<div class='card-header'>";
-    echo "<h3>🏫 Room $room_id</h3>";
-    echo "<span class='sub'>Exam: $examname</span>";
-    echo "<span class='sub'>Date: $exam_date</span>";
-    echo "</div>";
+    foreach ($data as $date => $rooms) {
+        foreach ($rooms as $room => $rows) {
+            if ($params && $room != $params)
+                continue;
 
-    echo "<div class='card-body'>";
-
-    echo "<table class='table'>";
-    echo "<thead>
-            <tr>
-                <th>Shift</th>
-                <th>Invigilator</th>
-            </tr>
-          </thead>";
-
-    foreach(['Morning','Day'] as $shift){
-
-        $tid = $shifts[$shift][0]['tid'] ?? null;
-
-        // teacher name fetch
-        $tname = '';
-        if($tid){
-            $tq = mysqli_fetch_assoc(mysqli_query($conn,"
-                SELECT tname FROM teacher 
-                WHERE tid='$tid' 
-                LIMIT 1
-            "));
-            $tname = $tq['tname'] ?? 'Unknown';
+            $roomGroup[$room][$date] = $rows;
         }
-
-        echo "<tr>";
-        echo "<td><b>$shift</b></td>";
-
-        echo "<td>";
-
-        echo "<select class='md-select'>";
-        echo "<option value='$tid'>$tname</option>";
-
-        // optional full list
-        $teachers = mysqli_query($conn,"
-            SELECT tid, tname 
-            FROM teacher 
-            WHERE sccode='$sccode'
-            ORDER BY tname ASC
-        ");
-
-        while($t = mysqli_fetch_assoc($teachers)){
-            echo "<option value='{$t['tid']}'>{$t['tname']}</option>";
-        }
-
-        echo "</select>";
-
-        echo "</td>";
-        echo "</tr>";
     }
 
-    echo "</table>";
+    foreach ($roomGroup as $room_id => $dates) {
 
-    echo "<div class='actions'>";
-    echo "<button class='btn primary' onclick='saveAssign($room_id)'>Update</button>";
-    echo "</div>";
+        foreach ($dates as $date => $rows) {
 
-    echo "</div>"; // body
-    echo "</div>"; // card
+            echo "<div class='card ton-card'>";
+            echo "<div class='card-header'>";
+            echo "<h3>🏫 Room $room_id</h3>";
+            echo "<span class='sub'>📅 $date</span>";
+            echo "</div>";
+
+            echo "<div class='card-body'>";
+
+            echo "<table class='table'>";
+            echo "<tr><th>Shift</th><th>Teacher</th></tr>";
+
+            foreach (['Morning', 'Day'] as $shift) {
+
+                $row = null;
+                foreach ($rows as $r) {
+                    if ($r['shift'] == $shift) {
+                        $row = $r;
+                        break;
+                    }
+                }
+
+                $tid = $row['tid'] ?? '';
+
+                $tname = '';
+                if ($tid) {
+                    $tq = mysqli_fetch_assoc(mysqli_query($conn, "
+                        SELECT tname FROM teacher WHERE tid='$tid'
+                    "));
+                    $tname = $tq['tname'] ?? '';
+                }
+
+                echo "<tr>";
+
+                echo "<td><b>$shift</b></td>";
+
+                echo "<td>";
+
+                // VIEW MODE
+                echo "<div class='view-box' id='view-$room_id-$date-$shift'>";
+                echo "<span>$tname</span>";
+                echo "<button onclick=\"editMode('$room_id','$date','$shift')\">✏️</button>";
+                echo "</div>";
+
+                // EDIT MODE (hidden)
+                echo "<div class='edit-box' id='edit-$room_id-$date-$shift' style='display:none;'>";
+
+                echo "<select onchange=\"saveAssign('$room_id','$date','$shift',this.value)\">";
+
+                $teachers = mysqli_query($conn, "SELECT tid,tname FROM teacher WHERE sccode='$sccode'");
+                while ($t = mysqli_fetch_assoc($teachers)) {
+                    $sel = ($t['tid'] == $tid) ? "selected" : "";
+                    echo "<option value='{$t['tid']}' $sel>{$t['tname']}</option>";
+                }
+
+                echo "</select>";
+
+                echo "</div>";
+
+                echo "</td>";
+
+                echo "</tr>";
+            }
+
+            echo "</table>";
+            echo "</div></div>";
+        }
+    }
+}
+
+/* =========================================================
+   TYPE = DAY (DATE WISE ROOM VIEW)
+=========================================================*/ elseif ($type == 'day') {
+
+    foreach ($data as $date => $rooms) {
+
+        if ($params && $date != $params)
+            continue;
+
+        echo "<div class='card ton-card'>";
+        echo "<div class='card-header'><h3>📅 $date</h3></div>";
+        echo "<div class='card-body'>";
+
+        foreach ($rooms as $room_id => $rows) {
+
+            echo "<h4>🏫 Room $room_id</h4>";
+
+            foreach (['Morning', 'Day'] as $shift) {
+
+                $row = null;
+                foreach ($rows as $r) {
+                    if ($r['shift'] == $shift) {
+                        $row = $r;
+                        break;
+                    }
+                }
+
+                $tid = $row['tid'] ?? '';
+
+                $tname = '';
+                if ($tid) {
+                    $tq = mysqli_fetch_assoc(mysqli_query($conn, "
+                        SELECT tname FROM teacher WHERE tid='$tid'
+                    "));
+                    $tname = $tq['tname'] ?? '';
+                }
+
+                echo "<div class='inline-row'>";
+                echo "<b>$shift</b> — $tname";
+                echo "<button onclick=\"editMode('$room_id','$date','$shift')\">✏️</button>";
+                echo "</div>";
+            }
+        }
+
+        echo "</div></div>";
+    }
+}
+
+/* =========================================================
+   TYPE = TEACHER (TEACHER WISE DUTY VIEW)
+=========================================================*/ elseif ($type == 'teacher') {
+
+    $teacherMap = [];
+
+    foreach ($data as $date => $rooms) {
+        foreach ($rooms as $room_id => $rows) {
+            foreach ($rows as $r) {
+                if ($params && $r['tid'] != $params)
+                    continue;
+                $teacherMap[$r['tid']][$date][] = $r;
+            }
+        }
+    }
+
+    foreach ($teacherMap as $tid => $dates) {
+
+        $tq = mysqli_fetch_assoc(mysqli_query($conn, "
+            SELECT tname FROM teacher WHERE tid='$tid'
+        "));
+        $tname = $tq['tname'] ?? '';
+
+        echo "<div class='card ton-card'>";
+        echo "<div class='card-header'><h3>👨‍🏫 $tname</h3></div>";
+        echo "<div class='card-body'>";
+
+        foreach ($dates as $date => $rows) {
+
+            echo "<h4>📅 $date</h4>";
+
+            foreach ($rows as $r) {
+                echo "<div class='inline-row'>";
+                echo "<span>{$r['shift']} - Room {$r['room_id']}</span>";
+                echo "<button onclick=\"editMode('{$r['room_id']}','$date','{$r['shift']}')\">✏️</button>";
+                echo "</div>";
+            }
+        }
+
+        echo "</div></div>";
+    }
 }
 
 echo "</div>";
