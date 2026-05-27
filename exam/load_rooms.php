@@ -110,7 +110,7 @@ if ($type == 'room') {
                 // VIEW MODE
                 echo "<div class='view-box d-flex' id='view-$room_id-$date-$shift'>";
                 echo "<span class='flex-grow-1'>$tname</span>";
-                echo "<button onclick=\"editMode('$room_id','$date','$shift')\"><i class='bi bi-pencil'></i></button>";
+                echo "<button class='btn btn-link btn-outline-primary' onclick=\"editMode('$room_id','$date','$shift')\"><i class='bi bi-pencil'></i></button>";
                 echo "</div>";
 
                 // EDIT MODE (hidden)
