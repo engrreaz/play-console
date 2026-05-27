@@ -12,10 +12,9 @@ WHERE sccode='$sccode' AND sessionyear='$session' AND id='$planid'
 LIMIT 1
 "));
 
-$examname = $examInfo['examtitle'];
-$exam_date = $examInfo['exam_date'];
-$sccode = $examInfo['sccode'];
-$slot = $examInfo['slot'];
+$examname = $examInfo['examtitle'] ?? "";
+$exam_date = $examInfo['exam_date'] ?? date('Y-m-d');
+$slot = $examInfo['slot'] ?? "School";
 
 // rooms
 $rooms = mysqli_query($conn,"
