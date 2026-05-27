@@ -202,6 +202,15 @@ if ($tail == 4) {
 
 
 if ($tail == 1) {
+
+
+$clsf = $_POST['clsf'];
+$secf = $_POST['secf'];
+$slot = $_POST['slot'];
+$session = $_POST['session'];
+
+
+
     // ১. ক্লাস ও সেকশন নাম ফেচ করা
     $stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
     $stmt_cls->bind_param("i", $class_id);
