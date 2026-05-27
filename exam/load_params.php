@@ -2,8 +2,15 @@
 include '../inc.light.php';
 
 $session = $_GET['session'];
-$exam = $_GET['exam'];
+$plan_id = $_GET['exam'];
 $type = $_GET['type'];
+
+$qq = "SELECT examtitle FROM seat_plans WHERE id='$plan_id' AND sessionyear='$session' AND sccode='$sccode' LIMIT 1";
+$res = mysqli_query($conn, $qq);
+$exam = "";
+while ($r = mysqli_fetch_assoc($res)) {
+    $exam = $r['examtitle'];
+}
 
 // $q = mysqli_query($conn,"SELECT DISTINCT max(id) as id, slot, examtitle 
 // FROM seat_plans 
@@ -15,42 +22,29 @@ $data = [];
 // }
 
 if ($type == "room") {
-    $data = [
-        [
-            "value" => 3,
-            "title" => "3 - Ramanujan"
-        ],
-        [
-            "value" => 6,
-            "title" => "6 - Sreenibas"
-        ]
-    ];
+
+    $q_room = "SELECT DISTINCT room_id as value, room_id as title FROM invigilators WHERE sessionyear='$session' AND examname='$exam' AND sccode='$sccode'";
+//   echo $q_room;
+    $res_room = mysqli_query($conn, $q_room);
+    while ($r = mysqli_fetch_assoc($res_room)) {
+        $data[] = $r;
+    }
 }
 
 if ($type == "day") {
-    $data = [
-        [
-            "value" => "2026-06-28",
-            "title" => "2026-06-28"
-        ],
-        [
-            "value" => "2026-06-29",
-            "title" => "2026-06-29"
-        ]
-    ];
+    $q_day = "SELECT DISTINCT exam_date as value, exam_date as title FROM invigilators WHERE sessionyear='$session' AND examname='$exam' AND sccode='$sccode'";
+    $res_day = mysqli_query($conn, $q_day);
+    while ($r = mysqli_fetch_assoc($res_day)) {
+        $data[] = $r;
+    }
 }
 
 if ($type == "teacher") {
-    $data = [
-        [
-            "value" => 1031879999,
-            "title" => "Saidur Rahman"
-        ],
-        [
-            "value" => 1031879995,
-            "title" => "Dr. Anwar Hossain"
-        ]
-    ];
+    $q_teacher = "SELECT DISTINCT tid as value, tid as title FROM invigilators WHERE sessionyear='$session' AND examname='$exam' AND sccode='$sccode'";
+    $res_teacher = mysqli_query($conn, $q_teacher);
+    while ($r = mysqli_fetch_assoc($res_teacher)) {
+        $data[] = $r;
+    }
 }
 
 echo json_encode($data);

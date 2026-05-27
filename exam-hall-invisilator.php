@@ -10,84 +10,176 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
 
 
 <style>
-    body {
-        font-family: Roboto, Arial;
-        background: #f6f6f9;
+    :root {
+        --m3-primary: #6750A4;
+        --m3-on-primary: #FFFFFF;
+        --m3-primary-container: #EADDFF;
+        --m3-on-primary-container: #21005D;
+        --m3-surface: #FEF7FF;
+        --m3-surface-variant: #E7E0EC;
+        --m3-on-surface: #1D1B20;
+        --m3-on-surface-variant: #49454F;
+        --m3-outline: #79747E;
+        /* Tonal Containers */
+        --m3-surface-container-low: #F7F2FA;
+        --m3-surface-container: #F3EDF7;
+        --m3-surface-container-high: #ECE6F0;
+        --m3-secondary-container: #E8DEF8;
+        --m3-on-secondary-container: #1D192B;
     }
 
+
+
+    /* M3 Elevateless Tonal Card Dashboard */
+    .m3-main-card {
+        background-color: var(--m3-surface-container-low);
+        border-radius: 12px;
+        /* M3 Extra Large Radius */
+        padding: 16px;
+        margin-bottom: 24px;
+        border: none;
+    }
+
+    .m3-title {
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--m3-on-surface);
+        margin-top: 0;
+        margin-bottom: 20px;
+        letter-spacing: 0.15px;
+    }
+
+    /* Form Fields: M3 Outlined Dropdown */
+    .m3-field-wrapper {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .m3-select {
+        width: 100%;
+        height: 40px;
+        padding: 8px 16px;
+        font-size: 16px;
+        color: var(--m3-on-surface);
+        background-color: transparent;
+        border: 1px solid var(--m3-outline);
+        border-radius: 100px;
+        /* M3 Outlined Field Radius */
+        outline: none;
+        appearance: none;
+        transition: border 0.2s, cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .m3-select:focus {
+        border: 2px solid var(--m3-primary);
+        padding: 8px 15px;
+        /* Adjust border offset */
+    }
+
+    /* M3 Buttons */
+    .m3-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.1px;
+        padding: 0 24px;
+        height: 40px;
+        border-radius: 20px;
+        /* Fully Rounded */
+        border: none;
+        cursor: pointer;
+        transition: box-shadow 0.2s, background-color 0.2s;
+    }
+
+    /* Filled / Primary Button */
+    .m3-btn-primary {
+        background-color: var(--m3-primary);
+        color: var(--m3-on-primary);
+    }
+
+    .m3-btn-primary:hover {
+        background-color: #5a4394;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Tonal/Outline Button */
+    .m3-btn-tonal {
+        background-color: var(--m3-secondary-container);
+        color: var(--m3-on-secondary-container);
+        border: none;
+    }
+
+    .m3-btn-tonal:hover {
+        background-color: #dfd5ef;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .m3-btn-outline {
+        background-color: transparent;
+        color: var(--m3-primary);
+        border: 1px solid var(--m3-outline);
+    }
+
+    .m3-btn-outline:hover {
+        background-color: rgba(103, 80, 164, 0.08);
+    }
+
+    /* Result Container Card */
+    .m3-result-card {
+        background-color: var(--m3-surface-container);
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 24px;
+    }
+
+    /* Grid Layout for AJAX generated cards */
     .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 16px;
-        /* padding:16px; */
+        margin-top: 16px;
     }
 
-    .ton-card {
-        background: #ffffff;
-        border-radius: 18px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
+    /* Utility Helpers for Bootstrap Compatibility */
+    .m3-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -8px;
+        margin-left: -8px;
     }
 
-    .card-header {
-        padding: 14px 16px;
-        background: #E8DEF8;
+    .m3-col-6 {
+        flex: 0 0 auto;
+        width: 50%;
+        padding-right: 8px;
+        padding-left: 8px;
+        box-sizing: border-box;
     }
 
-    .card-header h3 {
-        margin: 0;
-        font-size: 18px;
+    .m-1 {
+        margin: 4px;
     }
 
-    .sub {
-        display: block;
-        font-size: 13px;
-        color: #555;
+    .mt-0 {
+        margin-top: 0;
     }
 
-    .card-body {
-        padding: 14px;
+    .mt-3 {
+        margin-top: 16px;
     }
 
-    .table {
+    .mb-2 {
+        margin-bottom: 8px;
+    }
+
+    .p-2 {
+        padding: 8px;
+    }
+
+    .w-100 {
         width: 100%;
-        border-collapse: collapse;
-    }
-
-    .table th {
-        text-align: left;
-        font-size: 13px;
-        padding: 8px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .table td {
-        padding: 8px;
-    }
-
-    .md-select {
-        width: 100%;
-        padding: 8px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-        background: #fff;
-    }
-
-    .actions {
-        margin-top: 10px;
-        text-align: right;
-    }
-
-    .btn {
-        padding: 8px 14px;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-    }
-
-    .primary {
-        background: #6750A4;
-        color: #fff;
     }
 </style>
 
@@ -97,59 +189,68 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
 
 <body>
 
-    <div class="card m-1 mt-0">
-        <div class="card-body">
 
-            <div class="row mb-2">
 
-                <!-- Session -->
-                <div class="col-6"><select id="session" class="form-select  mb-2">
-                        <option value="" class="text-danger">Select Session</option>
+    <div class="m3-main-card m-1 mt-0">
+        <h3 class="m3-title">🗓️ Schedule Filter</h3>
+
+        <div class="m3-row">
+            <div class="m3-col-6">
+                <div class="m3-field-wrapper">
+                    <select id="session" class="m3-select mb-2">
+                        <option value="" style="color: #ba1a1a;">Select Session</option>
                         <?php
                         $q = mysqli_query($conn, "SELECT DISTINCT sessionyear FROM seat_plans");
                         while ($r = mysqli_fetch_assoc($q)) {
                             echo "<option value='{$r['sessionyear']}'>{$r['sessionyear']}</option>";
                         }
                         ?>
-                    </select></div>
-                <div class="col-6"> <!-- Exam -->
-                    <select id="exam" class="form-select  mb-2">
+                    </select>
+                </div>
+            </div>
+
+            <div class="m3-col-6">
+                <div class="m3-field-wrapper">
+                    <select id="exam" class="m3-select mb-2">
                         <option value="">Select Exam</option>
                     </select>
                 </div>
-                <div class="col-6"> <!-- Mode -->
-                    <select id="view-type" class="form-select  mb-2">
+            </div>
+
+            <div class="m3-col-6">
+                <div class="m3-field-wrapper">
+                    <select id="view-type" class="m3-select mb-2">
                         <option value="">Choose Type</option>
                         <option value="room">By Room</option>
                         <option value="day">By Day</option>
                         <option value="teacher">By Teacher</option>
                     </select>
                 </div>
-                <div class="col-6"><select id="params" class="form-select  mb-2">
-                        <option value="">Select Parameters</option>
-                    </select></div>
-
-
-
-
-
-
-
-
             </div>
 
-            <button class="btn btn-outline-primary " onclick="loadData()">Load Invigilating Schedule</button>
+            <div class="m3-col-6">
+                <div class="m3-field-wrapper">
+                    <select id="params" class="m3-select mb-2">
+                        <option value="">Select Parameters</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
+        <div style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+            <button class="m3-btn m3-btn-primary" onclick="loadData()">
+                Load Invigilating Schedule
+            </button>
+            <button class="m3-btn m3-btn-tonal" onclick="autoAssign()">
+                ✨ Auto Assign
+            </button>
+        </div>
     </div>
 
-    <div class="card m-1 mt-3 p-2 " id="resultArea">
-        <h3>Room Allocation</h3>
-        <div id="rooms"></div>
+    <div class="m3-result-card m-1 mt-3" id="resultArea">
+        <h3 class="m3-title" style="margin-bottom: 8px;">🏫 Room Allocation Blueprint</h3>
+        <div id="rooms" class="grid"></div>
     </div>
-
-
-    <button class="outline" onclick="autoAssign()">Auto Assign</button>
 
 
     <?php include "footer.php"; ?>
@@ -168,6 +269,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
                         exam.innerHTML += `<option value="${e.id}">${e.examtitle}</option>`;
                     });
                 });
+            $('#exam').val('<?= $chain_exam ?>');
         });
 
 
@@ -235,22 +337,37 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `room=${room}&date=${date}&shift=${shift}&tid=${tid}`
             })
-                .then(res => res.text())
-                .then(res => {
-                    location.reload();
-                });
+                .then(res => res.text());
+
+            document.getElementById(`view-${room}-${date}-${shift}`).style.display = 'block';
+
+            document.getElementById(`edit-${room}-${date}-${shift}`).style.display = 'none';
+            document.getElementById(`view-${room}-${date}-${shift}`).innerHTML = tid;
+            // .then(res => {
+            //     location.reload();
+            // });
         }
 
 
 
-        $('#session').val('').trigger('change');
-        $('#session').val('<?= $chain_session ?>').trigger('change');
-        $('#view-type').val('<?= $chain_type ?>').trigger('change');
+
+
+        // ------------------------- Auto load ---------------------------
+        $('#session').val('<?= $chain_session ?>');
+        $('#view-type').val('<?= $chain_type ?>');
+        document.getElementById('session').dispatchEvent(new Event('change'));
 
         setTimeout(() => {
             $('#exam').val('<?= $chain_exam ?>');
+        }, 800);
+        document.getElementById('view-type').dispatchEvent(new Event('change'));
+        setTimeout(() => {
             $('#params').val('<?= $chain_params ?>');
-        }, 3000);
+            loadData();
+        }, 1200);
+
+
+
 
     </script>
 </body>

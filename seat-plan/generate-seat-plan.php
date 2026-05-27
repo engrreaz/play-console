@@ -9,6 +9,8 @@ $rooms = $_POST['rooms'] ?? [];
 $layout = $_POST['layout'] ?? 'sequential';
 $mixing = $_POST['mixing'] ?? 'separate';
 
+var_dump($class_sections);
+
 if (empty($exam) || empty($shift) || empty($class_sections) || empty($rooms)) {
     echo json_encode(["success" => false, "message" => "Missing required fields."]);
     exit;

@@ -70,9 +70,6 @@ if ($result->num_rows > 0) {
 
             </div>
 
-            <div class="m3-subject-title">
-                <?= htmlspecialchars($row['subject']) ?>
-            </div>
 
             <div class="m3-subcode">
                 <?= htmlspecialchars($row['subj']) ?>
