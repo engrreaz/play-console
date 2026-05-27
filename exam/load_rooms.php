@@ -22,6 +22,7 @@ $rooms = mysqli_query($conn,"
 SELECT DISTINCT room_id 
 FROM seat_plan_allocations 
 WHERE sessionyear='$session'
+AND plan_id='$planid'
 ");
 
 while($room = mysqli_fetch_assoc($rooms)){
