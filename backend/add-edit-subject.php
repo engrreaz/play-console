@@ -211,16 +211,6 @@ $session = $_POST['session'];
 
 
 
-    // ১. ক্লাস ও সেকশন নাম ফেচ করা
-    $stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
-    $stmt_cls->bind_param("i", $class_id);
-    $stmt_cls->execute();
-    $res_cls = $stmt_cls->get_result()->fetch_assoc();
-    $clsf = $res_cls["areaname"] ?? '';
-    $secf = $res_cls["subarea"] ?? '';
-    $slot = $res_cls["slot"] ?? '';
-    $session = $res_cls["sessionyear"] ?? '';
-    $stmt_cls->close();
 
 
 
