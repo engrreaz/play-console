@@ -101,7 +101,7 @@ button {
     <h3>Room Allocation</h3>
     <div id="rooms"></div>
 </div>
-
+ 
 
 <button class="outline" onclick="autoAssign()">Auto Assign</button>
 
