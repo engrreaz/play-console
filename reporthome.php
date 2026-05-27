@@ -216,5 +216,16 @@ if ($count_class > 0) {
     function exam_hall_map() {
         window.location.href = `exam-hall-map.php`;
     }
+    function exam_hall_invisilator() {
+        window.location.href = `exam-hall-invisilator.php`;
+    }
+    function exam_routine() {
+        window.location.href = `exam-routine.php`;
+    }
     
+    function report_menu_gpa() {
+        window.location.href = `grade-scale.php`;
+    }
+    
+
 </script>
