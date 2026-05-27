@@ -6,7 +6,87 @@ include "inc.php";
 
 <style>
 
+<style>
+body{
+    font-family: Roboto, Arial;
+    background:#f6f6f9;
+}
 
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:16px;
+    padding:16px;
+}
+
+.ton-card{
+    background:#ffffff;
+    border-radius:18px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    overflow:hidden;
+}
+
+.card-header{
+    padding:14px 16px;
+    background:#E8DEF8;
+}
+
+.card-header h3{
+    margin:0;
+    font-size:18px;
+}
+
+.sub{
+    display:block;
+    font-size:12px;
+    color:#555;
+}
+
+.card-body{
+    padding:14px;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.table th{
+    text-align:left;
+    font-size:13px;
+    padding:8px;
+    border-bottom:1px solid #ddd;
+}
+
+.table td{
+    padding:8px;
+}
+
+.md-select{
+    width:100%;
+    padding:8px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    background:#fff;
+}
+
+.actions{
+    margin-top:10px;
+    text-align:right;
+}
+
+.btn{
+    padding:8px 14px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.primary{
+    background:#6750A4;
+    color:#fff;
+}
+</style>
 
 </style>
 </head>
@@ -104,8 +184,11 @@ include "inc.php";
         function loadData() {
             let session = document.getElementById("session").value;
             let exam = document.getElementById("exam").value;
+            let type = document.getElementById("view-type").value;
+            let params = document.getElementById("params").value;
 
-            fetch(`exam/load_rooms.php?session=${session}&planid=${exam}`)
+
+            fetch(`exam/load_rooms.php?session=${session}&planid=${exam}&type=${type}&params=${params}`)
                 .then(res => res.text())
                 .then(data => {
                     document.getElementById("rooms").innerHTML = data;
