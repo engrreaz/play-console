@@ -86,9 +86,10 @@ button {
         </select>
 
         <!-- Mode -->
-        <select id="mode">
-            <option value="manual">Manual</option>
-            <option value="auto">Auto Assign</option>
+        <select id="view-type">
+            <option value="room">By Room</option>
+            <option value="day">By Day</option>
+            <option value="teacher">By Teacher</option>
         </select>
 
         <button class="primary" onclick="loadData()">Load</button>
@@ -118,6 +119,22 @@ document.getElementById("session").addEventListener("change", function(){
         exam.innerHTML = "<option value=''>Select Exam</option>";
         data.forEach(e=>{
             exam.innerHTML += `<option value="${e.id}">${e.examtitle}</option>`;
+        });
+    });
+});
+
+
+document.getElementById("view-type").addEventListener("change", function(){
+    let session = document.getElementById("session").value;
+    let exam = document.getElementById("exam").value;
+let type = this.value;
+    fetch("exam/load_params.php?session="+session+"&exam="+exam+"&type="+type)
+    .then(res=>res.json())
+    .then(data=>{
+        let exam = document.getElementById("params");
+        exam.innerHTML = "<option value=''>Select Parameters</option>";
+        data.forEach(e=>{
+            exam.innerHTML += `<option value="${e.value}">${e.title}</option>`;
         });
     });
 });
