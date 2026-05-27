@@ -1,90 +1,94 @@
 <?php
 $page_title = "Exam Hall Invigilator Setup";
 include "inc.php";
+
+$chain_session = $_COOKIE["chain-session"] ?? $sessionyear;
+$chain_exam = $_COOKIE["chain-exam"] ?? '';
+$chain_type = $_COOKIE["chain-type"] ?? 'room';
+$chain_params = $_COOKIE["chain-params"] ?? '';
 ?>
 
 
 <style>
+    body {
+        font-family: Roboto, Arial;
+        background: #f6f6f9;
+    }
 
-body{
-    font-family: Roboto, Arial;
-    background:#f6f6f9;
-}
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+        /* padding:16px; */
+    }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-    gap:16px;
-    /* padding:16px; */
-}
+    .ton-card {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
 
-.ton-card{
-    background:#ffffff;
-    border-radius:18px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-    overflow:hidden;
-}
+    .card-header {
+        padding: 14px 16px;
+        background: #E8DEF8;
+    }
 
-.card-header{
-    padding:14px 16px;
-    background:#E8DEF8;
-}
+    .card-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
 
-.card-header h3{
-    margin:0;
-    font-size:18px;
-}
+    .sub {
+        display: block;
+        font-size: 12px;
+        color: #555;
+    }
 
-.sub{
-    display:block;
-    font-size:12px;
-    color:#555;
-}
+    .card-body {
+        padding: 14px;
+    }
 
-.card-body{
-    padding:14px;
-}
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.table{
-    width:100%;
-    border-collapse:collapse;
-}
+    .table th {
+        text-align: left;
+        font-size: 13px;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+    }
 
-.table th{
-    text-align:left;
-    font-size:13px;
-    padding:8px;
-    border-bottom:1px solid #ddd;
-}
+    .table td {
+        padding: 8px;
+    }
 
-.table td{
-    padding:8px;
-}
+    .md-select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        background: #fff;
+    }
 
-.md-select{
-    width:100%;
-    padding:8px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    background:#fff;
-}
+    .actions {
+        margin-top: 10px;
+        text-align: right;
+    }
 
-.actions{
-    margin-top:10px;
-    text-align:right;
-}
+    .btn {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+    }
 
-.btn{
-    padding:8px 14px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-}
-
-.primary{
-    background:#6750A4;
-    color:#fff;
-}
+    .primary {
+        background: #6750A4;
+        color: #fff;
+    }
 </style>
 
 
@@ -154,6 +158,7 @@ body{
     <script>
         document.getElementById("session").addEventListener("change", function () {
             let session = this.value;
+            alert(session);
             fetch("exam/load_exam.php?session=" + session)
                 .then(res => res.json())
                 .then(data => {
@@ -170,6 +175,7 @@ body{
             let session = document.getElementById("session").value;
             let exam = document.getElementById("exam").value;
             let type = this.value;
+            alert(type);
             fetch("exam/load_params.php?session=" + session + "&exam=" + exam + "&type=" + type)
                 .then(res => res.json())
                 .then(data => {
@@ -187,6 +193,10 @@ body{
             let type = document.getElementById("view-type").value;
             let params = document.getElementById("params").value;
 
+            setCookie("chain-session", session);
+            setCookie("chain-exam", exam);
+            setCookie("chain-type", type);
+            setCookie("chain-params", params);
 
             fetch(`exam/load_rooms.php?session=${session}&planid=${exam}&type=${type}&params=${params}`)
                 .then(res => res.text())
@@ -212,25 +222,37 @@ body{
     </script>
 
 
-<script>
-    function editMode(room, date, shift){
-    document.getElementById(`view-${room}-${date}-${shift}`).style.display = 'none';
-    document.getElementById(`edit-${room}-${date}-${shift}`).style.display = 'block';
-}
+    <script>
+        function editMode(room, date, shift) {
+            document.getElementById(`view-${room}-${date}-${shift}`).style.display = 'none';
+            document.getElementById(`edit-${room}-${date}-${shift}`).style.display = 'block';
+        }
 
-function saveAssign(room, date, shift, tid){
+        function saveAssign(room, date, shift, tid) {
 
-    fetch("exam/update_invigilator.php", {
-        method: "POST",
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: `room=${room}&date=${date}&shift=${shift}&tid=${tid}`
-    })
-    .then(res => res.text())
-    .then(res => {
-        location.reload();
-    });
-}
-</script>
+            fetch("exam/update_invigilator.php", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `room=${room}&date=${date}&shift=${shift}&tid=${tid}`
+            })
+                .then(res => res.text())
+                .then(res => {
+                    location.reload();
+                });
+        }
+
+
+
+        $('#session').val('').trigger('change');
+        $('#session').val('<?= $chain_session ?>').trigger('change');
+        $('#view-type').val('<?= $chain_type ?>').trigger('change');
+
+        setTimeout(() => {
+            $('#exam').val('<?= $chain_exam ?>');
+            $('#params').val('<?= $chain_params ?>');
+        }, 3000);
+
+    </script>
 </body>
 
 </html>
