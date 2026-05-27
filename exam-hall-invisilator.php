@@ -158,7 +158,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
     <script>
         document.getElementById("session").addEventListener("change", function () {
             let session = this.value;
-            alert(session);
+            // alert(session);
             fetch("exam/load_exam.php?session=" + session)
                 .then(res => res.json())
                 .then(data => {
@@ -175,7 +175,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
             let session = document.getElementById("session").value;
             let exam = document.getElementById("exam").value;
             let type = this.value;
-            alert(type);
+            // alert(type);
             fetch("exam/load_params.php?session=" + session + "&exam=" + exam + "&type=" + type)
                 .then(res => res.json())
                 .then(data => {
