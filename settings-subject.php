@@ -427,4 +427,6 @@ $sy_param = '%' . $current_session . '%';
         });
 
     }
+
+    loadAssignedSubjects();
 </script>
