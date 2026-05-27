@@ -9,7 +9,7 @@ $class_id = $_POST['id'] ?? ''; // areas table id
 $tail = $_POST['tail'];   // action indicator
 
 
-if($tail == 99 && $_POST['type'] == 'subject'){
+if ($tail == 99 && $_POST['type'] == 'subject') {
 
     $stmt = $conn->prepare("
         SELECT subcode, subject
@@ -27,11 +27,11 @@ if($tail == 99 && $_POST['type'] == 'subject'){
 
     echo '<option value="">Choose Subject</option>';
 
-    while($row = $res->fetch_assoc()){
+    while ($row = $res->fetch_assoc()) {
 
         echo '
-        <option value="'.$row['subcode'].'">
-            '.$row['subject'].' ['.$row['subcode'].']
+        <option value="' . $row['subcode'] . '">
+            ' . $row['subject'] . ' [' . $row['subcode'] . ']
         </option>';
 
     }
@@ -41,7 +41,7 @@ if($tail == 99 && $_POST['type'] == 'subject'){
 
 
 
-if($tail == 99 && $_POST['type'] == 'teacher'){
+if ($tail == 99 && $_POST['type'] == 'teacher') {
 
     $stmt = $conn->prepare("
         SELECT tid, tname
@@ -58,11 +58,11 @@ if($tail == 99 && $_POST['type'] == 'teacher'){
 
     echo '<option value="">Choose Teacher</option>';
 
-    while($row = $res->fetch_assoc()){
+    while ($row = $res->fetch_assoc()) {
 
         echo '
-        <option value="'.$row['tid'].'">
-            '.$row['tname'].' ('.$row['tid'].')
+        <option value="' . $row['tid'] . '">
+            ' . $row['tname'] . ' (' . $row['tid'] . ')
         </option>';
 
     }
@@ -71,7 +71,7 @@ if($tail == 99 && $_POST['type'] == 'teacher'){
 }
 
 
-if($tail == 2){
+if ($tail == 2) {
 
     $check = $conn->prepare("
         SELECT id
@@ -95,7 +95,7 @@ if($tail == 2){
 
     $check->execute();
 
-    if($check->get_result()->num_rows > 0){
+    if ($check->get_result()->num_rows > 0) {
 
         exit('duplicate');
 
@@ -145,7 +145,7 @@ if($tail == 2){
 }
 
 
-if($tail == 3){
+if ($tail == 3) {
 
     $stmt = $conn->prepare("
         UPDATE subsetup
@@ -180,7 +180,7 @@ if($tail == 3){
 
 
 
-if($tail == 4){
+if ($tail == 4) {
 
     $stmt = $conn->prepare("
         DELETE FROM subsetup
@@ -201,22 +201,17 @@ if($tail == 4){
 
 
 
-if ($tail != 2 || !$class_id) {
-   $slot = $_POST['slot'] ?? '';
-$session = $_POST['session'] ?? '';
-$clsf = $_POST['clsf'] ?? '';
-$secf = $_POST['secf'] ?? '';
-} else {
-// ১. ক্লাস ও সেকশন নাম ফেচ করা
-$stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
-$stmt_cls->bind_param("i", $class_id);
-$stmt_cls->execute();
-$res_cls = $stmt_cls->get_result()->fetch_assoc();
-$clsf = $res_cls["areaname"] ?? '';
-$secf = $res_cls["subarea"] ?? '';
-$slot = $res_cls["slot"] ?? '';
-$session = $res_cls["sessionyear"] ?? '';
-$stmt_cls->close();
+if ($tail ==2)  {
+    // ১. ক্লাস ও সেকশন নাম ফেচ করা
+    $stmt_cls = $conn->prepare("SELECT areaname, subarea FROM areas WHERE id = ?");
+    $stmt_cls->bind_param("i", $class_id);
+    $stmt_cls->execute();
+    $res_cls = $stmt_cls->get_result()->fetch_assoc();
+    $clsf = $res_cls["areaname"] ?? '';
+    $secf = $res_cls["subarea"] ?? '';
+    $slot = $res_cls["slot"] ?? '';
+    $session = $res_cls["sessionyear"] ?? '';
+    $stmt_cls->close();
 }
 
 
@@ -241,10 +236,10 @@ if ($result_sub->num_rows > 0) {
         $sub_setup_id = $row['id'];
         $subcode = $row['subject'];
         $subname = $row['subname'];
-        $subben  = $row['subben'];
-        
-        $marks_info = ($clsf == 'Six' || $clsf == 'Seven') ? "" : 
-                      "SUB: <b>{$row['subj']}</b> | OBJ: <b>{$row['obj']}</b> | PRA: <b>{$row['pra']}</b> | TOTAL: <b>{$row['fullmarks']}</b>";
+        $subben = $row['subben'];
+
+        $marks_info = ($clsf == 'Six' || $clsf == 'Seven') ? "" :
+            "SUB: <b>{$row['subj']}</b> | OBJ: <b>{$row['obj']}</b> | PRA: <b>{$row['pra']}</b> | TOTAL: <b>{$row['fullmarks']}</b>";
         ?>
 
         <div class="m3-item-card shadow-sm animated-fade-in mb-2 mx-2">
@@ -259,8 +254,8 @@ if ($result_sub->num_rows > 0) {
                     </div>
                     <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
                     <?= $row['tname'] ?>
-                    
-                    <?php if($marks_info): ?>
+
+                    <?php if ($marks_info): ?>
                         <div class="m3-marks-pill">
                             <?php echo $marks_info; ?>
                         </div>
@@ -276,8 +271,7 @@ if ($result_sub->num_rows > 0) {
                 </div>
 
                 <div class="d-flex flex-column gap-1 ms-2">
-                    <button class="btn-m3-icon text-primary" 
-                            onclick="editSubject(
+                    <button class="btn-m3-icon text-primary" onclick="editSubject(
 '<?= $row['id'] ?>',
 '<?= $row['subject'] ?>',
 '<?= $row['tid'] ?>',
@@ -285,8 +279,7 @@ if ($result_sub->num_rows > 0) {
 '<?= $row['obj'] ?>',
 '<?= $row['pra'] ?>',
 '<?= $row['fullmarks'] ?>'
-)"
-                    >
+)">
                         <i class="bi bi-pencil-square"></i>
                     </button>
                     <button class="btn-m3-icon text-danger" onclick="deleteSubject('<?= $row['id'] ?>')">
@@ -305,13 +298,14 @@ if ($result_sub->num_rows > 0) {
             <i class="bi bi-exclamation-triangle-fill display-4"></i>
         </div>
         <h6 class="fw-black text-dark">No Subjects Configured</h6>
-        <p class="small text-muted mb-4">Curriculum for <b><?php echo $clsf . " (" . $secf . ")"; ?></b> is currently empty.</p>
-        
+        <p class="small text-muted mb-4">Curriculum for <b><?php echo $clsf . " (" . $secf . ")"; ?></b> is currently empty.
+        </p>
+
         <button class="btn btn-warning fw-bold px-4 m3-8px" onclick="applyDefaultSetup(<?php echo $class_id; ?>);">
             <i class="bi bi-magic me-2"></i> APPLY DEFAULT SETUP
         </button>
     </div>
-<?php
+    <?php
 }
 $stmt_sub->close();
 ?>
@@ -326,12 +320,22 @@ $stmt_sub->close();
     }
 
     .m3-icon-box {
-        width: 44px; height: 44px;
+        width: 44px;
+        height: 44px;
         border-radius: 8px !important;
-        display: flex; align-items: center; justify-content: center;
-        margin-right: 14px; flex-shrink: 0; font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+        flex-shrink: 0;
+        font-size: 1.3rem;
     }
-    .tone-primary { background-color: #F3EDF7; color: #6750A4; border: 1px solid #EADDFF; }
+
+    .tone-primary {
+        background-color: #F3EDF7;
+        color: #6750A4;
+        border: 1px solid #EADDFF;
+    }
 
     .m3-marks-pill {
         display: inline-block;
@@ -356,14 +360,21 @@ $stmt_sub->close();
     }
 
     .btn-m3-icon {
-        width: 34px; height: 34px;
+        width: 34px;
+        height: 34px;
         border-radius: 6px;
         background: #fff;
         border: 1px solid #eee;
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: 0.2s;
     }
-    .btn-m3-icon:active { background: #F3EDF7; transform: scale(0.9); }
+
+    .btn-m3-icon:active {
+        background: #F3EDF7;
+        transform: scale(0.9);
+    }
 
     .m3-empty-card {
         background: #fff;
@@ -375,8 +386,16 @@ $stmt_sub->close();
     .animated-fade-in {
         animation: fadeIn 0.3s ease-out forwards;
     }
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
