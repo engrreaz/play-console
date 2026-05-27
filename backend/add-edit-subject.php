@@ -252,7 +252,7 @@ if ($tail == 1) {
                             <?php echo $subname; ?>
                         </div>
                         <div class="text-muted fw-bold small mb-1"><?php echo $subben; ?></div>
-                        <div class="text-muted fw-bold small mb-1"> <?= $row['tname'] ?></div>
+                        <div class="text-primary fw-bold small mb-1"> <?= $row['tname'] ?></div>
 
 
                         <?php if ($marks_info): ?>
