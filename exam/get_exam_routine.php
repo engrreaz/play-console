@@ -14,6 +14,7 @@ $sql = "
 SELECT *
 FROM examroutine
 
+
 WHERE
 sccode=?
 AND sessionyear LIKE ?
@@ -64,7 +65,7 @@ if($result->num_rows > 0){
 
                     <div class="m3-subcode">
                         Subject Code :
-                        <?= htmlspecialchars($row['subcode']) ?>
+                        <?= htmlspecialchars($row['subj']) ?>
                     </div>
 
                 </div>
