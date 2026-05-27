@@ -7,10 +7,10 @@ $type    = $_GET['type'] ?? '';
 $params  = $_GET['params'] ?? '';
 
 // exam info
-$examInfo = mysqli_fetch_assoc(mysqli_query($conn,"
+$examInfo = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT examtitle, exam_date, sccode, slot
     FROM seat_plans 
-    WHERE id='$planid' 
+    WHERE id='$planid'
       AND sessionyear='$session'
       AND sccode='$sccode'
     LIMIT 1
@@ -21,36 +21,52 @@ $exam_date = $examInfo['exam_date'] ?? date('Y-m-d');
 $slot      = $examInfo['slot'] ?? 'School';
 
 /* -----------------------------
-   BASE QUERY FILTER SYSTEM
+   FILTER SYSTEM
 ------------------------------*/
 $filterSQL = "";
 
-/* type based filter hook (future ready) */
-if($type == "room" && $params){
+if ($type == "room" && $params) {
     $filterSQL .= " AND room_id='$params' ";
-}
-elseif($type == "day" && $params){
-    $filterSQL .= " AND DATE(exam_date)='$params' ";
-}
-elseif($type == "teacher" && $params){
+} elseif ($type == "day" && $params) {
+    $filterSQL .= " AND exam_date='$params' ";
+} elseif ($type == "teacher" && $params) {
     $filterSQL .= " AND tid='$params' ";
 }
 
 /* -----------------------------
-   ROOMS
+   MAIN QUERY (IMPORTANT)
 ------------------------------*/
-$rooms = mysqli_query($conn,"
-    SELECT DISTINCT room_id 
-    FROM seat_plan_allocations 
+$mainSQL = "
+    SELECT * 
+    FROM invigilators 
     WHERE sessionyear='$session'
-      AND plan_id='$planid'
-");
+      AND slot='$slot'
+      AND sccode='$sccode'
+      AND examname='$examname'
+      $filterSQL
+    ORDER BY exam_date ASC, room_id ASC, shift ASC
+";
 
+$result = mysqli_query($conn, $mainSQL);
+
+/* -----------------------------
+   GROUP DATA (ROOM WISE)
+------------------------------*/
+$data = [];
+
+while($row = mysqli_fetch_assoc($result)){
+    $room = $row['room_id'];
+    $shift = $row['shift'];
+
+    $data[$room][$shift][] = $row;
+}
+
+/* -----------------------------
+   UI RENDER (MATERIAL 3 STYLE)
+------------------------------*/
 echo "<div class='grid'>";
 
-while($room = mysqli_fetch_assoc($rooms)){
-
-    $room_id = $room['room_id'];
+foreach($data as $room_id => $shifts){
 
     echo "<div class='card ton-card'>";
 
@@ -70,31 +86,30 @@ while($room = mysqli_fetch_assoc($rooms)){
             </tr>
           </thead>";
 
-    $shifts = ['Morning','Day'];
+    foreach(['Morning','Day'] as $shift){
 
-    foreach($shifts as $shift){
+        $tid = $shifts[$shift][0]['tid'] ?? null;
 
-        // existing assignment
-        $exist = mysqli_fetch_assoc(mysqli_query($conn,"
-            SELECT tid 
-            FROM invigilators 
-            WHERE sessionyear='$session'
-              AND slot='$slot'
-              AND room_id='$room_id'
-              AND shift='$shift'
-            LIMIT 1
-        "));
-
-        $exist_tid = $exist['tid'] ?? 0;
+        // teacher name fetch
+        $tname = '';
+        if($tid){
+            $tq = mysqli_fetch_assoc(mysqli_query($conn,"
+                SELECT tname FROM teacher 
+                WHERE tid='$tid' 
+                LIMIT 1
+            "));
+            $tname = $tq['tname'] ?? 'Unknown';
+        }
 
         echo "<tr>";
         echo "<td><b>$shift</b></td>";
 
         echo "<td>";
 
-        echo "<select class='md-select' name='teacher[$room_id][$shift]'>";
-        echo "<option value=''>Select Teacher</option>";
+        echo "<select class='md-select'>";
+        echo "<option value='$tid'>$tname</option>";
 
+        // optional full list
         $teachers = mysqli_query($conn,"
             SELECT tid, tname 
             FROM teacher 
@@ -103,8 +118,7 @@ while($room = mysqli_fetch_assoc($rooms)){
         ");
 
         while($t = mysqli_fetch_assoc($teachers)){
-            $selected = ($t['tid'] == $exist_tid) ? "selected" : "";
-            echo "<option value='{$t['tid']}' $selected>{$t['tname']}</option>";
+            echo "<option value='{$t['tid']}'>{$t['tname']}</option>";
         }
 
         echo "</select>";
@@ -116,7 +130,7 @@ while($room = mysqli_fetch_assoc($rooms)){
     echo "</table>";
 
     echo "<div class='actions'>";
-    echo "<button class='btn primary' onclick='saveAssign($room_id)'>Save</button>";
+    echo "<button class='btn primary' onclick='saveAssign($room_id)'>Update</button>";
     echo "</div>";
 
     echo "</div>"; // body

@@ -6,7 +6,6 @@ include "inc.php";
 
 <style>
 
-<style>
 body{
     font-family: Roboto, Arial;
     background:#f6f6f9;
@@ -88,7 +87,8 @@ body{
 }
 </style>
 
-</style>
+
+
 </head>
 
 <body>
