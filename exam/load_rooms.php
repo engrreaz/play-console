@@ -71,9 +71,9 @@ if ($type == 'room') {
         foreach ($dates as $date => $rows) {
 
             echo "<div class='card ton-card'>";
-            echo "<div class='card-header'>";
-            echo "<h3>🏫 Room $room_id</h3>";
-            echo "<span class='sub'>📅 $date</span>";
+            echo "<div class='card-header d-flex'>";
+            echo "<h3>📅  $date</h3>";
+            echo "<span class='sub text-right'>🏫 Room $room_id</span>";
             echo "</div>";
 
             echo "<div class='card-body'>";
@@ -108,9 +108,9 @@ if ($type == 'room') {
                 echo "<td>";
 
                 // VIEW MODE
-                echo "<div class='view-box' id='view-$room_id-$date-$shift'>";
-                echo "<span>$tname</span>";
-                echo "<button onclick=\"editMode('$room_id','$date','$shift')\">✏️</button>";
+                echo "<div class='view-box d-flex' id='view-$room_id-$date-$shift'>";
+                echo "<span class='flex-grow-1'>$tname</span>";
+                echo "<button onclick=\"editMode('$room_id','$date','$shift')\"><i class='bi bi-pencil'></i></button>";
                 echo "</div>";
 
                 // EDIT MODE (hidden)
