@@ -15,7 +15,7 @@ body{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
     gap:16px;
-    padding:16px;
+    /* padding:16px; */
 }
 
 .ton-card{
