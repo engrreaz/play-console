@@ -272,14 +272,14 @@ if ($tail == 1) {
 
                     <div class="d-flex flex-column gap-1 ms-2">
                         <button class="btn-m3-icon text-primary" onclick="editSubject(
-'<?= $row['id'] ?>',
-'<?= $row['subject'] ?>',
-'<?= $row['tid'] ?>',
-'<?= $row['subj'] ?>',
-'<?= $row['obj'] ?>',
-'<?= $row['pra'] ?>',
-'<?= $row['fullmarks'] ?>'
-)">
+                            '<?= $row['id'] ?>',
+                            '<?= $row['subject'] ?>',
+                            '<?= $row['tid'] ?>',
+                            '<?= $row['subj'] ?>',
+                            '<?= $row['obj'] ?>',
+                            '<?= $row['pra'] ?>',
+                            '<?= $row['fullmarks'] ?>'
+                            )">
                             <i class="bi bi-pencil-square"></i>
                         </button>
                         <button class="btn-m3-icon text-danger" onclick="deleteSubject('<?= $row['id'] ?>')">
@@ -363,7 +363,7 @@ $stmt_sub->close();
     .btn-m3-icon {
         width: 34px;
         height: 34px;
-        border-radius: 6px;
+        border-radius: 50%;
         background: #fff;
         border: 1px solid #eee;
         display: flex;
