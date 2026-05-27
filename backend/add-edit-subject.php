@@ -212,9 +212,9 @@ $session = $_POST['session'];
 
 
 
-
-
-    echo $clsf . " (" . $secf . ")";
+?>
+<div class="alert alert-info mx-3 p-2"><?= $clsf  . ' | ' . $secf ?></div>
+<?php 
 
     // ২. নির্ধারিত সাবজেক্টগুলো ফেচ করা
     $sql_sub = "SELECT a.*, b.subject as subname, b.subben, b.fourth 
