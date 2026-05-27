@@ -141,7 +141,7 @@ if ($tail == 2) {
 
     $stmt->execute();
 
-    exit('success');
+    // exit('success');
 }
 
 
