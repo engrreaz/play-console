@@ -212,6 +212,25 @@ body{
     </script>
 
 
+<script>
+    function editMode(room, date, shift){
+    document.getElementById(`view-${room}-${date}-${shift}`).style.display = 'none';
+    document.getElementById(`edit-${room}-${date}-${shift}`).style.display = 'block';
+}
+
+function saveAssign(room, date, shift, tid){
+
+    fetch("exam/update_invigilator.php", {
+        method: "POST",
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: `room=${room}&date=${date}&shift=${shift}&tid=${tid}`
+    })
+    .then(res => res.text())
+    .then(res => {
+        location.reload();
+    });
+}
+</script>
 </body>
 
 </html>
