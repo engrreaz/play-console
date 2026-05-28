@@ -144,7 +144,7 @@ $stmt->close();
             </div>
         <?php else: ?>
             <?php foreach ($student_list as $st): 
-                $due = $st['total_due'];
+                $due = $st['total_dues'];
                 $is_defaulter = ($due > 0);
             ?>
                 <div class="st-finance-card shadow-sm" onclick="go(<?php echo $st['stid']; ?>, <?= $sessionyear ?>)">
