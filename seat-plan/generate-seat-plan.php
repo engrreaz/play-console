@@ -41,6 +41,10 @@ foreach ($class_sections as $cs) {
     $stmt->close();
 }
 
+echo '<pre>';
+print_r($grouped_students);
+echo '</pre>';
+
 if ($mixing === 'mixed_interleaved') {
     $max_len = 0;
     foreach ($grouped_students as $g) {
