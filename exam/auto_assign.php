@@ -1,76 +1,98 @@
 <?php
 include '../inc.light.php';
 
-$session = $_GET['session'];
-$planid = $_GET['planid'];
-$examname = $_GET['examname'];
+$session  = $_GET['session'] ?? '';
+$examname = $_GET['examname'] ?? '';
+$slot = '';
 
-
-// exam info (important)
-$examInfo = mysqli_fetch_assoc(mysqli_query($conn,"
-SELECT examtitle, exam_date, sccode, slot
-FROM seat_plans 
-WHERE sccode='$sccode' AND sessionyear='$session' AND id='$planid'
-LIMIT 1
-"));
-
-$examname = $examInfo['examtitle'];
-$slot = $examInfo['slot'];
-
-
-/* -----------------------------
-   TEACHERS POOL
-------------------------------*/
-$teachers = [];
-$q = mysqli_query($conn, "SELECT tid FROM teacher WHERE sccode='$sccode'");
-while ($t = mysqli_fetch_assoc($q)) {
-    $teachers[] = $t['tid'];
+if (!$session || !$examname) {
+    exit("Missing session or examname");
 }
 
-if (count($teachers) == 0) {
+/* -----------------------------
+   NORMALIZE SHIFT FUNCTION
+------------------------------*/
+function normalizeShift($shift) {
+    $shift = strtolower(trim($shift));
+
+    if ($shift === 'morning') return 'Morning';
+    if ($shift === 'day') return 'Day';
+
+    return $shift;
+}
+
+/* -----------------------------
+   TEACHER POOL
+------------------------------*/
+$teachers = [];
+
+if (isset($_GET['tids']) && !empty($_GET['tids'])) {
+    $tids = explode(',', $_GET['tids']);
+    foreach ($tids as $tid) {
+        $teachers[] = trim($tid);
+    }
+} else {
+    $q = mysqli_query($conn, "
+        SELECT tid 
+        FROM teacher 
+        WHERE sccode='$sccode'
+    ");
+
+    while ($t = mysqli_fetch_assoc($q)) {
+        $teachers[] = $t['tid'];
+    }
+}
+
+
+if (empty($teachers)) {
     exit("No teachers found");
 }
 
 /* -----------------------------
-   EXAM ROUTINE (ALL DAYS)
+   ROUTINE
 ------------------------------*/
 $routine = mysqli_query($conn, "
-    SELECT date, time, clsname, secname 
-    FROM examroutine 
-    WHERE sccode='$sccode' 
-      AND sessionyear='$session' 
+    SELECT date, time 
+    FROM examroutine
+    WHERE sccode='$sccode'
+      AND sessionyear='$session'
       AND examname='$examname'
     ORDER BY date ASC, time ASC
 ");
 
-echo "
-    SELECT date, time, clsname, secname 
-    FROM examroutine 
-    WHERE sccode='$sccode' 
-      AND sessionyear='$session' 
-      AND examname='$examname'
-    ORDER BY date ASC, time ASC
-";
 /* -----------------------------
-   LOAD ROOMS
+   SEAT PLAN → SHIFT ROOM MAP
 ------------------------------*/
-$rooms = [];
-$rq = mysqli_query($conn, "
-    SELECT DISTINCT room_id 
-    FROM seat_plan_allocations 
-    WHERE plan_id='$planid'
+$roomsByShift = [];
+
+$q1 = mysqli_query($conn, "
+    SELECT sp.shift, spa.room_id, sp.slot
+    FROM seat_plans sp
+    JOIN seat_plan_allocations spa ON sp.id = spa.plan_id
+    WHERE sp.sccode='$sccode'
+      AND sp.sessionyear='$session'
+      AND sp.examtitle='$examname'
 ");
-while ($r = mysqli_fetch_assoc($rq)) {
-    $rooms[] = $r['room_id'];
+
+while ($r = mysqli_fetch_assoc($q1)) {
+
+    $shift = normalizeShift($r['shift']);
+    $room  = $r['room_id'];
+    $slot = $r['slot'];
+
+    $roomsByShift[$shift][$room] = true;
+}
+
+/* convert to simple array */
+foreach ($roomsByShift as $shift => $rooms) {
+    $roomsByShift[$shift] = array_keys($rooms);
 }
 
 /* -----------------------------
-   TEACHER USAGE TRACKER
+   TRACKERS
 ------------------------------*/
-$teacherLoad = [];
 $teacherDaily = [];
-
-$i = 0;
+$teacherIndex = 0;
 
 /* -----------------------------
    PROCESS ROUTINE
@@ -80,21 +102,37 @@ while ($row = mysqli_fetch_assoc($routine)) {
     $date = $row['date'];
     $time = $row['time'];
 
-    /* SHIFT DETECT */
-    $shift = (strtotime($time) < strtotime("12:00:00")) ? "Morning" : "Day";
+    /* -----------------------------
+       SHIFT DETECT (TIME BASED)
+    ------------------------------*/
+    if (strtotime($time) >= strtotime("10:00:00") && strtotime($time) <= strtotime("11:59:59")) {
+        $shift = "Morning";
+    } elseif (strtotime($time) >= strtotime("13:00:00") && strtotime($time) <= strtotime("15:00:00")) {
+        $shift = "Day";
+    } else {
+        continue; // outside exam window
+    }
+
+    $rooms = $roomsByShift[$shift] ?? [];
+
+    if (empty($rooms)) {
+        continue;
+    }
 
     foreach ($rooms as $room) {
 
         /* -------------------------
-           CHECK EXISTING
+           SKIP IF ALREADY ASSIGNED
         --------------------------*/
         $check = mysqli_query($conn, "
-            SELECT id FROM invigilators
-            WHERE sessionyear='$session'
-            AND examname='$examname'
-            AND exam_date='$date'
-            AND room_id='$room'
-            AND shift='$shift'
+            SELECT id 
+            FROM invigilators
+            WHERE sccode='$sccode'
+              AND sessionyear='$session'
+              AND examname='$examname'
+              AND exam_date='$date'
+              AND room_id='$room'
+              AND shift='$shift'
             LIMIT 1
         ");
 
@@ -103,17 +141,16 @@ while ($row = mysqli_fetch_assoc($routine)) {
         }
 
         /* -------------------------
-           FIND NEXT AVAILABLE TEACHER
+           SELECT TEACHER (ROUND ROBIN)
         --------------------------*/
         $tid = null;
 
-        for ($x = 0; $x < count($teachers); $x++) {
+        for ($i = 0; $i < count($teachers); $i++) {
 
-            $candidate = $teachers[$i % count($teachers)];
-            $i++;
+            $candidate = $teachers[$teacherIndex % count($teachers)];
+            $teacherIndex++;
 
-            /* avoid same teacher same date */
-            if (isset($teacherDaily[$date][$candidate])) {
+            if (isset($teacherDaily[$date][$shift][$candidate])) {
                 continue;
             }
 
@@ -122,22 +159,19 @@ while ($row = mysqli_fetch_assoc($routine)) {
         }
 
         if (!$tid) {
-            $tid = $teachers[$i % count($teachers)];
+            $tid = $teachers[$teacherIndex % count($teachers)];
         }
 
         /* -------------------------
-           TRACK USAGE
+           TRACK TEACHER
         --------------------------*/
-        $teacherDaily[$date][$tid] = true;
-        $teacherLoad[$tid] = ($teacherLoad[$tid] ?? 0) + 1;
+        $teacherDaily[$date][$shift][$tid] = true;
 
         /* -------------------------
            INSERT
         --------------------------*/
-
-        $qr = "
-            INSERT INTO invigilators 
-            (
+        mysqli_query($conn, "
+            INSERT INTO invigilators (
                 sccode,
                 sessionyear,
                 examname,
@@ -146,9 +180,7 @@ while ($row = mysqli_fetch_assoc($routine)) {
                 room_id,
                 shift,
                 tid
-            )
-            VALUES
-            (
+            ) VALUES (
                 '$sccode',
                 '$session',
                 '$examname',
@@ -158,10 +190,9 @@ while ($row = mysqli_fetch_assoc($routine)) {
                 '$shift',
                 '$tid'
             )
-        ";
-        echo $qr . "<br><br>";
-        mysqli_query($conn, $qr);
+        ");
     }
 }
 
 echo "done";
+?>

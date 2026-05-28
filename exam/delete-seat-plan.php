@@ -22,14 +22,7 @@ $get = mysqli_query($conn, "
     AND sessionyear='$sessionyear'
 ");
 
-echo "
-    SELECT id 
-    FROM seat_plans 
-    WHERE examtitle='$examtitle'
-    AND slot='$slot'
-    AND sccode='$sccode'
-    AND sessionyear='$sessionyear'
-";
+
 
 $ids = [];
 
@@ -49,10 +42,7 @@ mysqli_query($conn, "
     DELETE FROM seat_plan_allocations 
     WHERE plan_id IN ($idList)
 ");
-echo "
-    DELETE FROM seat_plan_allocations 
-    WHERE plan_id IN ($idList)
-";
+
 // 3. Delete invigilator data
 mysqli_query($conn, "
     DELETE FROM invigilators 

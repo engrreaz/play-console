@@ -9,7 +9,6 @@ $rooms = $_POST['rooms'] ?? [];
 $layout = $_POST['layout'] ?? 'sequential';
 $mixing = $_POST['mixing'] ?? 'separate';
 
-var_dump($class_sections);
 
 if (empty($exam) || empty($shift) || empty($class_sections) || empty($rooms)) {
     echo json_encode(["success" => false, "message" => "Missing required fields."]);
@@ -41,9 +40,6 @@ foreach ($class_sections as $cs) {
     $stmt->close();
 }
 
-echo '<pre>';
-print_r($grouped_students);
-echo '</pre>';
 
 if ($mixing === 'mixed_interleaved') {
     $max_len = 0;
@@ -117,19 +113,19 @@ $insert_plan->close();
 
 
 
-$delete_old_plan = $conn->prepare("
-    DELETE p, a
-    FROM seat_plans p
-    LEFT JOIN seat_plan_allocations a ON p.id = a.plan_id
-    WHERE p.sccode = ?
-    AND p.sessionyear = ?
-    AND p.slot = ?
-    AND p.examtitle = ?
-    AND p.shift = ?
-");
-$delete_old_plan->bind_param("issss", $sccode, $sessionyear, $slot, $exam, $shift);
-$delete_old_plan->execute();
-$delete_old_plan->close();
+// $delete_old_plan = $conn->prepare("
+//     DELETE p, a
+//     FROM seat_plans p
+//     LEFT JOIN seat_plan_allocations a ON p.id = a.plan_id
+//     WHERE p.sccode = ?
+//     AND p.sessionyear = ?
+//     AND p.slot = ?
+//     AND p.examtitle = ?
+//     AND p.shift = ?
+// ");
+// $delete_old_plan->bind_param("issss", $sccode, $sessionyear, $slot, $exam, $shift);
+// $delete_old_plan->execute();
+// $delete_old_plan->close();
 
 
 

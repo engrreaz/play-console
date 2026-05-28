@@ -135,6 +135,8 @@ if ($result0->num_rows > 0) {
         $is_chief = $row0["is_chief"];
         $is_admin = $row0["admin"];
         $mfa_enabled = $row0["mfa_enabled"];
+        $userps =  $row0["ps"];
+        $userdist =  $row0["dist"];
     }
 } else {
     $query33p = "insert into usersapp (sccode, email, token, firstlogin, lastlogin, photourl, userlevel) values ('$eiin', '$usr', '$token', '$cur', '$cur', '$pth' , '$dflt')";
@@ -457,6 +459,9 @@ $blocks = [
     'admin-st-attnd' => ['title' => 'Student Attendance', 'icon' => 'bi-people-fill', 'link' => 'admin-st-attnd.php', 'role' => 'Super Administrator  | Chief | Teacher'],
     'admin-teacher-attnd' => ['title' => 'Staff Attendance', 'icon' => 'bi-person-check-fill', 'link' => 'admin-teacher-attnd.php', 'role' => 'Super Administrator  | Chief | Administrator | Teacher | Accountants']
 ]; 
+
+
+
 
 
 include_once 'functions.php';

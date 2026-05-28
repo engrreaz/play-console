@@ -32,6 +32,7 @@ $mainSQL = "
     ORDER BY exam_date ASC, room_id ASC, shift ASC
 ";
 
+
 $result = mysqli_query($conn, $mainSQL);
 
 $data = [];
@@ -47,6 +48,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     $data[$date][$room][] = $row;
 }
+// var_dump($data);
 
 echo "<div class='grid'>";
 
@@ -65,6 +67,7 @@ if ($type == 'room') {
             $roomGroup[$room][$date] = $rows;
         }
     }
+
 
     foreach ($roomGroup as $room_id => $dates) {
 
@@ -103,7 +106,7 @@ if ($type == 'room') {
 
                 echo "<tr>";
 
-      
+
 
                 echo "<td>";
 
@@ -210,12 +213,12 @@ if ($type == 'room') {
             SELECT tname FROM teacher WHERE tid='$tid'
         "));
         $tname = $tq['tname'] ?? '';
-        $img_path =teacher_profile_image_path($tid);
+        $img_path = teacher_profile_image_path($tid);
 
         echo "<div class='card ton-card'>";
         echo "<div class='card-header d-flex'>";
-echo "<img src='$img_path' style='width:25px; height:25px; border-radius: 50%;'>";
-        
+        echo "<img src='$img_path' style='width:25px; height:25px; border-radius: 50%;'>";
+
         echo "<div class='flex-grow-1 fs-5 ms-2 fw-bold'> $tname</div></div>";
         echo "<div class='card-body'>";
 

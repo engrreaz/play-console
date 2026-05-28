@@ -267,7 +267,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
                 <button class="m3-btn m3-btn-primary" onclick="loadData()">
                     Load Invigilating Schedule
                 </button>
-                <button class="m3-btn m3-btn-tonal" onclick="autoAssign()">
+                <button class="m3-btn m3-btn-tonal" onclick="$('#autoAssignModal').modal('show')">
                     ✨ Auto Assign
                 </button>
             </div>
@@ -282,6 +282,41 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
         <div id="rooms" class="grid"></div>
     </div>
 
+
+    <!-- Auto Assign Modal -->
+    <div class="modal fade" id="autoAssignModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Select Teachers for Auto Assign</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="form-check mb-2 border-bottom pb-2">
+                <input class="form-check-input" type="checkbox" id="selectAllTeachers" onclick="toggleAllTeachers(this)">
+                <label class="form-check-label fw-bold" for="selectAllTeachers">
+                  Select All
+                </label>
+              </div>
+              <div id="teacherListContainer">
+                  <?php
+                  $tq = mysqli_query($conn, "SELECT tid, tname FROM teacher WHERE sccode='$sccode' ORDER BY tname ASC");
+                  while($tr = mysqli_fetch_assoc($tq)){
+                      echo '<div class="form-check">';
+                      echo '<input class="form-check-input teacher-checkbox" type="checkbox" value="'.$tr['tid'].'" id="tch_'.$tr['tid'].'">';
+                      echo '<label class="form-check-label" for="tch_'.$tr['tid'].'">'.$tr['tname'].'</label>';
+                      echo '</div>';
+                  }
+                  ?>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn m3-btn-tonal" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn m3-btn-primary" onclick="submitAutoAssign()">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <?php include "footer.php"; ?>
 
@@ -380,14 +415,35 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
             labelBlock();
         }
 
-        function autoAssign() {
+        function toggleAllTeachers(source) {
+            let checkboxes = document.querySelectorAll('.teacher-checkbox');
+            for(let i=0; i<checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        function submitAutoAssign() {
+            let checkboxes = document.querySelectorAll('.teacher-checkbox:checked');
+            let selectedTids = [];
+            for(let i=0; i<checkboxes.length; i++) {
+                selectedTids.push(checkboxes[i].value);
+            }
+            if(selectedTids.length === 0) {
+                alert("Please select at least one teacher.");
+                return;
+            }
+            autoAssign(selectedTids.join(','));
+            $('#autoAssignModal').modal('hide');
+        }
+
+        function autoAssign(tids) {
             let session = document.getElementById("session").value;
             let examSelect = document.getElementById("exam");
 
             let planid = examSelect.value;
             let examname = examSelect.options[examSelect.selectedIndex].text;
 
-            fetch(`exam/auto_assign.php?session=${session}&planid=${planid}&examname=${encodeURIComponent(examname)}`)
+            fetch(`exam/auto_assign.php?session=${session}&planid=${planid}&examname=${encodeURIComponent(examname)}&tids=${tids}`)
                 .then(res => res.text())
                 .then(res => {
                     alert("Auto assigned successfully");

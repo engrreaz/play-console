@@ -304,6 +304,8 @@ if ($userlevel == 'Guest') {
     include 'index_asstt_teacher.php';
 } else if ($userlevel == 'Staff') {
     include 'index_staff.php';
+} else if($userlevel == 'Upzila') {
+    include 'index_upzila.php';
 } else {
     include 'index_undef.php';
 }
