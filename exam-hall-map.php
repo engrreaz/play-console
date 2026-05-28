@@ -576,7 +576,7 @@ include 'inc.php';
 
             <button class="fab-btn fab-primary" ondblclick="toggleFab(this)" onclick="openBuildingModal()">
 
-                <i class="bi bi-plus-lg"></i>
+                <i class="bi bi-plus-lg "></i>
 
                 <span class="fab-text">
                     Building
@@ -605,6 +605,16 @@ include 'inc.php';
                 </span>
 
             </button>
+
+            <button class="fab-btn fab-danger" ondblclick="toggleFab(this)" onclick="openDeleteMapModal()">
+                <i class="bi bi-trash3-fill text-danger"></i>
+                <span class="fab-text">
+                    Delete Existing Map
+                </span>
+            </button>
+
+
+
             <div class="flex-grow-1"></div>
             <div class="vr"></div>
             <div class="border-info me-1  ">
