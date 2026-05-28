@@ -101,14 +101,18 @@ if (!empty($class_attendance_data)):
                     <span class="fw-black text-dark" style="font-size: 0.85rem;"><?= $att['classname'] ?> - <?= $att['sectionname'] ?></span>
                     <div class="mt-1">
                         <?php if($att['is_synced']): ?>
-                            <span class="sync-badge is-synced"><i class="bi bi-check-circle-fill me-1"></i>Synced</span>
+                            <span class="sync-badge is-synced badge-success"><i class="bi bi-check-circle-fill me-1"></i>Synced</span>
                         <?php else: ?>
-                            <span class="sync-badge not-synced"><i class="bi bi-cloud-slash-fill me-1"></i>Not Synced</span>
+                            <span class="sync-badge not-synced badge-warning"><i class="bi bi-cloud-slash-fill me-1"></i>Not Synced</span>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="text-end">
                     <div class="fw-black" style="font-size: 1.2rem; color: #6750A4; line-height:1;"><?= $att['effective_rate'] ?>%</div>
+                    
+                    <button class="btn btn-link ms-3 fs-5 text-danger"><i class="bi bi-fingerprint"></i></button>
+                    <button class="btn btn-link ms-3 fs-5 text-warning"><i class="bi bi-pencil-square"></i></button>
+                    
                     <?php if(!$att['is_synced'] && $att['total'] >= 0): ?>
                         <button class="sync-btn mt-2" onclick="syncNow('<?= $att['classname'] ?>', '<?= $att['sectionname'] ?>', this)">
                             <i class="bi bi-arrow-repeat"></i> Sync
