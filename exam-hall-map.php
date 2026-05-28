@@ -645,6 +645,38 @@ include 'inc.php';
 
 </div>
 
+<!-- DELETE SEAT PLAN MODAL -->
+<div class="modal fade" id="deleteMapModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content m3-card">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Delete Seat Plan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="m3-input-group">
+                    <label>Select Exam / Slot</label>
+                    <select id="delete_exam_select" class="m3-select">
+                        <option value="">-- Select Exam --</option>
+                    </select>
+                </div>
+
+                <button class="m3-btn m3-btn-danger w-100" onclick="confirmDeleteSeatPlan()">
+                    Delete Selected Plan
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 
 <div class="modal fade" id="benchMapModal">
 
@@ -1587,4 +1619,72 @@ include 'inc.php';
     $(document).on("click", function () {
         $(".tree-menu").hide();
     });
+</script>
+
+
+<script>
+    function openDeleteMapModal() {
+
+    $("#deleteMapModal").modal("show");
+    $("#delete_exam_select").html('<option>Loading...</option>');
+
+    $.ajax({
+        url: 'exam/load-seat-plan-exams.php',
+        type: 'GET',
+        success: function (res) {
+            $("#delete_exam_select").html(res);
+        }
+    });
+}
+
+function confirmDeleteSeatPlan() {
+
+    let val = $("#delete_exam_select").val();
+
+    if (!val) {
+        Swal.fire('Warning', 'Please select an exam', 'warning');
+        return;
+    }
+
+    let parts = val.split("||");
+    let examtitle = parts[0];
+    let slot = parts[1];
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This will delete entire seat plan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, Delete'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: 'exam/delete-seat-plan.php',
+                type: 'POST',
+                data: {
+                    examtitle: examtitle,
+                    slot: slot
+                },
+                success: function (res) {
+
+                    Swal.fire('Deleted!', 'Seat plan removed successfully.', 'success');
+
+                    $("#deleteMapModal").modal('hide');
+
+                    loadTree(); // refresh UI
+
+                },
+                error: function () {
+                    Swal.fire('Error', 'Delete failed!', 'error');
+                }
+            });
+
+        }
+
+    });
+}
 </script>

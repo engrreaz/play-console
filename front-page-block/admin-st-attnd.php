@@ -109,7 +109,7 @@ if (!empty($class_attendance_data)):
                 </div>
                 <div class="text-end">
                     <div class="fw-black" style="font-size: 1.2rem; color: #6750A4; line-height:1;"><?= $att['effective_rate'] ?>%</div>
-                    <?php if(!$att['is_synced'] && $att['total'] > 0): ?>
+                    <?php if(!$att['is_synced'] && $att['total'] >= 0): ?>
                         <button class="sync-btn mt-2" onclick="syncNow('<?= $att['classname'] ?>', '<?= $att['sectionname'] ?>', this)">
                             <i class="bi bi-arrow-repeat"></i> Sync
                         </button>
