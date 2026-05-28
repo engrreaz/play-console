@@ -1,5 +1,6 @@
 <?php
 include 'inc.php'; // header.php এবং DB কানেকশন লোড করবে
+// echo $sessionyear;
 $sy_param = "%" . $sessionyear . "%";
 
 // ২. প্যারামিটার হ্যান্ডলিং
@@ -146,7 +147,7 @@ $stmt->close();
                 $due = $st['total_due'];
                 $is_defaulter = ($due > 0);
             ?>
-                <div class="st-finance-card shadow-sm" onclick="go(<?php echo $st['stid']; ?>)">
+                <div class="st-finance-card shadow-sm" onclick="go(<?php echo $st['stid']; ?>, <?= $sessionyear ?>)">
                     <div class="roll-badge shadow-sm">
                         <?php echo $st['rollno']; ?>
                     </div>
@@ -176,8 +177,8 @@ $stmt->close();
 </main>
 
 <div style="height: 65px;"></div> <script>
-    function go(stid) {
-        window.location.href = `stfinancedetails.php?id=${stid}&year=<?php echo $current_session; ?>`;
+    function go(stid, sy) {
+        window.location.href = `stfinancedetails.php?id=${stid}&year=${sy}`;
     }
 
     function epos() {
