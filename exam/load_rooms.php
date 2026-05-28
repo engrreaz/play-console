@@ -72,14 +72,14 @@ if ($type == 'room') {
 
             echo "<div class='card ton-card'>";
             echo "<div class='card-header d-flex'>";
-            echo "<h3 class='flex-grow-1'>📅  $date</h3>";
-            echo "<span class='sub text-right'>🏫 Room $room_id</span>";
+            echo "<h3 class='flex-grow-1 fw-bold'><i class='bi bi-calendar3'></i> $date</h3>";
+            echo "<span class='sub text-right fw-tiny'><i class='bi bi-building'></i> Room # $room_id</span>";
             echo "</div>";
 
             echo "<div class='card-body'>";
 
-            echo "<table class='table'>";
-            echo "<tr><th>Shift</th><th>Teacher</th></tr>";
+            echo "<table class='table table-sm'>";
+            // echo "<tr><th>Shift</th><th>Teacher</th></tr>";
 
             foreach (['Morning', 'Day'] as $shift) {
 
@@ -103,25 +103,26 @@ if ($type == 'room') {
 
                 echo "<tr>";
 
-                echo "<td><b>$shift</b></td>";
+      
 
                 echo "<td>";
 
                 // VIEW MODE
+                echo "<div class='fw-bold fs-tiny text-muted'>$shift</div>";
                 echo "<div class='view-box d-flex' id='view-$room_id-$date-$shift'>";
-                echo "<span class='flex-grow-1'>$tname</span>";
+                echo "<span class='flex-grow-1' id='tid-$room_id-$date-$shift'>$tname</span>";
                 echo "<button class='btn btn-link btn-outline-primary' onclick=\"editMode('$room_id','$date','$shift')\"><i class='bi bi-pencil'></i></button>";
                 echo "</div>";
 
                 // EDIT MODE (hidden)
                 echo "<div class='edit-box' id='edit-$room_id-$date-$shift' style='display:none;'>";
 
-                echo "<select onchange=\"saveAssign('$room_id','$date','$shift',this.value)\">";
+                echo "<select id='tidx-$room_id-$date-$shift' class='form-select form-select-sm' onchange=\"saveAssign('$room_id','$date','$shift',this.value)\">";
 
                 $teachers = mysqli_query($conn, "SELECT tid,tname FROM teacher WHERE sccode='$sccode'");
                 while ($t = mysqli_fetch_assoc($teachers)) {
                     $sel = ($t['tid'] == $tid) ? "selected" : "";
-                    echo "<option value='{$t['tid']}' $sel>{$t['tname']}</option>";
+                    echo "<option value='{$t['tid']}' data-tname='{$t['tname']}' $sel>{$t['tname']}</option>";
                 }
 
                 echo "</select>";
@@ -149,12 +150,12 @@ if ($type == 'room') {
             continue;
 
         echo "<div class='card ton-card'>";
-        echo "<div class='card-header'><h5>📅 $date</h5></div>";
+        echo "<div class='card-header'><h5><i class='bi bi-calendar3'></i>$date</h5></div>";
         echo "<div class='card-body'>";
 
         foreach ($rooms as $room_id => $rows) {
 
-            echo "<h6>🏫 Room $room_id</h6>";
+            echo "<h5 class='text-success'><i class='bi bi-building'></i> Room $room_id</h5>";
 
             foreach (['Morning', 'Day'] as $shift) {
 
@@ -209,14 +210,18 @@ if ($type == 'room') {
             SELECT tname FROM teacher WHERE tid='$tid'
         "));
         $tname = $tq['tname'] ?? '';
+        $img_path =teacher_profile_image_path($tid);
 
         echo "<div class='card ton-card'>";
-        echo "<div class='card-header'><h5>👨‍🏫 $tname</h5></div>";
+        echo "<div class='card-header d-flex'>";
+echo "<img src='$img_path' style='width:25px; height:25px; border-radius: 50%;'>";
+        
+        echo "<div class='flex-grow-1 fs-5 ms-2 fw-bold'> $tname</div></div>";
         echo "<div class='card-body'>";
 
         foreach ($dates as $date => $rows) {
 
-            echo "<h6>📅 $date</h6>";
+            echo "<h6><i class='bi bi-calendar3'></i> $date</h6>";
 
             foreach ($rows as $r) {
                 echo "<div class='inline-row d-flex'>";

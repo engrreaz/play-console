@@ -192,69 +192,118 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
 
 
     <div class="m3-main-card m-1 mt-0">
-        <h3 class="m3-title">🗓️ Schedule Filter</h3>
+        <button class="btn btn-link float-end" onclick="toggleBlock();"><i class="bi bi-arrow-down-up"></i></button>
 
-        <div class="m3-row">
-            <div class="m3-col-6">
-                <div class="m3-field-wrapper">
-                    <select id="session" class="m3-select mb-2">
-                        <option value="" style="color: #ba1a1a;">Select Session</option>
-                        <?php
-                        $q = mysqli_query($conn, "SELECT DISTINCT sessionyear FROM seat_plans");
-                        while ($r = mysqli_fetch_assoc($q)) {
-                            echo "<option value='{$r['sessionyear']}'>{$r['sessionyear']}</option>";
-                        }
-                        ?>
-                    </select>
+        <h3 class="m3-title"><i class="bi bi-events"></i> Schedule Filter</h3>
+
+        <div id="label-block" style="display:block;">
+            <div class="row">
+                <div class="col-auto me-4">
+                    <div class="fs-6 fw-bold">Session</div>
+                    <div class="text-secondary" id="aaa"><?= $chain_session ?? '' ?></div>
+                </div>
+                <div class="col-auto flex-grow-1">
+                    <div class="fs-6 fw-bold">Exam</div>
+                    <div class="text-secondary" id="bbb"><?= $chain_exam ?? '' ?></div>
+                </div>
+                <div class="col-auto">
+                    <div class="fs-6 fw-bold">Filter by</div>
+                    <div class="d-flex">
+                        <div class="text-secondary" id="ccc"><?= $chain_type ?? '' ?></div>
+                        <div> &nbsp; &mdash; &nbsp; </div>
+                        <div class="text-secondary" id="ddd"><?= $chain_params ?? '' ?></div>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="m3-col-6">
-                <div class="m3-field-wrapper">
-                    <select id="exam" class="m3-select mb-2">
-                        <option value="">Select Exam</option>
-                    </select>
+        </div>
+
+        <div id="selection-block" style="display:none;">
+            <div class="m3-row">
+                <div class="m3-col-6">
+                    <div class="m3-field-wrapper">
+                        <select id="session" class="m3-select mb-2">
+                            <option value="" style="color: #ba1a1a;">Select Session</option>
+                            <?php
+                            $q = mysqli_query($conn, "SELECT DISTINCT sessionyear FROM seat_plans");
+                            while ($r = mysqli_fetch_assoc($q)) {
+                                echo "<option value='{$r['sessionyear']}'>{$r['sessionyear']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="m3-col-6">
+                    <div class="m3-field-wrapper">
+                        <select id="exam" class="m3-select mb-2">
+                            <option value="">Select Exam</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="m3-col-6">
+                    <div class="m3-field-wrapper">
+                        <select id="view-type" class="m3-select mb-2">
+                            <option value="">Choose Type</option>
+                            <option value="room">By Room</option>
+                            <option value="day">By Day</option>
+                            <option value="teacher">By Teacher</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="m3-col-6">
+                    <div class="m3-field-wrapper">
+                        <select id="params" class="m3-select mb-2">
+                            <option value="">Select Parameters</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="m3-col-6">
-                <div class="m3-field-wrapper">
-                    <select id="view-type" class="m3-select mb-2">
-                        <option value="">Choose Type</option>
-                        <option value="room">By Room</option>
-                        <option value="day">By Day</option>
-                        <option value="teacher">By Teacher</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="m3-col-6">
-                <div class="m3-field-wrapper">
-                    <select id="params" class="m3-select mb-2">
-                        <option value="">Select Parameters</option>
-                    </select>
-                </div>
+            <div style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+                <button class="m3-btn m3-btn-primary" onclick="loadData()">
+                    Load Invigilating Schedule
+                </button>
+                <button class="m3-btn m3-btn-tonal" onclick="autoAssign()">
+                    ✨ Auto Assign
+                </button>
             </div>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
-            <button class="m3-btn m3-btn-primary" onclick="loadData()">
-                Load Invigilating Schedule
-            </button>
-            <button class="m3-btn m3-btn-tonal" onclick="autoAssign()">
-                ✨ Auto Assign
-            </button>
-        </div>
+
     </div>
 
     <div class="m3-result-card m-1 mt-3" id="resultArea">
-        <h3 class="m3-title" style="margin-bottom: 8px;">🏫 Room Allocation Blueprint</h3>
+        <h3 class="m3-title text-center" style="margin-bottom: 8px;"><i class="bi bi-buildings"></i> Room Allocation
+            Blueprint</h3>
         <div id="rooms" class="grid"></div>
     </div>
 
 
     <?php include "footer.php"; ?>
 
+
+    <script>
+        function labelBlock() {
+            document.getElementById("selection-block").style.display = "none";
+            document.getElementById("label-block").style.display = "block";
+        }
+        function selectionBlock() {
+            document.getElementById("selection-block").style.display = "block";
+            document.getElementById("label-block").style.display = "none";
+        }
+
+        function toggleBlock() {
+            if (document.getElementById("selection-block").style.display == "none") {
+                selectionBlock();
+            } else {
+                labelBlock();
+            }
+        }
+    </script>
 
     <script>
         document.getElementById("session").addEventListener("change", function () {
@@ -266,7 +315,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
                     let exam = document.getElementById("exam");
                     exam.innerHTML = "<option value=''>Select Exam</option>";
                     data.forEach(e => {
-                        exam.innerHTML += `<option value="${e.id}">${e.examtitle}</option>`;
+                        exam.innerHTML += `<option value="${e.id}" data-title="${e.examtitle}">${e.examtitle}</option>`;
                     });
                 });
             $('#exam').val('<?= $chain_exam ?>');
@@ -287,6 +336,7 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
                         exam.innerHTML += `<option value="${e.value}">${e.title}</option>`;
                     });
                 });
+            $('#params').val('<?= $chain_params ?>');
         });
 
         function loadData() {
@@ -296,15 +346,38 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
             let params = document.getElementById("params").value;
 
             setCookie("chain-session", session);
-            setCookie("chain-exam", exam);
+            if (exam != '') {
+                setCookie("chain-exam", exam);
+            }
+
             setCookie("chain-type", type);
-            setCookie("chain-params", params);
+            if (params != '') {
+                setCookie("chain-params", params);
+            }
+
 
             fetch(`exam/load_rooms.php?session=${session}&planid=${exam}&type=${type}&params=${params}`)
                 .then(res => res.text())
                 .then(data => {
                     document.getElementById("rooms").innerHTML = data;
                 });
+
+
+            document.getElementById("aaa").innerHTML = session;
+
+            let el = document.getElementById("exam");
+            let selectedOption = el.options[el.selectedIndex];
+
+            document.getElementById("bbb").innerHTML =
+                selectedOption.dataset.title || '';
+
+            document.getElementById("ccc").innerHTML = type;
+            let ddd = document.getElementById("ddd");
+
+            if (ddd) {
+                ddd.innerHTML = params || '';
+            }
+            labelBlock();
         }
 
         function autoAssign() {
@@ -342,7 +415,13 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
             document.getElementById(`view-${room}-${date}-${shift}`).style.display = 'block';
 
             document.getElementById(`edit-${room}-${date}-${shift}`).style.display = 'none';
-            document.getElementById(`view-${room}-${date}-${shift}`).innerHTML = tid;
+
+            let el = document.getElementById(`tidx-${room}-${date}-${shift}`);
+            let selectedOption = el.options[el.selectedIndex];
+
+            document.getElementById("tid-" + room + "-" + date + "-" + shift).innerHTML =
+                selectedOption.dataset.tname || '';
+
             // .then(res => {
             //     location.reload();
             // });
@@ -355,21 +434,30 @@ $chain_params = $_COOKIE["chain-params"] ?? '';
         // ------------------------- Auto load ---------------------------
         $('#session').val('<?= $chain_session ?>');
         $('#view-type').val('<?= $chain_type ?>');
+
         document.getElementById('session').dispatchEvent(new Event('change'));
 
         setTimeout(() => {
+            console.log(1);
             $('#exam').val('<?= $chain_exam ?>');
         }, 800);
-        document.getElementById('view-type').dispatchEvent(new Event('change'));
+
         setTimeout(() => {
+            console.log(2);
+            document.getElementById('view-type').dispatchEvent(new Event('change'));
+        }, 900);
+
+        setTimeout(() => {
+            console.log(3);
             $('#params').val('<?= $chain_params ?>');
             loadData();
-        }, 1200);
+        }, 1500);
 
 
 
 
     </script>
+
 </body>
 
 </html>
