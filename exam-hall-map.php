@@ -428,16 +428,16 @@ include 'inc.php';
     }
 
     .fab-btn {
-        width: 52px;
-        height: 52px;
+        width: 40px;
+        height: 40px;
         border: none;
-        border-radius: 50px;
+        border-radius: 50%;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        gap: 10px;
-        padding: 0 16px;
+        gap: 7px;
+        padding: 0 12px;
         cursor: pointer;
         transition: all .25s ease;
         white-space: nowrap;
@@ -445,8 +445,8 @@ include 'inc.php';
     }
 
     .fab-btn i {
-        font-size: 20px;
-        min-width: 20px;
+        font-size: 16px;
+        min-width: 16px;
     }
 
     .fab-btn .fab-text {
@@ -474,6 +474,10 @@ include 'inc.php';
     .fab-success {
         background: var(--m3-success-container);
         color: var(--m3-on-success-container);
+    }
+    .fab-danger {
+        background: var(--m3-error-container);
+        color: var(--m3-on-error-container);
     }
 
 
