@@ -54,18 +54,18 @@ echo "
     WHERE plan_id IN ($idList)
 ";
 // 3. Delete invigilator data
-// mysqli_query($conn, "
-//     DELETE FROM invigilators 
-//     WHERE sessionyear='$sessionyear'
-//     AND examname='$examtitle'
-//     AND sccode='$sccode'
-// ");
+mysqli_query($conn, "
+    DELETE FROM invigilators 
+    WHERE sessionyear='$sessionyear'
+    AND examname='$examtitle'
+    AND sccode='$sccode'
+");
 
 // 4. Delete seat plans
-// mysqli_query($conn, "
-//     DELETE FROM seat_plans 
-//     WHERE sessionyear='$sessionyear' AND examtitle='$examtitle' AND sccode='$sccode' AND slot='$slot'
-// ");
+mysqli_query($conn, "
+    DELETE FROM seat_plans 
+    WHERE sessionyear='$sessionyear' AND examtitle='$examtitle' AND sccode='$sccode' AND slot='$slot'
+");
 
 echo "success";
 ?>
