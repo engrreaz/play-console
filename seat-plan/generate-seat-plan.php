@@ -113,19 +113,19 @@ $insert_plan->close();
 
 
 
-// $delete_old_plan = $conn->prepare("
-//     DELETE p, a
-//     FROM seat_plans p
-//     LEFT JOIN seat_plan_allocations a ON p.id = a.plan_id
-//     WHERE p.sccode = ?
-//     AND p.sessionyear = ?
-//     AND p.slot = ?
-//     AND p.examtitle = ?
-//     AND p.shift = ?
-// ");
-// $delete_old_plan->bind_param("issss", $sccode, $sessionyear, $slot, $exam, $shift);
-// $delete_old_plan->execute();
-// $delete_old_plan->close();
+$delete_old_plan = $conn->prepare("
+    DELETE p, a
+    FROM seat_plans p
+    LEFT JOIN seat_plan_allocations a ON p.id = a.plan_id
+    WHERE p.sccode = ?
+    AND p.sessionyear = ?
+    AND p.slot = ?
+    AND p.examtitle = ?
+    AND p.shift = ?
+");
+$delete_old_plan->bind_param("issss", $sccode, $sessionyear, $slot, $exam, $shift);
+$delete_old_plan->execute();
+$delete_old_plan->close();
 
 
 
