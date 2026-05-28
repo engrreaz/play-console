@@ -38,9 +38,8 @@ WHERE
 GROUP BY 
     s.stid, s.rollno, st.stnameeng, st.stnameben, st.previll
 ORDER BY s.rollno ASC;
-
 ";
-
+echo $sql;
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("siisss", $sy_param, $current_month, $sccode, $cls, $sec, $sy_param);
 $stmt->execute();
