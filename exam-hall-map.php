@@ -32,7 +32,7 @@ include 'inc.php';
         --m3-success-container: #9FF5A9;
         --m3-on-success-container: #002107;
 
-        --m3-surface: #FCFCFF;
+        --m3-surface: #faf2fa;
         --m3-on-surface: #1A1C1E;
         --m3-surface-variant: #DDE3EA;
         --m3-on-surface-variant: #41474D;
@@ -569,7 +569,7 @@ include 'inc.php';
 
 <div class="page-wrapper">
 
-    <div class="col m3-card">
+    <div class="col m3-cardx" style=padding:12px;>
 
         <div class="section-title ms-3">
             <i class="bi bi-diagram-3-fill"></i>

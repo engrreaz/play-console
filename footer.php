@@ -230,6 +230,28 @@ showUserStats($conn, $usr, $sccode);
                 <div class="icon-wrapper"><i class="bi bi-person-circle"></i></div>
                 <span>Profile</span>
             </a>
+
+
+<?php elseif (strpos($userlevel, 'Upzila') === 0): ?>
+
+<a href="index.php" class="nav-item <?= isActive('index.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-house-fill"></i></div>
+                <span>Home</span>
+            </a>
+            <a href="reporthome.php" class="nav-item <?= isActive('reporthome.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-mortarboard-fill"></i></div>
+                <span>Academic</span>
+            </a>
+            <a href="tools.php" class="nav-item <?= isActive('tools.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-plus-circle-fill"></i></div>
+                <span>Tools</span>
+            </a>
+            <a href="build.php" class="nav-item <?= isActive('build.php', $curfile) ?>">
+                <div class="icon-wrapper"><i class="bi bi-person-circle"></i></div>
+                <span>Profile</span>
+            </a>
+
+
         <?php endif; ?>
 
     </div>
