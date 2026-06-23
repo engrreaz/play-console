@@ -311,7 +311,23 @@ $can_edit_date = (in_array($userlevel, ['Administrator', 'Super Administrator'])
         <?php
         $idx = 0;
         $total_calc = 0;
-        $month_curr = date('m');
+       
+
+        
+$month = (int)date('m');
+
+if ((int)date('d') > 15) {
+    $month++;
+    
+    // ডিসেম্বর হলে জানুয়ারি
+    if ($month > 12) {
+        $month = 12;
+    }
+}
+
+ $month_curr = $month;
+
+
         // $stmt_due = $conn->prepare("SELECT * FROM stfinance WHERE sccode=? AND stid=? AND sessionyear LIKE ? AND month <= ? AND (dues > 0 OR particulareng='Fine' OR particulareng='Misc') ORDER BY id ASC");
         $stmt_due = $conn->prepare("SELECT * FROM stfinance WHERE sccode=? AND stid=? AND sessionyear LIKE ? AND month <= ? AND (dues > 0 ) ORDER BY id ASC");
         $stmt_due->bind_param("ssss", $sccode, $stid, $sy_like, $month_curr);
