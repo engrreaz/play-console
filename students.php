@@ -8,7 +8,7 @@ $sectionname = $_GET['sec'] ?? '';
 $sy_param = "%" . $sy . "%";
 
 // ডাটা ফেচিং (JOIN ব্যবহার করে সব তথ্য একসাথে আনা)
-$sql0 = "SELECT si.*, s.stnameeng, s.stnameben, s.gender, s.religion as s_rel, s.guarmobile as s_mob , s.guaremail
+$sql0 = "SELECT si.*, s.stnameeng, s.stnameben, s.gender, s.religion as s_rel, s.guarmobile as s_mob , s.guaremail, s.fname, s.mname
          FROM sessioninfo si 
          JOIN students s ON si.stid = s.stid 
          WHERE si.sessionyear LIKE ? AND si.sccode = ? AND si.classname = ? AND si.sectionname = ? 
@@ -326,6 +326,34 @@ $stslist = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 <form id="editForm">
                     <input type="hidden" name="stid" id="m_stid">
 
+                    <!-- Student Name (English) -->
+                    <div class="m3-floating-group mb-3">
+                        <i class="bi bi-person-circle m3-field-icon"></i>
+                        <input type="text" class="m3-input-floating" name="stnameeng" id="m_stnameeng" placeholder=" ">
+                        <label class="m3-floating-label">STUDENT NAME (ENGLISH)</label>
+                    </div>
+
+                    <!-- Student Name (Bengali) -->
+                    <div class="m3-floating-group mb-3">
+                        <i class="bi bi-person-circle m3-field-icon"></i>
+                        <input type="text" class="m3-input-floating" name="stnameben" id="m_stnameben" placeholder=" ">
+                        <label class="m3-floating-label">STUDENT NAME (BENGALI)</label>
+                    </div>
+
+                    <!-- Father's Name -->
+                    <div class="m3-floating-group mb-3">
+                        <i class="bi bi-person-fill m3-field-icon"></i>
+                        <input type="text" class="m3-input-floating" name="fname" id="m_fname" placeholder=" ">
+                        <label class="m3-floating-label">FATHER'S NAME</label>
+                    </div>
+
+                    <!-- Mother's Name -->
+                    <div class="m3-floating-group mb-3">
+                        <i class="bi bi-person-fill m3-field-icon"></i>
+                        <input type="text" class="m3-input-floating" name="mname" id="m_mname" placeholder=" ">
+                        <label class="m3-floating-label">MOTHER'S NAME</label>
+                    </div>
+
                     <!-- Guardian Mobile -->
                     <div class="m3-floating-group mb-3">
                         <i class="bi bi-telephone-fill m3-field-icon"></i>
@@ -561,6 +589,10 @@ $stslist = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     // ২. মডাল ডাটা পপুলেট করা
     function openEditModal(data) {
         $("#m_stid").val(data.stid);
+        $("#m_stnameeng").val(data.stnameeng);
+        $("#m_stnameben").val(data.stnameben);
+        $("#m_fname").val(data.fname);
+        $("#m_mname").val(data.mname);
         $("#m_mobile").val(data.s_mob);
         $("#m_gender").val(data.gender);
         $("#m_religion").val(data.s_rel);
@@ -574,6 +606,10 @@ $stslist = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     function updateStudent() {
         const formData = {
             stid: $("#m_stid").val(),
+            stnameeng: $("#m_stnameeng").val(),
+            stnameben: $("#m_stnameben").val(),
+            fname: $("#m_fname").val(),
+            mname: $("#m_mname").val(),
             guarmobile: $("#m_mobile").val(),
             gender: $("#m_gender").val(),
             religion: $("#m_religion").val(),

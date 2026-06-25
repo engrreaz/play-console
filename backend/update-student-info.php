@@ -2,6 +2,10 @@
 include '../inc.light.php';
 
 $stid       = $_POST['stid'] ?? '';
+$stnameeng  = $_POST['stnameeng'] ?? null;
+$stnameben  = $_POST['stnameben'] ?? null;
+$fname      = $_POST['fname'] ?? null;
+$mname      = $_POST['mname'] ?? null;
 $guarmobile = $_POST['guarmobile'] ?? null;
 $gender     = $_POST['gender'] ?? 'Boy';
 $religion   = $_POST['religion'] ?? 'Islam';
@@ -10,8 +14,8 @@ $status     = $_POST['status'] ?? 0;
 if (!$stid) die("ID Missing");
 
 // ১. students table আপডেট
-$q1 = $conn->prepare("UPDATE students SET guarmobile=?, gender=?, religion=? WHERE stid=? AND sccode=?");
-$q1->bind_param("ssssi", $guarmobile, $gender, $religion, $stid, $sccode);
+$q1 = $conn->prepare("UPDATE students SET stnameeng=?, stnameben=?, fname=?, mname=?, guarmobile=?, gender=?, religion=? WHERE stid=? AND sccode=?");
+$q1->bind_param("ssssssssi", $stnameeng, $stnameben, $fname, $mname, $guarmobile, $gender, $religion, $stid, $sccode);
 $res1 = $q1->execute();
 
 // ২. sessioninfo table আপডেট
