@@ -18,6 +18,7 @@ $q = mysqli_query($conn, "SELECT subject FROM subsetup
     if($userlevel == 'Teacher'){
         $q .= " AND tid='$userid'";
     }
+    echo $q;
 
 $data = [];
 
