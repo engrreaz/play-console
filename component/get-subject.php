@@ -15,6 +15,10 @@ $q = mysqli_query($conn, "SELECT subject FROM subsetup
     AND classname='$class' 
     AND sectionname='$section'");
 
+    if($userlevel == 'Teacher'){
+        $q .= " AND tid='$userid'";
+    }
+
 $data = [];
 
 while ($r = mysqli_fetch_assoc($q)) {
