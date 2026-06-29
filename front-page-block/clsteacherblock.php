@@ -108,8 +108,8 @@ if (!empty($class_teacher_payment_data)):
             <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">Academic Session: <?php echo $sessionyear; ?></div>
         </div>
         <div>
-            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;"><?= number_format($total_collection, 2) ?></h6>
-            <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">My Today's Collection</div>
+            <h6 class="fw-bold mb-0 text-end" style="font-size: 0.85rem;"><?= number_format($total_collection, 2) ?></h6>
+            <div class="small text-muted text-end" style="font-size: 0.6rem; font-weight: 600;">My Today's Collection</div>
         </div>
     </div>
 
