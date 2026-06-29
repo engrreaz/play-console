@@ -47,6 +47,11 @@ if (isset($ins_all_settings, $userlevel, $cteacher_data, $conn, $sccode)) {
     }
 }
 
+$abcd = "select sum(amount) as total from stpr where prdate='$td' and entryby='$usr' and sccode='$sccode'";
+$res = mysqli_query($conn, $abcd);
+$row = mysqli_fetch_assoc($res);
+$total_collection = $row['total'];
+
 if (!empty($class_teacher_payment_data)):
 ?>
 
@@ -98,9 +103,13 @@ if (!empty($class_teacher_payment_data)):
         <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px;">
             <i class="bi bi-wallet2" style="font-size: 0.9rem;"></i>
         </div>
-        <div>
+        <div class="flex-grow-1">
             <h6 class="fw-bold mb-0" style="font-size: 0.85rem;">Class Collection</h6>
             <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">Academic Session: <?php echo $sessionyear; ?></div>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-0" style="font-size: 0.85rem;"><?= number_format($total_collection, 2) ?></h6>
+            <div class="small text-muted" style="font-size: 0.6rem; font-weight: 600;">My Today's Collection</div>
         </div>
     </div>
 
