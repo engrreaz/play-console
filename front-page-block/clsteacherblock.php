@@ -1,7 +1,5 @@
 <?php
 
-
-
 $is_collection_user = false;
 $class_teacher_payment_data = [];
 

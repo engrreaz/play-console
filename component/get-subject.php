@@ -7,6 +7,7 @@ $session = $_POST['session'];
 $class = $_POST['cls'];
 $section = $_POST['sec'];
 
+echo $userid;
 // subjects list
 $q = mysqli_query($conn, "SELECT subject FROM subsetup 
     WHERE sccode='$sccode' 
