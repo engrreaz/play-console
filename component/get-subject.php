@@ -17,10 +17,10 @@ $qq = "SELECT subject FROM subsetup
     AND sectionname='$section'";
 
     if($userlevel == 'Teacher'){
-        $q .= " AND tid='$userid'";
+        $qq .= " AND tid='$userid'";
     }
 
-echo $q;
+echo $qq;
 
 $q = mysqli_query($conn, $qq );
 
