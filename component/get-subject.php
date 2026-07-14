@@ -7,7 +7,7 @@ $session = $_POST['session'];
 $class = $_POST['cls'];
 $section = $_POST['sec'];
 
-echo $userid;
+// echo $userid;
 // subjects list
 $qq = "SELECT subject FROM subsetup 
     WHERE sccode='$sccode' 
@@ -20,7 +20,7 @@ $qq = "SELECT subject FROM subsetup
         $qq .= " AND tid='$userid'";
     }
 
-echo $qq;
+// echo $qq;
 
 $q = mysqli_query($conn, $qq );
 
