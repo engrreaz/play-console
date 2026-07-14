@@ -9,17 +9,22 @@ $section = $_POST['sec'];
 
 echo $userid;
 // subjects list
-$q = mysqli_query($conn, "SELECT subject FROM subsetup 
+$qq = "SELECT subject FROM subsetup 
     WHERE sccode='$sccode' 
     AND slot='$slot' 
     AND sessionyear='$session'
     AND classname='$class' 
-    AND sectionname='$section'");
+    AND sectionname='$section'";
 
     if($userlevel == 'Teacher'){
         $q .= " AND tid='$userid'";
     }
+
 echo $q;
+
+$q = mysqli_query($conn, $qq );
+
+
 $data = [];
 
 while ($r = mysqli_fetch_assoc($q)) {
