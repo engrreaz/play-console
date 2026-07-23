@@ -32,8 +32,8 @@ if ($row = $stmt_sub->get_result()->fetch_assoc()) {
 $stmt_sub->close();
 
 $fullmark = $subj_full = $obj_full = $pra_full = $ca_full = 0;
-$stmt_setup = $conn->prepare("SELECT * FROM subsetup WHERE classname = ? AND sectionname = ? AND subject = ? AND sccode = ? LIMIT 1");
-$stmt_setup->bind_param("ssss", $classname, $sectionname, $subj, $sccode);
+$stmt_setup = $conn->prepare("SELECT * FROM subsetup WHERE classname = ? AND sectionname = ? AND subject = ? AND sccode = ? AND sessionyear LIKE ? LIMIT 1");
+$stmt_setup->bind_param("sssss", $classname, $sectionname, $subj, $sccode, $sessionyear_param);
 $stmt_setup->execute();
 $res_setup = $stmt_setup->get_result();
 if ($row = $res_setup->fetch_assoc()) {
